@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<foms>
+	<fom name="merchineLearn_user" config="com.fom.modules.importer.merchineLearn.MLConfig">
+		<src.path>E:/test</src.path>
+		<src.pattern>WXY\\d{5}_GROUP_DATA_\\d{8}_\\d+_\\d+.zip$</src.pattern>
+		<src.match.fail.del>false</src.match.fail.del>
+		<scanner>com.fom.context.LocalScanner</scanner>
+		<scanner.cron>0 0/1 * * * ?</scanner.cron>
+		<executor></executor>
+		<executor.min>10</executor.min>
+		<executor.max>10</executor.max>
+		<executor.aliveTime.seconds>30</executor.aliveTime.seconds>
+		<executor.overTime.seconds>86400</executor.overTime.seconds>
+		<executor.overTime.cancle>false</executor.overTime.cancle>
+		<batch>5000</batch>
+		<src.subPattern></src.subPattern>
+		<extended>
+			<es.index>grouptag</es.index>
+			<es.type>grouptag</es.type>
+			<es.json>index/index_grouptag.json</es.json>
+			<filed>DOCID,FTIME,LTIME,HIT_TIMES,APPTYPE,GROUPID,TOTAL_TIMES,PERCENT
+			</filed>
+			<pattern.APPTYPE>1030036</pattern.APPTYPE>
+			<pattern.GROUPID>{0}</pattern.GROUPID>
+			<pattern.PERCENT>{5}</pattern.PERCENT>
+			<pattern.TOTAL_TIMES>{4}</pattern.TOTAL_TIMES>
+			<pattern.DOCID>1030036_{0}</pattern.DOCID>
+			<pattern.FTIME>{1}</pattern.FTIME>
+			<pattern.LTIME>{2}</pattern.LTIME>
+			<pattern.HIT_TIMES>{3}</pattern.HIT_TIMES>
+		</extended>
+	</fom>
+
+
+	<fom name="merchineLearn" config="com.fom.modules.downloader.merchineLearn.MLConfig">
+		<src.path>/hive</src.path>
+		<src.pattern>wxy\\d{5}_(group|user|label)_data_\\d{8}</src.pattern>
+		<src.match.fail.del>false</src.match.fail.del><!-- TODO -->
+		<scanner>com.fom.context.HdfsScanner</scanner>
+		<scanner.cron>0 0/1 * * * ?</scanner.cron>
+		<executor></executor>
+		<executor.min>10</executor.min>
+		<executor.max>10</executor.max>
+		<executor.aliveTime.seconds>30</executor.aliveTime.seconds>
+		<executor.overTime.seconds>86400</executor.overTime.seconds>
+		<executor.overTime.cancle>false</executor.overTime.cancle>
+		<temp.path>/home/nebula/download/temp</temp.path>
+		<dest.path>/home/nebula/download/local</dest.path>
+		<src.del>false</src.del>
+		<hdfs1.url></hdfs1.url>
+		<hdfs2.url></hdfs2.url>
+		<signal.file></signal.file>
+
+
+
+
+
+	</fom>
+
+</foms>
+

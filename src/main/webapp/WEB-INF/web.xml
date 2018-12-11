@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="WebApp_ID" version="2.5">
+
+	<!-- 启动一个WEB项目的时候,容器(如:Tomcat)会去它的配置文件web.xml.读两个节点:<listener/>和<context-param/> -->
+	<!-- 紧接着,容器创建一个上下文ServletContext(这个WEB项目所有部分共享),并将<context-param/>转为键值对交给ServletContext -->
+	<!-- 然后,容器创建监听器实例<listener/>,在监听器中的初始化方法contextInitialized(ServletContextEvent 
+		args)中: -->
+	<!-- ServletContext = ServletContextEvent.getServletContext(); -->
+	<!-- context-param的值 = ServletContext.getInitParameter("context-param的键"); -->
+	<!-- 从而获取到所有配置的context-param -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/spring/*.xml</param-value>
+	</context-param>
+	<context-param>
+		<param-name>fomConfigLocation</param-name>
+		<param-value>/WEB-INF/fom.xml</param-value>
+	</context-param>
+	<!-- ConfigLoaderListener继承自ContextLoaderListener，它实现了ServletContextListener接口 -->
+	<!-- 在web.xml配置启动时，自动装配ApplicationContext的配置信息 -->
+	<listener>
+		<listener-class>com.fom.context.ConfigLoaderListener</listener-class>
+	</listener>
+
+	<servlet>
+		<servlet-name>springmvc</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/springmvc.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>springmvc</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+</web-app>
