@@ -14,9 +14,9 @@ import org.apache.hadoop.fs.Path;
  *
  * @param <E>
  */
-public class ScannerHdfs<E extends IHdfsConfig> extends Scanner<E>{
+public class HdfsScanner<E extends IHdfsConfig> extends Scanner<E>{
 
-	public ScannerHdfs(String name, Config config) {
+	public HdfsScanner(String name, Config config) {
 		super(name, config);
 	}
 

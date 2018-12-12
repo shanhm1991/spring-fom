@@ -19,7 +19,7 @@ import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
-import com.fom.context.ImporterLocalZip;
+import com.fom.context.ZipImporter;
 import com.fom.util.MD5Util;
 import com.fom.util.StorageUtil;
 import com.fom.util.db.handler.EsHandler;
@@ -28,7 +28,7 @@ import com.fom.util.db.handler.OraHandler;
 /**
  * 有害信息  *.bcp
  */
-public class HMImporter extends ImporterLocalZip<HMConfig, Map<String,Object>> {
+public class HMImporter extends ZipImporter<HMConfig, Map<String,Object>> {
 	
 	private static final String POOL_ES = "zwdata";
 	

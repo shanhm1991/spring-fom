@@ -10,10 +10,10 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 
-import com.fom.context.ImporterLocalSDZipConfig;
+import com.fom.context.ZipImporterConfig;
 import com.fom.util.XmlUtil;
 
-public class LabelImporterConfig extends ImporterLocalSDZipConfig {
+public class LabelImporterConfig extends ZipImporterConfig {
 	
 	private String esIndex;
 

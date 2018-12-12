@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fom.context.ImporterLocalZip;
+import com.fom.context.ZipImporter;
 import com.fom.modules.importer.demo.wa.WAConfig;
 import com.fom.util.StorageUtil;
 import com.fom.util.db.handler.OraHandler;
@@ -13,7 +13,7 @@ import com.fom.util.db.handler.OraHandler;
 /**
  * 敏感图片
  */
-public class SPImporter extends ImporterLocalZip<WAConfig, Map<String,Object>> {
+public class SPImporter extends ZipImporter<WAConfig, Map<String,Object>> {
 	
 	private static final String POOL_ORA = "scloudrs";
 

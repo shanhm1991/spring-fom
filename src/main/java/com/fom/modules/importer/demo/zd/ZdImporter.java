@@ -9,14 +9,14 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.fom.context.ImporterLocal;
 import com.fom.context.ImporterConfig;
+import com.fom.context.Importer;
 import com.fom.util.db.handler.OraHandler;
 
 /**
  * 重点内容
  */
-public class ZdImporter extends ImporterLocal<ImporterConfig, Map<String, Object>> {
+public class ZdImporter extends Importer<ImporterConfig, Map<String, Object>> {
 	
 	private static final String POOL_ORA = "zdurl";
 

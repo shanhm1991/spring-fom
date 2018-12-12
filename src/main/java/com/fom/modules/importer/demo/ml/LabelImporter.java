@@ -13,14 +13,14 @@ import java.util.Set;
 
 import org.elasticsearch.action.bulk.BulkItemResponse;
 
-import com.fom.context.ImporterLocalSDZip;
+import com.fom.context.ZipImporter;
 import com.fom.util.MD5Util;
 import com.fom.util.db.handler.EsHandler;
 
 /**
  * 机器学习标签[账户/群组]
  */
-public class LabelImporter extends ImporterLocalSDZip<LabelImporterConfig, Map<String,Object>>{
+public class LabelImporter extends ZipImporter<LabelImporterConfig, Map<String,Object>>{
 	
 	private static final String POOL_ES = "zwdata";
 

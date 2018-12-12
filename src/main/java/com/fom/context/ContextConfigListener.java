@@ -13,13 +13,13 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  * @author shanhm1991
  *
  */
-public final class ConfigLoaderListener extends ContextLoaderListener {
+public final class ContextConfigListener extends ContextLoaderListener {
 
-	public ConfigLoaderListener(){
+	public ContextConfigListener(){
 
 	}
 
-	public ConfigLoaderListener(WebApplicationContext context) {
+	public ContextConfigListener(WebApplicationContext context) {
 		super(context);
 	}
 

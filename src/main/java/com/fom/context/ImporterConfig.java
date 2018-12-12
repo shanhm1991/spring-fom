@@ -1,5 +1,7 @@
 package com.fom.context;
 
+import org.apache.hadoop.conf.Configuration;
+
 import com.fom.util.XmlUtil;
 
 /**
@@ -8,9 +10,11 @@ import com.fom.util.XmlUtil;
  *
  */
 public class ImporterConfig extends Config {
-	
+
 	int batch;
-	
+
+	Configuration fsConf;
+
 	protected ImporterConfig(String name) {
 		super(name);
 	}
@@ -19,8 +23,10 @@ public class ImporterConfig extends Config {
 	void load() throws Exception {
 		super.load();
 		batch = XmlUtil.getInt(element, "importer.batch", 5000, 1, 50000);
+		fsConf = new Configuration();
+		fsConf.set("fs.defaultFS", "file:///");
 	}
-	
+
 	@Override
 	public final String getType() {
 		return TYPE_IMPORTER;
@@ -46,7 +52,7 @@ public class ImporterConfig extends Config {
 		if(o == this){
 			return true;
 		}
-//		Config c = (Config)o; 
+		//		Config c = (Config)o; 
 
 		//		boolean equal = importer.equals(c.importer) && srcPathName.equals(c.srcPathName) && pool.equals(c.pool)  
 		//				&& reg.equals(c.reg) && cycle == c.cycle && configClass.equals(c.configClass) && isHDFS == c.isHDFS; 

@@ -11,9 +11,9 @@ import com.fom.util.XmlUtil;
  * @author shanhm1991
  *
  */
-public class ImporterZipConfig extends ImporterConfig {
+public class ZipImporterConfig extends ImporterConfig {
 
-	protected ImporterZipConfig(String name) {
+	protected ZipImporterConfig(String name) {
 		super(name);
 	}
 

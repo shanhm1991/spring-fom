@@ -2,10 +2,10 @@ package com.fom.modules.importer.demo.wa;
 
 import org.dom4j.Element;
 
-import com.fom.context.ImporterZipConfig;
+import com.fom.context.ZipImporterConfig;
 import com.fom.util.XmlUtil;
 
-public class WAConfig extends ImporterZipConfig {
+public class WAConfig extends ZipImporterConfig {
 
 	private String zkAddress;
 

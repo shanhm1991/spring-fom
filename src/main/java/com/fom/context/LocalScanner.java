@@ -10,9 +10,9 @@ import java.util.List;
  *
  * @param <E>
  */
-public class ScannerLocal<E extends Config> extends Scanner<E> {
+public class LocalScanner<E extends Config> extends Scanner<E> {
 
-	public ScannerLocal(String name, Config config) {
+	public LocalScanner(String name, Config config) {
 		super(name, config);
 	}
 

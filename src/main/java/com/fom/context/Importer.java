@@ -1,15 +1,14 @@
 package com.fom.context;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.fs.Path;
 
+import com.fiberhome.odin.hadoop.hdfs.io.SDFileReader;
 import com.fom.util.IoUtils;
 import com.fom.util.exception.WarnException;
 
@@ -20,11 +19,11 @@ import com.fom.util.exception.WarnException;
  * @param <E>
  * @param <V>
  */
-public abstract class ImporterLocal<E extends ImporterConfig,V> extends Executor<E> { 
+public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> { 
 
 	final File logFile;
 
-	protected ImporterLocal(String name, String path) {
+	protected Importer(String name, String path) {
 		super(name, path);
 		this.logFile = new File(path + ".log");
 	}
@@ -58,26 +57,26 @@ public abstract class ImporterLocal<E extends ImporterConfig,V> extends Executor
 
 	void readLine(File file, int StartLine) throws Exception {
 		int lineIndex = 0;
-		BufferedReader reader = null;
+		SDFileReader reader = null;
 		String line = "";
 		try{
-			reader = new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8"));
+			Path path = new Path(file.getPath());
+			reader = new SDFileReader(path, config.fsConf);
 			List<V> lineDatas = null; 
-			int batch = config.batch;
-			if(batch > 0){
+			if(config.batch > 0){
 				lineDatas = new ArrayList<V>(config.batch);
 			}else{
 				lineDatas = new ArrayList<V>(2500);
 			}
 
 			long batchTime = System.currentTimeMillis();
-			while ((line = reader.readLine()) != null) {
+			while ((line = reader.readStringLine()) != null) {
 				lineIndex++;
 				if(lineIndex <= StartLine){
 					continue;
 				}
 
-				if(batch > 0 && lineDatas.size() >= batch){
+				if(config.batch > 0 && lineDatas.size() >= config.batch){
 					batchProcessIfNotInterrupted(lineDatas, batchTime); 
 					updateLogFile(file.getName(), lineIndex);
 					lineDatas.clear();

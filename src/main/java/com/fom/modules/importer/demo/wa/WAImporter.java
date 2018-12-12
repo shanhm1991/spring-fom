@@ -6,14 +6,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fom.context.ImporterLocalZip;
+import com.fom.context.ZipImporter;
 import com.fom.util.StorageUtil;
 import com.fom.util.db.handler.OraHandler;
 
 /**
  * 行动预警
  */
-public class WAImporter extends ImporterLocalZip<WAConfig, Map<String,Object>> {
+public class WAImporter extends ZipImporter<WAConfig, Map<String,Object>> {
 	
 	private static final String POOL_ORA_scloudrs = "scloudrs";
 	

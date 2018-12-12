@@ -6,9 +6,9 @@ package com.fom.context;
  *
  * @param <E>
  */
-public class DownloaderHdfs<E extends DownloaderHdfsConfig> extends Executor<E> {
+public class HdfsDownloader<E extends HdfsDownloaderConfig> extends Executor<E> {
 
-	protected DownloaderHdfs(String name, String path) {
+	protected HdfsDownloader(String name, String path) {
 		super(name, path);
 	}
 

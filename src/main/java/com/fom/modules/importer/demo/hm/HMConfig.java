@@ -4,10 +4,10 @@ import java.io.File;
 
 import org.dom4j.Element;
 
-import com.fom.context.ImporterZipConfig;
+import com.fom.context.ZipImporterConfig;
 import com.fom.util.XmlUtil;
 
-public class HMConfig extends ImporterZipConfig {
+public class HMConfig extends ZipImporterConfig {
 	
 	private String zkAddress;
 

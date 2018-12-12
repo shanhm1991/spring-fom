@@ -9,11 +9,11 @@ import com.fom.util.XmlUtil;
  */
 public class DownloaderConfig extends Config {
 
+	boolean delSrc;
+	
 	String tempPath;
 	
 	String destPath;
-
-	boolean delSrc;
 
 	protected DownloaderConfig(String name) {
 		super(name);

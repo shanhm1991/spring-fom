@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
 	<!-- 标签聚合[导入] -->
-	<fom name="merge" config="com.fom.context.LocalSDZipImporterConfig"
+	<fom name="merge" config="com.fom.context.ZipImporterConfig"
 		enable="false">
 		<src.path>/opt/file/tagmerge</src.path>
 		<src.pattern>^(WXY00101|WXY00102|WXY00103|WXY00116)_GROUP_DATA_\\d{8}_\\d+_\\d+.zip$|^(WXY00101|WXY00102|WXY00103|WXY00116|WXY00109|WXY00115)_USER_DATA_\\d{8}_\\d+_\\d+.zip$
@@ -86,7 +86,7 @@
 	</fom>
 
 	<!-- 机器学习标签证据[导入] -->
-	<fom name="mechineLearn_detail" config="com.fom.context.LocalSDZipImporterConfig"
+	<fom name="mechineLearn_detail" config="com.fom.context.ZipImporterConfig"
 		enable="false">
 		<src.path>/home/wxy/mlinput</src.path>
 		<src.pattern>WXY\\d{5}_USER_DATA_\\d{8}_\\d+_\\d+.zip$</src.pattern>
@@ -104,7 +104,7 @@
 	</fom>
 
 	<!-- 重点内容[导入] -->
-	<fom name="zdurl" config="com.fom.context.LocalImporterConfig" enable="false">
+	<fom name="zdurl" config="com.fom.context.ImporterConfig" enable="false">
 		<src.path>/home/wxy/file/zdinfo</src.path>
 		<src.pattern>[a-zA-Z0-9_]+.nb$|[a-zA-Z0-9_]+.NB$</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>

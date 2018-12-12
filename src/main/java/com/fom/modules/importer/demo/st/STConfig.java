@@ -5,11 +5,11 @@ import java.io.File;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 
-import com.fom.context.ImporterZipConfig;
+import com.fom.context.ZipImporterConfig;
 import com.fom.util.XmlUtil;
 
 
-public class STConfig extends ImporterZipConfig {
+public class STConfig extends ZipImporterConfig {
 
 	private String userIndex;
 

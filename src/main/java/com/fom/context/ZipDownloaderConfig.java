@@ -5,11 +5,11 @@ package com.fom.context;
  * @author shanhm1991
  *
  */
-public class DownloaderZipConfig extends DownloaderConfig {
+public class ZipDownloaderConfig extends DownloaderConfig {
 
 	protected int zipContent;
 	
-	protected DownloaderZipConfig(String name) {
+	protected ZipDownloaderConfig(String name) {
 		super(name);
 	}
 

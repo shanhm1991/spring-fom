@@ -10,7 +10,7 @@ import com.fom.util.XmlUtil;
  * @author shanhm1991
  *
  */
-public class DownloaderHdfsConfig extends DownloaderConfig implements IHdfsConfig {
+public class HdfsDownloaderConfig extends DownloaderConfig implements IHdfsConfig {
 	
 	private String hdfs1_url;
 	
@@ -21,7 +21,7 @@ public class DownloaderHdfsConfig extends DownloaderConfig implements IHdfsConfi
 	String signalFile;
 	
 
-	protected DownloaderHdfsConfig(String name) {
+	protected HdfsDownloaderConfig(String name) {
 		super(name);
 	}
 	
