@@ -20,11 +20,11 @@ import com.fom.util.exception.WarnException;
  * @param <E>
  * @param <V>
  */
-public abstract class LocalImporter<E extends LocalImporterConfig,V> extends Executor<E> { 
+public abstract class ImporterLocal<E extends ImporterConfig,V> extends Executor<E> { 
 
 	final File logFile;
 
-	protected LocalImporter(String name, String path) {
+	protected ImporterLocal(String name, String path) {
 		super(name, path);
 		this.logFile = new File(path + ".log");
 	}

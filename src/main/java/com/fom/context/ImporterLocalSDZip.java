@@ -16,9 +16,9 @@ import com.fom.util.IoUtils;
  * @param <E>
  * @param <V>
  */
-public abstract class LocalSDZipImporter<E extends LocalSDZipImporterConfig,V> extends LocalZipImporter<E,V> {
+public abstract class ImporterLocalSDZip<E extends ImporterLocalSDZipConfig,V> extends ImporterLocalZip<E,V> {
 
-	protected LocalSDZipImporter(String name, String path) {
+	protected ImporterLocalSDZip(String name, String path) {
 		super(name, path);
 	}
 

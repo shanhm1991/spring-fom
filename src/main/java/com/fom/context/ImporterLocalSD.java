@@ -16,9 +16,9 @@ import com.fom.util.IoUtils;
  * @param <E>
  * @param <V>
  */
-public abstract class LocalSDFileImporter<E extends LocalSDFileImporterConfig,V> extends LocalImporter<E,V>{
+public abstract class ImporterLocalSD<E extends ImporterLocalSDConfig,V> extends ImporterLocal<E,V>{
 
-	protected LocalSDFileImporter(String name, String path) {
+	protected ImporterLocalSD(String name, String path) {
 		super(name, path);
 	}
 	

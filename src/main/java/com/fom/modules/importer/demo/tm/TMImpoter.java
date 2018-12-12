@@ -5,14 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fom.context.LocalZipImporter;
-import com.fom.context.LocalZipImporterConfig;
+import com.fom.context.ImporterLocalZip;
+import com.fom.context.ImporterZipConfig;
 import com.fom.util.db.handler.OraHandler;
 
 /**
  * 标签聚合
  */
-public class TMImpoter extends LocalZipImporter<LocalZipImporterConfig, Map<String, Object>>{
+public class TMImpoter extends ImporterLocalZip<ImporterZipConfig, Map<String, Object>>{
 	
 	private static final String POOL = "scloudrs";
 
@@ -43,7 +43,7 @@ public class TMImpoter extends LocalZipImporter<LocalZipImporterConfig, Map<Stri
 	}
 
 	@Override
-	protected void praseLineData(LocalZipImporterConfig config, List<Map<String, Object>> lineDatas, String line, long batchTime) {
+	protected void praseLineData(ImporterZipConfig config, List<Map<String, Object>> lineDatas, String line, long batchTime) {
 		String[] splits = line.trim().split("\t"); 
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("time", batchTime / 1000);
@@ -57,7 +57,7 @@ public class TMImpoter extends LocalZipImporter<LocalZipImporterConfig, Map<Stri
 	}
 
 	@Override
-	protected void batchProcessLineData(LocalZipImporterConfig config, List<Map<String, Object>> lineDatas, long batchTime) throws Exception {
+	protected void batchProcessLineData(ImporterZipConfig config, List<Map<String, Object>> lineDatas, long batchTime) throws Exception {
 		OraHandler.defaultHandler.batchExecute(POOL, sql, lineDatas);
 		log.info("批处理结束[" + lineDatas.size() + "], 耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 	}

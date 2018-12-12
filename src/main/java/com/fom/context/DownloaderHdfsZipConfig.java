@@ -6,13 +6,13 @@ package com.fom.context;
  * @author shanhm1991
  *
  */
-public class HdfsZipDownloaderConfig extends HdfsDownloaderConfig {
+public class DownloaderHdfsZipConfig extends DownloaderHdfsConfig {
 	
 	int zipContent;
 	
 	boolean zipIndexContinue;
 
-	protected HdfsZipDownloaderConfig(String name) {
+	protected DownloaderHdfsZipConfig(String name) {
 		super(name);
 	}
 	

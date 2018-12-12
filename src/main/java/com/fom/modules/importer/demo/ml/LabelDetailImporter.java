@@ -4,14 +4,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fom.context.LocalSDZipImporter;
-import com.fom.context.LocalSDZipImporterConfig;
+import com.fom.context.ImporterLocalSDZip;
+import com.fom.context.ImporterLocalSDZipConfig;
 import com.fom.util.db.handler.OraHandler;
 
 /**
  * 标签证据
  */
-public class LabelDetailImporter extends LocalSDZipImporter<LocalSDZipImporterConfig, Map<String, Object>>{
+public class LabelDetailImporter extends ImporterLocalSDZip<ImporterLocalSDZipConfig, Map<String, Object>>{
 	
 	private static final String POOL_ORA = "scloudrs";
 
@@ -24,7 +24,7 @@ public class LabelDetailImporter extends LocalSDZipImporter<LocalSDZipImporterCo
 	}
 
 	@Override
-	protected void praseLineData(LocalSDZipImporterConfig config, List<Map<String, Object>> lineDatas, 
+	protected void praseLineData(ImporterLocalSDZipConfig config, List<Map<String, Object>> lineDatas, 
 			String line, long batchTime) throws Exception {
 		String[] array = line.trim().split("\t");
 		if(array.length != 18){
@@ -51,7 +51,7 @@ public class LabelDetailImporter extends LocalSDZipImporter<LocalSDZipImporterCo
 	}
 
 	@Override
-	protected void batchProcessLineData(LocalSDZipImporterConfig config, List<Map<String, Object>> lineDatas, long batchTime) throws Exception {
+	protected void batchProcessLineData(ImporterLocalSDZipConfig config, List<Map<String, Object>> lineDatas, long batchTime) throws Exception {
 		OraHandler.defaultHandler.batchExecute(POOL_ORA, SQL, lineDatas);
 		log.info("批处理结束[" + lineDatas.size() + "], 耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 	}

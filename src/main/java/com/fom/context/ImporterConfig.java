@@ -7,11 +7,11 @@ import com.fom.util.XmlUtil;
  * @author shanhm1991
  *
  */
-public class LocalImporterConfig extends Config {
+public class ImporterConfig extends Config {
 	
 	int batch;
 	
-	protected LocalImporterConfig(String name) {
+	protected ImporterConfig(String name) {
 		super(name);
 	}
 
@@ -40,7 +40,7 @@ public class LocalImporterConfig extends Config {
 
 	@Override
 	public boolean equals(Object o){
-		if(!(o instanceof LocalImporterConfig)){
+		if(!(o instanceof ImporterConfig)){
 			return false;
 		}
 		if(o == this){

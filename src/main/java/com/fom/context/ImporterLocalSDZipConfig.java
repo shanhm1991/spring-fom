@@ -7,11 +7,11 @@ import org.apache.hadoop.conf.Configuration;
  * @author shanhm1991
  *
  */
-public class LocalSDZipImporterConfig extends LocalZipImporterConfig {
+public class ImporterLocalSDZipConfig extends ImporterZipConfig {
 
 	Configuration fsConfig;
 	
-	protected LocalSDZipImporterConfig(String name) {
+	protected ImporterLocalSDZipConfig(String name) {
 		super(name);
 	}
 

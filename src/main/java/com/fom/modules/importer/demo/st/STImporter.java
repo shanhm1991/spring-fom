@@ -18,7 +18,7 @@ import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 
-import com.fom.context.LocalZipImporter;
+import com.fom.context.ImporterLocalZip;
 import com.fom.util.MD5Util;
 import com.fom.util.StorageUtil;
 import com.fom.util.db.handler.EsHandler;
@@ -27,7 +27,7 @@ import com.fom.util.db.handler.OraHandler;
 /**
  * 可疑目标
  */
-public class STImporter extends LocalZipImporter<STConfig, Map<String, String>> {
+public class STImporter extends ImporterLocalZip<STConfig, Map<String, String>> {
 	
 	private static final String POOL_ES = "zwdata";
 	

@@ -9,14 +9,14 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.fom.context.LocalImporter;
-import com.fom.context.LocalImporterConfig;
+import com.fom.context.ImporterLocal;
+import com.fom.context.ImporterConfig;
 import com.fom.util.db.handler.OraHandler;
 
 /**
  * 重点内容
  */
-public class ZdImporter extends LocalImporter<LocalImporterConfig, Map<String, Object>> {
+public class ZdImporter extends ImporterLocal<ImporterConfig, Map<String, Object>> {
 	
 	private static final String POOL_ORA = "zdurl";
 
@@ -54,7 +54,7 @@ public class ZdImporter extends LocalImporter<LocalImporterConfig, Map<String, O
 	}
 
 	@Override
-	protected void executeBefore(LocalImporterConfig config) throws Exception {
+	protected void executeBefore(ImporterConfig config) throws Exception {
 		try {
 			List<Map<String, Object>> name = 
 					OraHandler.defaultHandler.queryForList(POOL_ORA, SQL_NAME, null);
@@ -69,7 +69,7 @@ public class ZdImporter extends LocalImporter<LocalImporterConfig, Map<String, O
 	}
 
 	@Override
-	protected void praseLineData(LocalImporterConfig config, List<Map<String, Object>> lineDatas, String line, long batchTime) {
+	protected void praseLineData(ImporterConfig config, List<Map<String, Object>> lineDatas, String line, long batchTime) {
 		String[] array = line.split("\t", -1);
 		if(array.length < 16){
 			log.warn("忽略行失败,字段数小于16");
@@ -150,7 +150,7 @@ public class ZdImporter extends LocalImporter<LocalImporterConfig, Map<String, O
 
 	//batch(insert + merge)
 	@Override
-	protected void batchProcessLineData(LocalImporterConfig config, List<Map<String, Object>> lineDatas, long batchTime) throws Exception {
+	protected void batchProcessLineData(ImporterConfig config, List<Map<String, Object>> lineDatas, long batchTime) throws Exception {
 		OraHandler.defaultHandler.startTransaction(POOL_ORA);
 		try{
 			OraHandler.defaultHandler.batchExecute(POOL_ORA, SQL, lineDatas);

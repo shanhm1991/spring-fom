@@ -11,9 +11,9 @@ import com.fom.util.XmlUtil;
  * @author shanhm1991
  *
  */
-public class LocalZipImporterConfig extends LocalImporterConfig {
+public class ImporterZipConfig extends ImporterConfig {
 
-	protected LocalZipImporterConfig(String name) {
+	protected ImporterZipConfig(String name) {
 		super(name);
 	}
 
