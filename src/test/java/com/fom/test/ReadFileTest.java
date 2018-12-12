@@ -9,7 +9,7 @@ import org.apache.hadoop.fs.Path;
 import com.fiberhome.odin.hadoop.hdfs.io.SDFileReader;
 import com.fom.util.IoUtils;
 
-public class SDFileTest {
+public class ReadFileTest {
 
 	public static void main(String[] args) throws IOException {
 

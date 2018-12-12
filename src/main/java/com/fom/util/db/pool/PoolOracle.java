@@ -9,7 +9,8 @@ import org.dom4j.Element;
 /**
  * 
  * @author X4584
- * @date 2018年8月10日
+ * @date 2018年12月12日
+ *
  */
 class PoolOracle extends Pool<Connection>{
 

@@ -4,7 +4,8 @@ import org.apache.hadoop.fs.FileSystem;
 
 /**
  * 
- * @author shanhm1991
+ * @author X4584
+ * @date 2018年12月12日
  *
  */
 interface IHdfsConfig extends IConfig {

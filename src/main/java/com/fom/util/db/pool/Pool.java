@@ -13,7 +13,8 @@ import org.apache.log4j.Logger;
 /**
  * 连接池管理  维护一个空闲池; 轮询监控关闭超时的空闲连接; 限制最大创建连接数
  * 
- * @author shanhm1991
+ * @author X4584
+ * @date 2018年12月12日
  *
  * @param <E>
  */

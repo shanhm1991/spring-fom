@@ -10,11 +10,14 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
+import com.fom.util.exception.WarnException;
+
 /**
- * TransportClient本身提供了连接池与多连接的复用
+ * TransportClient本身提供了连接与通道的复用
  * 
  * @author X4584
- * @date 2018年8月10日
+ * @date 2018年12月12日
+ *
  */
 class PoolEs extends Pool<TransportClient>{
 
@@ -74,12 +77,12 @@ class PoolEs extends Pool<TransportClient>{
 	private boolean hasReset(String name, List<String> list){
 		return !name.equals(clusterName) || !list.equals(nodes);
 	}
-
+	
 	@Override
 	public EsNode acquire(){
 		return clientNode;
 	}
-
+	
 	@Override
 	public void release() {
 		//判断client是否可用，如果不可用则关闭，但是api中未找到相关方法
@@ -96,6 +99,14 @@ class PoolEs extends Pool<TransportClient>{
 	@Override
 	protected EsNode create() throws Exception {
 		return null;
+	}
+	
+	public static TransportClient getClient(String poolName) throws WarnException{
+		PoolEs pool = (PoolEs)PoolManager.getPool(poolName);
+		if(pool == null){
+			throw new WarnException(poolName + "连接池不存在"); 
+		}
+		return pool.clientNode.v;
 	}
 	
 	public class EsNode extends Node<TransportClient> {

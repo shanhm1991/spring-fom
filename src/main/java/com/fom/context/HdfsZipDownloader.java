@@ -2,9 +2,17 @@ package com.fom.context;
 
 /**
  * 
- * @author shanhm1991
+ * @author X4584
+ * @date 2018年12月12日
  *
+ * @param <E>
  */
-public class HdfsZipDownloader {
+public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDownloader<E> {
 
+	protected HdfsZipDownloader(String name, String path) {
+		super(name, path);
+	}
+
+	
+	
 }

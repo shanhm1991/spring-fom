@@ -8,7 +8,8 @@ import com.fom.util.db.pool.OraHelper;
 /**
  * 
  * @author X4584
- * @date 2018年8月22日
+ * @date 2018年12月12日
+ *
  */
 public class OraHandlerImpl extends OraHelper implements OraHandler {
 	

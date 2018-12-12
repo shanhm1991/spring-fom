@@ -31,7 +31,8 @@ import oracle.sql.StructDescriptor;
 /**
  * 
  * @author X4584
- * @date 2018年8月10日
+ * @date 2018年12月12日
+ *
  */
 public class OraHelper {
 

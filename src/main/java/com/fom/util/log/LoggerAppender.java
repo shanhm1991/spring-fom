@@ -30,7 +30,8 @@ import com.fom.util.IoUtils;
 
 /**
  * 
- * @author shanhm1991
+ * @author X4584
+ * @date 2018年12月12日
  *
  */
 public class LoggerAppender extends FileAppender{

@@ -10,7 +10,8 @@ import org.elasticsearch.action.bulk.BulkItemResponse;
 /**
  * 
  * @author X4584
- * @date 2018年8月22日
+ * @date 2018年12月12日
+ *
  */
 public interface EsHandler {
 	

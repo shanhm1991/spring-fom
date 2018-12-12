@@ -17,7 +17,8 @@ import com.fom.util.log.LoggerFactory;
 
 /**
  * 
- * @author shanhm1991
+ * @author X4584
+ * @date 2018年12月12日
  *
  */
 public class StorageUtil {

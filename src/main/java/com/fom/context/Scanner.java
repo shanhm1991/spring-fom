@@ -18,7 +18,8 @@ import com.fom.util.log.LoggerFactory;
 
 /**
  * 
- * @author shanhm1991
+ * @author X4584
+ * @date 2018年12月12日
  *
  * @param <E>
  */
@@ -88,11 +89,14 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 					}
 				}
 			}
-			try {
-				sleep(config.getCronTime());
-			} catch (InterruptedException e) {
-				log.info("中断睡眠, 重新扫描..."); 
+			synchronized (this) {
+				try {
+					wait(config.getCronTime());
+				} catch (InterruptedException e) {
+					log.info("中断等待, 重新扫描..."); 
+				}
 			}
+
 		}
 	}
 

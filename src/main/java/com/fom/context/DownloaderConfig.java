@@ -4,7 +4,8 @@ import com.fom.util.XmlUtil;
 
 /**
  * 
- * @author shanhm1991
+ * @author X4584
+ * @date 2018年12月12日
  *
  */
 public class DownloaderConfig extends Config {
@@ -22,9 +23,9 @@ public class DownloaderConfig extends Config {
 	@Override
 	void load() throws Exception {
 		super.load();
-		tempPath = XmlUtil.getString(element, "src.path", "");
+		delSrc = XmlUtil.getBoolean(element, "src.del", false);
+		tempPath = XmlUtil.getString(element, "temp.path", "");
 		destPath = XmlUtil.getString(element, "dest.path", "");
-		delSrc = XmlUtil.getBoolean(element, "src.del", true);
 	}
 
 	@Override

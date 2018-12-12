@@ -19,5 +19,8 @@ public class CronTest {
 		File file = new File("E:/");
 		
 		System.out.println(Arrays.asList(file.list()));
+		
+		
+		System.out.println(new File("").length());
 	}
 }

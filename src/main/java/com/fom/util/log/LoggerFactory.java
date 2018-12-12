@@ -9,7 +9,8 @@ import org.apache.log4j.PatternLayout;
 
 /**
  * 
- * @author shanhm1991
+ * @author X4584
+ * @date 2018年12月12日
  *
  */
 public class LoggerFactory {
