@@ -19,6 +19,18 @@ public class DownloaderConfig extends Config {
 	protected DownloaderConfig(String name) {
 		super(name);
 	}
+	
+	public boolean isDelSrc() {
+		return delSrc;
+	}
+
+	public String getTempPath() {
+		return tempPath;
+	}
+
+	public String getDestPath() {
+		return destPath;
+	}
 
 	@Override
 	void load() throws Exception {

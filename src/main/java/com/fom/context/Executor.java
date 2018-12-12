@@ -22,7 +22,7 @@ public abstract class Executor<E extends Config> extends Thread {
 
 	protected final String name;
 
-	protected final String path;
+	protected final String srcPath;
 
 	protected final File srcFile;
 
@@ -32,7 +32,7 @@ public abstract class Executor<E extends Config> extends Thread {
 
 	protected Executor(String name, String path) { 
 		this.name = name;
-		this.path = path;
+		this.srcPath = path;
 		this.srcFile = new File(path);
 		this.srcName = srcFile.getName();
 		this.srcSize = srcFile.length() / 1024;
@@ -61,21 +61,23 @@ public abstract class Executor<E extends Config> extends Thread {
 			return;
 		}
 		Thread.currentThread().setName(config.getType() + "[" + srcName + "]");
-
-		long runTime = System.currentTimeMillis();
+		long sTime = System.currentTimeMillis();
 		try {
 			executeBefore(config);
+			
 			execute();
-			log.info(config.getTypeName() + "任务结束, 耗时=" + (System.currentTimeMillis() - runTime) + "ms");
+			
+			executeAfter(config);
+			log.info(config.getTypeName() + "任务结束, 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 		} catch(WarnException e){
-			log.warn(config.getTypeName() + "任务错误结束[" + e.getMessage() + "], 耗时=" + (System.currentTimeMillis() - runTime + "ms"));
+			log.warn(config.getTypeName() + "任务错误结束[" + e.getMessage() + "], 耗时=" + (System.currentTimeMillis() - sTime + "ms"));
 		} catch (InterruptedException e) {
-			//设置检测点:每次batchProcessLineData之前
-			log.warn(config.getTypeName() + "任务中断[" + e.getMessage() + "], 耗时=" + (System.currentTimeMillis() - runTime + "ms"));
+			//检测点:impoter每次batchProcessLineData之前
+			log.warn(config.getTypeName() + "任务中断[" + e.getMessage() + "], 耗时=" + (System.currentTimeMillis() - sTime + "ms"));
 		} catch(Throwable e) {
-			log.error(config.getTypeName() + "任务异常结束, 耗时=" + (System.currentTimeMillis() - runTime + "ms"), e);
+			log.error(config.getTypeName() + "任务异常结束, 耗时=" + (System.currentTimeMillis() - sTime + "ms"), e);
 		} finally{
-			executeAfter();
+			executeFinally();
 		}
 	}
 
@@ -84,8 +86,12 @@ public abstract class Executor<E extends Config> extends Thread {
 	}
 
 	abstract void execute() throws Exception;
+	
+	protected void executeAfter(E config) throws Exception {
 
-	void executeAfter() {
+	}
+
+	void executeFinally() {
 
 	}
 

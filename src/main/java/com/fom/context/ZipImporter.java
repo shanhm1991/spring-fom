@@ -156,7 +156,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 		}
 	}
 
-	void executeAfter() {
+	void executeFinally() {
 		if(!logFile.exists()){
 			return;
 		}

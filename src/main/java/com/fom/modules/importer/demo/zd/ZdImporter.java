@@ -29,21 +29,16 @@ public class ZdImporter extends Importer<ImporterConfig, Map<String, Object>> {
 			+ "min(sendtime) firsttime, min(userid) keep(dense_rank last order by sendtime) userid1,"
 			+ "min(groupid) keep(dense_rank last order by sendtime) groupid1,"
 			+ "min(sign) keep(dense_rank last order by sendtime) sign "
-
 			+ "from NCDATA_ZDURL_DETAIL  where tag=#time# and insert_time=#time1# group by url)"
-
-
 			+ " T2 on (T1.url = t2.url) "
 			+ "when matched then "
 			+ "update set T1.find_times= T1.find_times + T2.cnt," + "T1.last_userid = T2.USERID,"
-
 			+ "T1.LAST_GROUPID = T2.GROUPID," + "T1.LAST_TIME = T2.lasttime " 
 			+ "WHEN NOT matched THEN "
-
 			+ "INSERT(URL, URL_TYPE, FIND_TIMES, FIRST_TIME, FIRST_USERID, FIRST_GROUPID,LAST_TIME, LAST_USERID, LAST_GROUPID, SIGN) "
 			+ "VALUES(T2.URL, T2.URL_TYPE, T2.cnt, T2.firsttime, T2.USERID1, T2.GROUPID1, T2.lasttime, T2.USERID, T2.GROUPID, T2.SIGN)";
 
-	private static final String SQL_NAME = "select NAME from NAME_DICTIONARY";  //where MARK = #1#
+	private static final String SQL_NAME = "select NAME from NAME_DICTIONARY";
 
 	private static final String SPLIT = "\u0019";
 

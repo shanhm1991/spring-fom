@@ -208,13 +208,13 @@
 	</fom>
 
 	<!-- 机器学习结果[下载] -->
-	<fom name="merchineLearn" config="com.fom.modules.downloader.merchineLearn.MLConfig" enable="false">
+	<fom name="merchineLearn" config="com.fom.context.HdfsZipDownloaderConfig" enable="false">
 		<src.path>/hive</src.path>
 		<src.pattern>wxy\\d{5}_(group|user|label)_data_\\d{8}</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del><!-- TODO -->
 		<scanner>com.fom.context.HdfsScanner</scanner>
 		<scanner.cron>0 0/1 * * * ?</scanner.cron>
-		<executor></executor>
+		<executor>com.fom.modules.downloader.demo.ml.mlDownLoader</executor>
 		<executor.min>10</executor.min>
 		<executor.max>10</executor.max>
 		<executor.aliveTime.seconds>30</executor.aliveTime.seconds>

@@ -11,8 +11,6 @@ public class HdfsZipDownloaderConfig extends HdfsDownloaderConfig {
 	
 	int zipContent;
 	
-	boolean zipIndexContinue;
-
 	protected HdfsZipDownloaderConfig(String name) {
 		super(name);
 	}
@@ -21,7 +19,11 @@ public class HdfsZipDownloaderConfig extends HdfsDownloaderConfig {
 	void load() throws Exception {
 		super.load();
 		
-		
 	}
 
+	public int getZipContent() {
+		return zipContent;
+	}
+
+	
 }
