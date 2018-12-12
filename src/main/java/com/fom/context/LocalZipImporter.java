@@ -17,13 +17,13 @@ import com.fom.util.exception.WarnException;
  * @param <E>
  * @param <V>
  */
-public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importer<E,V> {
+public abstract class LocalZipImporter<E extends LocalZipImporterConfig,V> extends LocalImporter<E,V> {
 
 	protected final File unzipDir;
 	
 	private boolean isZipValid;
 
-	protected ZipImporter(String name, String path) {
+	protected LocalZipImporter(String name, String path) {
 		super(name, path);
 		this.unzipDir = new File(path.replace(".zip", ""));
 	}

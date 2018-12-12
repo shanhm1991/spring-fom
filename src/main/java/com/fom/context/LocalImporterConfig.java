@@ -7,18 +7,18 @@ import com.fom.util.XmlUtil;
  * @author shanhm1991
  *
  */
-public class ImporterConfig extends Config {
+public class LocalImporterConfig extends Config {
 	
 	int batch;
 	
-	protected ImporterConfig(String name) {
+	protected LocalImporterConfig(String name) {
 		super(name);
 	}
 
 	@Override
 	void load() throws Exception {
 		super.load();
-		batch = XmlUtil.getInt(element, "batch", 5000, 1, 50000);
+		batch = XmlUtil.getInt(element, "importer.batch", 5000, 1, 50000);
 	}
 	
 	@Override
@@ -34,13 +34,13 @@ public class ImporterConfig extends Config {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("\nbatch=" + batch);
+		builder.append("\nimporter.batch=" + batch);
 		return builder.toString();
 	}
 
 	@Override
 	public boolean equals(Object o){
-		if(!(o instanceof ImporterConfig)){
+		if(!(o instanceof LocalImporterConfig)){
 			return false;
 		}
 		if(o == this){

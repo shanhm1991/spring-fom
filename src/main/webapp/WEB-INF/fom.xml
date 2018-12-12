@@ -1,19 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
-	<fom name="merchineLearn_user" config="com.fom.modules.importer.merchineLearn.MLConfig">
-		<src.path>E:/test</src.path>
-		<src.pattern>WXY\\d{5}_GROUP_DATA_\\d{8}_\\d+_\\d+.zip$</src.pattern>
+	<!-- 标签聚合[导入] -->
+	<fom name="merge" config="com.fom.context.LocalSDZipImporterConfig"
+		enable="false">
+		<src.path>/opt/file/tagmerge</src.path>
+		<src.pattern>^(WXY00101|WXY00102|WXY00103|WXY00116)_GROUP_DATA_\\d{8}_\\d+_\\d+.zip$|^(WXY00101|WXY00102|WXY00103|WXY00116|WXY00109|WXY00115)_USER_DATA_\\d{8}_\\d+_\\d+.zip$
+		</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
 		<scanner>com.fom.context.LocalScanner</scanner>
 		<scanner.cron>0 0/1 * * * ?</scanner.cron>
-		<executor></executor>
+		<executor>com.fom.modules.importer.demo.tm.TMImpoter</executor>
 		<executor.min>10</executor.min>
 		<executor.max>10</executor.max>
 		<executor.aliveTime.seconds>30</executor.aliveTime.seconds>
 		<executor.overTime.seconds>86400</executor.overTime.seconds>
 		<executor.overTime.cancle>false</executor.overTime.cancle>
-		<batch>5000</batch>
-		<src.subPattern></src.subPattern>
+		<importer.batch>5000</importer.batch>
+		<importer.zip.subPattern></importer.zip.subPattern>
+	</fom>
+
+	<!-- 机器学习群组标签[导入] -->
+	<fom name="mechineLearn_group" config="com.fom.modules.importer.demo.ml.LabelImporterConfig"
+		enable="false">
+		<src.path>/home/wxy/mlinput</src.path>
+		<src.pattern>WXY\\d{5}_GROUP_DATA_\\d{8}_\\d+_\\d+.zip$</src.pattern>
+		<src.match.fail.del>false</src.match.fail.del>
+		<scanner>com.fom.context.LocalScanner</scanner>
+		<scanner.cron>0 0/1 * * * ?</scanner.cron>
+		<executor>com.fom.modules.importer.demo.ml.LabelImporter</executor>
+		<executor.min>10</executor.min>
+		<executor.max>10</executor.max>
+		<executor.aliveTime.seconds>30</executor.aliveTime.seconds>
+		<executor.overTime.seconds>86400</executor.overTime.seconds>
+		<executor.overTime.cancle>false</executor.overTime.cancle>
+		<importer.batch>5000</importer.batch>
+		<importer.zip.subPattern></importer.zip.subPattern>
 		<extended>
 			<es.index>grouptag</es.index>
 			<es.type>grouptag</es.type>
@@ -31,8 +52,179 @@
 		</extended>
 	</fom>
 
+	<!-- 机器学习账户标签[导入] -->
+	<fom name="mechineLearn_user" config="com.fom.modules.importer.demo.ml.LabelImporterConfig"
+		enable="false">
+		<src.path>/home/wxy/mlinput</src.path>
+		<src.pattern>WXY\\d{5}_USER_DATA_\\d{8}_\\d+_\\d+.zip$</src.pattern>
+		<src.match.fail.del>false</src.match.fail.del>
+		<scanner>com.fom.context.LocalScanner</scanner>
+		<scanner.cron>0 0/1 * * * ?</scanner.cron>
+		<executor>com.fom.modules.importer.demo.ml.LabelImporter</executor>
+		<executor.min>10</executor.min>
+		<executor.max>10</executor.max>
+		<executor.aliveTime.seconds>30</executor.aliveTime.seconds>
+		<executor.overTime.seconds>86400</executor.overTime.seconds>
+		<executor.overTime.cancle>false</executor.overTime.cancle>
+		<importer.batch>5000</importer.batch>
+		<importer.zip.subPattern></importer.zip.subPattern>
+		<extended>
+			<es.index>usertag</es.index>
+			<es.type>usertag</es.type>
+			<es.json>index/index_usertag.json</es.json>
+			<filed>DOCID,FTIME,LTIME,HIT_TIMES,ACCOUNTNAME,USERID,TOTAL_TIMES,PERCENT
+			</filed>
+			<pattern.ACCOUNTNAME>{1}</pattern.ACCOUNTNAME>
+			<pattern.PERCENT>{6}</pattern.PERCENT>
+			<pattern.TOTAL_TIMES>{5}</pattern.TOTAL_TIMES>
+			<pattern.USERID>{0}</pattern.USERID>
+			<pattern.DOCID>1030036_{0}</pattern.DOCID>
+			<pattern.FTIME>{2}</pattern.FTIME>
+			<pattern.LTIME>{3}</pattern.LTIME>
+			<pattern.HIT_TIMES>{4}</pattern.HIT_TIMES>
+		</extended>
+	</fom>
 
-	<fom name="merchineLearn" config="com.fom.modules.downloader.merchineLearn.MLConfig">
+	<!-- 机器学习标签证据[导入] -->
+	<fom name="mechineLearn_detail" config="com.fom.context.LocalSDZipImporterConfig"
+		enable="false">
+		<src.path>/home/wxy/mlinput</src.path>
+		<src.pattern>WXY\\d{5}_USER_DATA_\\d{8}_\\d+_\\d+.zip$</src.pattern>
+		<src.match.fail.del>false</src.match.fail.del>
+		<scanner>com.fom.context.LocalScanner</scanner>
+		<scanner.cron>0 0/1 * * * ?</scanner.cron>
+		<executor>com.fom.modules.importer.demo.ml.LabelDetailImporter</executor>
+		<executor.min>10</executor.min>
+		<executor.max>10</executor.max>
+		<executor.aliveTime.seconds>30</executor.aliveTime.seconds>
+		<executor.overTime.seconds>86400</executor.overTime.seconds>
+		<executor.overTime.cancle>false</executor.overTime.cancle>
+		<importer.batch>5000</importer.batch>
+		<importer.zip.subPattern></importer.zip.subPattern>
+	</fom>
+
+	<!-- 重点内容[导入] -->
+	<fom name="zdurl" config="com.fom.context.LocalImporterConfig" enable="false">
+		<src.path>/home/wxy/file/zdinfo</src.path>
+		<src.pattern>[a-zA-Z0-9_]+.nb$|[a-zA-Z0-9_]+.NB$</src.pattern>
+		<src.match.fail.del>false</src.match.fail.del>
+		<scanner>com.fom.context.LocalScanner</scanner>
+		<scanner.cron>0 0/1 * * * ?</scanner.cron>
+		<executor>com.fom.modules.importer.demo.zd.ZdImporter</executor>
+		<executor.min>10</executor.min>
+		<executor.max>10</executor.max>
+		<executor.aliveTime.seconds>30</executor.aliveTime.seconds>
+		<executor.overTime.seconds>86400</executor.overTime.seconds>
+		<executor.overTime.cancle>false</executor.overTime.cancle>
+		<importer.batch>5000</importer.batch>
+	</fom>
+
+	<!-- 行动预警[导入] -->
+	<fom name="warnAction" config="com.fom.modules.importer.demo.wa.WAConfig"
+		enable="false">
+		<src.path>/opt/file/WarnActionImport/inputpath/</src.path>
+		<src.pattern>5210-440300-.*-.*-WARNACTION_ICP_1030036_GROUPCHAT_.*_.*.zip$
+		</src.pattern>
+		<src.match.fail.del>false</src.match.fail.del>
+		<scanner>com.fom.context.LocalScanner</scanner>
+		<scanner.cron>0 0/1 * * * ?</scanner.cron>
+		<executor>com.fom.modules.importer.demo.wa.WAImporter</executor>
+		<executor.min>10</executor.min>
+		<executor.max>10</executor.max>
+		<executor.aliveTime.seconds>30</executor.aliveTime.seconds>
+		<executor.overTime.seconds>86400</executor.overTime.seconds>
+		<executor.overTime.cancle>false</executor.overTime.cancle>
+		<importer.batch>5000</importer.batch>
+		<importer.zip.subPattern>^.*.bcp</importer.zip.subPattern>
+		<extended>
+			<fullTextUrl>http://15.6.89.83:1980</fullTextUrl>
+			<zkAddress>15.6.89.83:1860,15.6.89.83:1861,15.6.89.83:1862
+			</zkAddress>
+		</extended>
+	</fom>
+
+	<!-- 敏感图片[导入] -->
+	<fom name="sensitivePicture" config="com.fom.modules.importer.demo.wa.WAConfig"
+		enable="false">
+		<src.path>/opt/file/sensitivepicimport/inputpath/</src.path>
+		<src.pattern>SENSITIVEPICDATA_.*_.*.zip$</src.pattern>
+		<src.match.fail.del>false</src.match.fail.del>
+		<scanner>com.fom.context.LocalScanner</scanner>
+		<scanner.cron>0 0/1 * * * ?</scanner.cron>
+		<executor>com.fom.modules.importer.demo.sp.SPImporter</executor>
+		<executor.min>10</executor.min>
+		<executor.max>10</executor.max>
+		<executor.aliveTime.seconds>30</executor.aliveTime.seconds>
+		<executor.overTime.seconds>86400</executor.overTime.seconds>
+		<executor.overTime.cancle>false</executor.overTime.cancle>
+		<importer.batch>5000</importer.batch>
+		<importer.zip.subPattern>^.*.bcp</importer.zip.subPattern>
+		<extended>
+			<fullTextUrl>http://15.6.89.83:1980</fullTextUrl>
+			<zkAddress>15.6.89.83:1860,15.6.89.83:1861,15.6.89.83:1862
+			</zkAddress>
+		</extended>
+	</fom>
+
+	<!-- 有害信息[导入] -->
+	<fom name="harmInfo" config="com.fom.modules.importer.demo.hm.HMConfig"
+		enable="false">
+		<src.path>/opt/file/HarmInfo/inputpath</src.path>
+		<src.pattern>^.*HARMINFO.*zip$</src.pattern>
+		<src.match.fail.del>false</src.match.fail.del>
+		<scanner>com.fom.context.LocalScanner</scanner>
+		<scanner.cron>0 0/1 * * * ?</scanner.cron>
+		<executor>com.fom.modules.importer.demo.hm.HMImporter</executor>
+		<executor.min>10</executor.min>
+		<executor.max>10</executor.max>
+		<executor.aliveTime.seconds>30</executor.aliveTime.seconds>
+		<executor.overTime.seconds>86400</executor.overTime.seconds>
+		<executor.overTime.cancle>false</executor.overTime.cancle>
+		<importer.batch>5000</importer.batch>
+		<importer.zip.subPattern>^.*.bcp</importer.zip.subPattern>
+		<extended>
+			<es.index>harminfo-</es.index>
+			<es.type>harminfo</es.type>
+			<es.json>index/index_harminfo.json</es.json>
+			<zkAddress>15.6.89.83:1860,15.6.89.83:1861,15.6.89.83:1862
+			</zkAddress>
+		</extended>
+	</fom>
+
+	<!-- 可疑目标[导入] -->
+	<fom name="suspiciousTarget" config="com.fom.modules.importer.demo.st.STConfig"
+		enable="false">
+		<src.path>/opt/file/tagimport/inputpath</src.path>
+		<src.pattern>^.*HARMINFO.*zip$|^.*YBZ99302.*zip$</src.pattern>
+		<src.match.fail.del>false</src.match.fail.del>
+		<scanner>com.fom.context.LocalScanner</scanner>
+		<scanner.cron>0 0/1 * * * ?</scanner.cron>
+		<executor>com.fom.modules.importer.demo.st.STImporter</executor>
+		<executor.min>10</executor.min>
+		<executor.max>10</executor.max>
+		<executor.aliveTime.seconds>30</executor.aliveTime.seconds>
+		<executor.overTime.seconds>86400</executor.overTime.seconds>
+		<executor.overTime.cancle>false</executor.overTime.cancle>
+		<importer.batch>5000</importer.batch>
+		<importer.zip.subPattern>^.*.bcp</importer.zip.subPattern>
+		<extended>
+			<es.index.user>usertag</es.index.user>
+			<es.type.user>usertag</es.type.user>
+			<es.json.user>index/index_usertag.json</es.json.user>
+			<es.index.group>grouptag</es.index.group>
+			<es.type.group>grouptag</es.type.group>
+			<es.json.group>index/index_grouptag.json</es.json.group>
+			<es.index.gzh>gzhtag</es.index.gzh>
+			<es.type.gzh>gzhtag</es.type.gzh>
+			<es.json.gzh>index/index_gzhtag.json</es.json.gzh>
+			<zkAddress>15.6.89.83:1860,15.6.89.83:1861,15.6.89.83:1862
+			</zkAddress>
+		</extended>
+	</fom>
+
+	<!-- 机器学习结果[下载] -->
+	<fom name="merchineLearn" config="com.fom.modules.downloader.merchineLearn.MLConfig"
+		enable="false">
 		<src.path>/hive</src.path>
 		<src.pattern>wxy\\d{5}_(group|user|label)_data_\\d{8}</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del><!-- TODO -->
@@ -44,17 +236,15 @@
 		<executor.aliveTime.seconds>30</executor.aliveTime.seconds>
 		<executor.overTime.seconds>86400</executor.overTime.seconds>
 		<executor.overTime.cancle>false</executor.overTime.cancle>
-		<temp.path>/home/nebula/download/temp</temp.path>
-		<dest.path>/home/nebula/download/local</dest.path>
-		<src.del>false</src.del>
 		<hdfs1.url></hdfs1.url>
 		<hdfs2.url></hdfs2.url>
 		<signal.file></signal.file>
-
-
-
-
-
+		<downloader.temp.path>/home/nebula/download/temp
+		</downloader.temp.path>
+		<downloader.dest.path>/home/nebula/download/local
+		</downloader.dest.path>
+		<downloader.src.del>false</downloader.src.del>
+		<downloader.zip.content>50</downloader.zip.content>
 	</fom>
 
 </foms>

@@ -16,9 +16,9 @@ import com.fom.util.IoUtils;
  * @param <E>
  * @param <V>
  */
-public abstract class SDZipImporter<E extends SDZipImporterConfig,V> extends ZipImporter<E,V> {
+public abstract class LocalSDZipImporter<E extends LocalSDZipImporterConfig,V> extends LocalZipImporter<E,V> {
 
-	protected SDZipImporter(String name, String path) {
+	protected LocalSDZipImporter(String name, String path) {
 		super(name, path);
 	}
 
@@ -50,7 +50,7 @@ public abstract class SDZipImporter<E extends SDZipImporterConfig,V> extends Zip
 					lineDatas.clear();
 					batchTime = System.currentTimeMillis();
 				}
-				lineDatas.add(praseLineData(config, line, batchTime));
+				praseLineData(config, lineDatas, line, batchTime);
 			}
 			if(!lineDatas.isEmpty()){
 				batchProcessIfNotInterrupted(lineDatas, batchTime); 

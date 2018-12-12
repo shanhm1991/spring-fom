@@ -7,10 +7,12 @@ import java.util.Date;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.dom4j.Element;
 import org.quartz.CronExpression;
 
 import com.fom.util.XmlUtil;
+import com.fom.util.log.LoggerFactory;
 
 /**
  * 
@@ -18,6 +20,8 @@ import com.fom.util.XmlUtil;
  *
  */
 public abstract class Config implements IConfig {
+	
+	protected static final Logger LOG = LoggerFactory.getLogger("config");
 
 	protected final String name;
 

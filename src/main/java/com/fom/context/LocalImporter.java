@@ -20,11 +20,11 @@ import com.fom.util.exception.WarnException;
  * @param <E>
  * @param <V>
  */
-public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> { 
+public abstract class LocalImporter<E extends LocalImporterConfig,V> extends Executor<E> { 
 
 	final File logFile;
 
-	protected Importer(String name, String path) {
+	protected LocalImporter(String name, String path) {
 		super(name, path);
 		this.logFile = new File(path + ".log");
 	}
@@ -83,7 +83,7 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 					lineDatas.clear();
 					batchTime = System.currentTimeMillis();
 				}
-				lineDatas.add(praseLineData(config, line, batchTime));
+				praseLineData(config, lineDatas, line, batchTime);
 			}
 			if(!lineDatas.isEmpty()){
 				batchProcessIfNotInterrupted(lineDatas, batchTime); 
@@ -98,11 +98,11 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 	 * 解析行数据, 异常则结束任务，保留文件，所以务必对错误数据导致的异常进行try-catch
 	 * @param config
 	 * @param line
+	 * @param lineDatas
 	 * @param batchTime
-	 * @return V
 	 * @throws Exception
 	 */
-	protected abstract V praseLineData(E config, String line, long batchTime) throws Exception;
+	protected abstract void praseLineData(E config, List<V> lineDatas, String line, long batchTime) throws Exception;
 
 	//选择在每次批处理开始处检测中断，因为比较耗时的地方就两个(读取解析文件数据内容，数据入库)
 	void batchProcessIfNotInterrupted(List<V> lineDatas, long batchTime) throws Exception {

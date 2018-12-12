@@ -16,9 +16,9 @@ import com.fom.util.IoUtils;
  * @param <E>
  * @param <V>
  */
-public abstract class SDFileImporter<E extends SDFileImporterConfig,V> extends Importer<E,V>{
+public abstract class LocalSDFileImporter<E extends LocalSDFileImporterConfig,V> extends LocalImporter<E,V>{
 
-	protected SDFileImporter(String name, String path) {
+	protected LocalSDFileImporter(String name, String path) {
 		super(name, path);
 	}
 	
@@ -50,7 +50,7 @@ public abstract class SDFileImporter<E extends SDFileImporterConfig,V> extends I
 					lineDatas.clear();
 					batchTime = System.currentTimeMillis();
 				}
-				lineDatas.add(praseLineData(config, line, batchTime));
+				praseLineData(config, lineDatas, line, batchTime);
 			}
 			if(!lineDatas.isEmpty()){
 				batchProcessIfNotInterrupted(lineDatas, batchTime); 

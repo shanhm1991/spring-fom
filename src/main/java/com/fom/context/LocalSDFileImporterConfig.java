@@ -7,11 +7,11 @@ import org.apache.hadoop.conf.Configuration;
  * @author shanhm1991
  *
  */
-public class SDFileImporterConfig extends ImporterConfig {
+public class LocalSDFileImporterConfig extends LocalImporterConfig {
 	
 	Configuration fsConf;
 
-	protected SDFileImporterConfig(String name) {
+	protected LocalSDFileImporterConfig(String name) {
 		super(name);
 		
 	}

@@ -78,11 +78,6 @@ public abstract class Executor<E extends Config> extends Thread {
 		}
 	}
 
-	/**
-	 * 准备工作, 异常则结束任务, 保留文件
-	 * @param config
-	 * @throws Exception
-	 */
 	protected void executeBefore(E config) throws Exception {
 
 	}

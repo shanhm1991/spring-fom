@@ -1,4 +1,4 @@
-package com.fom.modules.importer.merchineLearn;
+package com.fom.modules.importer.demo.ml;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,16 +8,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.dom4j.Element;
 
-import com.fom.context.SDZipImporterConfig;
+import com.fom.context.LocalSDZipImporterConfig;
 import com.fom.util.XmlUtil;
-import com.fom.util.log.LoggerFactory;
 
-public class MLConfig extends SDZipImporterConfig {
-	
-	private static final Logger LOG = LoggerFactory.getLogger("config");
+public class LabelImporterConfig extends LocalSDZipImporterConfig {
 	
 	private String esIndex;
 
@@ -33,7 +29,7 @@ public class MLConfig extends SDZipImporterConfig {
 
 	private Map<String,String> patternMap;
 
-	protected MLConfig(String name) {
+	protected LabelImporterConfig(String name) {
 		super(name);
 	}
 	
@@ -59,6 +55,10 @@ public class MLConfig extends SDZipImporterConfig {
 
 	public Map<String, String> getPatternMap() {
 		return patternMap;
+	}
+	
+	public File getEsJsonFile() {
+		return esJsonFile;
 	}
 
 	@Override

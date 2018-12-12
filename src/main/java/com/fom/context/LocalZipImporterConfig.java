@@ -11,9 +11,9 @@ import com.fom.util.XmlUtil;
  * @author shanhm1991
  *
  */
-public class ZipImporterConfig extends ImporterConfig {
+public class LocalZipImporterConfig extends LocalImporterConfig {
 
-	protected ZipImporterConfig(String name) {
+	protected LocalZipImporterConfig(String name) {
 		super(name);
 	}
 
@@ -24,7 +24,7 @@ public class ZipImporterConfig extends ImporterConfig {
 	@Override
 	void load() throws Exception {
 		super.load();
-		subReg = XmlUtil.getString(element, "src.zip.subPattern", "");
+		subReg = XmlUtil.getString(element, "importer.zip.subPattern", "");
 		if(!StringUtils.isBlank(subReg)){
 			subPattern = Pattern.compile(subReg);
 		}
