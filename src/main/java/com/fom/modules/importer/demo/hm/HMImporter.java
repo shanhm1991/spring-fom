@@ -26,7 +26,10 @@ import com.fom.util.db.handler.EsHandler;
 import com.fom.util.db.handler.OraHandler;
 
 /**
- * 有害信息  *.bcp
+ * 
+ * @author X4584
+ * @date 2018年12月13日
+ *
  */
 public class HMImporter extends ZipImporter<HMConfig, Map<String,Object>> {
 	

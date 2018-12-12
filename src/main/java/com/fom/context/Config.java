@@ -33,7 +33,7 @@ import com.fom.util.log.LoggerFactory;
  *
  */
 public abstract class Config implements IConfig {
-	
+
 	protected static final Logger LOG = LoggerFactory.getLogger("config");
 
 	protected final String name;
@@ -91,6 +91,45 @@ public abstract class Config implements IConfig {
 		load(element.element("extended"));
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("\nsrc.path=" + srcPath);
+		builder.append("\nsrc.pattern=" + reg);
+		builder.append("\nsrc.match.fail.del=" + delMatchFailFile);
+		builder.append("\nscanner=" + scannerClzz);
+		builder.append("\nscanner.cron=" + scannerCron);
+		builder.append("\nexecutor=" + executorClzz);
+		builder.append("\nexecutor.min=" + executorMin);
+		builder.append("\nexecutor.max=" + executorMax);
+		builder.append("\nexecutor.aliveTime.seconds=" + executorAliveTime);
+		builder.append("\nexecutor.overTime.seconds=" + executorOverTime);
+		builder.append("\nexecutor.overTime.cancle=" + executorCancelOnOverTime);
+		return builder.toString();
+	}
+
+	@Override
+	public boolean equals(Object o){
+		if(!(o instanceof Config)){
+			return false;
+		}
+		if(o == this){
+			return true;
+		}
+		Config c = (Config)o;
+		return srcPath.equals(c.srcPath)
+				&& reg.equals(c.reg)
+				&& delMatchFailFile == c.delMatchFailFile
+				&& scannerClzz.equals(c.scannerClzz)
+				&& scannerCron.equals(c.scannerCron)
+				&& executorClzz.equals(c.executorClzz)
+				&& executorMin == c.executorMin
+				&& executorMax == c.executorMax
+				&& executorAliveTime == c.executorAliveTime
+				&& executorOverTime == c.executorOverTime
+				&& executorCancelOnOverTime == c.executorCancelOnOverTime;
+	}
+
 	protected void load(Element extendedElement) throws Exception {
 
 	}
@@ -111,30 +150,13 @@ public abstract class Config implements IConfig {
 		Class<?> clzz = Class.forName(scannerClzz);
 		Constructor<?> constructor = clzz.getConstructor(String.class, Config.class);
 		scanner = (Scanner)constructor.newInstance(name, this);
-		return isValid(element.element("extended"));
+		return valid(element.element("extended"));
 	}
 
-	protected boolean isValid(Element extendedElement) throws Exception {
+	protected boolean valid(Element extendedElement) throws Exception {
 		return true;
 	}
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("\nsrc.path=" + srcPath);
-		builder.append("\nsrc.pattern=" + reg);
-		builder.append("\nsrc.match.fail.del=" + delMatchFailFile);
-		builder.append("\nscanner=" + scannerClzz);
-		builder.append("\nscanner.cron=" + scannerCron);
-		builder.append("\nexecutor=" + executorClzz);
-		builder.append("\nexecutor.min=" + executorMin);
-		builder.append("\nexecutor.max=" + executorMax);
-		builder.append("\nexecutor.aliveTime.seconds=" + executorAliveTime);
-		builder.append("\nexecutor.overTime.seconds=" + executorOverTime);
-		builder.append("\nexecutor.overTime.cancle=" + executorCancelOnOverTime);
-		return builder.toString();
-	}
-	
 	@Override
 	public final String getSrcPath() {
 		return srcPath;
@@ -169,12 +191,12 @@ public abstract class Config implements IConfig {
 	public final String getExecutorClass() {
 		return executorClzz;
 	}
-	
+
 	public final long getCronTime(){
 		Date nextDate = cronExpression.getNextValidTimeAfter(new Date());
 		return nextDate.getTime() - System.currentTimeMillis();
 	}
-	
+
 	public final boolean matchSrc(String srcName){
 		if(pattern == null){
 			return true;

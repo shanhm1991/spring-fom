@@ -34,24 +34,49 @@ public class DownloaderConfig extends Config {
 		super(name);
 	}
 	
-	public boolean isDelSrc() {
-		return delSrc;
-	}
-
-	public String getTempPath() {
-		return tempPath;
-	}
-
-	public String getDestPath() {
-		return destPath;
-	}
-
 	@Override
 	void load() throws Exception {
 		super.load();
 		delSrc = XmlUtil.getBoolean(element, "src.del", false);
 		tempPath = XmlUtil.getString(element, "temp.path", "");
 		destPath = XmlUtil.getString(element, "dest.path", "");
+	}
+	
+	@Override
+	boolean valid() throws Exception {
+		if(!super.valid()){
+			return false;
+		}
+		//...
+		return true;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("\nsrc.del=" + delSrc);
+		builder.append("\ntemp.path=" + tempPath);
+		builder.append("\ndest.path=" + destPath);
+		return builder.toString();
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		if(!(o instanceof DownloaderConfig)){
+			return false;
+		}
+		if(o == this){
+			return true;
+		}
+		
+		DownloaderConfig c = (DownloaderConfig)o; 
+		if(!super.equals(c)){
+			return false;
+		}
+		
+		return delSrc = c.delSrc
+				&& tempPath.equals(c.tempPath)
+				&& destPath.equals(c.destPath);
 	}
 
 	@Override
@@ -64,4 +89,15 @@ public class DownloaderConfig extends Config {
 		return NAME_DOWNLOADER;
 	}
 
+	public boolean isDelSrc() {
+		return delSrc;
+	}
+
+	public String getTempPath() {
+		return tempPath;
+	}
+
+	public String getDestPath() {
+		return destPath;
+	}
 }

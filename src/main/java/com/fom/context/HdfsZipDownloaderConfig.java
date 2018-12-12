@@ -1,5 +1,6 @@
 package com.fom.context;
 
+import com.fom.util.XmlUtil;
 
 /**
  * <src.path>
@@ -36,12 +37,43 @@ public class HdfsZipDownloaderConfig extends HdfsDownloaderConfig {
 	@Override
 	void load() throws Exception {
 		super.load();
+		zipContent = XmlUtil.getInt(element, "downloader.zip.content", 50, 1, 500);
+	}
+	
+	@Override
+	boolean valid() throws Exception {
+		if(!super.valid()){
+			return false;
+		}
+		//...
+		return true;
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		if(!(o instanceof HdfsZipDownloaderConfig)){
+			return false;
+		}
+		if(o == this){
+			return true;
+		}
 		
+		HdfsZipDownloaderConfig c = (HdfsZipDownloaderConfig)o; 
+		if(!super.equals(c)){
+			return false;
+		}
+		
+		return zipContent == c.zipContent;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("\ndownloader.zip.content=" + zipContent);
+		return builder.toString();
 	}
 
 	public int getZipContent() {
 		return zipContent;
 	}
-
-	
 }

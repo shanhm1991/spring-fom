@@ -8,6 +8,12 @@ import com.fom.context.HdfsZipDownloader;
 import com.fom.context.HdfsZipDownloaderConfig;
 import com.fom.util.exception.WarnException;
 
+/**
+ * 
+ * @author X4584
+ * @date 2018年12月13日
+ *
+ */
 public class mlDownLoader extends HdfsZipDownloader<HdfsZipDownloaderConfig>{
 	
 	public mlDownLoader(String name, String path) {

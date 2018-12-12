@@ -25,7 +25,10 @@ import com.fom.util.db.handler.EsHandler;
 import com.fom.util.db.handler.OraHandler;
 
 /**
- * 可疑目标
+ * 
+ * @author X4584
+ * @date 2018年12月13日
+ *
  */
 public class STImporter extends ZipImporter<STConfig, Map<String, String>> {
 	

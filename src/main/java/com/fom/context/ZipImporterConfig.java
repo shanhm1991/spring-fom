@@ -44,6 +44,41 @@ public class ZipImporterConfig extends ImporterConfig {
 		}
 	}
 	
+	@Override
+	boolean valid() throws Exception {
+		if(!super.valid()){
+			return false;
+		}
+		if(!StringUtils.isBlank(subReg)){
+			subPattern = Pattern.compile(subReg);
+		}
+		return true;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("\nimporter.zip.subPattern=" + subReg);
+		return builder.toString();
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		if(!(o instanceof ZipImporterConfig)){
+			return false;
+		}
+		if(o == this){
+			return true;
+		}
+		
+		ZipImporterConfig c = (ZipImporterConfig)o; 
+		if(!super.equals(c)){
+			return false;
+		}
+		
+		return subReg.equals(c.subReg);
+	}
+	
 	public final boolean matchZipFile(String fileName){
 		if(subPattern == null){
 			return true;

@@ -18,7 +18,7 @@
 	</fom>
 
 	<!-- 机器学习群组标签[导入] -->
-	<fom name="mechineLearn_group" config="com.fom.modules.importer.demo.ml.LabelImporterConfig" enable="false">
+	<fom name="mechineLearn_group" config="com.fom.modules.importer.demo.ml.LabelImporterConfig" enable="true">
 		<src.path>/home/wxy/mlinput</src.path>
 		<src.pattern>WXY\\d{5}_GROUP_DATA_\\d{8}_\\d+_\\d+.zip$</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
@@ -49,7 +49,7 @@
 	</fom>
 
 	<!-- 机器学习账户标签[导入] -->
-	<fom name="mechineLearn_user" config="com.fom.modules.importer.demo.ml.LabelImporterConfig" enable="false">
+	<fom name="mechineLearn_user" config="com.fom.modules.importer.demo.ml.LabelImporterConfig" enable="true">
 		<src.path>/home/wxy/mlinput</src.path>
 		<src.pattern>WXY\\d{5}_USER_DATA_\\d{8}_\\d+_\\d+.zip$</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
@@ -80,7 +80,7 @@
 	</fom>
 
 	<!-- 机器学习标签证据[导入] -->
-	<fom name="mechineLearn_detail" config="com.fom.context.ZipImporterConfig" enable="false">
+	<fom name="mechineLearn_detail" config="com.fom.context.ZipImporterConfig" enable="true">
 		<src.path>/home/wxy/mlinput</src.path>
 		<src.pattern>WXY\\d{5}_USER_DATA_\\d{8}_\\d+_\\d+.zip$</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
@@ -97,7 +97,7 @@
 	</fom>
 
 	<!-- 重点内容[导入] -->
-	<fom name="zdurl" config="com.fom.context.ImporterConfig" enable="false">
+	<fom name="zdurl" config="com.fom.context.ImporterConfig" enable="true">
 		<src.path>/home/wxy/file/zdinfo</src.path>
 		<src.pattern>[a-zA-Z0-9_]+.nb$|[a-zA-Z0-9_]+.NB$</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
@@ -113,7 +113,7 @@
 	</fom>
 
 	<!-- 行动预警[导入] -->
-	<fom name="warnAction" config="com.fom.modules.importer.demo.wa.WAConfig" enable="false">
+	<fom name="warnAction" config="com.fom.modules.importer.demo.wa.WAConfig" enable="true">
 		<src.path>/opt/file/WarnActionImport/inputpath/</src.path>
 		<src.pattern>5210-440300-.*-.*-WARNACTION_ICP_1030036_GROUPCHAT_.*_.*.zip$
 		</src.pattern>
@@ -135,7 +135,7 @@
 	</fom>
 
 	<!-- 敏感图片[导入] -->
-	<fom name="sensitivePicture" config="com.fom.modules.importer.demo.wa.WAConfig" enable="false">
+	<fom name="sensitivePicture" config="com.fom.modules.importer.demo.wa.WAConfig" enable="true">
 		<src.path>/opt/file/sensitivepicimport/inputpath/</src.path>
 		<src.pattern>SENSITIVEPICDATA_.*_.*.zip$</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
@@ -156,7 +156,7 @@
 	</fom>
 
 	<!-- 有害信息[导入] -->
-	<fom name="harmInfo" config="com.fom.modules.importer.demo.hm.HMConfig" enable="false">
+	<fom name="harmInfo" config="com.fom.modules.importer.demo.hm.HMConfig" enable="true">
 		<src.path>/opt/file/HarmInfo/inputpath</src.path>
 		<src.pattern>^.*HARMINFO.*zip$</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
@@ -179,7 +179,7 @@
 	</fom>
 
 	<!-- 可疑目标[导入] -->
-	<fom name="suspiciousTarget" config="com.fom.modules.importer.demo.st.STConfig" enable="false">
+	<fom name="suspiciousTarget" config="com.fom.modules.importer.demo.st.STConfig" enable="true">
 		<src.path>/opt/file/tagimport/inputpath</src.path>
 		<src.pattern>^.*HARMINFO.*zip$|^.*YBZ99302.*zip$</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>

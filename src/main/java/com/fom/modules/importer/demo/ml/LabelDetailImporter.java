@@ -9,7 +9,10 @@ import com.fom.context.ZipImporterConfig;
 import com.fom.util.db.handler.OraHandler;
 
 /**
- * 标签证据
+ * 
+ * @author X4584
+ * @date 2018年12月13日
+ *
  */
 public class LabelDetailImporter extends ZipImporter<ZipImporterConfig, Map<String, Object>>{
 	

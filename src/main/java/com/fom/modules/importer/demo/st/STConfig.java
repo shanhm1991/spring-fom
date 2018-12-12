@@ -8,7 +8,12 @@ import org.dom4j.Element;
 import com.fom.context.ZipImporterConfig;
 import com.fom.util.XmlUtil;
 
-
+/**
+ * 
+ * @author X4584
+ * @date 2018年12月13日
+ *
+ */
 public class STConfig extends ZipImporterConfig {
 
 	private String userIndex;
@@ -58,56 +63,71 @@ public class STConfig extends ZipImporterConfig {
 		gzhJson = XmlUtil.getString(element, "es.json.gzh", "");
 	}
 	
-	
 	@Override
-	protected boolean isValid(Element element) throws Exception {
+	protected boolean valid(Element extendedElement) throws Exception {
 		if(StringUtils.isBlank(userIndex)){ 
-			LOG.warn("缺少配置：" + name + ".user.index");
+			LOG.warn("缺少配置:es.index.user");
 			return false;
 		}
 		if(StringUtils.isBlank(userType)){ 
-			LOG.warn("缺少配置：" + name + ".user.type");
+			LOG.warn("缺少配置:es.type.user");
 			return false;
 		}
 		if(StringUtils.isBlank(userJson)){ 
-			LOG.warn("缺少配置：" + name + ".user.json");
+			LOG.warn("缺少配置:es.json.user");
 			return false;
 		}
 		userJsonFile = locationResource(userJson);
 		
 		if(StringUtils.isBlank(groupIndex)){ 
-			LOG.warn("缺少配置：" + name + ".group.index");
+			LOG.warn("缺少配置:es.index.group");
 			return false;
 		}
 		if(StringUtils.isBlank(groupType)){ 
-			LOG.warn("缺少配置：" + name + ".group.type");
+			LOG.warn("缺少配置:es.type.group");
 			return false;
 		}
 		if(StringUtils.isBlank(groupJson)){ 
-			LOG.warn("缺少配置：" + name + ".group.json");
+			LOG.warn("缺少配置:es.json.group");
 			return false;
 		}
 		groupJsonFile = locationResource(groupJson);
 		
 		if(StringUtils.isBlank(gzhIndex)){ 
-			LOG.warn("缺少配置：" + name + ".gzh.index");
+			LOG.warn("缺少配置:es.index.gzh");
 			return false;
 		}
 		if(StringUtils.isBlank(gzhType)){ 
-			LOG.warn("缺少配置：" + name + ".gzh.type");
+			LOG.warn("缺少配置:es.type.gzh");
 			return false;
 		}
 		if(StringUtils.isBlank(gzhJson)){ 
-			LOG.warn("缺少配置：" + name + ".gzh.json");
+			LOG.warn("缺少配置:es.json.gzh");
 			return false;
 		}
 		gzhJsonFile = locationResource(gzhJson);
 		
 		if(StringUtils.isBlank(zkAddress)){ 
-			LOG.warn("缺少配置：" + name + ".zkAddress");
+			LOG.warn("缺少配置:zkAddress");
 			return false;
 		}
 		return true;
+	}
+	
+	@Override
+	public String toString(){
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("\nes.index.user=" + userIndex);
+		builder.append("\nes.type.user=" + userType);
+		builder.append("\nes.json.user=" + userJson);
+		builder.append("\nes.index.group=" + groupIndex);
+		builder.append("\nes.type.group=" + groupType);
+		builder.append("\nes.json.group=" + groupJson);
+		builder.append("\nes.index.gzh=" + gzhIndex);
+		builder.append("\nes.type.gzh=" + gzhType);
+		builder.append("\nes.json.gzh=" + gzhJson);
+		builder.append("\nzkAddress=" + zkAddress);
+		return builder.toString();
 	}
 	
 	@Override
@@ -125,28 +145,18 @@ public class STConfig extends ZipImporterConfig {
 			return false;
 		}
 
-		return userIndex.equals(config.getUserIndex()) && userType.equals(config.getUserType()) && userJson.equals(config.getUserJson())
-				&& groupIndex.equals(config.getGroupIndex()) && groupType.equals(config.getGroupType()) && groupJson.equals(config.getGroupJson())
-				&& gzhIndex.equals(config.getGzhIndex()) && gzhType.equals(config.getGzhType()) && gzhJson.equals(config.getGzhJson())
-				&& zkAddress.equals(config.getZkAddress());
+		return userIndex.equals(config.userIndex) 
+				&& userType.equals(config.userType) 
+				&& userJson.equals(config.userJson)
+				&& groupIndex.equals(config.groupIndex) 
+				&& groupType.equals(config.groupType) 
+				&& groupJson.equals(config.groupJson)
+				&& gzhIndex.equals(config.gzhIndex) 
+				&& gzhType.equals(config.gzhType) 
+				&& gzhJson.equals(config.gzhJson)
+				&& zkAddress.equals(config.zkAddress);
 	}
 
-	@Override
-	public String toString(){
-		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("\n" + name + ".user.index=" + userIndex);
-		builder.append("\n" + name + ".user.type=" + userType);
-		builder.append("\n" + name + ".user.json=" + userJson);
-		builder.append("\n" + name + ".group.index=" + groupIndex);
-		builder.append("\n" + name + ".group.type=" + groupType);
-		builder.append("\n" + name + ".group.json=" + groupJson);
-		builder.append("\n" + name + ".gzh.index=" + gzhIndex);
-		builder.append("\n" + name + ".gzh.type=" + gzhType);
-		builder.append("\n" + name + ".gzh.json=" + gzhJson);
-		builder.append("\n" + name + ".zkAddress=" + zkAddress);
-		return builder.toString();
-	}
-	
 	public String getZkAddress() {
 		return zkAddress;
 	}

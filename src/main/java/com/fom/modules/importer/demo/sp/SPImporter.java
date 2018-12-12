@@ -11,7 +11,10 @@ import com.fom.util.StorageUtil;
 import com.fom.util.db.handler.OraHandler;
 
 /**
- * 敏感图片
+ * 
+ * @author X4584
+ * @date 2018年12月13日
+ *
  */
 public class SPImporter extends ZipImporter<WAConfig, Map<String,Object>> {
 	

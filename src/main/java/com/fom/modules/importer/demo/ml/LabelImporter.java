@@ -18,7 +18,10 @@ import com.fom.util.MD5Util;
 import com.fom.util.db.handler.EsHandler;
 
 /**
- * 机器学习标签[账户/群组]
+ * 
+ * @author X4584
+ * @date 2018年12月13日
+ *
  */
 public class LabelImporter extends ZipImporter<LabelImporterConfig, Map<String,Object>>{
 	

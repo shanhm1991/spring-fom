@@ -59,6 +59,43 @@ public class HdfsDownloaderConfig extends DownloaderConfig implements IHdfsConfi
 		conf.set("fs.defaultFS", "hdfs://ngpcluster");
 		fs = FileSystem.get(conf);
 	}
+	
+	@Override
+	boolean valid() throws Exception {
+		if(!super.valid()){
+			return false;
+		}
+		//...
+		return true;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("\nhdfs1.url=" + hdfs1_url);
+		builder.append("\nhdfs2.url=" + hdfs2_url);
+		builder.append("\nsignal.file=" + signalFile);
+		return builder.toString();
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		if(!(o instanceof HdfsDownloaderConfig)){
+			return false;
+		}
+		if(o == this){
+			return true;
+		}
+		
+		HdfsDownloaderConfig c = (HdfsDownloaderConfig)o; 
+		if(!super.equals(c)){
+			return false;
+		}
+		
+		return hdfs1_url.equals(c.hdfs1_url)
+				&& hdfs2_url.equals(c.hdfs2_url)
+				&& signalFile.equals(c.signalFile);
+	}
 
 	@Override
 	public final FileSystem getFs() {

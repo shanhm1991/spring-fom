@@ -14,7 +14,10 @@ import com.fom.context.Importer;
 import com.fom.util.db.handler.OraHandler;
 
 /**
- * 重点内容
+ * 
+ * @author X4584
+ * @date 2018年12月13日
+ *
  */
 public class ZdImporter extends Importer<ImporterConfig, Map<String, Object>> {
 	

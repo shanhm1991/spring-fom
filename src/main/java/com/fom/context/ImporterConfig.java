@@ -39,6 +39,39 @@ public class ImporterConfig extends Config {
 		fsConf = new Configuration();
 		fsConf.set("fs.defaultFS", "file:///");
 	}
+	
+	@Override
+	boolean valid() throws Exception {
+		if(!super.valid()){
+			return false;
+		}
+		//...
+		return true;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("\nimporter.batch=" + batch);
+		return builder.toString();
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		if(!(o instanceof ImporterConfig)){
+			return false;
+		}
+		if(o == this){
+			return true;
+		}
+		
+		ImporterConfig c = (ImporterConfig)o; 
+		if(!super.equals(c)){
+			return false;
+		}
+		
+		return batch == c.batch;
+	}
 
 	@Override
 	public final String getType() {
@@ -49,33 +82,4 @@ public class ImporterConfig extends Config {
 	public final String getTypeName() {
 		return NAME_IMPORTER;
 	}
-
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("\nimporter.batch=" + batch);
-		return builder.toString();
-	}
-
-	@Override
-	public boolean equals(Object o){
-		if(!(o instanceof ImporterConfig)){
-			return false;
-		}
-		if(o == this){
-			return true;
-		}
-		//		Config c = (Config)o; 
-
-		//		boolean equal = importer.equals(c.importer) && srcPathName.equals(c.srcPathName) && pool.equals(c.pool)  
-		//				&& reg.equals(c.reg) && cycle == c.cycle && configClass.equals(c.configClass) && isHDFS == c.isHDFS; 
-		//		if(equal){
-		//			equal = srcType.equals(c.srcType) && delMatchFailFile ==  c.delMatchFailFile && zipReg.equals(c.zipReg)
-		//					&& importerMax == c.importerMax && importerAliveTime == c.importerAliveTime && importerOverTime == c.importerOverTime
-		//					&& cancelWhenOverTime == c.cancelWhenOverTime && importerBatch == c.importerBatch;
-		//		}
-		return false;
-	}
-
-
 }
