@@ -43,19 +43,23 @@ class ConfigLoader extends AbstractRefreshableWebApplicationContext {
 		Iterator<?> it = operators.elementIterator("fom");
 		while(it.hasNext()){
 			Element element = (Element)it.next();
+			
 			String name = element.attributeValue("name");
 			String clzz = element.attributeValue("config");
-			Class<?> configClass = Class.forName(clzz);
-			Constructor<?> constructor = configClass.getDeclaredConstructor(String.class); 
-			constructor.setAccessible(true); 
-			Config config = (Config)constructor.newInstance(name);
-			config.element = element;
-			config.loader = this;
+			boolean enable = Boolean.valueOf(element.attributeValue("enable"));
+			if(enable){
+				Class<?> configClass = Class.forName(clzz);
+				Constructor<?> constructor = configClass.getDeclaredConstructor(String.class); 
+				constructor.setAccessible(true); 
+				Config config = (Config)constructor.newInstance(name);
+				config.element = element;
+				config.loader = this;
 
-			config.load();
-			config.valid();
-			ConfigManager.registerConfig(config);
-			LOG.info("#加载配置: " + name + config);
+				config.load();
+				config.valid();
+				ConfigManager.registerConfig(config);
+				LOG.info("#加载配置: " + name + config);
+			}
 		}
 		
 		for(Config config : ConfigManager.getAllConfig()){

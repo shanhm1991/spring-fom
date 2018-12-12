@@ -3,6 +3,20 @@ package com.fom.context;
 import com.fom.util.XmlUtil;
 
 /**
+ * <src.path>
+ * <src.pattern>
+ * <src.match.fail.del>
+ * <scanner.cron>
+ * <scanner>
+ * <executor>
+ * <executor.min>
+ * <executor.max>
+ * <executor.aliveTime.seconds>
+ * <executor.overTime.seconds>
+ * <executor.overTime.cancle>
+ * <downloader.src.del>
+ * <downloader.temp.path>
+ * <downloader.dest.path>
  * 
  * @author X4584
  * @date 2018年12月12日

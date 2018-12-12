@@ -2,6 +2,16 @@ package com.fom.context;
 
 /**
  * 
+ * <src.path>
+ * <src.pattern>
+ * <scanner.cron>
+ * <executor>
+ * <executor.min>
+ * <executor.max>
+ * <executor.aliveTime.seconds>
+ * <executor.overTime.seconds>
+ * <executor.overTime.cancle>
+ * 
  * @author X4584
  * @date 2018年12月12日
  *

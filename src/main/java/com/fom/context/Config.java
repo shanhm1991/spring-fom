@@ -15,6 +15,18 @@ import com.fom.util.XmlUtil;
 import com.fom.util.log.LoggerFactory;
 
 /**
+ * <src.path>
+ * <src.pattern>
+ * <src.match.fail.del>
+ * <scanner.cron>
+ * <scanner>
+ * <executor>
+ * <executor.min>
+ * <executor.max>
+ * <executor.aliveTime.seconds>
+ * <executor.overTime.seconds>
+ * <executor.overTime.cancle>
+ * 
  * 
  * @author X4584
  * @date 2018年12月12日
@@ -95,11 +107,10 @@ public abstract class Config implements IConfig {
 		if(!StringUtils.isBlank(reg)){
 			pattern = Pattern.compile(reg);
 		}
-		cronExpression = new CronExpression("0 0/1 * * * ?");
+		cronExpression = new CronExpression(scannerCron);
 		Class<?> clzz = Class.forName(scannerClzz);
 		Constructor<?> constructor = clzz.getConstructor(String.class, Config.class);
 		scanner = (Scanner)constructor.newInstance(name, this);
-
 		return isValid(element.element("extended"));
 	}
 

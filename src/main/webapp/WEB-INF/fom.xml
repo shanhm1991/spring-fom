@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
 	<!-- 标签聚合[导入] -->
-	<fom name="merge" config="com.fom.context.ZipImporterConfig" enable="false">
+	<fom name="merge" config="com.fom.context.ZipImporterConfig" enable="true">
 		<src.path>/opt/file/tagmerge</src.path>
 		<src.pattern>^(WXY00101|WXY00102|WXY00103|WXY00116)_GROUP_DATA_\\d{8}_\\d+_\\d+.zip$|^(WXY00101|WXY00102|WXY00103|WXY00116|WXY00109|WXY00115)_USER_DATA_\\d{8}_\\d+_\\d+.zip$</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
