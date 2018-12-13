@@ -63,11 +63,11 @@ public abstract class Executor<E extends Config> extends Thread {
 		Thread.currentThread().setName(config.getType() + "[" + srcName + "]");
 		long sTime = System.currentTimeMillis();
 		try {
-			executeBefore(config);
+			beforeExecute(config);
 			
 			execute();
 			
-			executeAfter(config);
+			afterExecute(config);
 			log.info(config.getTypeName() + "任务结束, 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 		} catch(WarnException e){
 			log.warn(config.getTypeName() + "任务错误结束[" + e.getMessage() + "], 耗时=" + (System.currentTimeMillis() - sTime + "ms"));
@@ -77,21 +77,21 @@ public abstract class Executor<E extends Config> extends Thread {
 		} catch(Throwable e) {
 			log.error(config.getTypeName() + "任务异常结束, 耗时=" + (System.currentTimeMillis() - sTime + "ms"), e);
 		} finally{
-			executeFinally();
+			finallyExecute();
 		}
 	}
 
-	protected void executeBefore(E config) throws Exception {
+	protected void beforeExecute(E config) throws Exception {
 
 	}
 
 	abstract void execute() throws Exception;
 	
-	protected void executeAfter(E config) throws Exception {
+	protected void afterExecute(E config) throws Exception {
 
 	}
 
-	void executeFinally() {
+	void finallyExecute() {
 
 	}
 

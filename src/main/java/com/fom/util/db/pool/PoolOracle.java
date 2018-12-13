@@ -6,6 +6,8 @@ import java.sql.SQLException;
 
 import org.dom4j.Element;
 
+import com.fom.util.XmlUtil;
+
 /**
  * 
  * @author X4584
@@ -35,17 +37,20 @@ class PoolOracle extends Pool<Connection>{
 
 	@Override
 	protected void load(Element el) throws Exception {
-		int core = getInt(el, "core", 4, 1, 50);
-		int max = getInt(el, "max", 4, 1, 50);
-		int overTime = getInt(el, "aliveTime", 30 * 1000, 3 * 1000, 300 * 1000);
-		String oraUrl = getString(el, "url", "");
-		String oraUser = getString(el, "user", "");
-		String oraPasswd = getString(el, "passwd", "");
-		if(this.core != core || this.max != max || this.overTime != overTime
-				|| !oraUrl.equals(this.oraUrl) || !oraUser.equals(this.oraUser) || !oraPasswd.equals(this.oraPasswd)){ 
+		int core = XmlUtil.getInt(el, "core", 4, 1, 50);
+		int max = XmlUtil.getInt(el, "max", 4, 1, 50);
+		int overTime = XmlUtil.getInt(el, "aliveTimeOut", 15000, 3000, 60000);
+		int waitTime = XmlUtil.getInt(el, "waitTimeOut", 15000, 3000, 60000);
+		String oraUrl = XmlUtil.getString(el, "url", "");
+		String oraUser = XmlUtil.getString(el, "user", "");
+		String oraPasswd = XmlUtil.getString(el, "passwd", "");
+		if(this.core != core || this.max != max || this.aliveTimeOut != overTime
+				|| !oraUrl.equals(this.oraUrl) || !oraUser.equals(this.oraUser) 
+				|| !oraPasswd.equals(this.oraPasswd) || this.waitTimeOut != waitTime){ 
 			this.core = core;
 			this.max = max;
-			this.overTime = overTime;
+			this.aliveTimeOut = overTime;
+			this.waitTimeOut = waitTime;
 			if(hasReset(oraUrl, oraUser, oraPasswd)){
 				synchronized (this) {
 					this.oraUrl = oraUrl;
@@ -55,7 +60,7 @@ class PoolOracle extends Pool<Connection>{
 				acquire();
 				release();
 			}
-			LOG.info("#### 加载完成, " + name + this);
+			LOG.info("#加载完成, " + name + this);
 		}
 	}
 	
@@ -73,7 +78,8 @@ class PoolOracle extends Pool<Connection>{
 		StringBuilder builder = new StringBuilder();
 		builder.append("\n" + name + ".core=" + core);
 		builder.append("\n" + name + ".max=" + max);
-		builder.append("\n" + name + ".aliveTime=" + overTime);
+		builder.append("\n" + name + ".aliveTimeOut=" + aliveTimeOut);
+		builder.append("\n" + name + ".waitTimeOut=" + waitTimeOut);
 		builder.append("\n" + name + ".url=" + oraUrl);
 		builder.append("\n" + name + ".user=" + oraUser);
 		builder.append("\n" + name + ".passwd=" + oraPasswd);

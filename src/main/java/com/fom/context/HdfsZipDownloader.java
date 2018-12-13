@@ -239,7 +239,7 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 	}
 
 	@Override
-	protected void executeAfter(final E config) throws Exception{ 
+	protected void afterExecute(final E config) throws Exception{ 
 		//先删临时目录  后删源目录
 		File temp = new File(subTempPath);
 		if(temp.exists() && !temp.delete()){

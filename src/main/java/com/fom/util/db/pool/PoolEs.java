@@ -10,6 +10,7 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
+import com.fom.util.XmlUtil;
 import com.fom.util.exception.WarnException;
 
 /**
@@ -36,7 +37,7 @@ class PoolEs extends Pool<TransportClient>{
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void load(Element el) throws Exception {
-		String name = getString(el, "clusterName", "");
+		String name = XmlUtil.getString(el, "clusterName", "");
 		
 		Element nodesE = el.element("nodes");
 		Iterator<Element> it = nodesE.elementIterator("node");
@@ -70,7 +71,7 @@ class PoolEs extends Pool<TransportClient>{
 			}
 			client = newClient;
 			clientNode.v = client;
-			LOG.info("#### 加载完成, " + name + this);
+			LOG.info("#加载完成, " + name + this);
 		}
 	}
 

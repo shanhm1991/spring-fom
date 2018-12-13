@@ -2,7 +2,14 @@ package com.fom.util.db.pool;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.nio.file.FileSystems;
+import java.nio.file.Paths;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,6 +24,7 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
+import com.fom.util.XmlUtil;
 import com.fom.util.log.LoggerFactory;
 
 /**
@@ -38,68 +46,115 @@ public class PoolManager {
 
 	private static int cleanTimes = 0;
 
-	//将pool相关的类分离出来一个package，但是又不希望被其他外部类访问到，所以将构造方法隐藏，只给子类调用
-	protected PoolManager(){
-
+	protected static void listenPool(File poolXml){
+		new Listener(poolXml).start();
+		new Monitor().start();
 	}
 
-	static{
-		Thread monitor = new Thread("pool-monitor"){
-			@Override
-			public void run(){
-				while(true){
-					try {
-						sleep(30 * 1000); //30s
-					} catch (InterruptedException e) {
-						//should never happened
-					}
-
-					Iterator<Pool<?>> it = poolRemoved.iterator();
-					while(it.hasNext()){
-						Pool<?> pool = it.next();
-						pool.clean();
-						if(pool.getLocalAlives() == 0){
-							it.remove();
+	private static class Listener extends Thread {
+		
+		private final File poolXml;
+		
+		public Listener(File poolXml) {
+			this.setName("pool-listener");
+			this.setDaemon(true); 
+			this.poolXml = poolXml;
+		}
+		
+		@Override
+		public void run() {
+			String parentPath = poolXml.getParent();
+			String name = poolXml.getName();
+			
+			load(poolXml);
+			
+			WatchService watch = null;
+			try {
+				watch = FileSystems.getDefault().newWatchService();
+				Paths.get(parentPath).register(watch, StandardWatchEventKinds.ENTRY_MODIFY); 
+			} catch (IOException e) {
+				LOG.error("配置监听启动失败", e); 
+			}
+			
+			WatchKey key = null;
+			while(true){
+				try {
+					key = watch.take();
+				} catch (InterruptedException e) {
+					return;
+				}
+				for(WatchEvent<?> event : key.pollEvents()){
+					if(StandardWatchEventKinds.ENTRY_MODIFY == event.kind()){ 
+						String eventName = event.context().toString();
+						if(name.equals(eventName)){ 
+							load(poolXml);
 						}
-					}
-
-					for(Pool<?> pool : poolMap.values()){
-						if(pool.overTime == 0){
-							continue;
-						}
-						pool.clean();
-					}
-					
-					StringBuilder builder = new StringBuilder(", detail=[");
-					for(Pool<?> pool : poolMap.values()){
-						builder.append(pool.name + ":" + pool.getLocalAlives() + "; ");
-					}
-					for(Pool<?> pool : poolRemoved){
-						builder.append(pool.name + "(removed):" + pool.getLocalAlives() + "; ");
-					}
-					String detail = builder.append("]").toString();
-					if(cleanTimes++ % 30 == 0){
-						LOG.info("[统计]当前所有连接数：" + Pool.getAlives() + detail); 
 					}
 				}
+				key.reset();
 			}
-		};
-		monitor.setDaemon(true); 
-		monitor.start();
+		}
 	}
 
+	private static class Monitor extends Thread {
+
+		public Monitor() {
+			this.setName("pool-monitor");
+			this.setDaemon(true); 
+		}
+
+		@Override
+		public void run() {
+			while(true){
+				try {
+					sleep(15 * 1000); //15s
+				} catch (InterruptedException e) {
+					//should never happened
+				}
+
+				Iterator<Pool<?>> it = poolRemoved.iterator();
+				while(it.hasNext()){
+					Pool<?> pool = it.next();
+					pool.clean();
+					if(pool.getLocalAlives() == 0){
+						it.remove();
+					}
+				}
+
+				for(Pool<?> pool : poolMap.values()){
+					if(pool.aliveTimeOut == 0){
+						continue;
+					}
+					pool.clean();
+				}
+
+				StringBuilder builder = new StringBuilder(", detail=[");
+				for(Pool<?> pool : poolMap.values()){
+					builder.append(pool.name + ":" + pool.getLocalAlives() + "; ");
+				}
+				for(Pool<?> pool : poolRemoved){
+					builder.append(pool.name + "(removed):" + pool.getLocalAlives() + "; ");
+				}
+				String detail = builder.append("]").toString();
+				if(cleanTimes++ % 10 == 0){
+					LOG.info("[统计]当前所有连接数：" + Pool.getAlives() + detail); 
+				}
+			}
+		}
+	}
+	
 	/**
 	 * Listener单线程调用
 	 * @param file
 	 */
 	@SuppressWarnings("rawtypes")
-	protected static final void load(String file){
+	private static void load(File file){
 		SAXReader reader = new SAXReader();
 		reader.setEncoding("UTF-8");
 		LOG.info("------------------------------加载连接池------------------------------"); 
 		Document doc = null;
 		try{
-			doc = reader.read(new FileInputStream(new File(file)));
+			doc = reader.read(new FileInputStream(file));
 		}catch(Exception e){
 			LOG.error("加载失败", e); 
 			remveAll();
@@ -109,12 +164,12 @@ public class PoolManager {
 
 		Element pools = doc.getRootElement();
 		Iterator it = pools.elementIterator("pool");
-		
+
 		Set<String> nameSet = new HashSet<String>();
 		while (it.hasNext()) {
 			Element ePool = (Element) it.next();
 
-			String name = Pool.getString(ePool, "name", null);
+			String name = XmlUtil.getString(ePool, "name", null);
 			if(name == null){
 				LOG.warn("忽略没有name的pool"); 
 				continue;
@@ -125,7 +180,7 @@ public class PoolManager {
 				continue;
 			}
 
-			String className = Pool.getString(ePool, "class", null);
+			String className = XmlUtil.getString(ePool, "class", null);
 			if(className == null){
 				LOG.warn(name + "加载失败,缺少配置class"); 
 				remvePool(name);

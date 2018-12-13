@@ -52,7 +52,7 @@ public class ZdImporter extends Importer<ImporterConfig, Map<String, Object>> {
 	}
 
 	@Override
-	protected void executeBefore(ImporterConfig config) throws Exception {
+	protected void beforeExecute(ImporterConfig config) throws Exception {
 		try {
 			List<Map<String, Object>> name = 
 					OraHandler.defaultHandler.queryForList(POOL_ORA, SQL_NAME, null);

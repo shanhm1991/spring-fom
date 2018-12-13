@@ -2,12 +2,16 @@ package com.fom.util.db.pool;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.dom4j.Element;
 
 import com.fom.util.log.LoggerFactory;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -28,7 +32,9 @@ abstract class Pool<E> {
 
 	private final ThreadLocal<Node<E>> threadLocal = new ThreadLocal<Node<E>>();
 
-	private final Object lock = new Object();
+	private final Lock lock = new ReentrantLock();
+
+	private final Condition condition = lock.newCondition();
 
 	private AtomicInteger aliveCount = new AtomicInteger(0);
 
@@ -38,7 +44,9 @@ abstract class Pool<E> {
 
 	protected volatile int max = 3; 
 
-	protected volatile long overTime = 0;//如果time = 0   1.不做超时关闭检查; 2.获取时如果没有空闲连接永久等待
+	protected volatile long waitTimeOut = 30000;
+
+	protected volatile long aliveTimeOut = 0;//如果time = 0   1.不做超时关闭检查; 2.获取时如果没有空闲连接永久等待
 
 	protected volatile String name;
 
@@ -60,7 +68,7 @@ abstract class Pool<E> {
 				if(!node.isIdel || node.isClosed){
 					continue;
 				}
-				if(System.currentTimeMillis() - node.releaseTime < overTime){
+				if(System.currentTimeMillis() - node.releaseTime < aliveTimeOut){
 					continue;
 				}
 				node.isClosed = true;
@@ -73,7 +81,7 @@ abstract class Pool<E> {
 		}
 	}
 
-	public Node<E> acquire() throws Exception{  //TODO
+	public Node<E> acquire() throws Exception{
 		Node<E> node = threadLocal.get();
 		if(node != null){
 			if(node.isValid()){
@@ -90,29 +98,35 @@ abstract class Pool<E> {
 			aliveTotal.decrementAndGet();
 		}
 
-		synchronized (lock) {
+		lock.lock();
+		try{
 			node = acquireFree();
 			if(node != null){
 				return node;
 			}
 
 			while(aliveCount.get() >= max){
-				lock.wait(30000);
+				if(!condition.await(waitTimeOut, TimeUnit.MILLISECONDS)){
+					throw new Exception("获取连接超时" + state());
+				}
 				node = acquireFree();
 				if(node != null){
 					return node;
 				}
 			}
-
-			node = create();
-			threadLocal.set(node);
-			aliveCount.incrementAndGet();
-			aliveTotal.incrementAndGet();
-			LOG.info("获取连接[create]" + state());
+		}finally{
+			lock.unlock();
 		}
-		return node;
 
+		node = create();
+		threadLocal.set(node);
+		aliveCount.incrementAndGet();
+		aliveTotal.incrementAndGet();
+		LOG.info("获取连接[create]" + state());
+		return node;
 	}
+
+
 
 	private Node<E> acquireFree() { 
 		Node<E> node = null;
@@ -156,7 +170,7 @@ abstract class Pool<E> {
 		if(node == null){
 			return;
 		}
-		
+
 		synchronized (node){
 			node.isIdel = true;
 			node.isClosed = false;
@@ -179,7 +193,8 @@ abstract class Pool<E> {
 			return;
 		}
 
-		synchronized (lock) { 
+		lock.lock();
+		try{
 			if(freeCount.get() >= core){
 				node.close();
 				aliveCount.decrementAndGet();
@@ -198,7 +213,9 @@ abstract class Pool<E> {
 
 			freeCount.incrementAndGet();
 			LOG.info("释放连接" + state()); 
-			lock.notifyAll();
+			condition.signalAll();
+		}finally{
+			lock.unlock();
 		}
 	}
 
@@ -216,43 +233,12 @@ abstract class Pool<E> {
 		return aliveTotal.get();
 	}
 
-	static final String getString(Element el, String key, String defaultValue){
-		Element e = el.element(key);
-		if(e == null){
-			return defaultValue;
-		}
-
-		String value = e.getTextTrim();
-		if(StringUtils.isBlank(value)){
-			return defaultValue;
-		}
-		return value;
-	}
-
-	static final int getInt(Element el, String key, int defaultValue, int min, int max){
-		Element e = el.element(key);
-		if(e == null){
-			return defaultValue;
-		}
-
-		int value = 0;
-		try{
-			value = Integer.parseInt(e.getTextTrim());
-		}catch(Exception e1){
-			return defaultValue;
-		}
-
-		if(value < min || value > max){
-			return defaultValue;
-		}
-		return value;
-	}
-
 	/**
 	 * 将同步操作的单元由pool改为node,原先的pool实现要实现动态响应配置变化非常麻烦
 	 * 修改之后只需要在acquire()和release()时判断node是否 进行isReset()
 	 * 
-	 * @author shanhm1991
+	 * @author X4584
+	 * @date 2018年12月13日
 	 *
 	 * @param <T>
 	 */

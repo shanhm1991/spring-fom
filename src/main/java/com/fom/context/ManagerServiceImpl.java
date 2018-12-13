@@ -1,8 +1,11 @@
 package com.fom.context;
 
+import java.io.File;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+
+import com.fom.util.db.pool.PoolManager;
 
 /**
  * 
@@ -11,10 +14,19 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service(value="managerService")
-public class ManagerServiceImpl implements ManagerService {
+public class ManagerServiceImpl extends PoolManager implements ManagerService {
+	
+	static void listen(File poolXml){
+		if(!poolXml.exists()){
+			return;
+		}
+		listenPool(poolXml);
+	}
 
 	@Override
 	public Map<String, Config> getConfigMap() {
 		return ConfigManager.getConfigMap();
 	}
+	
+	
 }

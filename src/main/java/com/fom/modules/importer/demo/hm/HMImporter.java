@@ -83,7 +83,7 @@ public class HMImporter extends ZipImporter<HMConfig, Map<String,Object>> {
 	}
 
 	@Override
-	protected void executeBefore(HMConfig config) throws Exception {
+	protected void beforeExecute(HMConfig config) throws Exception {
 		prepareIndex(config);
 		prepareLabelIdMap();
 	}
