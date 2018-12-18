@@ -48,8 +48,8 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 		log.info("启动扫描."); 
 		while(true){
 			E config = (E)ConfigManager.getConfig(name);
-			if(config == null){
-				log.info("配置已卸载，扫描中止."); 
+			if(config == null || !config.isRunning()){ 
+				log.info("任务取消，终止扫描."); 
 				pool.shutdownNow();
 				return;
 			}

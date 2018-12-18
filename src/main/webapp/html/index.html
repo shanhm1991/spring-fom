@@ -2,26 +2,203 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>index</title>
+<style type="text/css">
+span{ width:55px; display:inline-block;}
+</style>
 </head>
 <body>
-	<a href="#" onclick="manage()">manage</a>
-	<div id="conf"></div>
+<ul>
+<li><span><a href="#" onclick="list()">list</a></span></li> 
+<li><span><a href="#" onclick="stop()">stop</a></span><input id="stop"/></li> 
+<li><span><a href="#" onclick="stopAll()">stopAll</a></span></li>
+<li><span><a href="#" onclick="start()">start</a></span><input id="start"/></li>
+<li><span><a href="#" onclick="startAll()">startAll</a></li>
+<li><span><a href="#" onclick="restart()">restart</a></span><input id="restart"/></li>
+<li><span><a href="#" onclick="restartAll()">restartAll</a></li>
+<li><span><a href="#" onclick="srcFiles()">srcFiles</a></span><input id="srcFiles"/></li> 
+<li><span><a href="#" onclick="logs()">logs</a></span></li> 
+</ul>
+<hr>
+<div id="content"></div>
 </body>
 <script src="../js/jquery-3.3.1.min.js"></script>
 <script type="text/javascript">
-function manage(){
+$(document).ready(function() {
+	list();
+});
+
+function list(){
 	$.ajax({
-         url: "/fom/hellofm",
-         type: "POST",
-         dataType: "json",
-         success: function(data){
-         	$.each(data,function(name,value) {
-         		$("<div/>").text(name).appendTo($("#conf"));
-         		$("<div/>").text(JSON.stringify(value, null, '\t')).appendTo($("#conf"));
+        url: "/fom/list",
+        type: "POST",
+        dataType: "json",
+        success: function(data){
+       	$("#content").html("");
+       	var Tb = $("<table/>")
+        	$.each(data,function(name,value) {
+        		$("<tr/>").html("<td><a id='" + name + "' href='#' onclick='detail(this)'>" + name + "</a></td>"
+        				+ "<td>" + JSON.stringify(value, null, '\t') + "</td>").appendTo($(Tb));
+        	});
+       	$("#content").append($(Tb));
+        },error:function(data,type, err){
+	        $("#content").text(err);
+	    }
+    });
+}
+
+function detail(e){
+	var name = $(e).attr("id");
+	$.ajax({
+        url: "/fom/detail",
+        type: "POST",
+        dataType: "json",
+        data: { "name" : name },
+        success: function(data){
+        	$("#content").html("<button id='" + name + "' onclick='viewXml(this)'>viewXml</button>");
+        	$.each(data,function(name,value){
+        		$("<div/>")
+        		.append($("<label style='font-weight: bold;'/>").html(name))
+        		.append($("<label/>").html(value))
+        		.appendTo($("#content"));
          	});
-         }
-     });
+        },error:function(data,type, err){
+	        $("#content").text(err);
+	    }
+	 });
+}
+
+function viewXml(e){
+	var name = $(e).attr("id");
+	$.ajax({
+        url: "/fom/xml", 
+        type: "POST",
+        dataType: "json",
+        data: { "name" : name },
+        success: function(data){
+        	$("#content").html("");
+        	$.each(data,function(name,value) {
+        		$("<div/>")
+        		.append($("<label style='font-weight: bold;'/>").text(name))
+        		.append($("<br>"))
+        		.append($("<button id='" + name + "' onclick='edit(this)'>Edit</button>"))
+        		.append($("<button id='b_" + name + "' hidden='true' onclick='apply(this)'>Apply</button>"))
+        		.append($("<br>"))
+        		.append($("<textarea id='t_" + name + "' spellcheck='false' autocapitalize='off' autocomplete='off' autocorrect='off' disabled='disabled' rows='25' cols='125'/>").text(value))
+        		.appendTo($("#content"));
+         	});
+        },error:function(data,type, err){
+	        $("#content").text(err);
+	    }
+	});
+}
+
+function edit(e){
+	var name = $(e).attr("id");
+	$(e).attr("hidden",true);
+	$("#b_" + name).attr("hidden",false);
+	$("#t_" + name).attr("disabled",false); 
+}
+
+function apply(e){
+	var id = $(e).attr("id");
+	var name = id.replace("b_","");
+	$.ajax({
+        url: "/fom/apply", 
+        type: "POST",
+        dataType: "json",
+        data: { "name" : name, "data" : $("#t_" + name).text()},
+        success: function(data){
+        	$("#content").html(JSON.stringify(data, null, '\t'));
+        },error:function(data,type, err){
+	        $("#content").text(err);
+	    }
+	});
+	
+}
+
+function stop(){
+	var name = $("#stop").val();
+	$.ajax({
+        url: "/fom/stop", 
+        type: "POST",
+        dataType: "json",
+        data: { "name" : name },
+        success: function(data){
+        	$("#content").html(JSON.stringify(data, null, '\t'));
+        },error:function(data,type, err){
+	        $("#content").text(err);
+	    }
+	});
+}
+
+function stopAll(){
+	$.ajax({
+        url: "/fom/stopAll", 
+        type: "POST",
+        dataType: "json",
+        success: function(data){
+        	$("#content").html(JSON.stringify(data, null, '\t'));
+        },error:function(data,type, err){
+	        $("#content").text(err);
+	    }
+	});
+}
+
+function start(){
+	var name = $("#start").val();
+	$.ajax({
+        url: "/fom/start", 
+        type: "POST",
+        dataType: "json",
+        data: { "name" : name },
+        success: function(data){
+        	$("#content").html(JSON.stringify(data, null, '\t'));
+        },error:function(data,type, err){
+	        $("#content").text(err);
+	    }
+	});
+}
+
+function startAll(){
+	$.ajax({
+        url: "/fom/startAll", 
+        type: "POST",
+        dataType: "json",
+        success: function(data){
+        	$("#content").html(JSON.stringify(data, null, '\t'));
+        },error:function(data,type, err){
+	        $("#content").text(err);
+	    }
+	});
+}
+
+function restart(){
+	var name = $("#restart").val();
+	$.ajax({
+        url: "/fom/restart", 
+        type: "POST",
+        dataType: "json",
+        data: { "name" : name },
+        success: function(data){
+        	$("#content").html(JSON.stringify(data, null, '\t'));
+        },error:function(data,type, err){
+	        $("#content").text(err);
+	    }
+	});
+}
+
+function restartAll(){
+	$.ajax({
+        url: "/fom/restartAll", 
+        type: "POST",
+        dataType: "json",
+        success: function(data){
+        	$("#content").html(JSON.stringify(data, null, '\t'));
+        },error:function(data,type, err){
+	        $("#content").text(err);
+	    }
+	});
 }
 </script>
 </html>

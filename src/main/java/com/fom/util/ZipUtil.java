@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 /**
@@ -16,7 +17,7 @@ import java.util.zip.ZipFile;
  */
 public class ZipUtil {
 
-	public static long unZip(File file, File unzipDir) throws Exception{ 
+	public static long unZip(File file, File unzipDir) throws ZipException, Exception{ 
 		long sTime = System.currentTimeMillis();
 		ZipFile zip = null;
 		try {

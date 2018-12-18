@@ -30,14 +30,15 @@ public final class ContextConfigListener extends ContextLoaderListener {
 		ServletContext context = event.getServletContext();
 		ApplicationContext springContext = WebApplicationContextUtils.getWebApplicationContext(context);
 		ConfigLoader configloader = (ConfigLoader)springContext.getBean("configLoader");
+		configloader.setServletContext(context); 
 		try{
-			configloader.load(context, context.getInitParameter("fomConfigLocation"));
+			configloader.load(context.getInitParameter("fomConfigLocation"));
 		}catch(Exception e){
 			throw new RuntimeException("加载fom配置失败", e);
 		}
 
 		PoolLoader poolLoader = (PoolLoader)springContext.getBean("poolLoader");
-		poolLoader.load(context, context.getInitParameter("poolConfigLocation"));
+		poolLoader.load(context.getInitParameter("poolConfigLocation"));
 	}
 
 	@Override

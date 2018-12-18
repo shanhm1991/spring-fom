@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<foms>
+	<!-- 行动预警[导入] -->
+	<fom name="warnAction" config="com.fom.modules.importer.demo.wa.WAConfig">
+		<src.path>/opt/file/WarnActionImport/inputpath/</src.path>
+		<src.pattern>5210-440300-.*-.*-WARNACTION_ICP_1030036_GROUPCHAT_.*_.*.zip$
+		</src.pattern>
+		<src.match.fail.del>false</src.match.fail.del>
+		<scanner>com.fom.context.LocalScanner</scanner>
+		<scanner.cron>0 0/1 * * * ?</scanner.cron>
+		<executor>com.fom.modules.importer.demo.wa.WAImporter</executor>
+		<executor.min>10</executor.min>
+		<executor.max>10</executor.max>
+		<executor.aliveTime.seconds>30</executor.aliveTime.seconds>
+		<executor.overTime.seconds>86400</executor.overTime.seconds>
+		<executor.overTime.cancle>false</executor.overTime.cancle>
+		<importer.batch>5000</importer.batch>
+		<importer.zip.subPattern>^.*.bcp</importer.zip.subPattern>
+		<extended>
+			<fullTextUrl>http://15.6.89.83:1980</fullTextUrl>
+			<zkAddress>15.6.89.83:1860,15.6.89.83:1861,15.6.89.83:1862</zkAddress>
+		</extended>
+	</fom>
+</foms>

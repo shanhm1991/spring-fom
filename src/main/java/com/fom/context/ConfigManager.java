@@ -23,6 +23,9 @@ class ConfigManager {
 	}
 
 	public static void registerConfig(Config config){
+		if(config == null){
+			return;
+		}
 		configMap.put(config.name, config);
 	}
 

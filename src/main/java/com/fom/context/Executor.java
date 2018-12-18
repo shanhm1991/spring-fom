@@ -38,7 +38,7 @@ public abstract class Executor<E extends Config> extends Thread {
 		this.srcSize = srcFile.length() / 1024;
 		Config config = getRuntimeConfig();
 		if(config == null){
-			throw new RuntimeException("config获取失败");
+			throw new RuntimeException("任务取消.");
 		}
 		this.setName(config.getType() + "[" + srcName + "]");
 		this.log = LoggerFactory.getLogger(config.getType() + "." + name);
@@ -56,8 +56,8 @@ public abstract class Executor<E extends Config> extends Thread {
 	@Override
 	public final void run(){
 		config = getRuntimeConfig();
-		if(config == null){
-			log.info("配置已卸载，任务中止."); 
+		if(config == null || !config.isRunning){
+			log.info("任务取消."); 
 			return;
 		}
 		Thread.currentThread().setName(config.getType() + "[" + srcName + "]");

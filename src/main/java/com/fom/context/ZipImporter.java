@@ -21,8 +21,12 @@ import com.fom.util.exception.WarnException;
 public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importer<E,V> {
 
 	protected final File unzipDir;
-	
-	private boolean isZipValid;
+
+	private boolean reExecute; 
+
+	private boolean zipValid = true;
+
+	private List<String> nameList = null;
 
 	protected ZipImporter(String name, String path) {
 		super(name, path);
@@ -30,33 +34,31 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 	}
 
 	void execute() throws Exception {
-		isZipValid = processZip();
-	}
-
-	private boolean processZip() throws Exception {
-		List<String> nameList = null;
 		if(logFile.exists()){
-			log.warn("继续遗留任务处理."); 
+			log.warn("继续处理遗留任务文件."); 
 			//上次任务删除源文件失败
 			if(!unzipDir.exists()){ 
-				return false;
+				reExecute = false;
+				return;
 			}
 
-			//上次任务删除解压目录失败
+			//上次任务删除解压目录失败或者解压失败
 			String[] nameArray = unzipDir.list();
 			if(nameArray == null || nameArray.length == 0){ 
-				return false;
+				reExecute = false;
+				return;
 			}
 
 			nameList = Arrays.asList(nameArray);
 			//上次任务清空解压目录失败
 			if(!validZipContent(config, nameList)){
-				return false;
+				reExecute = false;
+				return;
 			}
 
 			//处理未完成文件
-			processFailedFile(nameList);
-		}else{
+			processFailedFile();
+		} else {
 			//第一次任务处理
 			if(!unzipDir.exists()){
 				if(!unzipDir.mkdirs()){
@@ -79,35 +81,37 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 			try{
 				unzipCost = ZipUtil.unZip(srcFile, unzipDir);
 			}catch(ZipException e){
-				log.error("文件解压失败", e); 
-				return false;
+				log.error("解压失败", e); 
+				zipValid = false;
+				return; 
 			}
-			log.info("解压文件结束(" + srcSize + "KB), 耗时=" + unzipCost + "ms");
-
-			if(!logFile.createNewFile()){
-				throw new WarnException("创建日志文件失败.");
-			}
+			log.info("解压结束(" + srcSize + "KB), 耗时=" + unzipCost + "ms");
 
 			String[] nameArray = unzipDir.list();
 			if(nameArray == null || nameArray.length == 0){ 
-				return false;
+				zipValid = false;
+				return;
 			}
 
 			nameList = Arrays.asList(nameArray);
 			if(!validZipContent(config, nameList)){
-				return false;
+				zipValid = false;
+				return;
+			}
+
+			if(!logFile.createNewFile()){
+				throw new WarnException("创建日志文件失败.");
 			}
 		}
 		
-		processFiles(nameList);
-		return true;
+		processFiles();
 	}
 
 	protected boolean validZipContent(E config, List<String> nameList) {
 		return true;
 	}
 
-	private void processFailedFile(List<String> nameList) throws Exception {  
+	private void processFailedFile() throws Exception {  
 		List<String> lines = FileUtils.readLines(logFile);
 		//刚创建完日志文件,线程结束
 		if(lines.isEmpty()){
@@ -139,8 +143,8 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 			throw new WarnException("删除文件失败:" + name); 
 		}
 	}
-	
-	private void processFiles(List<String> nameList) throws Exception {
+
+	private void processFiles() throws Exception {
 		for(String name : nameList){
 			if(!config.matchZipFile(name)){
 				continue;
@@ -157,38 +161,38 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 	}
 
 	void finallyExecute() {
-		if(!logFile.exists()){
+		if(zipValid && !logFile.exists()){
 			return;
 		}
-		
+
 		if(unzipDir.exists()){ 
 			String[] nameArray = unzipDir.list();
 			if(nameArray != null && nameArray.length > 0){
-				if(isZipValid && validZipContent(config, Arrays.asList(nameArray))){ 
-					log.warn("遗留未处理完的文件, 等待下次处理."); 
-					return;
-				}else{
+				if(!reExecute || !validZipContent(config, Arrays.asList(nameArray))){
 					for(String name : nameArray){
 						if(!new File(unzipDir + File.separator + name).delete()){
 							log.warn("清除文件失败:" + name); 
 							return;
 						}
 					}
+				}else{
+					log.warn("文件遗留, 等待下次处理."); 
+					return;
 				}
 			}
-			
+
 			if(!unzipDir.delete()){
 				log.warn("删除解压目录失败."); 
 				return;
 			}
 		}
-		
+
 		if(!srcFile.delete()){ //srcFile.exist = true
 			log.warn("删除源文件失败."); 
 			return;
 		}
-		
-		if(!logFile.delete()){
+
+		if(logFile.exists() && !logFile.delete()){
 			log.warn("删除日志失败."); 
 		}
 	}

@@ -29,8 +29,9 @@ interface IConfig {
 	String NAME_UPLOADER = "上传";
 
 	String NAME_DOWNLOADER = "下载";
-
-
+	
+	boolean isRunning();
+	
 	String getType();
 
 	String getTypeName();
