@@ -76,12 +76,12 @@ function detail(e){
         dataType: "json",
         data: { "name" : name },
         success: function(data){
-        	$("#content").html("<button id='" + name + "' onclick='viewXml(this)'>viewXml</button>");
         	$.each(data,function(name,value){
-        		$("<div/>")
-        		.append($("<label style='font-weight: bold;'/>").html(name))
-        		.append($("<label/>").html(value))
-        		.appendTo($("#content"));
+        		$("#content").html("<button id='" + name + "' onclick='viewXml(this)'>viewXml</button>"
+        				+ "<br><label style='font-weight: bold;'>" + name + ":</label>");
+        		var div=document.createElement("div");
+          	    document.getElementById("content").appendChild(div);
+          	    div.innerText=value;
          	});
         },error:function(data,type, err){
 	        $("#content").text(err);
@@ -105,7 +105,7 @@ function viewXml(e){
         		.append($("<button id='" + name + "' onclick='edit(this)'>Edit</button>"))
         		.append($("<button id='b_" + name + "' hidden='true' onclick='apply(this)'>Apply</button>"))
         		.append($("<br>"))
-        		.append($("<textarea id='t_" + name + "' spellcheck='false' autocapitalize='off' autocomplete='off' autocorrect='off' disabled='disabled' rows='25' cols='125'/>").text(value))
+        		.append($("<textarea id='t_" + name + "' spellcheck='false' disabled='disabled' rows='25' cols='125'/>").text(value))
         		.appendTo($("#content"));
          	});
         },error:function(data,type, err){
@@ -128,7 +128,7 @@ function apply(e){
         url: "/fom/apply", 
         type: "POST",
         dataType: "json",
-        data: { "name" : name, "data" : $("#t_" + name).text()},
+        data: { "name" : name, "data" : $("#t_" + name).val()},
         success: function(data){
         	$("#content").html(data.msg);
         },error:function(data,type, err){

@@ -125,6 +125,8 @@ public class ManagerServiceImpl extends PoolManager implements ManagerService {
 		}
 		
 		configLoader.writeApply(newConfig, doc);
+		ConfigManager.registerConfig(newConfig); 
+		
 		if(oldConfig.scanner != null && (oldConfig.isRunning || oldConfig.scanner.isAlive())){
 			newConfig.scanner = oldConfig.scanner;
 			newConfig.scanner.interrupt();

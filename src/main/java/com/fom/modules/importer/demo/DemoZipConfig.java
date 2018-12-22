@@ -1,24 +1,22 @@
-package com.fom.modules.importer;
+package com.fom.modules.importer.demo;
 
 import org.dom4j.Element;
 
-import com.fom.context.ImporterConfig;
+import com.fom.context.ZipImporterConfig;
 
 /**
  * 继承自父类的配置项，另外可以在<extended>节点中自定义配置项
  * 
  * @author X4584
- * @date 2018年12月21日
+ * @date 2018年12月22日
  *
  */
-public class DemoConfig extends ImporterConfig {
-	
-	//自定义配置项,对应于节点<extended>
+public class DemoZipConfig extends ZipImporterConfig {
 
-	protected DemoConfig(String name) {
+	protected DemoZipConfig(String name) {
 		super(name);
 	}
-	
+
 	/**
 	 * 继承自Config，自定义加载<extended>中的配置项
 	 */
@@ -52,14 +50,14 @@ public class DemoConfig extends ImporterConfig {
 	 */
 	@Override
 	public boolean equals(Object o) {
-		if(!(o instanceof DemoConfig)){
+		if(!(o instanceof DemoZipConfig)){
 			return false;
 		}
 		if(o == this){
 			return true;
 		}
 
-		DemoConfig config = (DemoConfig)o;
+		DemoZipConfig config = (DemoZipConfig)o;
 		boolean equal = super.equals(config);
 		if(!equal){
 			return false;
@@ -67,5 +65,5 @@ public class DemoConfig extends ImporterConfig {
 		//equal=...
 		return equal;
 	}
-
+	
 }

@@ -37,9 +37,6 @@ class ConfigLoader extends AbstractRefreshableWebApplicationContext {
 	private File fomXml;
 
 	void load(String fomLocation) throws Exception {
-		
-		
-		
 		fomXml = getResource(fomLocation).getFile();
 		SAXReader reader = new SAXReader();
 		reader.setEncoding("UTF-8");
@@ -61,7 +58,7 @@ class ConfigLoader extends AbstractRefreshableWebApplicationContext {
 		while(it.hasNext()){
 			Config config = loadElement((Element)it.next());
 			ConfigManager.registerConfig(config);
-			LOG.info("#加载配置: " + config.name + config);
+			LOG.info("#加载配置: " + config.name + "\n" + config);
 		}
 	}
 	
@@ -110,8 +107,8 @@ class ConfigLoader extends AbstractRefreshableWebApplicationContext {
 	}
 
 	public void writeApply(Config config, Document doc) throws Exception { 
-		File updatePath = getResource("/WEB-INF/update").getFile();
-		for(File file : updatePath.listFiles()){
+		File apply = new File(System.getProperty("config.apply"));
+		for(File file : apply.listFiles()){
 			if(file.getName().startsWith(config.name + ".xml.") && !file.delete()){
 				throw new WarnException("删除文件失败:" + file.getName());
 			}
@@ -119,7 +116,7 @@ class ConfigLoader extends AbstractRefreshableWebApplicationContext {
 		
 		OutputFormat formater=OutputFormat.createPrettyPrint();  
 		formater.setEncoding("UTF-8");  
-		File xml = new File(updatePath + File.separator + config.name + ".xml." + config.loadTime);
+		File xml = new File(apply + File.separator + config.name + ".xml." + config.loadTime);
 		FileOutputStream out = null;
 		XMLWriter writer = null;
 		try{
@@ -132,9 +129,7 @@ class ConfigLoader extends AbstractRefreshableWebApplicationContext {
 		}finally{
 			IoUtils.close(out); 
 		}
-		
-		File historyPath = getResource("/WEB-INF/update/history").getFile();
-		FileUtils.copyFile(xml, new File(historyPath + File.separator + xml.getName()));
+		FileUtils.copyFile(xml, new File(apply + File.separator + "history" + File.separator + xml.getName()));
 	}
 
 	@Override

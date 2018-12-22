@@ -39,9 +39,7 @@ public class ManageController {
 	@ResponseBody
 	public Map<String,String> detail(String name) throws Exception{
 		Map<String,String> map = new HashMap<>();
-		String detail = service.detail(name);
-		detail = detail.replaceAll("\n", "<br>");
-		map.put(name, detail);
+		map.put(name, service.detail(name));
 		return map;
 	}
 	
@@ -49,8 +47,7 @@ public class ManageController {
 	@ResponseBody
 	public Map<String,String> viewXml(String name) throws Exception{ 
 		Map<String,String> map = new HashMap<>();
-		String xml = service.xml(name);
-		map.put(name, xml);
+		map.put(name, service.xml(name));
 		return map;
 	}
 	
@@ -110,12 +107,18 @@ public class ManageController {
 		return map;
 	}
 	
+	@RequestMapping("/srcs")
+	@ResponseBody
+	public Map<String,Object> srcs(String name, boolean match) throws Exception{ 
+		return service.srcs(name, match);
+	}
+	
 	@RequestMapping("/logs")
 	@ResponseBody
 	public Map<String,Object> logs() throws Exception{ 
 		Map<String,Object> map = new HashMap<>();
-		String path = System.getProperty("webapp.root");
-		File logs = new File(path + File.separator + "log");
+		String root = System.getProperty("webapp.root");
+		File logs = new File(root + File.separator + "log");
 		String[] array = logs.list();
 		if(array != null){
 			map.put("logs", Arrays.asList(array));
@@ -143,11 +146,5 @@ public class ManageController {
 			IoUtils.close(in);
 		}
 		return null;
-	}
-	
-	@RequestMapping("/srcs")
-	@ResponseBody
-	public Map<String,Object> srcs(String name, boolean match) throws Exception{ 
-		return service.srcs(name, match);
 	}
 }

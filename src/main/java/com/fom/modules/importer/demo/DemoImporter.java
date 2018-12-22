@@ -1,4 +1,4 @@
-package com.fom.modules.importer;
+package com.fom.modules.importer.demo;
 
 import java.util.List;
 
@@ -19,16 +19,16 @@ public class DemoImporter extends Importer<DemoConfig, DemoBean> {
 	}
 
 	/**
-	 * 继承自Importer, 将行数据line解析成DemoBean，并添加到lineDatas中去
+	 * [Abstract]继承自Importer, 将行数据line解析成DemoBean，并添加到lineDatas中去
 	 * 异常则结束任务，保留文件，所以对错误数据导致的异常需要try-catch，一避免任务重复失败
 	 */
 	@Override
 	protected void praseLineData(DemoConfig config, List<DemoBean> lineDatas, String line, long batchTime) throws Exception {
-		System.out.println(line); 
+		log.info(line);
 	}
 
 	/**
-	 * 继承自Importer, 批处理行数据解析结果, 异常则结束任务，保留文件
+	 * [Abstract]继承自Importer, 批处理行数据解析结果, 异常则结束任务，保留文件
 	 */
 	@Override
 	protected void batchProcessLineData(DemoConfig config, List<DemoBean> lineDatas, long batchTime) throws Exception {
@@ -36,7 +36,7 @@ public class DemoImporter extends Importer<DemoConfig, DemoBean> {
 	}
 
 	/**
-	 * //继承自Executor，在任务线程完成时执行的动作
+	 * 继承自Executor，在任务线程完成时执行的动作
 	 */
 	@Override
 	protected void onComplete(DemoConfig config) throws Exception {

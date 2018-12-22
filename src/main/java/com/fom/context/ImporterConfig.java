@@ -1,5 +1,7 @@
 package com.fom.context;
 
+import java.io.File;
+
 import org.apache.hadoop.conf.Configuration;
 
 import com.fom.util.XmlUtil;
@@ -27,6 +29,8 @@ public class ImporterConfig extends Config {
 	int batch;
 
 	Configuration fsConf;
+	
+	File progressDir = null;
 
 	protected ImporterConfig(String name) {
 		super(name);
@@ -45,7 +49,11 @@ public class ImporterConfig extends Config {
 		if(!super.valid()){
 			return false;
 		}
-		//...
+		progressDir = new File(System.getProperty("import.progress") + File.separator + name);
+		if(!progressDir.exists() && !progressDir.mkdirs()){
+			LOG.error("创建处理目录失败:" + progressDir.getPath()); 
+			return false;
+		}
 		return true;
 	}
 	

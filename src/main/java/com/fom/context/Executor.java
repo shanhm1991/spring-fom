@@ -77,7 +77,7 @@ public abstract class Executor<E extends Config> extends Thread {
 		} catch(Throwable e) {
 			log.error(config.getTypeName() + "任务异常结束, 耗时=" + (System.currentTimeMillis() - sTime + "ms"), e);
 		} finally{
-			finallyExecute();
+			onFinally();
 		}
 	}
 
@@ -97,7 +97,7 @@ public abstract class Executor<E extends Config> extends Thread {
 
 	}
 
-	void finallyExecute() {
+	void onFinally() {
 
 	}
 

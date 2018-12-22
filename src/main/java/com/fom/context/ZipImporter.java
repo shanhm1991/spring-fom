@@ -30,7 +30,8 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 
 	protected ZipImporter(String name, String path) {
 		super(name, path);
-		this.unzipDir = new File(path.replace(".zip", ""));
+		this.unzipDir = new File(System.getProperty("cache.root") 
+				+ File.separator + "iprogress" + File.separator + name + File.separator + srcName);
 	}
 
 	void execute() throws Exception {
@@ -161,7 +162,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 		}
 	}
 
-	void finallyExecute() {
+	void onFinally() {
 		if(zipValid && !logFile.exists()){
 			return;
 		}

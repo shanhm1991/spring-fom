@@ -31,18 +31,28 @@ public final class ContextConfigListener extends ContextLoaderListener {
 		super.contextInitialized(event); 
 		ServletContext context = event.getServletContext();
 		ApplicationContext springContext = WebApplicationContextUtils.getWebApplicationContext(context);
-		
 		String root = System.getProperty("webapp.root");
-		File ipath = new File(root + File.separator 
-				+ "WEB-INF" + File.separator + "cache" + File.separator + "ichange" + File.separator + "history");
-		if(!ipath.exists()){
-			ipath.mkdirs();
+		
+		String path = root + File.separator + "cache" + File.separator + "apply";
+		File cache = new File(path + File.separator + "history");
+		if(!cache.exists()){
+			cache.mkdirs();
 		}
-		File dpath = new File(root + File.separator 
-				+ "WEB-INF" + File.separator + "cache" + File.separator + "dtemp");
-		if(!dpath.exists()){
-			dpath.mkdirs();
+		System.setProperty("config.apply", path);
+		
+		path = root + File.separator + "cache" + File.separator + "iprogress";
+		cache = new File(path);
+		if(!cache.exists()){
+			cache.mkdirs();
 		}
+		System.setProperty("import.progress", path);
+		
+		path = root + File.separator + "cache" + File.separator + "dtemp";
+		cache = new File(path);
+		if(!cache.exists()){
+			cache.mkdirs();
+		}
+		System.setProperty("download.temp", path);
 		
 		ConfigLoader configloader = (ConfigLoader)springContext.getBean("configLoader");
 		configloader.setServletContext(context); 

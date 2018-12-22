@@ -49,7 +49,7 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 		while(true){
 			E config = (E)ConfigManager.getConfig(name);
 			if(config == null || !config.isRunning()){ 
-				log.info("任务取消，终止扫描."); 
+				log.info("终止扫描."); 
 				pool.shutdownNow();
 				return;
 			}
@@ -71,7 +71,6 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 				for (String fileName : fileNameList){
 					String path = config.getSrcPath() + File.separator + fileName;
 					if(isExecutorAlive(fileName)){
-						log.info("任务已经存在,取消创建:" + fileName);
 						continue;
 					}
 					try {
@@ -82,7 +81,7 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 						futureMap.put(path, pool.submit(executor));
 						log.info("新建" + config.getTypeName() + "任务" + config.getType() + "[" + fileName + "]"); 
 					} catch (RejectedExecutionException e) {
-						log.warn(config.getTypeName() + "任务提交拒绝,等待下次提交[" + fileName + "].");
+						log.warn(config.getTypeName() + "任务提交被拒绝,等待下次提交[" + fileName + "].");
 						break;
 					}catch (Exception e) {
 						log.error(config.getTypeName() + "任务新建异常[" + fileName + "]", e); 
@@ -93,10 +92,9 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 				try {
 					wait(config.getCronTime());
 				} catch (InterruptedException e) {
-					log.info("中断等待, 重新扫描..."); 
+					log.info("wait interrupted."); 
 				}
 			}
-
 		}
 	}
 
@@ -138,5 +136,4 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 		Future<Void> future = futureMap.get(key);
 		return future != null && !future.isDone();
 	}
-
 }

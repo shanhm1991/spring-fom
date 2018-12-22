@@ -26,7 +26,8 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 
 	protected Importer(String name, String path) {
 		super(name, path);
-		this.logFile = new File(path + ".log");
+		this.logFile = new File(System.getProperty("import.progress")
+				+ File.separator + name + File.separator + srcName + ".log");
 	}
 
 	void execute() throws Exception {
@@ -68,7 +69,7 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 			if(config.batch > 0){
 				lineDatas = new ArrayList<V>(config.batch);
 			}else{
-				lineDatas = new ArrayList<V>(2500);
+				lineDatas = new ArrayList<V>(500);
 			}
 
 			long batchTime = System.currentTimeMillis();
@@ -88,8 +89,8 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 			}
 			if(!lineDatas.isEmpty()){
 				batchProcessIfNotInterrupted(lineDatas, batchTime); 
-				updateLogFile(file.getName(), lineIndex);
 			}
+			updateLogFile(file.getName(), lineIndex);
 		}finally{
 			IoUtils.close(reader);
 		}

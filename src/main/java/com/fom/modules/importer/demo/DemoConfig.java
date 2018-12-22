@@ -1,28 +1,33 @@
-package com.fom.modules.importer;
+package com.fom.modules.importer.demo;
 
 import org.dom4j.Element;
 
-import com.fom.context.ZipImporterConfig;
+import com.fom.context.ImporterConfig;
+import com.fom.util.XmlUtil;
 
 /**
  * 继承自父类的配置项，另外可以在<extended>节点中自定义配置项
  * 
  * @author X4584
- * @date 2018年12月22日
+ * @date 2018年12月21日
  *
  */
-public class DemoZipConfig extends ZipImporterConfig {
-
-	protected DemoZipConfig(String name) {
+public class DemoConfig extends ImporterConfig {
+	
+	private String myconf;
+	
+	//...
+	
+	protected DemoConfig(String name) {
 		super(name);
 	}
-
+	
 	/**
 	 * 继承自Config，自定义加载<extended>中的配置项
 	 */
 	@Override
 	protected void load(Element extendedElement) throws Exception {
-		super.load(extendedElement);
+		myconf = XmlUtil.getString(extendedElement, "demo.conf", ""); 
 		//...
 	}
 	
@@ -31,8 +36,8 @@ public class DemoZipConfig extends ZipImporterConfig {
 	 */
 	@Override
 	protected boolean valid(Element extendedElement) throws Exception {
-		return super.valid(extendedElement);
-		//...
+		//myconf is ok
+		return true;
 	}
 	
 	/**
@@ -41,7 +46,8 @@ public class DemoZipConfig extends ZipImporterConfig {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder(super.toString());
-		//builder.append...
+		builder.append("\ndemo.conf=" + myconf);
+		//...
 		return builder.toString();
 	}
 	
@@ -50,20 +56,21 @@ public class DemoZipConfig extends ZipImporterConfig {
 	 */
 	@Override
 	public boolean equals(Object o) {
-		if(!(o instanceof DemoZipConfig)){
+		if(!(o instanceof DemoConfig)){
 			return false;
 		}
 		if(o == this){
 			return true;
 		}
 
-		DemoZipConfig config = (DemoZipConfig)o;
+		DemoConfig config = (DemoConfig)o;
 		boolean equal = super.equals(config);
 		if(!equal){
 			return false;
 		}
-		//equal=...
-		return equal;
+		
+		//...
+		return myconf.equals(config.myconf); 
 	}
-	
+
 }

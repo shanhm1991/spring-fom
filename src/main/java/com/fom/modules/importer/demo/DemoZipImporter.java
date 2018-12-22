@@ -1,4 +1,4 @@
-package com.fom.modules.importer;
+package com.fom.modules.importer.demo;
 
 import java.util.List;
 
