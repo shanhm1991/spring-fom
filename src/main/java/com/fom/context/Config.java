@@ -103,6 +103,7 @@ public abstract class Config implements IConfig {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("\ntype=" + getTypeName());
+		builder.append("\nvalid=" + valid);
 		builder.append("\nisRunning=" + isRunning);
 		builder.append("\nsrc.path=" + srcPath);
 		builder.append("\nsrc.pattern=" + reg);

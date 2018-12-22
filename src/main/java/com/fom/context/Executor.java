@@ -63,11 +63,11 @@ public abstract class Executor<E extends Config> extends Thread {
 		Thread.currentThread().setName(config.getType() + "[" + srcName + "]");
 		long sTime = System.currentTimeMillis();
 		try {
-			beforeExecute(config);
+			onStart(config);
 			
 			execute();
 			
-			afterExecute(config);
+			onComplete(config);
 			log.info(config.getTypeName() + "任务结束, 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 		} catch(WarnException e){
 			log.warn(config.getTypeName() + "任务错误结束[" + e.getMessage() + "], 耗时=" + (System.currentTimeMillis() - sTime + "ms"));
@@ -81,13 +81,19 @@ public abstract class Executor<E extends Config> extends Thread {
 		}
 	}
 
-	protected void beforeExecute(E config) throws Exception {
+	/**
+	 * 继承自Executor，在任务线程启动时执行的第一个动作，可以完成一些准备操作
+	 */
+	protected void onStart(E config) throws Exception {
 
 	}
 
 	abstract void execute() throws Exception;
 	
-	protected void afterExecute(E config) throws Exception {
+	/**
+	 * 继承自Executor，在任务线程完成时执行的动作
+	 */
+	protected void onComplete(E config) throws Exception {
 
 	}
 

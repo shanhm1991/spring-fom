@@ -66,7 +66,7 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 
 			cleanFuture(config);
 
-			List<String> fileNameList = scan(config);
+			List<String> fileNameList = filter(config);
 			if(fileNameList != null){
 				for (String fileName : fileNameList){
 					String path = config.getSrcPath() + File.separator + fileName;
@@ -76,7 +76,7 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 					}
 					try {
 						Class<?> clzz = Class.forName(config.getExecutorClass());
-						Constructor<?> constructor = clzz.getConstructor(String.class, String.class);
+						Constructor<?> constructor = clzz.getDeclaredConstructor(String.class, String.class);
 						constructor.setAccessible(true);
 						Executor executor = (Executor)constructor.newInstance(name, path);
 						futureMap.put(path, pool.submit(executor));
@@ -101,6 +101,8 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 	}
 
 	protected abstract List<String> scan(E config);
+	
+	protected abstract List<String> filter(E config);
 
 	private void cleanFuture(E config){
 		long cleanTime = System.currentTimeMillis() / 1000;

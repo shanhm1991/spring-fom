@@ -1,5 +1,7 @@
 package com.fom.context;
 
+import java.io.File;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
@@ -29,6 +31,19 @@ public final class ContextConfigListener extends ContextLoaderListener {
 		super.contextInitialized(event); 
 		ServletContext context = event.getServletContext();
 		ApplicationContext springContext = WebApplicationContextUtils.getWebApplicationContext(context);
+		
+		String root = System.getProperty("webapp.root");
+		File ipath = new File(root + File.separator 
+				+ "WEB-INF" + File.separator + "cache" + File.separator + "ichange" + File.separator + "history");
+		if(!ipath.exists()){
+			ipath.mkdirs();
+		}
+		File dpath = new File(root + File.separator 
+				+ "WEB-INF" + File.separator + "cache" + File.separator + "dtemp");
+		if(!dpath.exists()){
+			dpath.mkdirs();
+		}
+		
 		ConfigLoader configloader = (ConfigLoader)springContext.getBean("configLoader");
 		configloader.setServletContext(context); 
 		try{

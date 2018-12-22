@@ -132,6 +132,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 		int lineIndex = 0;
 		try{
 			lineIndex = Integer.valueOf(lines.get(1));
+			log.info("获取文件处理进度[" + name + "]:" + lineIndex); 
 		}catch(Exception e){
 			log.warn("获取文件处理进度失败,将从第0行开始处理:" + name);
 		}

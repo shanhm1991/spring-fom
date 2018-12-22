@@ -100,28 +100,39 @@ public class ManagerServiceImpl extends PoolManager implements ManagerService {
 		Element element = doc.getRootElement();
 		Config newConfig = configLoader.loadElement(element);
 		if(!name.equals(newConfig.name)){ 
-			return "failed, 属性name不可以修改";
+			return "failed, attribute[name] can not be change.";
 		}
+		
 		Config oldConfig = ConfigManager.getConfig(name);
 		if(!newConfig.getClass().getName().equals(oldConfig.getClass().getName())){
-			return "failed, 属性config不可以修改";
+			return "failed, attribute[config] can not be change.";
 		}
 		
 		if(!newConfig.scannerClzz.equals(oldConfig.scannerClzz)){ 
-			return "failed, 节点scanner不可以修改";
+			return "failed, node[scanner] can not be change.";
 		}
+		
 		if(!newConfig.executorClzz.equals(oldConfig.executorClzz)){ 
-			return "failed, 节点executor不可以修改";
+			return "failed, node[executor] can not be change.";
+		}
+		
+		if(!newConfig.valid){
+			return "failed, " + name + " config not valid.";
 		}
 		
 		if(oldConfig.equals(newConfig)){ 
-			return "failed, " + name + " not changed.";
+			return "failed, " + name + " config not changed.";
 		}
 		
-		newConfig.scanner = oldConfig.scanner;
-		newConfig.scanner.interrupt();
 		configLoader.writeApply(newConfig, doc);
-		ConfigManager.registerConfig(newConfig); 
+		if(oldConfig.scanner != null && (oldConfig.isRunning || oldConfig.scanner.isAlive())){
+			newConfig.scanner = oldConfig.scanner;
+			newConfig.scanner.interrupt();
+		}else{
+			newConfig.scanner.start();
+		}
+		newConfig.startTime = System.currentTimeMillis();
+		newConfig.isRunning = true;
 		return "success, " + name + " update applyed.";
 	}
 	
@@ -145,7 +156,7 @@ public class ManagerServiceImpl extends PoolManager implements ManagerService {
 	@Override
 	public String stopAll(){
 		Map<String, Config> cmap = ConfigManager.getConfigMap();
-		StringBuilder builder = new StringBuilder("<br>");
+		StringBuilder builder = new StringBuilder();
 		for(Entry<String, Config> entry : cmap.entrySet()){
 			Config config = entry.getValue();
 			if(!config.valid){
@@ -188,7 +199,7 @@ public class ManagerServiceImpl extends PoolManager implements ManagerService {
 	@Override
 	public String startAll() throws Exception {
 		Map<String, Config> cmap = ConfigManager.getConfigMap();
-		StringBuilder builder = new StringBuilder("<br>");
+		StringBuilder builder = new StringBuilder();
 		for(Entry<String, Config> entry : cmap.entrySet()){
 			Config config = entry.getValue();
 			if(!config.valid){
@@ -232,7 +243,7 @@ public class ManagerServiceImpl extends PoolManager implements ManagerService {
 	@Override
 	public String restartAll() {
 		Map<String, Config> cmap = ConfigManager.getConfigMap();
-		StringBuilder builder = new StringBuilder("<br>");
+		StringBuilder builder = new StringBuilder();
 		for(Entry<String, Config> entry : cmap.entrySet()){
 			Config config = entry.getValue();
 			if(!config.valid){
@@ -248,5 +259,22 @@ public class ManagerServiceImpl extends PoolManager implements ManagerService {
 			builder.append("success, " + config.name + " restarted.<br>");
 		}
 		return builder.toString();
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Map<String,Object> srcs(String name, boolean match) throws Exception{
+		Map<String,Object> map = new HashMap<>();
+		Config config = ConfigManager.getConfig(name);
+		if(config == null){
+			return map;
+		}
+		map.put("path", config.srcPath);
+		if(match){
+			map.put("srcs", config.scanner.filter(config));
+		}else{
+			map.put("srcs", config.scanner.scan(config));
+		}
+		return map;
 	}
 }

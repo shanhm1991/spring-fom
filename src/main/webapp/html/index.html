@@ -4,23 +4,26 @@
 <meta charset="UTF-8">
 <title>index</title>
 <style type="text/css">
-span{ width:55px; display:inline-block;}
+span{ width:62px; padding:2px; display:inline-block;}
+table{ table-layout:fixed;}
+td{ word-wrap:break-word;}
+button{ margin-top: 2px; margin-bottom: 3px;}
 </style>
 </head>
 <body>
 <ul>
 <li><span><a href="#" onclick="list()">list</a></span></li> 
-<li><span><a href="#" onclick="stop()">stop</a></span><input id="stop"/></li> 
-<li><span><a href="#" onclick="stopAll()">stopAll</a></span></li>
-<li><span><a href="#" onclick="start()">start</a></span><input id="start"/></li>
-<li><span><a href="#" onclick="startAll()">startAll</a></li>
-<li><span><a href="#" onclick="restart()">restart</a></span><input id="restart"/></li>
-<li><span><a href="#" onclick="restartAll()">restartAll</a></li>
-<li><span><a href="#" onclick="srcFiles()">srcFiles</a></span><input id="srcFiles"/></li> 
+<li><span><a href="#" onclick="srcs()">srcs</a></span><input id="srcs"/></li> 
 <li><span><a href="#" onclick="logs()">logs</a></span></li> 
-</ul>
+<li><span><a href="#" onclick="operation('stop','stop')">stop</a></span><input id="stop"/></li> 
+<li><span><a href="#" onclick="operation('stopAll')">stopAll</a></span></li>
+<li><span><a href="#" onclick="operation('start','start')">start</a></span><input id="start"/></li>
+<li><span><a href="#" onclick="operation('startAll')">startAll</a></li> 
+<li><span><a href="#" onclick="operation('restart','restart')">restart</a></span><input id="restart"/></li>
+<li><span><a href="#" onclick="operation('restartAll')">restartAll</a></li>
+</ul><label style="width: 100px"></label>
 <hr>
-<div id="content"></div>
+<div id="content" style="overflow:auto;"></div> 
 </body>
 <script src="../js/jquery-3.3.1.min.js"></script>
 <script type="text/javascript">
@@ -36,15 +39,33 @@ function list(){
         success: function(data){
        	$("#content").html("");
        	var Tb = $("<table/>")
-        	$.each(data,function(name,value) {
-        		$("<tr/>").html("<td><a id='" + name + "' href='#' onclick='detail(this)'>" + name + "</a></td>"
-        				+ "<td>" + JSON.stringify(value, null, '\t') + "</td>").appendTo($(Tb));
-        	});
+        $.each(data,function(name,value) {
+        	$("<tr/>").html("<td><a id='" + name + "' href='#' onclick='detail(this)'>" + name + "</a></td>"
+        			+ "<td>" + JSON.stringify(value, null, '\t') + "</td>").appendTo($(Tb));
+        });
        	$("#content").append($(Tb));
         },error:function(data,type, err){
 	        $("#content").text(err);
 	    }
     });
+}
+
+function operation(opt, id){
+	var name = $("#" + id).val();
+	if(id != null && name == ""){
+		return;
+	}
+	$.ajax({
+        url: "/fom/" + opt, 
+        type: "POST",
+        dataType: "json",
+        data: { "name" : name },
+        success: function(data){
+        	$("#content").html(data.msg);
+        },error:function(data,type, err){
+	        $("#content").text(err);
+	    }
+	});
 }
 
 function detail(e){
@@ -109,94 +130,103 @@ function apply(e){
         dataType: "json",
         data: { "name" : name, "data" : $("#t_" + name).text()},
         success: function(data){
-        	$("#content").html(JSON.stringify(data, null, '\t'));
-        },error:function(data,type, err){
-	        $("#content").text(err);
-	    }
-	});
-	
-}
-
-function stop(){
-	var name = $("#stop").val();
-	$.ajax({
-        url: "/fom/stop", 
-        type: "POST",
-        dataType: "json",
-        data: { "name" : name },
-        success: function(data){
-        	$("#content").html(JSON.stringify(data, null, '\t'));
+        	$("#content").html(data.msg);
         },error:function(data,type, err){
 	        $("#content").text(err);
 	    }
 	});
 }
 
-function stopAll(){
+function logs(){
 	$.ajax({
-        url: "/fom/stopAll", 
+        url: "/fom/logs", 
         type: "POST",
         dataType: "json",
         success: function(data){
-        	$("#content").html(JSON.stringify(data, null, '\t'));
+        	$("#content").html("");
+           	var Tb = $("<table width='100%'/>")
+           	var Tr;
+           	var TdArray = new Array();
+          	for (var i=0;i<data.logs.length;i++){
+          		if(i % 5 == 0){
+          			Tr = $("<tr/>")
+          			$(Tb).append($(Tr));
+          		}
+          		var value = $.trim(data.logs[i]);
+          		var url = "/fom/log/" + value;
+          		$(Tr).append($("<td><a href='#' onclick='load(&quot;" + url + "&quot;,&quot;" + value + "&quot;);'>" + value + "</a></td>"));
+           	}
+          	$("#content").append($(Tb)); 
         },error:function(data,type, err){
 	        $("#content").text(err);
 	    }
 	});
 }
 
-function start(){
-	var name = $("#start").val();
-	$.ajax({
-        url: "/fom/start", 
-        type: "POST",
-        dataType: "json",
-        data: { "name" : name },
-        success: function(data){
-        	$("#content").html(JSON.stringify(data, null, '\t'));
-        },error:function(data,type, err){
-	        $("#content").text(err);
-	    }
-	});
+function load(url, name){
+   var xmlhttp;
+   if(window.XMLHttpRequest){
+      xmlhttp=new XMLHttpRequest();
+   }else{
+      xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+   }
+   //0: 请求未初始化
+   //1: 服务器连接已建立
+   //2: 请求已接收
+   //3: 请求处理中
+   //4: 请求已完成，且响应已就绪
+   xmlhttp.onreadystatechange=function(){
+      if (xmlhttp.readyState==4 && xmlhttp.status==200){
+    	  $("#content").html("<label style='font-weight: bold;'>" + name + "</label>&nbsp;&nbsp;" +
+    			  "<button onclick='window.open(&quot;/fom/download?file=" + name + "&quot;);'>Download</button>")
+    	  var div=document.createElement("div");
+    	  div.style.height="450px";
+    	  div.style.margin="10px 0px 0px 0px";
+    	  div.style.overflow="auto";
+    	  document.getElementById("content").appendChild(div);
+    	  div.innerText=xmlhttp.responseText;
+      }
+   }
+   xmlhttp.open("GET", url, true);
+   xmlhttp.send();
 }
 
-function startAll(){
+function srcs(name, match){
+	if(name == null){
+		name = $("#srcs").val();
+	}
+	if(name == ""){
+		return;
+	}
+	if(match == null){
+		match = true;
+	}
 	$.ajax({
-        url: "/fom/startAll", 
+        url: "/fom/srcs", 
         type: "POST",
         dataType: "json",
+        data: { "name" : name, "match" : match},
         success: function(data){
-        	$("#content").html(JSON.stringify(data, null, '\t'));
+        	$("#content").html("<button onclick='srcs(&quot;" + name + "&quot;,false);'>AllFiles</button>");
+        	$("#content").append($("<div>").text(data.path));
+          	var Tb = $("<table width='100%'  border='1' cellspacing='0'/>")
+        	var Tr;
+        	var TdArray = new Array();
+        	for (var i = 0;i < data.srcs.length;i++){
+        		if(i % 5 == 0){
+        			var Tr = $("<tr/>");
+        			$(Tb).append($(Tr));
+        			for(var j = 0;j < 5;j++){
+        				var Td = $("<td/>");
+        				TdArray[j] = Td;
+        				$(Tr).append($(Td));
+        			}
+        		}
+        		$(TdArray[i % 5]).text($.trim(data.srcs[i]));
+        	}
+          	$("#content").append($(Tb)); 
         },error:function(data,type, err){
-	        $("#content").text(err);
-	    }
-	});
-}
-
-function restart(){
-	var name = $("#restart").val();
-	$.ajax({
-        url: "/fom/restart", 
-        type: "POST",
-        dataType: "json",
-        data: { "name" : name },
-        success: function(data){
-        	$("#content").html(JSON.stringify(data, null, '\t'));
-        },error:function(data,type, err){
-	        $("#content").text(err);
-	    }
-	});
-}
-
-function restartAll(){
-	$.ajax({
-        url: "/fom/restartAll", 
-        type: "POST",
-        dataType: "json",
-        success: function(data){
-        	$("#content").html(JSON.stringify(data, null, '\t'));
-        },error:function(data,type, err){
-	        $("#content").text(err);
+	        $("#content").text(err);	
 	    }
 	});
 }

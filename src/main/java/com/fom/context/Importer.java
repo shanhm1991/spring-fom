@@ -41,6 +41,7 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 			List<String> lines = FileUtils.readLines(logFile);
 			try{
 				lineIndex = Integer.valueOf(lines.get(1));
+				log.info("获取文件处理进度:" + lineIndex); 
 			}catch(Exception e){
 				log.warn("获取文件处理进度失败,将从第0行开始处理.");
 			}
@@ -95,7 +96,7 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 	}
 
 	/**
-	 * 解析行数据, 异常则结束任务，保留文件，所以务必对错误数据导致的异常进行try-catch
+	 * 继承自Importer, 解析行数据, 异常则结束任务，保留文件，所以务必对错误数据导致的异常进行try-catch
 	 * @param config
 	 * @param line
 	 * @param lineDatas
@@ -113,7 +114,7 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 	}
 
 	/**
-	 * 批处理行数据解析结果, 异常则结束任务，保留文件
+	 * 继承自Importer, 批处理行数据解析结果, 异常则结束任务，保留文件
 	 * @param lineDatas
 	 * @param config
 	 * @param batchTime

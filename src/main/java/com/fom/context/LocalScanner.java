@@ -1,8 +1,12 @@
 package com.fom.context;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.apache.commons.lang.ArrayUtils;
 
 /**
  * 
@@ -22,19 +26,30 @@ public class LocalScanner<E extends Config> extends Scanner<E> {
 		List<String> list = new LinkedList<>();
 
 		String[] names = new File(config.srcPath).list();
-		if(names == null || names.length == 0){
+		if(ArrayUtils.isEmpty(names)){
 			return list;
 		}
+		list.addAll(Arrays.asList(names));
+		return list;
+	}
 
-		for(String name : names){
+	@Override
+	protected List<String> filter(E config) {
+		List<String> list = scan(config);
+		if(list.isEmpty()){
+			return list;
+		}
+		
+		Iterator<String> it = list.iterator();
+		while(it.hasNext()){
+			String name = it.next();
 			if(config.matchSrc(name)){
-				list.add(name);
-			}else if(config.delMatchFailFile){
-				if(new File(config.srcPath + File.separator + name).delete()){
-					log.info("删除不匹配的文件：" + name);
-				}else{
-					log.info("删除不匹配的文件失败：" + name);
-				}
+				continue;
+			}
+			
+			it.remove();
+			if(config.delMatchFailFile && !new File(config.srcPath + File.separator + name).delete()){
+				log.warn("删除文件失败[不匹配]:" + name);
 			}
 		}
 		return list;

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<foms>
+	<!-- demo -->
+	<fom name="demo" config="com.fom.context.ImporterConfig">
+		<src.path>E:\\test</src.path>
+		<src.pattern>^.*.txt$</src.pattern>
+		<src.match.fail.del>false</src.match.fail.del>
+		<scanner>com.fom.context.LocalScanner</scanner>
+		<scanner.cron>0 0/1 * * * ?</scanner.cron>
+		<executor>com.fom.modules.importer.demo.DemoImporter</executor>
+		<executor.min>10</executor.min>
+		<executor.max>10</executor.max>
+		<executor.aliveTime.seconds>30</executor.aliveTime.seconds>
+		<executor.overTime.seconds>86400</executor.overTime.seconds>
+		<executor.overTime.cancle>false</executor.overTime.cancle>
+		<importer.batch>5000</importer.batch>
+	</fom>
+</foms>

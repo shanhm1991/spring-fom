@@ -37,6 +37,9 @@ class ConfigLoader extends AbstractRefreshableWebApplicationContext {
 	private File fomXml;
 
 	void load(String fomLocation) throws Exception {
+		
+		
+		
 		fomXml = getResource(fomLocation).getFile();
 		SAXReader reader = new SAXReader();
 		reader.setEncoding("UTF-8");

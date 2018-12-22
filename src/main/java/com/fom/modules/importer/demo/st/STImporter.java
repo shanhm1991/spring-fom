@@ -73,7 +73,7 @@ public class STImporter extends ZipImporter<STConfig, Map<String, String>> {
 	}
 
 	@Override
-	protected void beforeExecute(STConfig config) throws Exception{
+	protected void onStart(STConfig config) throws Exception{
 		prepareIndex(config);
 		prepareLabelMap();
 	}

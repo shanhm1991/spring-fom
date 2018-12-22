@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
 	<includes>
-		<include>fom/import/harmInfo.xml</include>
-		<include>fom/import/mechineLearn_detail.xml</include>
-		<include>fom/import/mechineLearn_group.xml</include>
-		<include>fom/import/mechineLearn_user.xml</include>
-		<include>fom/import/merge.xml</include>
-		<include>fom/import/sensitivePicture.xml</include>
-		<include>fom/import/suspiciousTarget.xml</include>
-		<include>fom/import/warnAction.xml</include>
-		<include>fom/import/zdurl.xml</include>
-		<include>fom/download/merchineLearn.xml</include>
+		<include>conf/import/demo.xml</include>
+		<!-- <include>conf/import/harmInfo.xml</include> -->
+		<!-- <include>conf/import/mechineLearn_detail.xml</include> -->
+		<!-- <include>conf/import/mechineLearn_group.xml</include> -->
+		<!-- <include>conf/import/mechineLearn_user.xml</include> -->
+		<!-- <include>conf/import/merge.xml</include> -->
+		<!-- <include>conf/import/sensitivePicture.xml</include> -->
+		<!-- <include>conf/import/suspiciousTarget.xml</include> -->
+		<!-- <include>conf/import/warnAction.xml</include> -->
+		<!-- <include>conf/import/zdurl.xml</include> -->
+		<!-- <include>conf/download/merchineLearn.xml</include> -->
 	</includes>
 </foms>
 

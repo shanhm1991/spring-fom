@@ -1,7 +1,13 @@
 package com.fom.web;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -10,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fom.context.ManagerService;
+import com.fom.util.IoUtils;
 
 @Controller
 public class ManageController {
@@ -101,5 +108,46 @@ public class ManageController {
 		Map<String,Object> map = new HashMap<>();
 		map.put("msg", service.restartAll());
 		return map;
+	}
+	
+	@RequestMapping("/logs")
+	@ResponseBody
+	public Map<String,Object> logs() throws Exception{ 
+		Map<String,Object> map = new HashMap<>();
+		String path = System.getProperty("webapp.root");
+		File logs = new File(path + File.separator + "log");
+		String[] array = logs.list();
+		if(array != null){
+			map.put("logs", Arrays.asList(array));
+		}
+		return map;
+	}
+	
+	@RequestMapping("/download")
+	@ResponseBody
+	public Map<String,Object> download(String file, HttpServletResponse resp) throws Exception{ 
+		String path = System.getProperty("webapp.root") + File.separator + "log";
+		File log = new File(path + File.separator + file);
+		resp.reset();
+		resp.setContentType("application/octet-stream;charset=UTF-8");
+		resp.addHeader("Content-Disposition", "attachment;filename=\"" + file +"\""); 
+		InputStream in = null;
+		int len = 0;
+		byte[] bytes =  new byte[1024];
+		try{
+			in = new FileInputStream(log);
+			while((len = in.read(bytes)) > 0){
+				resp.getOutputStream().write(bytes, 0, len);
+			}
+		}finally{
+			IoUtils.close(in);
+		}
+		return null;
+	}
+	
+	@RequestMapping("/srcs")
+	@ResponseBody
+	public Map<String,Object> srcs(String name, boolean match) throws Exception{ 
+		return service.srcs(name, match);
 	}
 }

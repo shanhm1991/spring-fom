@@ -9,7 +9,6 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 
-import com.fom.context.DownloaderConfig;
 import com.fom.context.ZipImporterConfig;
 import com.fom.util.XmlUtil;
 
@@ -101,7 +100,7 @@ public class LabelImporterConfig extends ZipImporterConfig {
 	
 	@Override
 	public boolean equals(Object o){
-		if(!(o instanceof DownloaderConfig)){
+		if(!(o instanceof LabelImporterConfig)){
 			return false;
 		}
 		if(o == this){

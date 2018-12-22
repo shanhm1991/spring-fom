@@ -20,25 +20,38 @@ public class HdfsScanner<E extends IHdfsConfig> extends Scanner<E>{
 	public HdfsScanner(String name, Config config) {
 		super(name, config);
 	}
-
-	@Override
-	protected List<String> scan(E config) {
+	
+	private FileStatus[] scanHdfs(E config){
 		FileStatus[] statusArray = null;
 		try {
 			statusArray = config.getFs().listStatus(new Path(config.getSrcPath()));
 		} catch (Exception e) {
 			log.error("扫描异常",e);
-			return null;
 		}
-		
+		return statusArray;
+	}
+
+	@Override
+	protected List<String> scan(E config) {
+		List<String> list = new LinkedList<>();
+		FileStatus[] statusArray = scanHdfs(config);
 		if(ArrayUtils.isEmpty(statusArray)){
-			return null;
+			return list;
 		}
-		return filter(statusArray,config);
+		for(FileStatus status : statusArray){
+			list.add(status.getPath().getName());
+		}
+		return list;
 	}
 	
-	protected List<String> filter (FileStatus[] statusArray, E config){
+	@Override
+	protected List<String> filter (E config){
 		List<String> pathList = new LinkedList<String>();
+		FileStatus[] statusArray = scanHdfs(config);
+		if(ArrayUtils.isEmpty(statusArray)){
+			return pathList;
+		}
+		
 		for(FileStatus status : statusArray) {
 			if(!config.matchSrc(status.getPath().getName())){
 				continue;

@@ -39,7 +39,7 @@ public class LabelImporter extends ZipImporter<LabelImporterConfig, Map<String,O
 	}
 
 	@Override
-	protected void beforeExecute(LabelImporterConfig config) throws Exception{
+	protected void onStart(LabelImporterConfig config) throws Exception{
 		if(EsHandler.defaultHandler.synCreateIndex(POOL_ES, config.getEsIndex(), config.getEsType(), config.getEsJsonFile())){
 			log.info("创建ES索引[index=" + config.getEsIndex() + ", type=" + config.getEsType() + "]");
 		}

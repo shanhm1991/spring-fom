@@ -37,5 +37,4 @@ public class LoggerFactory {
 		logger.addAppender(appender);  
 		return logger;
 	}
-
 }

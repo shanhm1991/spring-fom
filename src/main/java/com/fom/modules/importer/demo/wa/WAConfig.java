@@ -3,7 +3,6 @@ package com.fom.modules.importer.demo.wa;
 import org.dom4j.Element;
 
 import com.fom.context.ZipImporterConfig;
-import com.fom.modules.importer.demo.st.STConfig;
 import com.fom.util.XmlUtil;
 
 /**
@@ -46,7 +45,7 @@ public class WAConfig extends ZipImporterConfig {
 	
 	@Override
 	public boolean equals(Object o){
-		if(!(o instanceof STConfig)){
+		if(!(o instanceof WAConfig)){
 			return false;
 		}
 		if(o == this){

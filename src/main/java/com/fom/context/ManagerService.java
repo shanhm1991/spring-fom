@@ -23,4 +23,6 @@ public interface ManagerService {
 	String restart(String name) throws Exception;
 	
 	String restartAll() throws Exception;
+	
+	Map<String,Object> srcs(String name, boolean match) throws Exception;
 }
