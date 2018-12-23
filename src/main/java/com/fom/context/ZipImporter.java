@@ -1,8 +1,9 @@
 package com.fom.context;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.ZipException;
 
@@ -26,7 +27,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 
 	private boolean removeDirectly;
 
-	private List<String> nameList = new ArrayList<>();
+	private List<String> nameList;
 
 	protected ZipImporter(String name, String path) {
 		super(name, path);
@@ -45,7 +46,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 	 */
 	void execute() throws Exception {
 		if(logFile.exists()){
-			log.warn("继续遗留任务处理."); 
+			log.warn("继续处理任务遗留文件."); 
 			//上次任务在第5步失败
 			if(!unzipDir.exists()){ 
 				removeDirectly = true;
@@ -58,9 +59,9 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 				removeDirectly = true;
 				return;
 			}
-			nameList.addAll(Arrays.asList(nameArray));
+			nameList = Arrays.asList(nameArray);
 			//失败在第4步
-			if(!validZipContent(config, nameList)){
+			if(!matchContents() && !validContents(config, nameList)){
 				removeDirectly = true;
 				return;
 			}
@@ -71,7 +72,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 			//上次任务在第1步或者第2步失败
 			if(unzipDir.exists()){
 				File[] fileArray = unzipDir.listFiles();
-				if(fileArray != null && fileArray.length > 0){
+				if(!ArrayUtils.isEmpty(fileArray)){
 					log.warn("清空未正确解压的文件目录");
 					for(File file : fileArray){
 						if(!file.delete()){
@@ -94,7 +95,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 				removeDirectly = true;
 				return; 
 			}
-			
+
 			String[] nameArray = unzipDir.list();
 			if(nameArray == null || nameArray.length == 0){ 
 				removeDirectly = true;
@@ -102,7 +103,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 			}
 
 			nameList = Arrays.asList(nameArray);
-			if(!validZipContent(config, nameList)){
+			if(!matchContents() && !validContents(config, nameList)){
 				removeDirectly = true;
 				return;
 			}
@@ -115,8 +116,20 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 		processFiles();
 	}
 
-	protected boolean validZipContent(E config, List<String> nameList) {
+	protected boolean validContents(E config, List<String> nameList) {
 		return true;
+	}
+
+	private boolean matchContents(){
+		List<String> list = new LinkedList<>();
+		for(String name : nameList){
+			if(config.matchZipContent(name)){
+				list.add(name);
+			}
+		}
+		nameList = list;
+		System.out.println(nameList.size());
+		return nameList.size() > 0;
 	}
 
 	private void processFailedFile() throws Exception {  
@@ -129,7 +142,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 		String name = lines.get(0); 
 		File file = new File(unzipDir + File.separator + name);
 		if(!file.exists()){
-			log.warn("遗留文件已不存在:" + name);
+			log.warn("未找到任务遗留文件:" + name);
 			return;
 		}
 
@@ -143,7 +156,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 			log.warn("获取文件处理进度失败,将从第0行开始处理:" + name);
 		}
 
-		readLine(file, lineIndex);
+		readFile(file, lineIndex);
 		nameList.remove(name);
 		log.info("处理文件结束[" + file.getName() + "(" + size + "KB)], 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 		if(!file.delete()){
@@ -152,41 +165,32 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 	}
 
 	private void processFiles() throws Exception {
-		int mached = 0;
-		for(String name : nameList){
-			if(!config.matchZipFile(name)){
-				continue;
-			} 
-			mached++;
-
+		Iterator<String> it = nameList.iterator();
+		while(it.hasNext()){
+			String name = it.next();
+			it.remove();
 			long sTime = System.currentTimeMillis();
 			File file = new File(unzipDir + File.separator + name);
 			long size = file.length() / 1024;
-			readLine(file, 0);
+			readFile(file, 0);
 			log.info("处理文件结束[" + name + "(" + size + "KB)], 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 			if(!file.delete()){
 				throw new WarnException("删除文件失败:" + file.getName()); 
 			}
 		}
-		if(mached == 0){
-			log.warn("没有需要处理的内容文件"); 
-			removeDirectly = true;
-		}
 	}
 
 	void onFinally() {
-		if(!removeDirectly){
+		if(!removeDirectly && nameList.size() > 0){
+			log.warn("遗留任务文件, 等待下次处理."); 
 			return;
 		}
 
 		if(unzipDir.exists()){ 
-			String[] nameArray = unzipDir.list();
-			if(!ArrayUtils.isEmpty(nameArray) && validZipContent(config, Arrays.asList(nameArray))){
-				log.warn("遗留任务文件, 等待下次处理."); 
-				return;
-			}else{
-				for(String name : nameArray){
-					if(!new File(unzipDir + File.separator + name).delete()){
+			File[] fileArray = unzipDir.listFiles();
+			if(!ArrayUtils.isEmpty(fileArray)){
+				for(File file : fileArray){
+					if(!file.delete()){
 						log.warn("清除文件失败:" + name);
 						return;
 					}
@@ -197,12 +201,14 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 				return;
 			}
 		}
+		
 		//srcFile.exist = true
-		if(srcFile.delete()){ 
+		if(!srcFile.delete()){ 
 			log.warn("清除源文件失败."); 
 			return;
 		}
-		if(logFile.exists() && logFile.delete()){
+		
+		if(logFile.exists() && !logFile.delete()){
 			log.warn("清除日志失败.");
 		}
 	}

@@ -79,7 +79,7 @@ public class STImporter extends ZipImporter<STConfig, Map<String, String>> {
 	}
 
 	@Override
-	protected boolean validZipContent(STConfig config, List<String> nameList) {
+	protected boolean validContents(STConfig config, List<String> nameList) {
 		//为了避免出现Tag_YJ获取失败，务必将正则表达式表达精确 ，为了与原设计流程保持一致(清理机制)，没有将这个判断放在prepare中而是在解压之后判断
 		//YJMONITOR-5210-440300-440301-1516432270-WZSZ_ICP_1030036_YJMONITOR_RESULT_WXY_1_YBZ99302_20180120094602_004_ZDR_1
 		if(srcName.startsWith(ZIPFLAG_YG)) {

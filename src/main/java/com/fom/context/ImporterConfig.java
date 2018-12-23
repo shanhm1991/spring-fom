@@ -2,8 +2,6 @@ package com.fom.context;
 
 import java.io.File;
 
-import org.apache.hadoop.conf.Configuration;
-
 import com.fom.util.XmlUtil;
 
 /**
@@ -28,8 +26,6 @@ public class ImporterConfig extends Config {
 
 	int batch;
 
-	Configuration fsConf;
-	
 	File progressDir = null;
 
 	protected ImporterConfig(String name) {
@@ -40,8 +36,6 @@ public class ImporterConfig extends Config {
 	void load() throws Exception {
 		super.load();
 		batch = XmlUtil.getInt(element, "importer.batch", 5000, 1, 50000);
-		fsConf = new Configuration();
-		fsConf.set("fs.defaultFS", "file:///");
 	}
 	
 	@Override

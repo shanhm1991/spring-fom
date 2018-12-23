@@ -27,7 +27,7 @@ public class DemoImporter extends Importer<DemoConfig, DemoBean> {
 	 */
 	@Override
 	protected void praseLineData(DemoConfig config, List<DemoBean> lineDatas, String line, long batchTime) throws Exception {
-		log.info(line);
+		log.info("解析行数据:" + line);
 		if(StringUtils.isBlank(line)){
 			return;
 		}
@@ -40,7 +40,8 @@ public class DemoImporter extends Importer<DemoConfig, DemoBean> {
 	 */
 	@Override
 	protected void batchProcessLineData(DemoConfig config, List<DemoBean> lineDatas, long batchTime) throws Exception {
-
+		log.info("处理数据入库:" + lineDatas.size());
+		//EsHandler.defaultHandler.bulkInsert(poolName, index, type, data);
 	}
 
 	/**

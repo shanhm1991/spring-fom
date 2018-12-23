@@ -89,7 +89,7 @@ public class HMImporter extends ZipImporter<HMConfig, Map<String,Object>> {
 	}
 
 	@Override
-	protected boolean validZipContent(HMConfig config, List<String> nameList) {
+	protected boolean validContents(HMConfig config, List<String> nameList) {
 		int xmlCount = 0;
 		int bcpCount = 0;
 		String xmlName = "";

@@ -2,13 +2,11 @@ package com.fom.context;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.hadoop.fs.Path;
 
-import com.fiberhome.odin.hadoop.hdfs.io.SDFileReader;
 import com.fom.util.IoUtils;
 import com.fom.util.exception.WarnException;
 
@@ -38,7 +36,7 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 				throw new WarnException("创建日志文件失败.");
 			}
 		}else{
-			log.warn("继续遗留任务处理."); 
+			log.warn("继续处理任务遗留文件."); 
 			List<String> lines = FileUtils.readLines(logFile);
 			try{
 				lineIndex = Integer.valueOf(lines.get(1));
@@ -48,7 +46,7 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 			}
 		}
 
-		readLine(srcFile, lineIndex);
+		readFile(srcFile, lineIndex);
 		log.info("处理文件结束(" + srcSize + "KB),耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 		if(!srcFile.delete()){
 			throw new WarnException("删除文件失败."); 
@@ -57,28 +55,20 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 			throw new WarnException("删除日志失败."); 
 		}
 	}
-
-	void readLine(File file, int StartLine) throws Exception {
+	
+	void readFile(File file, int StartLine) throws Exception {
 		int lineIndex = 0;
-		SDFileReader reader = null;
+		MultiReader reader = null;
 		String line = "";
 		try{
-			Path path = new Path(file.getPath());
-			reader = new SDFileReader(path, config.fsConf);
-			List<V> lineDatas = null; 
-			if(config.batch > 0){
-				lineDatas = new ArrayList<V>(config.batch);
-			}else{
-				lineDatas = new ArrayList<V>(500);
-			}
-
+			reader = new MultiReader(file, false);
+			List<V> lineDatas = new LinkedList<>(); 
 			long batchTime = System.currentTimeMillis();
-			while ((line = reader.readStringLine()) != null) {
+			while ((line = reader.readLine()) != null) {
 				lineIndex++;
 				if(lineIndex <= StartLine){
 					continue;
 				}
-
 				if(config.batch > 0 && lineDatas.size() >= config.batch){
 					batchProcessIfNotInterrupted(lineDatas, lineIndex, batchTime); 
 					updateLogFile(file.getName(), lineIndex);

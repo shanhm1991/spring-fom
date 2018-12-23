@@ -79,7 +79,7 @@ public class ZipImporterConfig extends ImporterConfig {
 		return subReg.equals(c.subReg);
 	}
 	
-	public final boolean matchZipFile(String fileName){
+	public final boolean matchZipContent(String fileName){
 		if(subPattern == null){
 			return true;
 		}

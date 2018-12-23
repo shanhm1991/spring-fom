@@ -24,7 +24,7 @@ public class DemoZipImporter extends ZipImporter<DemoZipConfig, DemoZipBean>{
 	 * 继承自ZipImporter，校验zip包含的文件是否合法
 	 */
 	@Override
-	protected boolean validZipContent(DemoZipConfig config, List<String> nameList) {
+	protected boolean validContents(DemoZipConfig config, List<String> nameList) {
 		return true;
 	}
 
@@ -36,11 +36,11 @@ public class DemoZipImporter extends ZipImporter<DemoZipConfig, DemoZipBean>{
 	@Override
 	protected void praseLineData(DemoZipConfig config, List<DemoZipBean> lineDatas, String line, long batchTime)
 			throws Exception {
-		log.info(line);
+		log.info("解析行数据:" + line);
 		if(StringUtils.isBlank(line)){
 			return;
 		}
-		lineDatas.add(new DemoZipBean(line));
+		lineDatas.add(new DemoZipBean(line)); 
 	}
 
 	/**
@@ -50,7 +50,8 @@ public class DemoZipImporter extends ZipImporter<DemoZipConfig, DemoZipBean>{
 	@Override
 	protected void batchProcessLineData(DemoZipConfig config, List<DemoZipBean> lineDatas, long batchTime)
 			throws Exception {
-
+		log.info("处理数据入库:" + lineDatas.size());
+		//OraHandler.defaultHandler.batchExecute(poolName, sql, paramMaps);
 	}
 
 	/**

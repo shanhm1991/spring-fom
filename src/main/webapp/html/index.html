@@ -2,8 +2,9 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>index</title>
+<title>file operation manage</title>
 <style type="text/css">
+a{ text-decoration : none; }
 span{ width:62px; padding:2px; display:inline-block;}
 table{ table-layout:fixed;}
 td{ word-wrap:break-word;}
@@ -15,20 +16,36 @@ button{ margin-top: 2px; margin-bottom: 3px;}
 <li><span><a href="#" onclick="list()">list</a></span></li> 
 <li><span><a href="#" onclick="srcs()">srcs</a></span><input id="srcs"/></li> 
 <li><span><a href="#" onclick="logs()">logs</a></span></li> 
-<li><span><a href="#" onclick="operation('stop','stop')">stop</a></span><input id="stop"/></li> 
-<li><span><a href="#" onclick="operation('stopAll')">stopAll</a></span></li>
 <li><span><a href="#" onclick="operation('start','start')">start</a></span><input id="start"/></li>
 <li><span><a href="#" onclick="operation('startAll')">startAll</a></li> 
+<li><span><a href="#" onclick="operation('stop','stop')">stop</a></span><input id="stop"/></li> 
+<li><span><a href="#" onclick="operation('stopAll')">stopAll</a></span></li>
 <li><span><a href="#" onclick="operation('restart','restart')">restart</a></span><input id="restart"/></li>
 <li><span><a href="#" onclick="operation('restartAll')">restartAll</a></li>
-</ul><label style="width: 100px"></label>
+</ul>
 <hr>
-<div id="content" style="overflow:auto;"></div> 
+<div id="content" style="overflow:auto; margin-top: 5px;"></div> 
 </body>
 <script src="../js/jquery-3.3.1.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
 	list();
+	window.onpopstate = function(event){
+	    if(event.state){
+	    	var f = event.state.fun
+	    	if(f == null){
+	    		list();
+	    		return;
+	    	}
+	    	var param = event.state.param
+	    	if(param == null){
+	    		f = f + "();"
+	    	}else{
+	    		f = f + "('" + param.arg1 + "','" + param.arg2 + "');";
+	    	}
+	    	eval(f);
+	    }
+	};
 });
 
 function list(){
@@ -37,17 +54,18 @@ function list(){
         type: "POST",
         dataType: "json",
         success: function(data){
-       	$("#content").html("");
-       	var Tb = $("<table/>")
-        $.each(data,function(name,value) {
-        	$("<tr/>").html("<td><a id='" + name + "' href='#' onclick='detail(this)'>" + name + "</a></td>"
+         	$("#content").html("");
+         	var Tb = $("<table/>")
+            $.each(data,function(name,value) {
+          	     $("<tr/>").html("<td><a href='#' onclick='detail(&quot;" + name + "&quot;)'>" + name + "</a></td>"
         			+ "<td>" + JSON.stringify(value, null, '\t') + "</td>").appendTo($(Tb));
-        });
-       	$("#content").append($(Tb));
+            });
+         	$("#content").append($(Tb));
         },error:function(data,type, err){
 	        $("#content").text(err);
 	    }
     });
+	window.history.pushState({"fun":"list"},"", "");
 }
 
 function operation(opt, id){
@@ -68,8 +86,7 @@ function operation(opt, id){
 	});
 }
 
-function detail(e){
-	var name = $(e).attr("id");
+function detail(name){
 	$.ajax({
         url: "/fom/detail",
         type: "POST",
@@ -77,7 +94,7 @@ function detail(e){
         data: { "name" : name },
         success: function(data){
         	$.each(data,function(name,value){
-        		$("#content").html("<button id='" + name + "' onclick='viewXml(this)'>viewXml</button>"
+        		$("#content").html("<button onclick='viewXml(&quot;" + name + "&quot;)'>viewXml</button>"
         				+ "<br><label style='font-weight: bold;'>" + name + ":</label>");
         		var div=document.createElement("div");
           	    document.getElementById("content").appendChild(div);
@@ -87,10 +104,10 @@ function detail(e){
 	        $("#content").text(err);
 	    }
 	 });
+	window.history.pushState({"fun":"detail","param":{"arg1":name}},"", "");
 }
 
-function viewXml(e){
-	var name = $(e).attr("id");
+function viewXml(name){
 	$.ajax({
         url: "/fom/xml", 
         type: "POST",
@@ -102,8 +119,8 @@ function viewXml(e){
         		$("<div/>")
         		.append($("<label style='font-weight: bold;'/>").text(name))
         		.append($("<br>"))
-        		.append($("<button id='" + name + "' onclick='edit(this)'>Edit</button>"))
-        		.append($("<button id='b_" + name + "' hidden='true' onclick='apply(this)'>Apply</button>"))
+        		.append($("<button id='" + name + "' onclick='edit(&quot;" + name + "&quot;)'>Edit</button>"))
+        		.append($("<button id='b_" + name + "' hidden='true' onclick='apply(&quot;" + name + "&quot;)'>Apply</button>"))
         		.append($("<br>"))
         		.append($("<textarea id='t_" + name + "' spellcheck='false' disabled='disabled' rows='25' cols='125'/>").text(value))
         		.appendTo($("#content"));
@@ -112,18 +129,17 @@ function viewXml(e){
 	        $("#content").text(err);
 	    }
 	});
+	window.history.pushState({"fun":"viewXml","param":{"arg1":name}},"", "");
 }
 
-function edit(e){
-	var name = $(e).attr("id");
-	$(e).attr("hidden",true);
+function edit(name){
+	$("#" + name).attr("hidden",true);
 	$("#b_" + name).attr("hidden",false);
 	$("#t_" + name).attr("disabled",false); 
+	window.history.pushState({"fun":"edit","param":{"arg1":name}},"", "");
 }
 
-function apply(e){
-	var id = $(e).attr("id");
-	var name = id.replace("b_","");
+function apply(name){
 	$.ajax({
         url: "/fom/apply", 
         type: "POST",
@@ -161,6 +177,7 @@ function logs(){
 	        $("#content").text(err);
 	    }
 	});
+	window.history.pushState({"fun":"logs"},"", "");
 }
 
 function load(url, name){
@@ -189,6 +206,7 @@ function load(url, name){
    }
    xmlhttp.open("GET", url, true);
    xmlhttp.send();
+   window.history.pushState({"fun":"load","param":{"arg1":url,"arg2":name}},"", "");
 }
 
 function srcs(name, match){
@@ -229,6 +247,7 @@ function srcs(name, match){
 	        $("#content").text(err);	
 	    }
 	});
+	window.history.pushState({"fun":"srcs","param":{"arg1":name,"arg2":match}},"", "");
 }
 </script>
 </html>

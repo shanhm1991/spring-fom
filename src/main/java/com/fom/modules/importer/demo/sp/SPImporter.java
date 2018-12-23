@@ -36,7 +36,7 @@ public class SPImporter extends ZipImporter<WAConfig, Map<String,Object>> {
 	}
 
 	@Override
-	protected boolean validZipContent(WAConfig config, List<String> nameList) {
+	protected boolean validContents(WAConfig config, List<String> nameList) {
 		int count = 1;
 		for(String name : nameList){
 			if(name.endsWith(".bcp")){
