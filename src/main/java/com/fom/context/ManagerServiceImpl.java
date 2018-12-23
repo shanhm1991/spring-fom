@@ -95,6 +95,7 @@ public class ManagerServiceImpl extends PoolManager implements ManagerService {
 	@Override
 	public String apply(String name, String data) throws Exception {
 		SAXReader reader = new SAXReader();
+		reader.setEncoding("UTF-8");
 		StringReader in=new StringReader(data);  
 		Document doc = reader.read(in); 
 		Element element = doc.getRootElement();

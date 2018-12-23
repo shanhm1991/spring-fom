@@ -62,6 +62,5 @@ public class TMImpoter extends ZipImporter<ZipImporterConfig, Map<String, Object
 	@Override
 	protected void batchProcessLineData(ZipImporterConfig config, List<Map<String, Object>> lineDatas, long batchTime) throws Exception {
 		OraHandler.defaultHandler.batchExecute(POOL, sql, lineDatas);
-		log.info("批处理结束[" + lineDatas.size() + "], 耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 	}
 }

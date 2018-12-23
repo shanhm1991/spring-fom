@@ -80,7 +80,7 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 				}
 
 				if(config.batch > 0 && lineDatas.size() >= config.batch){
-					batchProcessIfNotInterrupted(lineDatas, batchTime); 
+					batchProcessIfNotInterrupted(lineDatas, lineIndex, batchTime); 
 					updateLogFile(file.getName(), lineIndex);
 					lineDatas.clear();
 					batchTime = System.currentTimeMillis();
@@ -88,7 +88,7 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 				praseLineData(config, lineDatas, line, batchTime);
 			}
 			if(!lineDatas.isEmpty()){
-				batchProcessIfNotInterrupted(lineDatas, batchTime); 
+				batchProcessIfNotInterrupted(lineDatas, lineIndex, batchTime); 
 			}
 			updateLogFile(file.getName(), lineIndex);
 		}finally{
@@ -107,11 +107,12 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 	protected abstract void praseLineData(E config, List<V> lineDatas, String line, long batchTime) throws Exception;
 
 	//选择在每次批处理开始处检测中断，因为比较耗时的地方就两个(读取解析文件数据内容，数据入库)
-	void batchProcessIfNotInterrupted(List<V> lineDatas, long batchTime) throws Exception {
+	void batchProcessIfNotInterrupted(List<V> lineDatas, int lineIndex, long batchTime) throws Exception {
 		if(interrupted()){
 			throw new InterruptedException("processLine");
 		}
 		batchProcessLineData(config, lineDatas, batchTime); 
+		log.info("批处理结束[" + lineDatas.size() + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 	}
 
 	/**
@@ -125,6 +126,7 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 
 	void updateLogFile(String fileName, int lineIndex) throws IOException{ 
 		String data = fileName + "\n" + lineIndex;
+		log.info("已读取行数:" + lineIndex);
 		FileUtils.writeStringToFile(logFile, data, false);
 	}
 }

@@ -242,8 +242,6 @@ public class STImporter extends ZipImporter<STConfig, Map<String, String>> {
 	//GZHTAG
 	@SuppressWarnings("unchecked")
 	private void processGzhEsData(List<Map<String, String>> lineDatas, STConfig config) throws Exception {
-		long sTime = System.currentTimeMillis();
-
 		//以docId作为key对tag进行合并
 		Map<String,Map<String,Object>> insertData = new HashMap<String, Map<String,Object>>();
 
@@ -299,9 +297,7 @@ public class STImporter extends ZipImporter<STConfig, Map<String, String>> {
 		EsHandler.defaultHandler.bulkInsert(POOL_ES, config.getGzhIndex(), config.getGzhType(), insertData);
 		Set<BulkItemResponse> conflictSet = 
 				EsHandler.defaultHandler.bulkUpdate(POOL_ES, config.getGzhIndex(), config.getGzhType(), updateData); 
-		log.info("ES.gzhTag批处理结束[" + lineDatas.size() + "], inser=" + insertData.size() + ", update=" + localData.size() 
-		+ ",conflictFailed=" + conflictSet.size() + ", 耗时=" + (System.currentTimeMillis() - sTime) + "ms"); 
-
+		log.info("gzhTag, insert=" + insertData.size() + ", update=" + localData.size() + ",conflictFailed=" + conflictSet.size()); 
 		resolveConflict(POOL_ES, config.getGzhIndex(), config.getGzhType(), conflictSet, localData);
 	}
 
@@ -341,8 +337,6 @@ public class STImporter extends ZipImporter<STConfig, Map<String, String>> {
 	//GROUPTAG  USERTAG
 	@SuppressWarnings("unchecked")
 	private void processGroupEsData(List<Map<String, String>> lineDatas, STConfig config) throws Exception {
-
-		long sTime = System.currentTimeMillis();
 		Map<String,Map<String,Object>> userInsertData = new HashMap<String, Map<String,Object>>();
 		Map<String,Map<String,Object>> groupInsertData = new HashMap<String, Map<String,Object>>();
 		for(Map<String, String> map : lineDatas){
@@ -434,9 +428,7 @@ public class STImporter extends ZipImporter<STConfig, Map<String, String>> {
 		Set<BulkItemResponse> userConflictSet = 
 				EsHandler.defaultHandler.bulkUpdate(POOL_ES, config.getUserIndex(), config.getUserType(), userUpdateData);
 		EsHandler.defaultHandler.bulkInsert(POOL_ES, config.getUserIndex(), config.getUserType(), userInsertData);
-
-		log.info("ES.userTag批处理结束, insert=" + userInsertData.size() + ",update=" + userUpdateData.size() 
-		+ ",updateFailed=" + userConflictSet.size() + ",耗时=" + (System.currentTimeMillis() - sTime) + "ms"); 
+		log.info("userTag, insert=" + userInsertData.size() + ",update=" + userUpdateData.size() + ",updateFailed=" + userConflictSet.size()); 
 		resolveConflict(POOL_ES, config.getUserIndex(), config.getUserType(), userConflictSet, userLocalData);
 
 
@@ -452,17 +444,13 @@ public class STImporter extends ZipImporter<STConfig, Map<String, String>> {
 		Set<BulkItemResponse> groupConflictSet = 
 				EsHandler.defaultHandler.bulkUpdate(POOL_ES, config.getGroupIndex(), config.getGroupType(), groupUpdateData);
 		EsHandler.defaultHandler.bulkInsert(POOL_ES, config.getGroupIndex(), config.getGroupType(), groupInsertData);
-		log.info("ES.groupTag批处理结束,insert=" + groupInsertData.size() + ",update=" + groupUpdateData.size()
-		+ ",updateFailed=" + groupConflictSet.size() + ",耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+		log.info("groupTag,insert=" + groupInsertData.size() + ",update=" + groupUpdateData.size() + ",updateFailed=" + groupConflictSet.size());
 	}
 
 
 	private void processYJEsData(List<Map<String, String>> lineDatas, STConfig config) throws Exception {
-		long sTime = System.currentTimeMillis();
-
 		Map<String,Map<String,Object>> userInsertData = new HashMap<String, Map<String,Object>>();
 		Map<String,Map<String,Object>> groupInsertData = new HashMap<String, Map<String,Object>>();
-
 		for(Map<String, String> map : lineDatas){
 			long fTime = 0;
 			try{
@@ -542,9 +530,7 @@ public class STImporter extends ZipImporter<STConfig, Map<String, String>> {
 		Set<BulkItemResponse> userConflictSet = 
 				EsHandler.defaultHandler.bulkUpdate(POOL_ES, config.getUserIndex(), config.getUserType(), userUpdateData);
 		EsHandler.defaultHandler.bulkInsert(POOL_ES, config.getUserIndex(), config.getUserType(), userInsertData);
-
-		log.info("ES.userTag批处理结束, insert=" + userInsertData.size() + ",update=" + userUpdateData.size() 
-		+ ",updateFailed=" + userConflictSet.size() + ",耗时=" + (System.currentTimeMillis() - sTime) + "ms"); 
+		log.info("userTag, insert=" + userInsertData.size() + ",update=" + userUpdateData.size() + ",updateFailed=" + userConflictSet.size()); 
 		resolveConflict(POOL_ES, config.getUserIndex(), config.getUserType(), userConflictSet, userLocalData);
 
 
@@ -560,8 +546,7 @@ public class STImporter extends ZipImporter<STConfig, Map<String, String>> {
 		Set<BulkItemResponse> groupConflictSet = 
 				EsHandler.defaultHandler.bulkUpdate(POOL_ES, config.getGroupIndex(), config.getGroupType(), groupUpdateData);
 		EsHandler.defaultHandler.bulkInsert(POOL_ES, config.getGroupIndex(), config.getGroupType(), groupInsertData);
-		log.info("ES.groupTag批处理结束,insert=" + groupInsertData.size() + ",update=" + groupUpdateData.size()
-		+ ",updateFailed=" + groupConflictSet.size() + ",耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+		log.info("groupTag,insert=" + groupInsertData.size() + ",update=" + groupUpdateData.size() + ",updateFailed=" + groupConflictSet.size());
 	}
 
 	@SuppressWarnings("unchecked")

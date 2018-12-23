@@ -170,7 +170,6 @@ public class ZdImporter extends Importer<ImporterConfig, Map<String, Object>> {
 		}finally{
 			OraHandler.defaultHandler.endTransaction(POOL_ORA);
 		}
-		log.info("批处理结束[" + lineDatas.size() + "], 耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 	}
 
 	private void addParamMap(String[] array, String v1, int v2, Date date, long time, List<Map<String, Object>> paramMaps) {

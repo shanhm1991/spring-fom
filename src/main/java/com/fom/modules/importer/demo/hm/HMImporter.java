@@ -165,7 +165,6 @@ public class HMImporter extends ZipImporter<HMConfig, Map<String,Object>> {
 		}
 
 		EsHandler.defaultHandler.bulkInsert(POOL_ES, index_today, config.getEsType(), mergeData);
-		log.info("批处理结束[" + lineDatas.size() + "], 耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 	}
 
 	private void prepareIndex(HMConfig config) throws Exception{

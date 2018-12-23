@@ -2,6 +2,8 @@ package com.fom.modules.importer.demo;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fom.context.ZipImporter;
 
 public class DemoZipImporter extends ZipImporter<DemoZipConfig, DemoZipBean>{
@@ -27,16 +29,22 @@ public class DemoZipImporter extends ZipImporter<DemoZipConfig, DemoZipBean>{
 	}
 
 	/**
+	 * Abstract
 	 * 继承自Importer, 将行数据line解析成DemoBean，并添加到lineDatas中去
 	 * 异常则结束任务，保留文件，所以对错误数据导致的异常需要try-catch，一避免任务重复失败
 	 */
 	@Override
 	protected void praseLineData(DemoZipConfig config, List<DemoZipBean> lineDatas, String line, long batchTime)
 			throws Exception {
-
+		log.info(line);
+		if(StringUtils.isBlank(line)){
+			return;
+		}
+		lineDatas.add(new DemoZipBean(line));
 	}
 
 	/**
+	 * Abstract
 	 * 继承自Importer, 批处理行数据解析结果, 异常则结束任务，保留文件
 	 */
 	@Override

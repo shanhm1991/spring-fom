@@ -1,11 +1,13 @@
 package com.fom.context;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.zip.ZipException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.ArrayUtils;
 
 import com.fom.util.ZipUtil;
 import com.fom.util.exception.WarnException;
@@ -22,81 +24,86 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 
 	protected final File unzipDir;
 
-	private boolean reExecute; 
+	private boolean removeDirectly;
 
-	private boolean zipValid = true;
-
-	private List<String> nameList = null;
+	private List<String> nameList = new ArrayList<>();
 
 	protected ZipImporter(String name, String path) {
 		super(name, path);
-		this.unzipDir = new File(System.getProperty("cache.root") 
-				+ File.separator + "iprogress" + File.separator + name + File.separator + srcName);
+		this.unzipDir = new File(System.getProperty("import.progress")
+				+ File.separator + name + File.separator + srcName);
 	}
 
+	/**
+	 * 1.解压到缓存目录，并校验解压结果是否合法
+	 * 2.创建对应的处理日志文件
+	 * 3.挨个处理并删除文件
+	 * 4.清空并删除解压目录
+	 * 5.删除源文件
+	 * 6.删除日志文件
+	 * 上述任何步骤返回失败或出现异常则结束任务
+	 */
 	void execute() throws Exception {
 		if(logFile.exists()){
-			log.warn("继续处理遗留任务文件."); 
-			//上次任务删除源文件失败
+			log.warn("继续遗留任务处理."); 
+			//上次任务在第5步失败
 			if(!unzipDir.exists()){ 
-				reExecute = false;
+				removeDirectly = true;
 				return;
 			}
-
-			//上次任务删除解压目录失败或者解压失败
+			//上次任务在第3步或者第4步失败
 			String[] nameArray = unzipDir.list();
+			//失败在第4步
 			if(nameArray == null || nameArray.length == 0){ 
-				reExecute = false;
+				removeDirectly = true;
 				return;
 			}
-
-			nameList = Arrays.asList(nameArray);
-			//上次任务清空解压目录失败
+			nameList.addAll(Arrays.asList(nameArray));
+			//失败在第4步
 			if(!validZipContent(config, nameList)){
-				reExecute = false;
+				removeDirectly = true;
 				return;
 			}
 
 			//处理未完成文件
 			processFailedFile();
 		} else {
-			//第一次任务处理
-			if(!unzipDir.exists()){
-				if(!unzipDir.mkdirs()){
-					throw new WarnException("创建解压目录失败: " + unzipDir.getName());
-				}
-			}else{
-				//上次任务zip文件未正确解压
-				log.warn("清空未正确解压的文件目录: " + unzipDir.getName());
+			//上次任务在第1步或者第2步失败
+			if(unzipDir.exists()){
 				File[] fileArray = unzipDir.listFiles();
 				if(fileArray != null && fileArray.length > 0){
+					log.warn("清空未正确解压的文件目录");
 					for(File file : fileArray){
 						if(!file.delete()){
 							throw new WarnException("清除文件失败:" + file.getName()); 
 						}
 					}
 				}
+			}else{
+				//首次任务处理
+				if(!unzipDir.mkdirs()){
+					throw new WarnException("创建解压目录失败: " + unzipDir.getName());
+				}
 			}
 
-			long unzipCost = 0;
 			try{
-				unzipCost = ZipUtil.unZip(srcFile, unzipDir);
+				long cost = ZipUtil.unZip(srcFile, unzipDir);
+				log.info("解压结束(" + srcSize + "KB), 耗时=" + cost + "ms");
 			}catch(ZipException e){
 				log.error("解压失败", e); 
-				zipValid = false;
+				removeDirectly = true;
 				return; 
 			}
-			log.info("解压结束(" + srcSize + "KB), 耗时=" + unzipCost + "ms");
-
+			
 			String[] nameArray = unzipDir.list();
 			if(nameArray == null || nameArray.length == 0){ 
-				zipValid = false;
+				removeDirectly = true;
 				return;
 			}
 
 			nameList = Arrays.asList(nameArray);
 			if(!validZipContent(config, nameList)){
-				zipValid = false;
+				removeDirectly = true;
 				return;
 			}
 
@@ -104,7 +111,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 				throw new WarnException("创建日志文件失败.");
 			}
 		}
-		
+
 		processFiles();
 	}
 
@@ -121,8 +128,6 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 
 		String name = lines.get(0); 
 		File file = new File(unzipDir + File.separator + name);
-		log.info("继续处理遗留文件:" + name); 
-
 		if(!file.exists()){
 			log.warn("遗留文件已不存在:" + name);
 			return;
@@ -147,10 +152,13 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 	}
 
 	private void processFiles() throws Exception {
+		int mached = 0;
 		for(String name : nameList){
 			if(!config.matchZipFile(name)){
 				continue;
 			} 
+			mached++;
+
 			long sTime = System.currentTimeMillis();
 			File file = new File(unzipDir + File.separator + name);
 			long size = file.length() / 1024;
@@ -160,42 +168,42 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 				throw new WarnException("删除文件失败:" + file.getName()); 
 			}
 		}
+		if(mached == 0){
+			log.warn("没有需要处理的内容文件"); 
+			removeDirectly = true;
+		}
 	}
 
 	void onFinally() {
-		if(zipValid && !logFile.exists()){
+		if(!removeDirectly){
 			return;
 		}
 
 		if(unzipDir.exists()){ 
 			String[] nameArray = unzipDir.list();
-			if(nameArray != null && nameArray.length > 0){
-				if(!reExecute || !validZipContent(config, Arrays.asList(nameArray))){
-					for(String name : nameArray){
-						if(!new File(unzipDir + File.separator + name).delete()){
-							log.warn("清除文件失败:" + name); 
-							return;
-						}
+			if(!ArrayUtils.isEmpty(nameArray) && validZipContent(config, Arrays.asList(nameArray))){
+				log.warn("遗留任务文件, 等待下次处理."); 
+				return;
+			}else{
+				for(String name : nameArray){
+					if(!new File(unzipDir + File.separator + name).delete()){
+						log.warn("清除文件失败:" + name);
+						return;
 					}
-				}else{
-					log.warn("文件遗留, 等待下次处理."); 
-					return;
 				}
 			}
-
 			if(!unzipDir.delete()){
-				log.warn("删除解压目录失败."); 
+				log.warn("清除解压目录失败."); 
 				return;
 			}
 		}
-
-		if(!srcFile.delete()){ //srcFile.exist = true
-			log.warn("删除源文件失败."); 
+		//srcFile.exist = true
+		if(srcFile.delete()){ 
+			log.warn("清除源文件失败."); 
 			return;
 		}
-
-		if(logFile.exists() && !logFile.delete()){
-			log.warn("删除日志失败."); 
+		if(logFile.exists() && logFile.delete()){
+			log.warn("清除日志失败.");
 		}
 	}
 }

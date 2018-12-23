@@ -2,6 +2,7 @@
 <foms>
 	<includes>
 		<include>conf/import/demo.xml</include>
+		<include>conf/import/demoZip.xml</include>
 		<!-- <include>conf/import/harmInfo.xml</include> -->
 		<!-- <include>conf/import/mechineLearn_detail.xml</include> -->
 		<!-- <include>conf/import/mechineLearn_group.xml</include> -->

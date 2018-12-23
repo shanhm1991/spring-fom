@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
-	<!-- demo -->
+	<!-- demo[导入] -->
 	<fom name="demo" config="com.fom.modules.importer.demo.DemoConfig">
 		<src.path>E:\\test</src.path>
 		<src.pattern>.\.txt</src.pattern>

@@ -89,7 +89,6 @@ public class WAImporter extends ZipImporter<WAConfig, Map<String,Object>> {
 	@Override
 	protected void batchProcessLineData(WAConfig config, List<Map<String,Object>> lineDatas, long batchTime) throws Exception{ 
 		OraHandler.defaultHandler.batchExecute(POOL_ORA_scloudrs, SQL, lineDatas);
-		log.info("批处理结束[" + lineDatas.size() + "], 耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 	}
 
 	private long praseTime(String datestring){

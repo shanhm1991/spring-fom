@@ -117,6 +117,5 @@ public class SPImporter extends ZipImporter<WAConfig, Map<String,Object>> {
 	protected void batchProcessLineData(WAConfig config, List<Map<String, Object>> lineDatas, long batchTime)
 			throws Exception {
 		OraHandler.defaultHandler.batchExecute(POOL_ORA, SQL, lineDatas);
-		log.info("批处理结束[" + lineDatas.size() + "], 耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 	}
 }

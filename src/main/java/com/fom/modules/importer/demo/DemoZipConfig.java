@@ -3,6 +3,7 @@ package com.fom.modules.importer.demo;
 import org.dom4j.Element;
 
 import com.fom.context.ZipImporterConfig;
+import com.fom.util.XmlUtil;
 
 /**
  * 继承自父类的配置项，另外可以在<extended>节点中自定义配置项
@@ -13,6 +14,10 @@ import com.fom.context.ZipImporterConfig;
  */
 public class DemoZipConfig extends ZipImporterConfig {
 
+	private String myconf;
+
+	//...
+
 	protected DemoZipConfig(String name) {
 		super(name);
 	}
@@ -22,29 +27,30 @@ public class DemoZipConfig extends ZipImporterConfig {
 	 */
 	@Override
 	protected void load(Element extendedElement) throws Exception {
-		super.load(extendedElement);
+		myconf = XmlUtil.getString(extendedElement, "demo.conf", ""); 
 		//...
 	}
-	
+
 	/**
 	 * 继承自Config，自定义校验<extended>中的配置项
 	 */
 	@Override
 	protected boolean valid(Element extendedElement) throws Exception {
-		return super.valid(extendedElement);
-		//...
+		//myconf is ok
+		return true;
 	}
-	
+
 	/**
 	 * 需要继承父类复写，在打日志的时候以及页面展示的时候即调用的toString()
 	 */
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder(super.toString());
-		//builder.append...
+		builder.append("\ndemo.conf=" + myconf);
+		//...
 		return builder.toString();
 	}
-	
+
 	/**
 	 * 需要继承父类复写，再修改配置时判断config配置项有没有变化时即调用的equals(Object o)
 	 */
@@ -62,8 +68,9 @@ public class DemoZipConfig extends ZipImporterConfig {
 		if(!equal){
 			return false;
 		}
-		//equal=...
-		return equal;
+
+		//...
+		return myconf.equals(config.myconf); 
 	}
-	
+
 }

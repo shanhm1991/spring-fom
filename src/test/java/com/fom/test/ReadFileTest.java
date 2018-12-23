@@ -12,8 +12,6 @@ import com.fom.util.IoUtils;
 public class ReadFileTest {
 
 	public static void main(String[] args) throws IOException {
-
-
 		Configuration fsConf = new Configuration();
 		fsConf.set("fs.defaultFS", "file:///");
 
@@ -36,5 +34,6 @@ public class ReadFileTest {
 		}finally{
 			IoUtils.close(reader);
 		}
+		System.out.println(file.delete()); 
 	}
 }

@@ -137,9 +137,7 @@ public class LabelImporter extends ZipImporter<LabelImporterConfig, Map<String,O
 		Set<BulkItemResponse> conflictSet = 
 				EsHandler.defaultHandler.bulkUpdate(POOL_ES, config.getEsIndex(), config.getEsType(), updateData);
 		EsHandler.defaultHandler.bulkInsert(POOL_ES, config.getEsIndex(), config.getEsType(), insertData);
-		log.info("批处理结束[" + lineDatas.size() + "], inser=" + insertData.size() + ", update=" + localData.size() 
-		+ ",updateFailed=" + conflictSet.size() + ", 耗时=" + (System.currentTimeMillis() - batchTime) + "ms"); 
-
+		log.info("inser=" + insertData.size() + ", update=" + localData.size() + ",updateFailed=" + conflictSet.size()); 
 		resolveConflict(POOL_ES, config.getEsIndex(), config.getEsType(), conflictSet, localData);
 	}
 

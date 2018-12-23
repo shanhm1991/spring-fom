@@ -4,6 +4,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.log4j.Logger;
+
+import com.fom.util.log.LoggerFactory;
+
 /**
  * 
  * @author X4584
@@ -11,6 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  */
 class ConfigManager {
+	
+	private static final Logger LOG = LoggerFactory.getLogger("config");
 
 	private static Map<String,Config> configMap = new ConcurrentHashMap<String,Config>();
 
@@ -26,7 +32,11 @@ class ConfigManager {
 		if(config == null){
 			return;
 		}
-		configMap.put(config.name, config);
+		if(null == configMap.put(config.name, config)){
+			LOG.info("#加载配置: " + config.name + "\n" + config);
+		}else{
+			LOG.info("#更新配置: " + config.name + "\n" + config);
+		}
 	}
 
 	public static Collection<Config> getAllConfig(){
