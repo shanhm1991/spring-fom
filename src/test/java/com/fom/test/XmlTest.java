@@ -39,7 +39,6 @@ public class XmlTest {
 				+"</oprator>";
 
 		SAXReader reader = new SAXReader();
-		
 		StringReader in=new StringReader(s);  
 	    Document doc=reader.read(in); 
 		
