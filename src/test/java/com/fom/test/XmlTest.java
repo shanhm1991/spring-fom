@@ -19,13 +19,9 @@ import org.dom4j.io.XMLWriter;
 public class XmlTest {
 	public static void main(String[] args) throws DocumentException, IOException {
 
-		String s = "<oprator name=\"merchineLearn_user\" config=\"com.fom.modules.importer.merchineLearn.MerchineLearnConfig\">"
+		String s = "<oprator name=\"test\">"
 				+"<importer/>"
 				+"<scanner/>"
-				+"<src.path>/home/wxy/mlinput</src.path>"
-				+"<src.scan.cron>0 0/3 * * * ?</src.scan.cron>"
-				+"<src.pattern>WXY\\d{5}_GROUP_DATA_\\d{8}_\\d+_\\d+.zip$</src.pattern>"
-				+"<src.isHdfs>true</src.isHdfs>"
 				+"<src.type>zip</src.type>"
 				+"<src.zip.subPattern/>"
 				+"<src.match.fail.del>false</src.match.fail.del>"
