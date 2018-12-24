@@ -12,10 +12,9 @@ import org.springframework.web.context.support.AbstractRefreshableWebApplication
 import com.fom.util.log.LoggerFactory;
 
 /**
- * 如果使用内置pool，则在这里进行加载监听
  * 
- * @author X4584
- * @date 2018年12月13日
+ * @author shanhm
+ * @date 2018年12月23日
  *
  */
 @Component(value="poolLoader")

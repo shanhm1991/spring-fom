@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
 	<!-- demoZip[导入] -->
-	<fom name="demoZip" config="com.fom.modules.importer.demo.DemoZipConfig">
+	<fom name="demozipImport" config="com.fom.modules.importer.demo.DemoZipImporterConfig">
 		<src.path>E:\\test</src.path>
 		<src.pattern>.\.zip</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>

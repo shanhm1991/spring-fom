@@ -18,8 +18,8 @@ import com.fom.util.XmlUtil;
  * <executor.overTime.cancle>
  * <importer.batch>
  * 
- * @author X4584
- * @date 2018年12月12日
+ * @author shanhm
+ * @date 2018年12月23日
  *
  */
 public class ImporterConfig extends Config {

@@ -1,7 +1,6 @@
 package com.fom.context;
 
 /**
- * 
  * <src.path>
  * <src.pattern>
  * <scanner.cron>
@@ -12,8 +11,8 @@ package com.fom.context;
  * <executor.overTime.seconds>
  * <executor.overTime.cancle>
  * 
- * @author X4584
- * @date 2018年12月12日
+ * @author shanhm
+ * @date 2018年12月23日
  *
  */
 interface IConfig {

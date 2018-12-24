@@ -27,9 +27,8 @@ import com.fom.util.log.LoggerFactory;
  * <executor.overTime.seconds>
  * <executor.overTime.cancle>
  * 
- * 
- * @author X4584
- * @date 2018年12月12日
+ * @author shanhm
+ * @date 2018年12月23日
  *
  */
 public abstract class Config implements IConfig {
@@ -213,7 +212,7 @@ public abstract class Config implements IConfig {
 	}
 
 	public final long getCronTime(){
-		Date nextDate = cronExpression.getNextValidTimeAfter(new Date());
+		Date nextDate = cronExpression.getTimeAfter(new Date());
 		return nextDate.getTime() - System.currentTimeMillis();
 	}
 

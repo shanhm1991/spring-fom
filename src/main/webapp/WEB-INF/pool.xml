@@ -1,57 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pools>
 	<pool>
-		<name>zwdata</name>
+		<name>demoEs</name>
 		<class>com.fom.util.db.pool.PoolEs</class>
-		<clusterName>zwdata</clusterName>
+		<clusterName>myEs</clusterName>
 		<nodes>
-			<node>15.6.89.77:9300</node>
+			<node>ip:9300</node>
 		</nodes>
 	</pool>
 
 	<pool>
-		<name>scloudrs</name>
+		<name>demoOracle</name>
 		<core>20</core>
 		<max>20</max>
 		<waitTimeOut>30000</waitTimeOut>
 		<aliveTimeOut>300000</aliveTimeOut>
 		<class>com.fom.util.db.pool.PoolOracle</class>
-		<url>jdbc:oracle:thin:@15.6.89.74:1521:ora11g</url>
-		<user>scloudrs</user>
-		<passwd>scloudrs</passwd>
-	</pool>
-	<pool>
-		<name>scloudpf</name>
-		<core>20</core>
-		<max>20</max>
-		<waitTimeOut>30000</waitTimeOut>
-		<aliveTimeOut>300000</aliveTimeOut>
-		<class>com.fom.util.db.pool.PoolOracle</class>
-		<url>jdbc:oracle:thin:@15.6.89.75:1521:ora11g</url>
-		<user>scloudpf</user>
-		<passwd>scloudpf</passwd>
-	</pool>
-	<pool>
-		<name>zdurl</name>
-		<core>20</core>
-		<max>20</max>
-		<waitTimeOut>30000</waitTimeOut>
-		<aliveTimeOut>15000</aliveTimeOut>
-		<class>com.fom.util.db.pool.PoolOracle</class>
-		<url>jdbc:oracle:thin:@15.6.89.74:1521:ora11g</url>
-		<user>zdurl</user>
-		<passwd>zdurl</passwd>
-	</pool>
-
-	<pool>
-		<name>nbpf</name>
-		<core>20</core>
-		<max>20</max>
-		<waitTimeOut>30000</waitTimeOut>
-		<aliveTimeOut>30000</aliveTimeOut>
-		<class>com.fom.util.db.pool.PoolOracle</class>
-		<url>jdbc:oracle:thin:@15.6.89.75:1521:ora11g</url>
-		<user>wx_nbpf</user>
-		<passwd>wx_nbpf</passwd>
+		<url>jdbc:oracle:thin:@ip:1521:ora11g</url>
+		<user>user</user>
+		<passwd>passwd</passwd>
 	</pool>
 </pools>

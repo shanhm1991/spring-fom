@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
 	<!-- demo[导入] -->
-	<fom name="demo" config="com.fom.modules.importer.demo.DemoConfig">
+	<fom name="demoImport" config="com.fom.modules.importer.demo.DemoImporterConfig">
 		<src.path>E:\\test</src.path>
 		<src.pattern>.\.txt</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>

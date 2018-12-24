@@ -2,17 +2,7 @@
 <foms>
 	<includes>
 		<include>conf/import/demo.xml</include>
-		<include>conf/import/demoZip.xml</include>
-		<!-- <include>conf/import/harmInfo.xml</include> -->
-		<!-- <include>conf/import/mechineLearn_detail.xml</include> -->
-		<!-- <include>conf/import/mechineLearn_group.xml</include> -->
-		<!-- <include>conf/import/mechineLearn_user.xml</include> -->
-		<!-- <include>conf/import/merge.xml</include> -->
-		<!-- <include>conf/import/sensitivePicture.xml</include> -->
-		<!-- <include>conf/import/suspiciousTarget.xml</include> -->
-		<!-- <include>conf/import/warnAction.xml</include> -->
-		<!-- <include>conf/import/zdurl.xml</include> -->
-		<!-- <include>conf/download/merchineLearn.xml</include> -->
+		<include>conf/import/demozip.xml</include>
 	</includes>
 </foms>
 

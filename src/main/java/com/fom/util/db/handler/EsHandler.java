@@ -9,13 +9,13 @@ import org.elasticsearch.action.bulk.BulkItemResponse;
 
 /**
  * 
- * @author X4584
- * @date 2018年12月12日
+ * @author shanhm
+ * @date 2018年12月23日
  *
  */
 public interface EsHandler {
 	
-	EsHandler defaultHandler = new EsHandlerImpl();
+	EsHandler handler = new EsHandlerImpl();
 
 	/**
 	 * 同步判断新建索引

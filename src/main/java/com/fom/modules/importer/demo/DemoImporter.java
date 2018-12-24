@@ -6,7 +6,13 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fom.context.Importer;
 
-public class DemoImporter extends Importer<DemoConfig, DemoBean> {
+/**
+ * 
+ * @author shanhm
+ * @date 2018年12月23日
+ *
+ */
+public class DemoImporter extends Importer<DemoImporterConfig, DemoBean> {
 
 	protected DemoImporter(String name, String path) {
 		super(name, path);
@@ -16,17 +22,17 @@ public class DemoImporter extends Importer<DemoConfig, DemoBean> {
 	 * 继承自Executor，在任务线程启动时执行的第一个动作，可以完成一些准备操作
 	 */
 	@Override
-	protected void onStart(DemoConfig config) throws Exception {
+	protected void onStart(DemoImporterConfig config) throws Exception {
 		super.onStart(config);
 	}
 
 	/**
-	 * Abstract
-	 * 继承自Importer, 将行数据line解析成DemoBean，并添加到lineDatas中去
+	 * 
+	 * [Abstract]继承自Importer, 将行数据line解析成DemoBean，并添加到lineDatas中去
 	 * 异常则结束任务，保留文件，所以对错误数据导致的异常需要try-catch，一避免任务重复失败
 	 */
 	@Override
-	protected void praseLineData(DemoConfig config, List<DemoBean> lineDatas, String line, long batchTime) throws Exception {
+	protected void praseLineData(DemoImporterConfig config, List<DemoBean> lineDatas, String line, long batchTime) throws Exception {
 		log.info("解析行数据:" + line);
 		if(StringUtils.isBlank(line)){
 			return;
@@ -35,20 +41,19 @@ public class DemoImporter extends Importer<DemoConfig, DemoBean> {
 	}
 
 	/**
-	 * Abstract
-	 * 继承自Importer, 批处理行数据解析结果, 异常则结束任务，保留文件
+	 * [Abstract]继承自Importer, 批处理行数据解析结果, 异常则结束任务，保留文件
 	 */
 	@Override
-	protected void batchProcessLineData(DemoConfig config, List<DemoBean> lineDatas, long batchTime) throws Exception {
+	protected void batchProcessLineData(DemoImporterConfig config, List<DemoBean> lineDatas, long batchTime) throws Exception {
 		log.info("处理数据入库:" + lineDatas.size());
-		//EsHandler.defaultHandler.bulkInsert(poolName, index, type, data);
+		//EsHandler.handler.bulkInsert(poolName, index, type, data);
 	}
 
 	/**
 	 * 继承自Executor，在任务线程完成时执行的动作
 	 */
 	@Override
-	protected void onComplete(DemoConfig config) throws Exception {
+	protected void onComplete(DemoImporterConfig config) throws Exception {
 
 	}
 }

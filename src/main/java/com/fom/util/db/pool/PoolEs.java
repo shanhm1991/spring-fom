@@ -16,8 +16,8 @@ import com.fom.util.exception.WarnException;
 /**
  * TransportClient本身提供了连接与通道的复用
  * 
- * @author X4584
- * @date 2018年12月12日
+ * @author shanhm
+ * @date 2018年12月23日
  *
  */
 class PoolEs extends Pool<TransportClient>{

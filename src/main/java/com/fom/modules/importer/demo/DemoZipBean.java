@@ -1,5 +1,11 @@
 package com.fom.modules.importer.demo;
 
+/**
+ * 
+ * @author shanhm
+ * @date 2018年12月23日
+ *
+ */
 public class DemoZipBean {
 
 	private String data;

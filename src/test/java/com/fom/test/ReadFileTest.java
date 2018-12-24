@@ -10,6 +10,12 @@ import org.apache.hadoop.fs.Path;
 import com.fiberhome.odin.hadoop.hdfs.io.SDFileReader;
 import com.fom.util.IoUtils;
 
+/**
+ * 
+ * @author shanhm
+ * @date 2018年12月23日
+ *
+ */
 public class ReadFileTest {
 
 	public static void main(String[] args) throws IOException {
@@ -37,6 +43,6 @@ public class ReadFileTest {
 		}finally{
 			IoUtils.close(reader);
 		}
-		System.out.println(fs.delete(path, true)); 
+		System.out.println(fs.delete(path, true)); //bug
 	}
 }

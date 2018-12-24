@@ -30,8 +30,8 @@ import com.fom.util.log.LoggerFactory;
 /**
  * Listener负责监听配置变化和更新poolMap中的pool,Impoter从poolMap中获取使用pool
  * 
- * @author X4584
- * @date 2018年12月12日
+ * @author shanhm
+ * @date 2018年12月23日
  *
  */
 public class PoolManager {

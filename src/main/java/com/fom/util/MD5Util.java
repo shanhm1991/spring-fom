@@ -15,8 +15,8 @@ import java.security.NoSuchAlgorithmException;
 
 /**
  * 
- * @author X4584
- * @date 2018年12月12日
+ * @author shanhm
+ * @date 2018年12月23日
  *
  */
 public class MD5Util {

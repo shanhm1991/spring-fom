@@ -13,11 +13,10 @@ import com.fiberhome.odin.hadoop.hdfs.io.SDFileReader;
 import com.fom.util.IoUtils;
 
 /**
- * 
  * 引入SDFileReader是为了解析orc压缩格式的文件
  * 但是存在bug场景，在windows下没有hadoop环境变量时，即便关闭了SDFileReader，依然无法删除文件
  * 
- * @author X4584
+ * @author shanhm
  * @date 2018年12月23日
  *
  */

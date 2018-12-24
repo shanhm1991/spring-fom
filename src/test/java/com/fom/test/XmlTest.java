@@ -10,6 +10,12 @@ import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 
+/**
+ * 
+ * @author shanhm
+ * @date 2018年12月23日
+ *
+ */
 public class XmlTest {
 	public static void main(String[] args) throws DocumentException, IOException {
 

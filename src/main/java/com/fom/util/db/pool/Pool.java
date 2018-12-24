@@ -15,10 +15,10 @@ import com.fom.util.log.LoggerFactory;
 import org.apache.log4j.Logger;
 
 /**
- * 连接池管理  维护一个空闲池; 轮询监控关闭超时的空闲连接; 限制最大创建连接数
+ * 连接池管理  维护一个空闲池; 轮询监控关闭超时的空闲连接; 限制最大创建连接数; 动态响应配置变化
  * 
- * @author X4584
- * @date 2018年12月12日
+ * @author shanhm
+ * @date 2018年12月23日
  *
  * @param <E>
  */

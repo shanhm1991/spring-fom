@@ -21,8 +21,8 @@ import com.fom.util.XmlUtil;
  * <importer.batch>
  * <importer.zip.subPattern>
  * 
- * @author X4584
- * @date 2018年12月12日
+ * @author shanhm
+ * @date 2018年12月23日
  *
  */
 public class ZipImporterConfig extends ImporterConfig {

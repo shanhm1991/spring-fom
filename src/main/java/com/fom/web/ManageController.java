@@ -18,6 +18,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.fom.context.ManagerService;
 import com.fom.util.IoUtils;
 
+/**
+ * 
+ * @author shanhm
+ * @date 2018年12月23日
+ *
+ */
 @Controller
 public class ManageController {
 
