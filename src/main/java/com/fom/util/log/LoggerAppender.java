@@ -118,10 +118,30 @@ public class LoggerAppender extends FileAppender{
 	public void setFile(String file){
 		super.setFile(file); 
 	}
-
+	
 	@Override
 	protected void subAppend(LoggingEvent event) {
-		super.subAppend(event); 
+		if("\n".equals(event.getMessage())){
+			System.out.println(1);
+			this.qw.write("\n");
+		}else{
+			this.qw.write(this.layout.format(event));
+		}
+
+	    if(layout.ignoresThrowable()) {
+	      String[] s = event.getThrowableStrRep();
+	      if (s != null) {
+		int len = s.length;
+		for(int i = 0; i < len; i++) {
+		  this.qw.write(s[i]);
+		  this.qw.write(Layout.LINE_SEP);
+		}
+	      }
+	    }
+	    if(shouldFlush(event)) {
+	      this.qw.flush();
+	    }
+		
 		if (fileName != null && qw != null) {
 			long size = ((CountingQuietWriter) qw).getCount();
 			if(datePattern == null){
@@ -145,7 +165,6 @@ public class LoggerAppender extends FileAppender{
 		
 		File file = new File(fileName);
 		File bak = new File(fileName + "." + date + "." + maxBackupIndex);
-
 		//如果最大的日志备份序号已经存在，直接覆盖
 		if(bak.exists()){
 			try {

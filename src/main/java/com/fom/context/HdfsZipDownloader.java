@@ -96,7 +96,7 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 					}
 				}
 
-				log.info("下载文件(" + (status.getLen() / 1024) + "KB)：" + status.getPath()); 
+				log.info("下载文件(" + numFormat.format(status.getLen() / 1024.0) + "KB)：" + status.getPath()); 
 				BufferedInputStream buffer = null;
 				try{
 					buffer = new BufferedInputStream(config.fs.open(status.getPath()));

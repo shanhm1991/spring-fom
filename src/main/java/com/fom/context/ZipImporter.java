@@ -89,7 +89,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 
 			try{
 				long cost = ZipUtil.unZip(srcFile, unzipDir);
-				log.info("解压结束(" + srcSize + "KB), 耗时=" + cost + "ms");
+				log.info("解压结束(" + numFormat.format(srcSize) + "KB), 耗时=" + cost + "ms");
 			}catch(ZipException e){
 				log.error("解压失败", e); 
 				removeDirectly = true;
@@ -147,7 +147,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 		}
 
 		long sTime = System.currentTimeMillis();
-		long size = file.length() / 1024;
+		double size = file.length() / 1024.0;
 		int lineIndex = 0;
 		try{
 			lineIndex = Integer.valueOf(lines.get(1));
@@ -158,7 +158,8 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 
 		readFile(file, lineIndex);
 		nameList.remove(name);
-		log.info("处理文件结束[" + file.getName() + "(" + size + "KB)], 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+		log.info("处理文件结束[" + name + "(" 
+				+ numFormat.format(size) + "KB)], 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 		if(!file.delete()){
 			throw new WarnException("删除文件失败:" + name); 
 		}
@@ -171,9 +172,10 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 			it.remove();
 			long sTime = System.currentTimeMillis();
 			File file = new File(unzipDir + File.separator + name);
-			long size = file.length() / 1024;
+			double size = file.length() / 1024.0;
 			readFile(file, 0);
-			log.info("处理文件结束[" + name + "(" + size + "KB)], 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+			log.info("处理文件结束[" + name + "(" 
+					+ numFormat.format(size) + "KB)], 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 			if(!file.delete()){
 				throw new WarnException("删除文件失败:" + file.getName()); 
 			}
@@ -201,13 +203,13 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 				return;
 			}
 		}
-		
+
 		//srcFile.exist = true
 		if(!srcFile.delete()){ 
 			log.warn("清除源文件失败."); 
 			return;
 		}
-		
+
 		if(logFile.exists() && !logFile.delete()){
 			log.warn("清除日志失败.");
 		}

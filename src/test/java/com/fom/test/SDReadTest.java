@@ -16,7 +16,7 @@ import com.fom.util.IoUtils;
  * @date 2018年12月23日
  *
  */
-public class ReadFileTest {
+public class SDReadTest {
 
 	public static void main(String[] args) throws IOException {
 		Configuration fsConf = new Configuration();
@@ -24,20 +24,13 @@ public class ReadFileTest {
 		FileSystem fs = FileSystem.get(fsConf);
 
 		File file = new File("E:/node.txt");
-		int StartLine = 0;
-		int lineIndex = 0;
 		SDFileReader reader = null;
 		String line = "";
 		Path path = null;
 		try{
 			path = new Path(file.getPath());
 			reader = new SDFileReader(path, fsConf);
-
 			while ((line = reader.readStringLine()) != null) {
-				lineIndex++;
-				if(lineIndex <= StartLine){
-					continue;
-				}
 				System.out.println(line);
 			}
 		}finally{

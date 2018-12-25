@@ -15,7 +15,7 @@ import com.fom.util.log.LoggerFactory;
  *
  */
 class ConfigManager {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger("config");
 
 	private static Map<String,Config> configMap = new ConcurrentHashMap<String,Config>();
@@ -33,8 +33,15 @@ class ConfigManager {
 			return;
 		}
 		if(null == configMap.put(config.name, config)){
-			LOG.info("#加载配置: " + config.name + "\n" + config);
+			if(config.valid){
+				LOG.info("\n");
+				LOG.info("#加载配置: " + config.name + "\n" + config);
+			}else{
+				LOG.info("\n");
+				LOG.warn("#非法配置: " + config.name + "\n" + config);
+			}
 		}else{
+			LOG.info("\n");
 			LOG.info("#更新配置: " + config.name + "\n" + config);
 		}
 	}
@@ -42,7 +49,7 @@ class ConfigManager {
 	public static Collection<Config> getAllConfig(){
 		return configMap.values();
 	}
-	
+
 	public static Map<String,Config> getConfigMap(){
 		return configMap;
 	}

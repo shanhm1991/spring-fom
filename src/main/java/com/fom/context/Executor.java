@@ -1,6 +1,7 @@
 package com.fom.context;
 
 import java.io.File;
+import java.text.DecimalFormat;
 
 import org.apache.log4j.Logger;
 
@@ -17,6 +18,8 @@ import com.fom.util.log.LoggerFactory;
 public abstract class Executor<E extends Config> extends Thread {
 
 	E config;
+	
+	DecimalFormat numFormat  = new DecimalFormat("0.0");
 
 	protected final Logger log;
 
@@ -26,7 +29,7 @@ public abstract class Executor<E extends Config> extends Thread {
 
 	protected final File srcFile;
 
-	protected final long srcSize;
+	protected final double srcSize;
 
 	protected final String srcName;
 
@@ -35,7 +38,7 @@ public abstract class Executor<E extends Config> extends Thread {
 		this.srcPath = path;
 		this.srcFile = new File(path);
 		this.srcName = srcFile.getName();
-		this.srcSize = srcFile.length() / 1024;
+		this.srcSize = srcFile.length() / 1024.0;
 		Config config = getRuntimeConfig();
 		if(config == null){
 			throw new RuntimeException("任务取消.");

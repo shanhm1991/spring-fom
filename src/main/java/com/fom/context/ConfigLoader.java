@@ -8,6 +8,7 @@ import java.lang.reflect.Constructor;
 import java.util.Iterator;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
@@ -20,6 +21,7 @@ import org.springframework.web.context.support.AbstractRefreshableWebApplication
 
 import com.fom.util.IoUtils;
 import com.fom.util.exception.WarnException;
+import com.fom.util.log.LoggerFactory;
 
 /**
  * 
@@ -29,6 +31,8 @@ import com.fom.util.exception.WarnException;
  */
 @Component(value="configLoader")
 class ConfigLoader extends AbstractRefreshableWebApplicationContext {
+	
+	private static final Logger LOG = LoggerFactory.getLogger("config");
 
 	private File fomXml;
 
@@ -80,6 +84,8 @@ class ConfigLoader extends AbstractRefreshableWebApplicationContext {
 			if(config != null){
 				config.valid = false;
 			}
+			LOG.info("\n"); 
+			LOG.error(name + "加载异常", e);
 		}
 		return config;
 	}
