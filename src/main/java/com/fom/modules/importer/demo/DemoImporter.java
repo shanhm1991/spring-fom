@@ -47,6 +47,9 @@ public class DemoImporter extends Importer<DemoImporterConfig, DemoBean> {
 	protected void batchProcessLineData(DemoImporterConfig config, List<DemoBean> lineDatas, long batchTime) throws Exception {
 		log.info("处理数据入库:" + lineDatas.size());
 		//EsHandler.handler.bulkInsert(poolName, index, type, data);
+		
+		
+		
 	}
 
 	/**

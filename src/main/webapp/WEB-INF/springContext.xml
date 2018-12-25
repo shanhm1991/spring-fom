@@ -8,6 +8,5 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
 	</context:component-scan>
 	
-	<!-- <import resource="classpath*:spring-redis.xml"/> -->
-
+	<import resource="dataSource/demo_mysql_spring.xml"/>
 </beans>

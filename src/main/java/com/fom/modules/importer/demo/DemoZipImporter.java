@@ -55,7 +55,11 @@ public class DemoZipImporter extends ZipImporter<DemoZipImporterConfig, DemoZipB
 	protected void batchProcessLineData(DemoZipImporterConfig config, List<DemoZipBean> lineDatas, long batchTime)
 			throws Exception {
 		log.info("处理数据入库:" + lineDatas.size());
-		//OraHandler.handler.batchExecute(poolName, sql, paramMaps);
+		
+		//1. OraHandler.handler.batchExecute(poolName, sql, paramMaps);
+		
+		//2.
+		
 	}
 
 	/**

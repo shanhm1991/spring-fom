@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd" >
+<beans>
+	<!-- 配置一个库:mysql.demo -->
+	<bean id="demoDataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql:///demo" />
+		<property name="username" value="root" />
+		<property name="password" value="root" />
+		<property name="minIdle" value="1" />
+		<property name="maxIdle" value="10" />
+		<property name="initialSize" value="1" />
+		<property name="timeBetweenEvictionRunsMillis" value="60000"/> 
+        <property name="poolPreparedStatements" value="true"/>        
+        <property name="maxOpenPreparedStatements" value="50"/>        
+        <property name="removeAbandonedTimeout" value="180"/>
+        <property name="testOnBorrow" value="true"/>
+        <property name="testOnReturn" value="true"/>
+        <property name="testWhileIdle" value="true"/>
+		<property name="validationQuery" value="select 1 from dual" />
+	</bean>
+	
+	<bean id="demoSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="demoDataSource" />
+		<property name="configLocation" value="/WEB-INF/dataSource/demo_mysql_mybatis.xml" />
+	</bean>
+
+	<bean id="demoDao" class="com.fom.dao.DemoDaoImpl">
+		<property name="sqlSessionFactory" ref="demoSqlSessionFactory" />
+	</bean>
+</beans>
