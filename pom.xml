@@ -175,7 +175,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- <dependency> <groupId>org.apache.hadoop</groupId> <artifactId>hadoop-hdfs-client</artifactId> <version>3.1.0</version> </dependency> -->
 		<dependency>
 			<groupId>org.apache.orc</groupId>
 			<artifactId>orc-core</artifactId>
@@ -198,18 +197,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.nebula</groupId>
-			<artifactId>datacenter</artifactId>
-			<version>6.20.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.nebula</groupId>
 			<artifactId>storage</artifactId>
 			<version>1.2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.nebula</groupId>
-			<artifactId>gaia</artifactId>
-			<version>6.1.2</version>
 		</dependency>
 	</dependencies>
 </project>

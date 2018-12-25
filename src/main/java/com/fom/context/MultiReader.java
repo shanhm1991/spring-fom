@@ -6,10 +6,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-
-import com.fiberhome.odin.hadoop.hdfs.io.SDFileReader;
 import com.fom.util.IoUtils;
 
 /**
@@ -22,37 +18,37 @@ import com.fom.util.IoUtils;
  */
 public class MultiReader implements Closeable {
 	
-	private boolean useSD;
+//	private boolean useSD;
+//	
+//	private Configuration fsConf;
 	
-	private Configuration fsConf;
-	
-	private SDFileReader sdReader;
+//	private SDFileReader sdReader;
 	
 	private BufferedReader buffReader;
 
 	
 	public MultiReader(File file, boolean useSD) throws Exception{
-		this.useSD = useSD;
+//		this.useSD = useSD;
 		if(useSD){
-			fsConf = new Configuration();
-			fsConf.set("fs.defaultFS", "file:///");
-			sdReader = new SDFileReader(new Path(file.getPath()), fsConf);
+//			fsConf = new Configuration();
+//			fsConf.set("fs.defaultFS", "file:///");
+//			sdReader = new SDFileReader(new Path(file.getPath()), fsConf);
 		}else{
 			buffReader = new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8"));
 		}
 	}
 	
 	public String readLine() throws Exception{
-		if(useSD){
-			return sdReader.readStringLine();
-		}else{
+//		if(useSD){
+//			return sdReader.readStringLine();
+//		}else{
 			return buffReader.readLine();
-		}
+//		}
 	}
 	
 	@Override
 	public void close(){
-		IoUtils.close(sdReader);
+//		IoUtils.close(sdReader);
 		IoUtils.close(buffReader);
 	}
 
