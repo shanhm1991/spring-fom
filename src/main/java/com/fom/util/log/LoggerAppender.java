@@ -122,7 +122,6 @@ public class LoggerAppender extends FileAppender{
 	@Override
 	protected void subAppend(LoggingEvent event) {
 		if("\n".equals(event.getMessage())){
-			System.out.println(1);
 			this.qw.write("\n");
 		}else{
 			this.qw.write(this.layout.format(event));

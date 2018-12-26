@@ -12,6 +12,6 @@
 	</typeAliases>
 
 	<mappers>
-		<mapper resource="mappers/demo.xml" />
+		<mapper resource="mappers/oracle_demo.xml" />
 	</mappers>
 </configuration> 

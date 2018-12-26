@@ -61,7 +61,7 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 		MultiReader reader = null;
 		String line = "";
 		try{
-			reader = new MultiReader(file, false);
+			reader = new MultiReader(file);
 			List<V> lineDatas = new LinkedList<>(); 
 			long batchTime = System.currentTimeMillis();
 			while ((line = reader.readLine()) != null) {

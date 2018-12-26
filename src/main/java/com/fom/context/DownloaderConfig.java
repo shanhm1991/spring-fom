@@ -15,7 +15,6 @@ import com.fom.util.XmlUtil;
  * <executor.overTime.seconds>
  * <executor.overTime.cancle>
  * <downloader.src.del>
- * <downloader.temp.path>
  * <downloader.dest.path>
  * 
  * @author shanhm
@@ -38,8 +37,7 @@ public class DownloaderConfig extends Config {
 	void load() throws Exception {
 		super.load();
 		delSrc = XmlUtil.getBoolean(element, "src.del", false);
-		tempPath = XmlUtil.getString(element, "temp.path", "");
-		destPath = XmlUtil.getString(element, "dest.path", "");
+		destPath = XmlUtil.getString(element, "downloader.dest.path", "");
 	}
 	
 	@Override
@@ -47,7 +45,10 @@ public class DownloaderConfig extends Config {
 		if(!super.valid()){
 			return false;
 		}
-		//...
+		
+		//校验 destPath
+		
+		tempPath = XmlUtil.getString(element, "temp.path", "");//TODO
 		return true;
 	}
 	
@@ -55,8 +56,7 @@ public class DownloaderConfig extends Config {
 	public String toString() {
 		StringBuilder builder = new StringBuilder(super.toString());
 		builder.append("\nsrc.del=" + delSrc);
-		builder.append("\ntemp.path=" + tempPath);
-		builder.append("\ndest.path=" + destPath);
+		builder.append("\ndownloader.dest.path=" + destPath);
 		return builder.toString();
 	}
 	
@@ -91,10 +91,6 @@ public class DownloaderConfig extends Config {
 
 	public boolean isDelSrc() {
 		return delSrc;
-	}
-
-	public String getTempPath() {
-		return tempPath;
 	}
 
 	public String getDestPath() {

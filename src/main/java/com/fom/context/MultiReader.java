@@ -6,49 +6,69 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.ql.exec.vector.VectorizedRowBatch;
+import org.apache.orc.FileFormatException;
+import org.apache.orc.OrcFile;
+import org.apache.orc.Reader;
+import org.apache.orc.RecordReader;
+
 import com.fom.util.IoUtils;
 
 /**
- * 引入SDFileReader是为了解析orc压缩格式的文件
- * 但是存在bug场景，在windows下没有hadoop环境变量时，即便关闭了SDFileReader，依然无法删除文件
  * 
  * @author shanhm
  * @date 2018年12月23日
  *
  */
 public class MultiReader implements Closeable {
-	
-//	private boolean useSD;
-//	
-//	private Configuration fsConf;
-	
-//	private SDFileReader sdReader;
-	
+
+
 	private BufferedReader buffReader;
 
+	private RecordReader recordReader;
+
+	private VectorizedRowBatch batch;
 	
-	public MultiReader(File file, boolean useSD) throws Exception{
-//		this.useSD = useSD;
-		if(useSD){
-//			fsConf = new Configuration();
-//			fsConf.set("fs.defaultFS", "file:///");
-//			sdReader = new SDFileReader(new Path(file.getPath()), fsConf);
-		}else{
+	private StringBuilder builder;
+
+	private boolean isOrc;
+
+
+	public MultiReader(File file) throws Exception {
+		try {
+			Reader reader = 
+					OrcFile.createReader(new Path("E:/node.txt"), OrcFile.readerOptions(new Configuration()));
+			recordReader = reader.rows();
+			batch = reader.getSchema().createRowBatch(1);
+			builder = new StringBuilder();
+			isOrc = true;
+		} catch (FileFormatException e) {
 			buffReader = new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8"));
 		}
 	}
-	
+
 	public String readLine() throws Exception{
-//		if(useSD){
-//			return sdReader.readStringLine();
-//		}else{
+		if(!isOrc){
 			return buffReader.readLine();
-//		}
+		}
+		
+		if(recordReader.nextBatch(batch)){
+			builder.setLength(0); 
+			for(int i = 0;i < batch.numCols;i++){
+				batch.cols[i].stringifyValue(builder, 0);
+				builder.append("\t");
+			}
+			return builder.toString();
+		}
+		
+		return null;
 	}
-	
+
 	@Override
 	public void close(){
-//		IoUtils.close(sdReader);
+		IoUtils.close(recordReader);
 		IoUtils.close(buffReader);
 	}
 
