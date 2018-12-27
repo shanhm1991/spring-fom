@@ -26,7 +26,7 @@ import org.apache.log4j.helpers.LogLog;
 import org.apache.log4j.helpers.OptionConverter;
 import org.apache.log4j.spi.LoggingEvent;
 
-import com.fom.util.IoUtils;
+import com.fom.util.Utils;
 
 /**
  * 
@@ -364,14 +364,14 @@ public class LoggerAppender extends FileAppender{
 						tarOut.closeArchiveEntry();
 						tarOut.flush();
 					}finally{
-						IoUtils.close(input);
+						Utils.close(input);
 					}
 				}
 			}catch(Exception e) {
 				LogLog.error("", e); 
 				return;
 			}finally{
-				IoUtils.close(tarOut);
+				Utils.close(tarOut);
 			}
 
 			fileName = fileName + ".gz";
@@ -390,8 +390,8 @@ public class LoggerAppender extends FileAppender{
 				LogLog.error("", e); 
 				return;
 			}finally{
-				IoUtils.close(in);
-				IoUtils.close(gzipOut);
+				Utils.close(in);
+				Utils.close(gzipOut);
 			}
 			tar.delete();
 			for (File file : files) {

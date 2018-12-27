@@ -36,13 +36,13 @@ public class ZipUtil {
 						outStream.write(buff,0,len); 
 					}
 				}finally{
-					IoUtils.close(inStream);
-					IoUtils.close(outStream);
+					Utils.close(inStream);
+					Utils.close(outStream);
 				}
 			}
 			return System.currentTimeMillis() - sTime;
 		} finally{
-			IoUtils.close(zip);
+			Utils.close(zip);
 		}
 	}
 }

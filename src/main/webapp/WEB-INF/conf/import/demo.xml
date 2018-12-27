@@ -2,7 +2,7 @@
 <foms>
 	<!-- demo[导入] -->
 	<fom name="demoImport" config="com.fom.modules.importer.demo.DemoImporterConfig">
-		<src.path>/test/</src.path>
+		<src.path>${webapp.root}/test</src.path>
 		<src.pattern>.\.txt</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
 		<scanner>com.fom.context.LocalScanner</scanner>

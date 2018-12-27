@@ -14,7 +14,7 @@ import org.apache.orc.OrcFile;
 import org.apache.orc.Reader;
 import org.apache.orc.RecordReader;
 
-import com.fom.util.IoUtils;
+import com.fom.util.Utils;
 
 /**
  * 
@@ -39,7 +39,7 @@ public class MultiReader implements Closeable {
 	public MultiReader(File file) throws Exception {
 		try {
 			Reader reader = 
-					OrcFile.createReader(new Path("E:/node.txt"), OrcFile.readerOptions(new Configuration()));
+					OrcFile.createReader(new Path(file.getPath()), OrcFile.readerOptions(new Configuration()));
 			recordReader = reader.rows();
 			batch = reader.getSchema().createRowBatch(1);
 			builder = new StringBuilder();
@@ -68,8 +68,8 @@ public class MultiReader implements Closeable {
 
 	@Override
 	public void close(){
-		IoUtils.close(recordReader);
-		IoUtils.close(buffReader);
+		Utils.close(recordReader);
+		Utils.close(buffReader);
 	}
 
 }

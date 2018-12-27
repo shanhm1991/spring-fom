@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
-import com.fom.util.IoUtils;
+import com.fom.util.Utils;
 import com.fom.util.exception.WarnException;
 
 /**
@@ -82,7 +82,7 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 			}
 			updateLogFile(file.getName(), lineIndex);
 		}finally{
-			IoUtils.close(reader);
+			Utils.close(reader);
 		}
 	}
 

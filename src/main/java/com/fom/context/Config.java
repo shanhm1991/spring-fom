@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.dom4j.Element;
 import org.quartz.CronExpression;
 
+import com.fom.util.Utils;
 import com.fom.util.XmlUtil;
 import com.fom.util.log.LoggerFactory;
 
@@ -84,7 +85,7 @@ public abstract class Config implements IConfig {
 	boolean executorCancelOnOverTime;
 
 	void load() throws Exception {
-		srcPath = XmlUtil.getString(element, "src.path", "");
+		srcPath = Utils.parsePath(XmlUtil.getString(element, "src.path", ""));
 		reg = XmlUtil.getString(element, "src.pattern", "");
 		delMatchFailFile = XmlUtil.getBoolean(element, "src.match.fail.del", false);
 		scannerClzz = XmlUtil.getString(element, "scanner", "");

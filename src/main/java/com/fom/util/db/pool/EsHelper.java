@@ -31,7 +31,7 @@ import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.engine.VersionConflictEngineException;
 
-import com.fom.util.IoUtils;
+import com.fom.util.Utils;
 import com.fom.util.log.LoggerFactory;
 
 /**
@@ -71,7 +71,7 @@ public class EsHelper {
 			PutMappingRequest mappingRequest = Requests.putMappingRequest(index).type(type).source(builder);
 			client.admin().indices().putMapping(mappingRequest).actionGet();
 		}finally{
-			IoUtils.close(parser);
+			Utils.close(parser);
 		}
 	}
 

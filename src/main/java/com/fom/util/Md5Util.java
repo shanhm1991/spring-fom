@@ -19,7 +19,7 @@ import java.security.NoSuchAlgorithmException;
  * @date 2018年12月23日
  *
  */
-public class MD5Util {
+public class Md5Util {
 	/**
 	 * 默认的密码字符串组合，用来将字节转换成 16 进制表示的字符,apache校验下载的文件的正确性用的就是默认的这个组合
 	 */
@@ -33,7 +33,7 @@ public class MD5Util {
 		try {
 			messagedigest = MessageDigest.getInstance("MD5");
 		} catch (NoSuchAlgorithmException nsaex) {
-			System.err.println(MD5Util.class.getName()
+			System.err.println(Md5Util.class.getName()
 					+ "初始化失败，MessageDigest不支持MD5Util。");
 			nsaex.printStackTrace();
 		}
@@ -184,7 +184,7 @@ public class MD5Util {
 			messagedigest.update(byteBuffer);
 			return bufferToHex(messagedigest.digest());
 		}finally{
-			IoUtils.close(in);
+			Utils.close(in);
 		}
 	}
 

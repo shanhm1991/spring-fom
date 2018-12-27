@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
-public class SpringContext implements ApplicationContextAware {
+public class SpringUtil implements ApplicationContextAware {
 	
 	private static ApplicationContext applicationContext;
 	

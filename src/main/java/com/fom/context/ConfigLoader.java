@@ -19,7 +19,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.AbstractRefreshableWebApplicationContext;
 
-import com.fom.util.IoUtils;
+import com.fom.util.Utils;
 import com.fom.util.exception.WarnException;
 import com.fom.util.log.LoggerFactory;
 
@@ -131,7 +131,7 @@ class ConfigLoader extends AbstractRefreshableWebApplicationContext {
 					ConfigManager.registerConfig(config); 
 				}
 			}finally{
-				IoUtils.close(in); 
+				Utils.close(in); 
 			}
 		}
 	}
@@ -157,7 +157,7 @@ class ConfigLoader extends AbstractRefreshableWebApplicationContext {
 			writer.flush();
 			writer.close();
 		}finally{
-			IoUtils.close(out); 
+			Utils.close(out); 
 		}
 		FileUtils.copyFile(xml, new File(apply + File.separator + "history" + File.separator + xml.getName()));
 	}

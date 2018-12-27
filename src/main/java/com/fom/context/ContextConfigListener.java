@@ -61,7 +61,7 @@ public final class ContextConfigListener extends ContextLoaderListener {
 		}catch(Exception e){
 			throw new RuntimeException("加载fom配置失败", e);
 		}
-
+		
 		PoolLoader poolLoader = (PoolLoader)springContext.getBean("poolLoader");
 		poolLoader.load(context.getInitParameter("poolConfigLocation"));
 	}

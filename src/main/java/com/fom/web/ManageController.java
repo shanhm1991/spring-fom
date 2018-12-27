@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fom.context.ManagerService;
-import com.fom.util.IoUtils;
+import com.fom.util.Utils;
 
 /**
  * 
@@ -149,7 +149,7 @@ public class ManageController {
 				resp.getOutputStream().write(bytes, 0, len);
 			}
 		}finally{
-			IoUtils.close(in);
+			Utils.close(in);
 		}
 		return null;
 	}
