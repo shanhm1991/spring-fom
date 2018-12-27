@@ -5,6 +5,8 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fom.context.Importer;
+import com.fom.dao.demo.MysqlDemoDao;
+import com.fom.util.SpringUtil;
 
 /**
  * 
@@ -23,7 +25,7 @@ public class DemoImporter extends Importer<DemoImporterConfig, DemoBean> {
 	 */
 	@Override
 	protected void onStart(DemoImporterConfig config) throws Exception {
-		super.onStart(config);
+		log.info("start process.");
 	}
 
 	/**
@@ -45,11 +47,9 @@ public class DemoImporter extends Importer<DemoImporterConfig, DemoBean> {
 	 */
 	@Override
 	protected void batchProcessLineData(DemoImporterConfig config, List<DemoBean> lineDatas, long batchTime) throws Exception {
+		MysqlDemoDao demoDao = SpringUtil.getBeanById("mysqlDemoDao", MysqlDemoDao.class);
+		demoDao.batchInsertDemo(lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());
-		//EsHandler.handler.bulkInsert(poolName, index, type, data);
-		
-		
-		
 	}
 
 	/**
@@ -57,6 +57,6 @@ public class DemoImporter extends Importer<DemoImporterConfig, DemoBean> {
 	 */
 	@Override
 	protected void onComplete(DemoImporterConfig config) throws Exception {
-
+		log.info("complete process.");
 	}
 }

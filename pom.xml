@@ -66,13 +66,23 @@
 		</dependency>
 		<dependency>
 			<groupId>org.mybatis</groupId>
-			<artifactId>mybatis-spring</artifactId>
-			<version>1.3.1</version>
+			<artifactId>mybatis</artifactId>
+			<version>3.4.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mybatis</groupId>
-			<artifactId>mybatis</artifactId>
-			<version>3.4.6</version>
+			<artifactId>mybatis-spring</artifactId>
+			<version>1.3.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.oracle</groupId>
+			<artifactId>ojdbc6</artifactId>
+			<version>11.2.0.3</version>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>8.0.11</version>
 		</dependency>
 		<dependency>
 			<groupId>com.mchange</groupId>
@@ -179,21 +189,6 @@
 			<groupId>org.apache.orc</groupId>
 			<artifactId>orc-core</artifactId>
 			<version>1.5.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.oracle</groupId>
-			<artifactId>ojdbc6</artifactId>
-			<version>11.2.0.3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.mybatis</groupId>
-			<artifactId>mybatis</artifactId>
-			<version>3.4.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.mybatis</groupId>
-			<artifactId>mybatis-spring</artifactId>
-			<version>1.3.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.nebula</groupId>

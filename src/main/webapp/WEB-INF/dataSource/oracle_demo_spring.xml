@@ -4,9 +4,9 @@
 	<!-- 配置一个库:mysql.demo -->
 	<bean id="demoDataSource" class="org.apache.commons.dbcp2.BasicDataSource">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-		<property name="url" value="jdbc:mysql:///demo" />
-		<property name="username" value="root" />
-		<property name="password" value="root" />
+		<property name="url" value="jdbc:mysql://192.168.141.13:3306/demo" />
+		<property name="username" value="shanhm"/>
+		<property name="password" value="shanhm"/>
 		<property name="minIdle" value="1" />
 		<property name="maxIdle" value="10" />
 		<property name="initialSize" value="1" />

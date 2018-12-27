@@ -48,7 +48,7 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 		}
 
 		readFile(srcFile, lineIndex);
-		log.info("处理文件结束(" + srcSize + "KB),耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+		log.info("处理文件结束(" + numFormat.format(srcSize) + "KB),耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 		if(!srcFile.delete()){
 			throw new WarnException("删除文件失败."); 
 		}
