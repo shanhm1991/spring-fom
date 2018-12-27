@@ -7,6 +7,8 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
+import com.fom.util.Utils;
+
 /**
  * 
  * @author shanhm
@@ -30,8 +32,9 @@ public class LoggerFactory {
 		appender.setLayout(layout); 
 		appender.setEncoding("UTF-8");
 		appender.setAppend(true);
-		String root = System.getProperty("webapp.root");
-		appender.setFile(root + File.separator + "log" + File.separator + name + ".log");
+		String logFile = Utils.parsePath("${webapp.root}"
+				+ File.separator + "log" + File.separator + name + ".log");
+		appender.setFile(logFile);
 		appender.setRolling("false"); 
 		appender.activateOptions();
 		logger.addAppender(appender);  

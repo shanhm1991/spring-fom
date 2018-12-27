@@ -20,7 +20,7 @@
 	</context-param>
 	<context-param>
 		<param-name>poolConfigLocation</param-name>
-		<param-value>WEB-INF/pool1.xml</param-value>
+		<param-value>WEB-INF/pool.xml</param-value>
 	</context-param>
 
 

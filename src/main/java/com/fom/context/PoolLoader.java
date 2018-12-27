@@ -27,7 +27,7 @@ public class PoolLoader extends AbstractRefreshableWebApplicationContext {
 			File poolXml = getResource(poolLocation).getFile();
 			ManagerServiceImpl.listen(poolXml);
 		}catch(Exception e){
-			LOG.warn("pool初始化失败"); 
+			LOG.warn("pool初始化失败", e); 
 			return;
 		}
 	}

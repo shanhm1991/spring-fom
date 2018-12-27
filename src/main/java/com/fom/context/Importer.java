@@ -24,8 +24,9 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 
 	protected Importer(String name, String path) {
 		super(name, path);
-		this.logFile = new File(System.getProperty("import.progress")
+		String logPath = Utils.parsePath("${import.progress}" 
 				+ File.separator + name + File.separator + srcName + ".log");
+		this.logFile = new File(logPath);
 	}
 
 	void execute() throws Exception {
@@ -55,7 +56,7 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 			throw new WarnException("删除日志失败."); 
 		}
 	}
-	
+
 	void readFile(File file, int StartLine) throws Exception {
 		int lineIndex = 0;
 		MultiReader reader = null;

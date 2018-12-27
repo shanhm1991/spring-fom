@@ -123,8 +123,7 @@ public class ManageController {
 	@ResponseBody
 	public Map<String,Object> logs() throws Exception{ 
 		Map<String,Object> map = new HashMap<>();
-		String root = System.getProperty("webapp.root");
-		File logs = new File(root + File.separator + "log");
+		File logs = new File(Utils.parsePath("${webapp.root}" + File.separator + "log"));
 		String[] array = logs.list();
 		if(array != null){
 			map.put("logs", Arrays.asList(array));
@@ -135,8 +134,8 @@ public class ManageController {
 	@RequestMapping("/download")
 	@ResponseBody
 	public Map<String,Object> download(String file, HttpServletResponse resp) throws Exception{ 
-		String path = System.getProperty("webapp.root") + File.separator + "log";
-		File log = new File(path + File.separator + file);
+		String path = Utils.parsePath("${webapp.root}" + File.separator + "log"  + File.separator + file);
+		File log = new File(path);
 		resp.reset();
 		resp.setContentType("application/octet-stream;charset=UTF-8");
 		resp.addHeader("Content-Disposition", "attachment;filename=\"" + file +"\""); 

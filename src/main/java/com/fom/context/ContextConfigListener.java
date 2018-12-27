@@ -63,6 +63,7 @@ public final class ContextConfigListener extends ContextLoaderListener {
 		}
 		
 		PoolLoader poolLoader = (PoolLoader)springContext.getBean("poolLoader");
+		poolLoader.setServletContext(context); 
 		poolLoader.load(context.getInitParameter("poolConfigLocation"));
 	}
 
