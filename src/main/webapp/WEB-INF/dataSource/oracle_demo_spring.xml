@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd" >
 <beans>
-	<!-- 配置一个库:mysql.demo -->
-	<bean id="demoDataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+	<!-- 配置一个库:oracle.demo -->
+	<bean id="oracleDemoDataSource" class="org.apache.commons.dbcp2.BasicDataSource">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
 		<property name="url" value="jdbc:mysql://192.168.141.13:3306/demo" />
 		<property name="username" value="shanhm"/>
@@ -20,12 +20,12 @@
 		<property name="validationQuery" value="select 1 from dual" />
 	</bean>
 	
-	<bean id="demoSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-		<property name="dataSource" ref="demoDataSource" />
+	<bean id="oracleDemoSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="oracleDemoDataSource" />
 		<property name="configLocation" value="/WEB-INF/dataSource/oracle_demo_mybatis.xml" />
 	</bean>
 
-	<bean id="demoDao" class="com.fom.dao.DemoDaoImpl">
-		<property name="sqlSessionFactory" ref="demoSqlSessionFactory" />
+	<bean id="oracleDemoDao" class="com.fom.dao.demo.OracleDemoDaoImpl">
+		<property name="sqlSessionFactory" ref="oracleDemoSqlSessionFactory" />
 	</bean>
 </beans>
