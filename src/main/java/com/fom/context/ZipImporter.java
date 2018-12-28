@@ -128,7 +128,6 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 			}
 		}
 		nameList = list;
-		System.out.println(nameList.size());
 		return nameList.size() > 0;
 	}
 

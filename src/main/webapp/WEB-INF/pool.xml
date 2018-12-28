@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pools>
-	<pool>
+	<!-- <pool>
 		<name>demoEs</name>
 		<class>com.fom.util.db.pool.PoolEs</class>
 		<clusterName>myEs</clusterName>
 		<nodes>
 			<node>ip:9300</node>
 		</nodes>
-	</pool>
+	</pool> -->
 
 	<pool>
 		<name>demoOracle</name>
@@ -16,8 +16,8 @@
 		<waitTimeOut>30000</waitTimeOut>
 		<aliveTimeOut>300000</aliveTimeOut>
 		<class>com.fom.util.db.pool.PoolOracle</class>
-		<url>jdbc:oracle:thin:@ip:1521:ora11g</url>
-		<user>user</user>
-		<passwd>passwd</passwd>
+		<url>jdbc:oracle:thin:@192.168.141.21:1521:orcl</url>
+		<user>scott</user>
+		<passwd>scott</passwd>
 	</pool>
 </pools>

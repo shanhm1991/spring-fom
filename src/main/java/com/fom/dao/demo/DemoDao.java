@@ -1,12 +1,13 @@
 package com.fom.dao.demo;
 
 import java.util.List;
+import java.util.Map;
 
 import com.fom.modules.importer.demo.DemoBean;
 
-public interface MysqlDemoDao {
+public interface DemoDao {
 	
-	List<DemoBean> selectDemo();
+	List<Map<String,String>> selectDemo();
 	
 	int inserDemo(DemoBean bean);
 	

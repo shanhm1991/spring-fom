@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd" >
 <beans>
-	<!-- 配置一个库:oracle.demo -->
-	<bean id="oracleDemoDataSource" class="org.apache.commons.dbcp2.BasicDataSource">
-		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-		<property name="url" value="jdbc:mysql://192.168.141.13:3306/demo" />
-		<property name="username" value="shanhm"/>
-		<property name="password" value="shanhm"/>
-		<property name="minIdle" value="1" />
-		<property name="maxIdle" value="10" />
-		<property name="initialSize" value="1" />
-		<property name="timeBetweenEvictionRunsMillis" value="60000"/> 
-        <property name="poolPreparedStatements" value="true"/>        
-        <property name="maxOpenPreparedStatements" value="50"/>        
-        <property name="removeAbandonedTimeout" value="180"/>
-        <property name="testOnBorrow" value="true"/>
-        <property name="testOnReturn" value="true"/>
-        <property name="testWhileIdle" value="true"/>
-		<property name="validationQuery" value="select 1 from dual" />
+	<!-- 配置oracle的demo库,连接池使用c3p0 -->
+	<bean id="oracleDemoDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="oracle.jdbc.driver.OracleDriver" />
+		<property name="jdbcUrl" value="jdbc:oracle:thin:@192.168.141.21:1521:orcl" />
+		<property name="user" value="scott" />
+		<property name="password" value="scott" />
+		<property name="acquireIncrement" value="2" />
+		<property name="acquireRetryAttempts" value="2" />
+		<property name="acquireRetryDelay" value="1000" />
+		<property name="autoCommitOnClose" value="false" />
+		<property name="initialPoolSize" value="1" />
+		<property name="maxIdleTime" value="60000" />
+		<property name="maxPoolSize" value="20" />
+		<property name="maxStatements" value="0" />
+		<property name="maxStatementsPerConnection" value="0" />
+		<property name="numHelperThreads" value="3" />
+		<property name="propertyCycle" value="300" />
 	</bean>
-	
+
 	<bean id="oracleDemoSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<property name="dataSource" ref="oracleDemoDataSource" />
 		<property name="configLocation" value="/WEB-INF/dataSource/oracle_demo_mybatis.xml" />
@@ -28,4 +28,6 @@
 	<bean id="oracleDemoDao" class="com.fom.dao.demo.OracleDemoDaoImpl">
 		<property name="sqlSessionFactory" ref="oracleDemoSqlSessionFactory" />
 	</bean>
+
+
 </beans>

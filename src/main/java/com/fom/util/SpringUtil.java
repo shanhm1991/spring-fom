@@ -39,7 +39,7 @@ public class SpringUtil implements ApplicationContextAware {
      * @param c
      * @return
      */
-    public static Object getBeanByClass(Class<?> c){
+    public static <T> T getBeanByClass(Class<T> c){
         return applicationContext.getBean(c);
     }
      
@@ -48,8 +48,7 @@ public class SpringUtil implements ApplicationContextAware {
      * @param c
      * @return
      */
-    @SuppressWarnings("rawtypes")
-	public static Map getBeansByClass(Class<?> c){
+	public static <T> Map<String,T> getBeansByClass(Class<T> c){
         return applicationContext.getBeansOfType(c);
     }
 }

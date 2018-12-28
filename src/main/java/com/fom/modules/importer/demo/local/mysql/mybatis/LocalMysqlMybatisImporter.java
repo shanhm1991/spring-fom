@@ -5,20 +5,21 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fom.context.Importer;
-import com.fom.dao.demo.MysqlDemoDao;
+import com.fom.dao.demo.DemoDao;
 import com.fom.modules.importer.demo.DemoBean;
 import com.fom.modules.importer.demo.local.LocalImporterConfig;
 import com.fom.util.SpringUtil;
 
 /**
+ * 解析文本文件将数据导入mysql，使用mybatis
  * 
  * @author shanhm
  * @date 2018年12月23日
  *
  */
-public class LocalImporter1 extends Importer<LocalImporterConfig, DemoBean> {
+public class LocalMysqlMybatisImporter extends Importer<LocalImporterConfig, DemoBean> {
 
-	protected LocalImporter1(String name, String path) {
+	protected LocalMysqlMybatisImporter(String name, String path) {
 		super(name, path);
 	}
 
@@ -49,7 +50,7 @@ public class LocalImporter1 extends Importer<LocalImporterConfig, DemoBean> {
 	 */
 	@Override
 	protected void batchProcessLineData(LocalImporterConfig config, List<DemoBean> lineDatas, long batchTime) throws Exception {
-		MysqlDemoDao demoDao = SpringUtil.getBeanById("mysqlDemoDao", MysqlDemoDao.class);
+		DemoDao demoDao = SpringUtil.getBeanById("mysqlDemoDao", DemoDao.class);
 		demoDao.batchInsertDemo(lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());
 	}

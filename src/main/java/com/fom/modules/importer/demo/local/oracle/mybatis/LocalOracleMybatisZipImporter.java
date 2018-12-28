@@ -5,18 +5,21 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fom.context.ZipImporter;
+import com.fom.dao.demo.DemoDao;
 import com.fom.modules.importer.demo.DemoBean;
 import com.fom.modules.importer.demo.local.LocalZipImporterConfig;
+import com.fom.util.SpringUtil;
 
 /**
+ * 解析zip文件将数据导入oracle，使用mybatis
  * 
  * @author shanhm
  * @date 2018年12月23日
  *
  */
-public class LocalZipImporter_oracle_mysql extends ZipImporter<LocalZipImporterConfig, DemoBean>{
+public class LocalOracleMybatisZipImporter extends ZipImporter<LocalZipImporterConfig, DemoBean>{
 
-	protected LocalZipImporter_oracle_mysql(String name, String path) {
+	protected LocalOracleMybatisZipImporter(String name, String path) {
 		super(name, path);
 	}
 
@@ -25,7 +28,7 @@ public class LocalZipImporter_oracle_mysql extends ZipImporter<LocalZipImporterC
 	 */
 	@Override
 	protected void onStart(LocalZipImporterConfig config) throws Exception {
-		super.onStart(config);
+		log.info("start process.");
 	}
 
 	/**
@@ -33,6 +36,7 @@ public class LocalZipImporter_oracle_mysql extends ZipImporter<LocalZipImporterC
 	 */
 	@Override
 	protected boolean validContents(LocalZipImporterConfig config, List<String> nameList) {
+		log.info("zip contents valid true.");
 		return true;
 	}
 
@@ -56,12 +60,9 @@ public class LocalZipImporter_oracle_mysql extends ZipImporter<LocalZipImporterC
 	@Override
 	protected void batchProcessLineData(LocalZipImporterConfig config, List<DemoBean> lineDatas, long batchTime)
 			throws Exception {
+		DemoDao demoDao = SpringUtil.getBeanById("oracleDemoDao", DemoDao.class);
+		demoDao.batchInsertDemo(lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());
-		
-		//1. OraHandler.handler.batchExecute(poolName, sql, paramMaps);
-		
-		//2.
-		
 	}
 
 	/**
@@ -69,6 +70,6 @@ public class LocalZipImporter_oracle_mysql extends ZipImporter<LocalZipImporterC
 	 */
 	@Override
 	protected void onComplete(LocalZipImporterConfig config) throws Exception {
-
+		log.info("complete process.");
 	}
 }

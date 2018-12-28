@@ -1,15 +1,16 @@
 package com.fom.dao.demo;
 
 import java.util.List;
+import java.util.Map;
 
 import org.mybatis.spring.support.SqlSessionDaoSupport;
 
 import com.fom.modules.importer.demo.DemoBean;
 
-public class MysqlDemoDaoImpl extends SqlSessionDaoSupport implements MysqlDemoDao {
+public class MysqlDemoDaoImpl extends SqlSessionDaoSupport implements DemoDao {
 	
 	@Override
-	public List<DemoBean> selectDemo() {
+	public List<Map<String,String>> selectDemo() {
 		return getSqlSession().selectList("mysql.demo.selectDemo");
 	}
 

@@ -9,4 +9,5 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 	</context:component-scan>
 	
 	<import resource="dataSource/mysql_demo_spring.xml"/>
+	<import resource="dataSource/oracle_demo_spring.xml"/>
 </beans>

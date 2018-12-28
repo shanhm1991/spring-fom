@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
 	<includes>
-		<include>conf/import/demo/LocalImporter_mysql_mybatis.xml</include>
-		<!-- <include>conf/import/demozip.xml</include>
-		<include>conf/download/hdfs.xml</include> -->
+		<include>conf/import/demo/localImporter_mysql_mybatis.xml</include>
+		<include>conf/import/demo/localzipImporter_oracle_mybatis.xml</include>
+		<!-- <include>conf/download/hdfs.xml</include> -->
 	</includes>
 </foms>
 
