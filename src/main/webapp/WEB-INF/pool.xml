@@ -18,6 +18,6 @@
 		<class>com.fom.util.db.pool.PoolOracle</class>
 		<url>jdbc:oracle:thin:@192.168.141.21:1521:orcl</url>
 		<user>scott</user>
-		<passwd>scott</passwd>
+		<passwd>admin</passwd>
 	</pool>
 </pools>
