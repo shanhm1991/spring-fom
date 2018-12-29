@@ -42,7 +42,11 @@ public class LocalMysqlMybatisImporter extends Importer<LocalImporterConfig, Dem
 		if(StringUtils.isBlank(line)){
 			return;
 		}
-		lineDatas.add(new DemoBean(line)); 
+		DemoBean bean = new DemoBean(line);
+		bean.setSource("local");
+		bean.setFileType("txt/orc");
+		bean.setImportWay("mybatis");
+		lineDatas.add(bean); 
 	}
 
 	/**

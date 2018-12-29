@@ -61,7 +61,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 			}
 			nameList = Arrays.asList(nameArray);
 			//失败在第4步
-			if(!matchContents() && !validContents(config, nameList)){
+			if(!matchContents() || !validContents(config, nameList)){
 				removeDirectly = true;
 				return;
 			}
@@ -103,7 +103,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 			}
 
 			nameList = Arrays.asList(nameArray);
-			if(!matchContents() && !validContents(config, nameList)){
+			if(!matchContents() || !validContents(config, nameList)){
 				removeDirectly = true;
 				return;
 			}

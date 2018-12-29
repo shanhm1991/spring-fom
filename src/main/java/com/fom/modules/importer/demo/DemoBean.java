@@ -12,16 +12,16 @@ public class DemoBean {
 	
 	private String name;
 	
-	private String age;
+	private String source;
 	
-	private String tel;
+	private String fileType;
+	
+	private String importWay;
 	
 	public DemoBean(String data){
-		String[] array = data.split("#");
+		String[] array = data.split("#"); 
 		this.id = array[0];
 		this.name = array[1];
-		this.age = array[2];
-		this.tel = array[3];
 	}
 
 	public String getId() {
@@ -40,20 +40,27 @@ public class DemoBean {
 		this.name = name;
 	}
 
-	public String getAge() {
-		return age;
+	public String getSource() {
+		return source;
 	}
 
-	public void setAge(String age) {
-		this.age = age;
+	public void setSource(String source) {
+		this.source = source;
 	}
 
-	public String getTel() {
-		return tel;
+	public String getFileType() {
+		return fileType;
 	}
 
-	public void setTel(String tel) {
-		this.tel = tel;
+	public void setFileType(String fileType) {
+		this.fileType = fileType;
 	}
 
+	public String getImportWay() {
+		return importWay;
+	}
+
+	public void setImportWay(String importWay) {
+		this.importWay = importWay;
+	}
 }

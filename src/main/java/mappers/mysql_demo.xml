@@ -7,13 +7,13 @@
 	</select>
 
 	<insert id="insertDemo" parameterType="demo">
-		insert into demo(id,name,age,tel) values (#{id},#{name},#{age},#{tel})
+		insert into demo(id,name,source,filetype,importway) values (#{id},#{name},#{source},#{fileType},#{importWay})
 	</insert>
 
 	<insert id="batchInsertDemo" parameterType="List">
-		insert into demo(id,name,age,tel) values
+		insert into demo(id,name,source,filetype,importway) values
 		<foreach collection="list" item="item" index="index" separator=",">
-			(#{item.id},#{item.name},#{item.age},#{item.tel})
+			(#{item.id},#{item.name},#{item.source},#{item.fileType},#{item.importWay})
 		</foreach>
 	</insert>
 </mapper>
