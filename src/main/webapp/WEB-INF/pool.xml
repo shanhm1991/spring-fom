@@ -5,7 +5,7 @@
 		<class>com.fom.util.db.pool.PoolEs</class>
 		<clusterName>myEs</clusterName>
 		<nodes>
-			<node>ip:9300</node>
+			<node>192.168.141.13:9300</node>
 		</nodes>
 	</pool> -->
 
@@ -19,5 +19,17 @@
 		<url>jdbc:oracle:thin:@192.168.141.21:1521:orcl</url>
 		<user>scott</user>
 		<passwd>admin</passwd>
+	</pool>
+	
+	<pool>
+		<name>demoMysql</name>
+		<core>20</core>
+		<max>20</max>
+		<waitTimeOut>30000</waitTimeOut>
+		<aliveTimeOut>300000</aliveTimeOut>
+		<class>com.fom.util.db.pool.PoolMysql</class>
+		<url>jdbc:mysql://192.168.141.13:3306/demo</url>
+		<user>shanhm</user>
+		<passwd>shanhm</passwd>
 	</pool>
 </pools>

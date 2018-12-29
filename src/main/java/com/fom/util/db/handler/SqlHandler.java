@@ -9,9 +9,9 @@ import java.util.Map;
  * @date 2018年12月23日
  *
  */
-public interface OraHandler {
+public interface SqlHandler {
 	
-	OraHandler handler = new OraHandlerImpl();
+	SqlHandler handler = new SqlHandlerImpl();
 	
 	/**
 	 * 查询

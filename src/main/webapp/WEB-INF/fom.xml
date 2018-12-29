@@ -5,7 +5,7 @@
 		<include>conf/import/demo/localImporter_mysql_pool.xml</include>
 		<include>conf/import/demo/localzipImporter_oracle_mybatis.xml</include>
 		<include>conf/import/demo/localzipImporter_oracle_pool.xml</include>
-		<!-- <include>conf/download/hdfs.xml</include> -->
+		<include>conf/download/hdfs.xml</include>
 	</includes>
 </foms>
 

@@ -1,5 +1,6 @@
 package com.fom.modules.importer.demo.local.mysql.pool;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -7,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fom.context.Importer;
 import com.fom.modules.importer.demo.local.LocalImporterConfig;
+import com.fom.util.db.handler.SqlHandler;
 
 /**
  * 解析文本文件将数据导入mysql，使用自带pool
@@ -15,7 +17,11 @@ import com.fom.modules.importer.demo.local.LocalImporterConfig;
  * @date 2018年12月23日
  *
  */
-public class LocalMysqlPoolImporter extends Importer<LocalImporterConfig, Map<String,String>> {
+public class LocalMysqlPoolImporter extends Importer<LocalImporterConfig, Map<String,Object>> {
+
+	private static final String SQL = 
+			"insert into demo(id,name,source,filetype,importway) "
+					+ "values (#id#,#name#,#source#,#fileType#,#importWay#)";
 
 	protected LocalMysqlPoolImporter(String name, String path) {
 		super(name, path);
@@ -35,18 +41,27 @@ public class LocalMysqlPoolImporter extends Importer<LocalImporterConfig, Map<St
 	 * 异常则结束任务，保留文件，所以对错误数据导致的异常需要try-catch，一避免任务重复失败
 	 */
 	@Override
-	protected void praseLineData(LocalImporterConfig config, List<Map<String,String>> lineDatas, String line, long batchTime) throws Exception {
+	protected void praseLineData(LocalImporterConfig config, List<Map<String,Object>> lineDatas, String line, long batchTime) throws Exception {
 		log.info("解析行数据:" + line);
 		if(StringUtils.isBlank(line)){
 			return;
 		}
+		String[] array = line.split("#"); 
+		Map<String,Object> map = new HashMap<>();
+		map.put("id", array[0]);
+		map.put("name", array[1]);
+		map.put("source", "local");
+		map.put("fileType", "txt/orc");
+		map.put("importWay", "pool");
+		lineDatas.add(map);
 	}
 
 	/**
 	 * [Abstract]继承自Importer, 批处理行数据解析结果, 异常则结束任务，保留文件
 	 */
 	@Override
-	protected void batchProcessLineData(LocalImporterConfig config, List<Map<String,String>> lineDatas, long batchTime) throws Exception {
+	protected void batchProcessLineData(LocalImporterConfig config, List<Map<String,Object>> lineDatas, long batchTime) throws Exception {
+		SqlHandler.handler.batchExecute("demoMysql", SQL, lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());
 	}
 

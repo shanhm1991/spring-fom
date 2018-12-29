@@ -34,11 +34,11 @@ import oracle.sql.StructDescriptor;
  * @date 2018年12月23日
  *
  */
-public class OraHelper {
+public class SqlHelper {
 
 	protected static final Logger LOG = LoggerFactory.getLogger("oracle");
 
-	protected OraHelper(){
+	protected SqlHelper(){
 
 	}
 
