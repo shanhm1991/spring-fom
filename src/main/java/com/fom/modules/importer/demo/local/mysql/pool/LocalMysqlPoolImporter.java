@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fom.context.Importer;
 import com.fom.modules.importer.demo.local.LocalImporterConfig;
-import com.fom.util.db.handler.SqlHandler;
+import com.fom.util.db.handler.JdbcHandler;
 
 /**
  * 解析文本文件将数据导入mysql，使用自带pool
@@ -61,7 +61,7 @@ public class LocalMysqlPoolImporter extends Importer<LocalImporterConfig, Map<St
 	 */
 	@Override
 	protected void batchProcessLineData(LocalImporterConfig config, List<Map<String,Object>> lineDatas, long batchTime) throws Exception {
-		SqlHandler.handler.batchExecute("demoMysql", SQL, lineDatas);
+		JdbcHandler.handler.batchExecute("demoMysql", SQL, lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());
 	}
 

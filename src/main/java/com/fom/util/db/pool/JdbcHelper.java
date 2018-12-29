@@ -34,17 +34,17 @@ import oracle.sql.StructDescriptor;
  * @date 2018年12月23日
  *
  */
-public class SqlHelper {
+public class JdbcHelper {
 
 	protected static final Logger LOG = LoggerFactory.getLogger("oracle");
 
-	protected SqlHelper(){
+	protected JdbcHelper(){
 
 	}
 
 	protected final void _startTransaction(String poolName) throws Exception {
-		PoolOracle pool = getPool(poolName);
-		PoolOracle.OracleNode node = (PoolOracle.OracleNode)pool.acquire();
+		JdbcPool pool = getPool(poolName);
+		JdbcPool.JdbcNode node = (JdbcPool.JdbcNode)pool.acquire();
 		if(node.isInTransaction){
 			LOG.warn("事务开启失败[Connection is already in Transaction]");
 			return;
@@ -64,8 +64,8 @@ public class SqlHelper {
 	}
 	
 	protected final void _endTransaction(String poolName) throws Exception {
-		PoolOracle pool = getPool(poolName);
-		PoolOracle.OracleNode node = (PoolOracle.OracleNode)pool.acquire();
+		JdbcPool pool = getPool(poolName);
+		JdbcPool.JdbcNode node = (JdbcPool.JdbcNode)pool.acquire();
 		if(!node.isInTransaction){
 			pool.release();
 			LOG.warn("提交事务失败[Connection is not in Transaction]");
@@ -86,8 +86,8 @@ public class SqlHelper {
 		}
 	}
 	
-	private boolean isInTransaction(PoolOracle pool) throws Exception{ 
-		PoolOracle.OracleNode node = (PoolOracle.OracleNode)pool.acquire();
+	private boolean isInTransaction(JdbcPool pool) throws Exception{ 
+		JdbcPool.JdbcNode node = (JdbcPool.JdbcNode)pool.acquire();
 		return node.isInTransaction;
 	}
 	
@@ -101,9 +101,9 @@ public class SqlHelper {
 			return;
 		}
 
-		PoolOracle pool = getPool(poolName);
+		JdbcPool pool = getPool(poolName);
 		try{
-			PoolOracle.OracleNode node = (PoolOracle.OracleNode)pool.acquire();
+			JdbcPool.JdbcNode node = (JdbcPool.JdbcNode)pool.acquire();
 			if(!isInTransaction(getPool(poolName))){
 				LOG.warn("取消事务失败[Connection is not in Transaction]");
 				return;
@@ -129,7 +129,7 @@ public class SqlHelper {
 	}
 
 	private List<Map<String, Object>> queryForList(String poolName, String sql, Map<String, Object> paramMap, Map<String, Integer> indexMap) throws Exception {
-		PoolOracle pool = getPool(poolName);
+		JdbcPool pool = getPool(poolName);
 		PreparedStatement ps = null;
 		ResultSet resultSet = null;
 		try{
@@ -150,7 +150,7 @@ public class SqlHelper {
 	}
 
 	private List<Map<String, Object>> queryForListTransaction(String poolName, String sql, Map<String, Object> paramMap, Map<String, Integer> indexMap) throws Exception {
-		PoolOracle pool = getPool(poolName);
+		JdbcPool pool = getPool(poolName);
 		PreparedStatement ps = null;
 		ResultSet resultSet = null;
 		try{
@@ -184,7 +184,7 @@ public class SqlHelper {
 	}
 
 	private int execute(String poolName, String sql, Map<String, Object> paramMap, Map<String, Integer> indexMap) throws Exception { 
-		PoolOracle pool = getPool(poolName);
+		JdbcPool pool = getPool(poolName);
 		PreparedStatement ps = null;
 		try{
 			Connection con = pool.acquire().v;
@@ -235,7 +235,7 @@ public class SqlHelper {
 	}
 
 	private int[] batchExecute(String poolName, String sql, List<Map<String, Object>> paramMaps, Map<String, Integer> indexMap) throws Exception {
-		PoolOracle pool = getPool(poolName);
+		JdbcPool pool = getPool(poolName);
 		PreparedStatement ps = null;
 		try{
 			Connection con = pool.acquire().v;
@@ -287,8 +287,8 @@ public class SqlHelper {
 
 	
 
-	private PoolOracle getPool(String poolName) throws WarnException{ 
-		PoolOracle pool = (PoolOracle)PoolManager.getPool(poolName);
+	private JdbcPool getPool(String poolName) throws WarnException{ 
+		JdbcPool pool = (JdbcPool)PoolManager.getPool(poolName);
 		if(pool == null){
 			throw new WarnException(poolName + "连接池不存在");
 		}

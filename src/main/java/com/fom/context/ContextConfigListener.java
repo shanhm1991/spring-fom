@@ -54,6 +54,10 @@ public final class ContextConfigListener extends ContextLoaderListener {
 		}
 		System.setProperty("download.temp", path);
 		
+		PoolLoader poolLoader = (PoolLoader)springContext.getBean("poolLoader");
+		poolLoader.setServletContext(context); 
+		poolLoader.load(context.getInitParameter("poolConfigLocation"));
+		
 		ConfigLoader configloader = (ConfigLoader)springContext.getBean("configLoader");
 		configloader.setServletContext(context); 
 		try{
@@ -61,10 +65,6 @@ public final class ContextConfigListener extends ContextLoaderListener {
 		}catch(Exception e){
 			throw new RuntimeException("加载fom配置失败", e);
 		}
-		
-		PoolLoader poolLoader = (PoolLoader)springContext.getBean("poolLoader");
-		poolLoader.setServletContext(context); 
-		poolLoader.load(context.getInitParameter("poolConfigLocation"));
 	}
 
 	@Override

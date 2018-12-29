@@ -9,9 +9,9 @@ import java.util.Map;
  * @date 2018年12月23日
  *
  */
-public interface SqlHandler {
+public interface JdbcHandler {
 	
-	SqlHandler handler = new SqlHandlerImpl();
+	JdbcHandler handler = new JdbcHandlerImpl();
 	
 	/**
 	 * 查询
@@ -38,7 +38,6 @@ public interface SqlHandler {
 	 * @param poolName poolName 连接池名称
 	 * @param sql sql语句，其中参数变量以#修饰开头和结尾 
 	 * @param paramMaps 对应sql语句中的参数变量的值
-	 * @param isTransaction 是否事务执行
 	 * @return
 	 * @throws Exception
 	 */

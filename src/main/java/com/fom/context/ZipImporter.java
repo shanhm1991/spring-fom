@@ -168,13 +168,14 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 		Iterator<String> it = nameList.iterator();
 		while(it.hasNext()){
 			String name = it.next();
-			it.remove();
 			long sTime = System.currentTimeMillis();
 			File file = new File(unzipDir + File.separator + name);
 			double size = file.length() / 1024.0;
 			readFile(file, 0);
 			log.info("处理文件结束[" + name + "(" 
 					+ numFormat.format(size) + "KB)], 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+			
+			it.remove();
 			if(!file.delete()){
 				throw new WarnException("删除文件失败:" + file.getName()); 
 			}

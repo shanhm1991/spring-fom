@@ -47,6 +47,7 @@ public class PoolManager {
 	private static int cleanTimes = 0;
 
 	protected static void listenPool(File poolXml){
+		load(poolXml);//确保在加载启动任务前已经加载过pool
 		new Listener(poolXml).start();
 		new Monitor().start();
 	}
@@ -65,8 +66,6 @@ public class PoolManager {
 		public void run() {
 			String parentPath = poolXml.getParent();
 			String name = poolXml.getName();
-			
-			load(poolXml);
 			
 			WatchService watch = null;
 			try {

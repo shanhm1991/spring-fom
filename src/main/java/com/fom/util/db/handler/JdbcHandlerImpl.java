@@ -3,7 +3,7 @@ package com.fom.util.db.handler;
 import java.util.List;
 import java.util.Map;
 
-import com.fom.util.db.pool.SqlHelper;
+import com.fom.util.db.pool.JdbcHelper;
 
 /**
  * 
@@ -11,7 +11,7 @@ import com.fom.util.db.pool.SqlHelper;
  * @date 2018年12月23日
  *
  */
-public class SqlHandlerImpl extends SqlHelper implements SqlHandler {
+public class JdbcHandlerImpl extends JdbcHelper implements JdbcHandler {
 	
 	@Override
 	public List<Map<String, Object>> queryForList(String poolName, String sql, Map<String, Object> paramMap) throws Exception {

@@ -13,9 +13,10 @@
 		<name>demoOracle</name>
 		<core>20</core>
 		<max>20</max>
-		<waitTimeOut>30000</waitTimeOut>
-		<aliveTimeOut>300000</aliveTimeOut>
-		<class>com.fom.util.db.pool.PoolOracle</class>
+		<waitTimeOut>120000</waitTimeOut>
+		<aliveTimeOut>120000</aliveTimeOut>
+		<class>com.fom.util.db.pool.JdbcPool</class>
+		<driver>oracle.jdbc.driver.OracleDriver</driver>
 		<url>jdbc:oracle:thin:@192.168.141.21:1521:orcl</url>
 		<user>scott</user>
 		<passwd>admin</passwd>
@@ -25,9 +26,10 @@
 		<name>demoMysql</name>
 		<core>20</core>
 		<max>20</max>
-		<waitTimeOut>30000</waitTimeOut>
-		<aliveTimeOut>300000</aliveTimeOut>
-		<class>com.fom.util.db.pool.PoolMysql</class>
+		<waitTimeOut>120000</waitTimeOut>
+		<aliveTimeOut>120000</aliveTimeOut>
+		<class>com.fom.util.db.pool.JdbcPool</class>
+		<driver>com.mysql.jdbc.Driver</driver>
 		<url>jdbc:mysql://192.168.141.13:3306/demo</url>
 		<user>shanhm</user>
 		<passwd>shanhm</passwd>

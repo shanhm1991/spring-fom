@@ -20,7 +20,7 @@ import com.fom.util.exception.WarnException;
  * @date 2018年12月23日
  *
  */
-class PoolEs extends Pool<TransportClient>{
+class EsPool extends Pool<TransportClient>{
 
 	private String clusterName;
 
@@ -30,7 +30,7 @@ class PoolEs extends Pool<TransportClient>{
 	
 	private volatile EsNode clientNode = new EsNode();
 
-	PoolEs(String name){
+	EsPool(String name){
 		super(name);
 	}
 
@@ -103,7 +103,7 @@ class PoolEs extends Pool<TransportClient>{
 	}
 	
 	public static TransportClient getClient(String poolName) throws WarnException{
-		PoolEs pool = (PoolEs)PoolManager.getPool(poolName);
+		EsPool pool = (EsPool)PoolManager.getPool(poolName);
 		if(pool == null){
 			throw new WarnException(poolName + "连接池不存在"); 
 		}

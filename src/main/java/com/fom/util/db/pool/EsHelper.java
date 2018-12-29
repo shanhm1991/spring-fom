@@ -49,23 +49,23 @@ public class EsHelper {
 	}
 
 	protected final boolean _isIndexExist(String poolName, String index) throws Exception {
-		IndicesExistsResponse response = PoolEs.getClient(poolName).admin().indices().
+		IndicesExistsResponse response = EsPool.getClient(poolName).admin().indices().
 				exists(new IndicesExistsRequest().indices(new String[] { index })).actionGet();
 		return response.isExists();
 	}
 
 	protected final void _createIndex(String poolName, String index) throws Exception{
-		PoolEs.getClient(poolName).admin().indices().prepareCreate(index).execute().actionGet();
+		EsPool.getClient(poolName).admin().indices().prepareCreate(index).execute().actionGet();
 	}
 
 	protected final void _delIndex(String poolName, String index) throws Exception{
-		PoolEs.getClient(poolName).admin().indices().prepareDelete(index).execute().actionGet();
+		EsPool.getClient(poolName).admin().indices().prepareDelete(index).execute().actionGet();
 	}
 
 	protected final void _mappingIndex(String poolName, String index, String type, File jsonFile) throws Exception {
 		XContentParser parser = null;
 		try{
-			TransportClient client = PoolEs.getClient(poolName);
+			TransportClient client = EsPool.getClient(poolName);
 			parser = XContentFactory.xContent(XContentType.JSON).createParser(new FileInputStream(jsonFile));
 			XContentBuilder builder = XContentFactory.jsonBuilder().copyCurrentStructure(parser);
 			PutMappingRequest mappingRequest = Requests.putMappingRequest(index).type(type).source(builder);
@@ -77,7 +77,7 @@ public class EsHelper {
 
 	protected final List<Map<String,Object>> _multiGet(String poolName, String index, String type, Set<String> keySet) throws Exception {
 		List<Map<String,Object>> list = new ArrayList<Map<String,Object>>();
-		TransportClient client = PoolEs.getClient(poolName);
+		TransportClient client = EsPool.getClient(poolName);
 
 		MultiGetRequestBuilder muiltRequest = client.prepareMultiGet();
 		for(String key : keySet){
@@ -95,7 +95,7 @@ public class EsHelper {
 	}
 
 	protected final void _blukDelete(String poolName, String index, String type, Set<String> keySet) throws Exception {
-		TransportClient client = PoolEs.getClient(poolName);
+		TransportClient client = EsPool.getClient(poolName);
 		BulkRequestBuilder bulkRequest = client.prepareBulk();
 		for(String key : keySet){
 			DeleteRequestBuilder delRequest = client.prepareDelete(index, type, key);
@@ -109,7 +109,7 @@ public class EsHelper {
 
 	protected Set<BulkItemResponse> _bulkUpdate(String poolName, String index, String type, Map<String,Map<String,Object>> data) throws Exception {
 		Set<BulkItemResponse> conflictSet = new HashSet<>();
-		TransportClient client = PoolEs.getClient(poolName);
+		TransportClient client = EsPool.getClient(poolName);
 
 		BulkRequestBuilder bulkRequest = client.prepareBulk();
 		for(Entry<String, Map<String, Object>> entry : data.entrySet()){
@@ -133,7 +133,7 @@ public class EsHelper {
 	}
 
 	protected final void _bulkInsert(String poolName, String index, String type, Map<String,Map<String,Object>> data) throws Exception {
-		TransportClient client = PoolEs.getClient(poolName);
+		TransportClient client = EsPool.getClient(poolName);
 		BulkRequestBuilder bulkRequest = client.prepareBulk();
 		for(Entry<String, Map<String, Object>> entry : data.entrySet()){
 			IndexRequestBuilder indexRequest = client.prepareIndex(index, type,entry.getKey()).setSource(entry.getValue());

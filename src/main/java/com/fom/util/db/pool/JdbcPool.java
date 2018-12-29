@@ -14,24 +14,17 @@ import com.fom.util.XmlUtil;
  * @date 2018年12月23日
  *
  */
-class PoolOracle extends Pool<Connection>{
+class JdbcPool extends Pool<Connection>{
 
-	static{
-		try {
-			Class.forName("oracle.jdbc.driver.OracleDriver");
-		} catch (Exception e) {
-			LOG.error("加载失败：oracle.jdbc.driver.OracleDriver", e); 
-			throw new RuntimeException("加载失败：oracle.jdbc.driver.OracleDriver", e);
-		}
-	}
+	private String url;
 
-	private String oraUrl;
+	private String user;
 
-	private String oraUser;
+	private String passwd;
+	
+	private String driver;
 
-	private String oraPasswd;
-
-	PoolOracle(String name){
+	JdbcPool(String name){
 		super(name);
 	}
 
@@ -39,23 +32,26 @@ class PoolOracle extends Pool<Connection>{
 	protected void load(Element el) throws Exception {
 		int core = XmlUtil.getInt(el, "core", 4, 1, 50);
 		int max = XmlUtil.getInt(el, "max", 4, 1, 50);
-		int overTime = XmlUtil.getInt(el, "aliveTimeOut", 15000, 3000, 60000);
-		int waitTime = XmlUtil.getInt(el, "waitTimeOut", 15000, 3000, 60000);
-		String oraUrl = XmlUtil.getString(el, "url", "");
-		String oraUser = XmlUtil.getString(el, "user", "");
-		String oraPasswd = XmlUtil.getString(el, "passwd", "");
+		int overTime = XmlUtil.getInt(el, "aliveTimeOut", 30000, 3000, 300000);
+		int waitTime = XmlUtil.getInt(el, "waitTimeOut", 30000, 3000, 300000);
+		String driver = XmlUtil.getString(el, "driver", "");
+		String url = XmlUtil.getString(el, "url", "");
+		String user = XmlUtil.getString(el, "user", "");
+		String passwd = XmlUtil.getString(el, "passwd", "");
 		if(this.core != core || this.max != max || this.aliveTimeOut != overTime
-				|| !oraUrl.equals(this.oraUrl) || !oraUser.equals(this.oraUser) 
-				|| !oraPasswd.equals(this.oraPasswd) || this.waitTimeOut != waitTime){ 
+				|| !driver.equals(this.driver) || !url.equals(this.url) || !user.equals(this.user) 
+				|| !passwd.equals(this.passwd) || this.waitTimeOut != waitTime){ 
 			this.core = core;
 			this.max = max;
 			this.aliveTimeOut = overTime;
 			this.waitTimeOut = waitTime;
-			if(hasReset(oraUrl, oraUser, oraPasswd)){
+			if(hasReset(url, user, passwd, driver)){
 				synchronized (this) {
-					this.oraUrl = oraUrl;
-					this.oraUser = oraUser;
-					this.oraPasswd = oraPasswd; 
+					this.url = url;
+					this.user = user;
+					this.passwd = passwd; 
+					this.driver = driver;
+					Class.forName(driver, true, JdbcPool.class.getClassLoader());
 				}
 				acquire();
 				release();
@@ -64,13 +60,14 @@ class PoolOracle extends Pool<Connection>{
 		}
 	}
 	
-	private boolean hasReset(String url, String user, String passwd){
-		return !url.equals(oraUrl) || !user.equals(oraUser) || !passwd.equals(oraPasswd);
+	private boolean hasReset(String url, String user, String passwd, String driver){
+		return !url.equals(this.url) || !user.equals(this.user)  
+				|| !passwd.equals(this.passwd) || !driver.equals(this.driver); 
 	}
 
 	@Override
-	protected OracleNode create() throws Exception {
-		return new OracleNode();
+	protected JdbcNode create() throws Exception {
+		return new JdbcNode();
 	}
 
 	@Override
@@ -80,35 +77,36 @@ class PoolOracle extends Pool<Connection>{
 		builder.append("\n" + name + ".max=" + max);
 		builder.append("\n" + name + ".aliveTimeOut=" + aliveTimeOut);
 		builder.append("\n" + name + ".waitTimeOut=" + waitTimeOut);
-		builder.append("\n" + name + ".url=" + oraUrl);
-		builder.append("\n" + name + ".user=" + oraUser);
-		builder.append("\n" + name + ".passwd=" + oraPasswd);
+		builder.append("\n" + name + ".driver=" + driver);
+		builder.append("\n" + name + ".url=" + url);
+		builder.append("\n" + name + ".user=" + user);
+		builder.append("\n" + name + ".passwd=" + passwd);
 		return builder.toString();
 	}
 	
-	public class OracleNode extends Node<Connection> {
+	public class JdbcNode extends Node<Connection> {
 
-		private String url;
+		private String nodeUrl;
 
-		private String user;
+		private String nodeUser;
 
-		private String passwd;
+		private String nodePasswd;
 		
 		public volatile boolean isInTransaction = false;
 
-		public OracleNode() throws Exception{ 
-			synchronized(PoolOracle.this){
-				url = oraUrl;
-				user = oraUser;
-				passwd = oraPasswd;
+		public JdbcNode() throws Exception{ 
+			synchronized(JdbcPool.this){
+				nodeUrl = url;
+				nodeUser = user;
+				nodePasswd = passwd;
 			}
-			v = DriverManager.getConnection(url,user,passwd); 
+			v = DriverManager.getConnection(nodeUrl,nodeUser,nodePasswd); 
 		}
 
 		@Override
 		public boolean isReset() {
-			synchronized(PoolOracle.this){
-				return hasReset(url, user, passwd);
+			synchronized(JdbcPool.this){
+				return hasReset(nodeUrl, nodeUser, nodePasswd, driver);
 			}
 		}
 
