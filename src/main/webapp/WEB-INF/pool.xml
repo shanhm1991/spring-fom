@@ -29,7 +29,7 @@
 		<waitTimeOut>120000</waitTimeOut>
 		<aliveTimeOut>120000</aliveTimeOut>
 		<class>com.fom.util.db.pool.JdbcPool</class>
-		<driver>com.mysql.jdbc.Driver</driver>
+		<driver>com.mysql.cj.jdbc.Driver</driver>
 		<url>jdbc:mysql://192.168.141.13:3306/demo</url>
 		<user>shanhm</user>
 		<passwd>shanhm</passwd>

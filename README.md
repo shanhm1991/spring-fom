@@ -1,51 +1,36 @@
-# fom 功能
-1.解析入库[支持数据库：mysql、oracle、elasticsearch(2.x)]
-
-1.1：本地文件
-
-1.1.1：文件导入
-
-1.1.1.1：文本文件(txt/orc)
-
-1.1.1.2：xml文件 [TODO]
-
-1.1.2：zip压缩包导入
-
-1.1.2.1：文本压缩包(txt/orc)
-
-1.1.2.2：xml文件压缩包 [TODO]
-
-1.2：HDFS服务文件 [TODO]
-
-1.3：HTTP服务文件 [TODO]
-
-1.4：FTP服务文件 [TODO]
+#功能（支持扩展）
+1.解析入库
+支持数据库：mysql、oracle、elasticsearch(2.x)；
+支持入库方式：mybatis、内置pool；
+支持文件来源：本地、HDFS服务[TODO]、HTTP服务[TODO]、FTP服务[TODO]；
+支持文件类型：文本、zip包；
+支持文件文本格式：txt/orc、xml[TODO]；
 
 2.下载
+支持下载方式：文件下载、文件打包下载；
+支持下载服务：HDFS服务、HTTP服务[TODO]、FTP服务[TODO]；
 
-2.1：HDFS服务
+3.上传[TODO]
+支持上传服务：HDFS服务、HTTP服务、FTP服务；
 
-2.1.1：HDFS文件下载
+#维护（http://ip:port/fom/html/index.html）
+1.list: 
+列出已加载的所有模块（包括信息：名称、类型、加载时间、启动时间、运行状态、配置是否合法），
+点击可以查看加载的详细信息，并且可以查看、修改(实时生效)所加载的实际xml配置
+2.srcs: 
+根据模块名列出源文件目录下的匹配文件名或者所有文件名（TODO增加大小和数目统计信息）
+3.logs: 
+列出所有运行的日志，点击可以查看内容，或者下载（TODO功能可以进一步完善）
+4.start/startAll/stop/stopAll/restart/restartAll：
+启动/停止/重启模块
 
-2.1.2：HDFS目录下载打包
+#demo
+1.local_file_import_es_pool：             解析本地txt/orc文件，并用内置pool方式导入es；
+2.local_file_import_mysql_mybatis： 解析本地txt/orc文件，并用mybatis方式导入mysql；
+3.local_file_import_mysql_pool：       解析本地txt/orc文件，并用内置pool方式导入mysql；
+4.local_zip_import_oracle_mybatis： 解析本地zip(txt/orc)文件，并用mybatis方式导入oracle；
+5.local_zip_import_oracle_pool：       解析本地zip(txt/orc)文件，并用内置pool方式导入oracle；
+6.hdfs_file_download：   下载HDFS服务指定目录下文件；
+7.hdfs_zip_download：      下载HDFS服务指定目录下文件并打包；
 
-2.2：HTTP服务
-
-2.2.1：HTTP文件下载 [TODO]
-
-2.2.2：HTTP目录下载打包 [TODO]
-
-2.3：FTP服务
-
-2.3.1：FTP文件下载 [TODO]
-
-2.3.2：FTP目录下载打包 [TODO]
-
-3.上传
-
-3.1：HDFS服务 [TODO]
-
-3.2：HTTP服务 [TODO]
-
-3.3：FTP服务 [TODO]
 

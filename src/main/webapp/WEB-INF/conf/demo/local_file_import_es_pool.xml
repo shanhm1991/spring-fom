@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
-	<fom name="LocalImport_mysql_mybatis" config="com.fom.modules.importer.demo.local.LocalImporterConfig">
+	<fom name="local_file_import_es_pool" config="com.fom.modules.importer.demo.local.es.LocalEsImporterConfig">
 		<src.path>${webapp.root}/test</src.path>
-		<src.pattern>demo.txt</src.pattern>
+		<src.pattern>demo.bcp</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
 		<scanner>com.fom.context.LocalScanner</scanner>
 		<scanner.cron>0 0/1 * * * ?</scanner.cron>
-		<executor>com.fom.modules.importer.demo.local.mysql.mybatis.LocalMysqlMybatisImporter</executor>
+		<executor>com.fom.modules.importer.demo.local.es.LocalEsPoolImpoter</executor>
 		<executor.min>10</executor.min>
 		<executor.max>10</executor.max>
 		<executor.aliveTime.seconds>30</executor.aliveTime.seconds>
