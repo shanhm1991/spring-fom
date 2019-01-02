@@ -1,6 +1,5 @@
 package com.fom.context;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -9,7 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedOutputStream;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -20,6 +18,7 @@ import org.apache.hadoop.fs.PathFilter;
 
 import com.fom.util.FileUtil;
 import com.fom.util.IoUtil;
+import com.fom.util.ZipUtil;
 import com.fom.util.exception.WarnException;
 
 import net.lingala.zip4j.core.ZipFile;
@@ -98,26 +97,13 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 				}
 
 				long sTime = System.currentTimeMillis();
+				String name = status.getPath().getName();
+				ZipUtil.zipEntry(name, config.fs.open(status.getPath()), zipOutStream);
 				String size = numFormat.format(status.getLen() / 1024.0);
-				BufferedInputStream buffer = null;
-				try{
-					buffer = new BufferedInputStream(config.fs.open(status.getPath()));
-					ZipEntry zipEntry = new ZipEntry(status.getPath().getName());
-					zipOutStream.putNextEntry(zipEntry);
-					int count;
-					int BUFFER = 8192;
-					byte[] data = new byte[BUFFER];
-					while((count=buffer.read(data, 0, BUFFER))!=-1){
-						zipOutStream.write(data, 0, count);
-					}
-					contents++;
-				}finally{
-					IoUtil.close(buffer);
-				}
-				log.info("下载文件结束:" + status.getPath().getName() 
-						+ "(" + size + "KB), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
-
-				if(contents >= config.getZipContent()){
+				log.info("下载文件结束:" 
+						+ name + "(" + size + "KB), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+				
+				if(++contents >= config.getZipContent()){
 					IoUtil.close(zipOutStream);
 					//流管道关闭，如果继续写文件需要重新打开
 					isStreamClosed = true;

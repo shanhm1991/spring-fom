@@ -1,5 +1,6 @@
 package com.fom.util;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -8,6 +9,7 @@ import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 /**
  * 
@@ -17,6 +19,14 @@ import java.util.zip.ZipFile;
  */
 public class ZipUtil {
 
+	/**
+	 * 
+	 * @param file
+	 * @param unzipDir
+	 * @return
+	 * @throws ZipException
+	 * @throws Exception
+	 */
 	public static final long unZip(File file, File unzipDir) throws ZipException, Exception{ 
 		long sTime = System.currentTimeMillis();
 		ZipFile zip = null;
@@ -45,4 +55,23 @@ public class ZipUtil {
 			IoUtil.close(zip);
 		}
 	}
+
+	public static final void zipEntry(String entryName, 
+			InputStream in, ZipOutputStream zipOutStream) throws Exception{
+		BufferedInputStream buffer = null;
+		try{
+			buffer = new BufferedInputStream(in); 
+			ZipEntry zipEntry = new ZipEntry(entryName);
+			zipOutStream.putNextEntry(zipEntry);
+			int count;
+			int BUFFER = 8192;
+			byte[] data = new byte[BUFFER];
+			while((count=buffer.read(data, 0, BUFFER))!=-1){
+				zipOutStream.write(data, 0, count);
+			}
+		}finally{
+			IoUtil.close(buffer);
+		}
+	}
+
 }
