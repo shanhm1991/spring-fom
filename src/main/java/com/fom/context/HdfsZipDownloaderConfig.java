@@ -15,7 +15,7 @@ import com.fom.util.XmlUtil;
  * <executor.overTime.seconds>
  * <executor.overTime.cancle>
  * <downloader.src.del>
- * <downloader.temp.path>
+ * <downloader.withTemp>
  * <downloader.dest.path>
  * <hdfs1.url>
  * <hdfs2.url>
@@ -28,6 +28,8 @@ import com.fom.util.XmlUtil;
  */
 public class HdfsZipDownloaderConfig extends HdfsDownloaderConfig {
 	
+	String signalFile;
+	
 	int zipContent;
 	
 	protected HdfsZipDownloaderConfig(String name) {
@@ -37,6 +39,7 @@ public class HdfsZipDownloaderConfig extends HdfsDownloaderConfig {
 	@Override
 	void load() throws Exception {
 		super.load();
+		signalFile = XmlUtil.getString(element, "signal.file", "");
 		zipContent = XmlUtil.getInt(element, "downloader.zip.content", 50, 1, 500);
 	}
 	
@@ -63,17 +66,25 @@ public class HdfsZipDownloaderConfig extends HdfsDownloaderConfig {
 			return false;
 		}
 		
-		return zipContent == c.zipContent;
+		return zipContent == c.zipContent
+				&& signalFile.equals(c.signalFile);
 	}
 	
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("\nsignal.file=" + signalFile);
 		builder.append("\ndownloader.zip.content=" + zipContent);
 		return builder.toString();
+	}
+	
+	@Override
+	public final String getSignalFile() {
+		return signalFile;
 	}
 
 	public int getZipContent() {
 		return zipContent;
 	}
+	
 }

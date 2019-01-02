@@ -17,7 +17,7 @@ import java.util.zip.ZipFile;
  */
 public class ZipUtil {
 
-	public static long unZip(File file, File unzipDir) throws ZipException, Exception{ 
+	public static final long unZip(File file, File unzipDir) throws ZipException, Exception{ 
 		long sTime = System.currentTimeMillis();
 		ZipFile zip = null;
 		try {

@@ -18,11 +18,10 @@ import com.fom.util.XmlUtil;
  * <executor.overTime.seconds>
  * <executor.overTime.cancle>
  * <downloader.src.del>
- * <downloader.temp.path>
+ * <downloader.withTemp>
  * <downloader.dest.path>
  * <hdfs1.url>
  * <hdfs2.url>
- * <signal.file>
  * 
  * @author shanhm
  * @date 2018年12月23日
@@ -36,9 +35,6 @@ public class HdfsDownloaderConfig extends DownloaderConfig implements IHdfsConfi
 	
 	FileSystem fs;
 	
-	String signalFile;
-	
-
 	protected HdfsDownloaderConfig(String name) {
 		super(name);
 	}
@@ -48,7 +44,6 @@ public class HdfsDownloaderConfig extends DownloaderConfig implements IHdfsConfi
 		super.load();
 		hdfs_master = XmlUtil.getString(element, "hdfs.master", "");
 		hdfs_slave = XmlUtil.getString(element, "hdfs.slave", "");
-		signalFile = XmlUtil.getString(element, "signal.file", "");
 		Configuration conf = new Configuration();
 		conf.set("dfs.nameservices", "proxy");
 		conf.set("dfs.ha.namenodes.proxy", "nn1,nn2");
@@ -74,7 +69,6 @@ public class HdfsDownloaderConfig extends DownloaderConfig implements IHdfsConfi
 		StringBuilder builder = new StringBuilder(super.toString());
 		builder.append("\nhdfs.master=" + hdfs_master);
 		builder.append("\nhdfs.slave=" + hdfs_slave);
-		builder.append("\nsignal.file=" + signalFile);
 		return builder.toString();
 	}
 	
@@ -93,8 +87,7 @@ public class HdfsDownloaderConfig extends DownloaderConfig implements IHdfsConfi
 		}
 		
 		return hdfs_master.equals(c.hdfs_master)
-				&& hdfs_slave.equals(c.hdfs_slave)
-				&& signalFile.equals(c.signalFile);
+				&& hdfs_slave.equals(c.hdfs_slave);
 	}
 
 	@Override
@@ -103,8 +96,8 @@ public class HdfsDownloaderConfig extends DownloaderConfig implements IHdfsConfi
 	}
 
 	@Override
-	public final String getSignalFile() {
-		return signalFile;
+	public String getSignalFile() {
+		return "";
 	}
 
 
