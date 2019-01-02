@@ -2,7 +2,6 @@ package com.fom.context;
 
 import java.io.File;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.Path;
 
 /**
@@ -20,9 +19,9 @@ public class HdfsDownloader<E extends HdfsDownloaderConfig> extends Downloader<E
 
 	@Override
 	protected void download(E config) throws Exception {
-		String path = config.tempPath;
-		if(StringUtils.isBlank(config.tempPath)){
-			path = config.destPath;
+		String path = config.destPath;
+		if(config.withTemp){
+			path = config.tempPath;
 		}
 		config.fs.copyToLocalFile(config.delSrc, new Path(config.srcPath), new Path(path), true);
 		double size = new File(path + File.separator + srcName).length() / 1024.0;

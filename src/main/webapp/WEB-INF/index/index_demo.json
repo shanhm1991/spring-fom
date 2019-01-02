@@ -1,24 +1,21 @@
 {
-    "mappings": {
-        "demo": {
-            "properties": {
-                "ID": {
-                    "type": "string"
-                },
-                "NAME": {
-                    "index": "not_analyzed",
-                    "type": "string"
-                },
-                "SOURCE": {
-                    "type": "string"
-                },
-                  "FILETYPE": {
-                    "type": "string"
-                },
-                "IMPORTWAY": {
-                    "type": "string"
-                }
-            }
-        }
-    }
+   "properties": {
+     "ID": {
+          "type": "string"
+     },
+     "NAME": {
+          "index": "not_analyzed",
+          "type": "string"
+     },
+     "SOURCE": {
+           "type": "string"
+     },
+     "FILETYPE": {
+           "type": "string"
+     },
+     "IMPORTWAY": {
+           "type": "string"
+     }
+  }
+   
 }

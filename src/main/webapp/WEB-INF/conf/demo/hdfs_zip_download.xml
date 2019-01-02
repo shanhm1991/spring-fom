@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
-	<!-- hdfs[下载] -->
-	<fom name="hdfs_file_download" config="com.fom.context.HdfsDownloaderConfig">
+	<!-- TODO -->
+	<fom name="hdfs_zip_download" config="com.fom.context.HdfsZipDownloaderConfig">
 		<src.path>/</src.path>
 		<src.pattern></src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
 		<scanner>com.fom.context.HdfsScanner</scanner>
 		<scanner.cron>0 0/1 * * * ?</scanner.cron>
-		<executor>com.fom.context.HdfsDownloader</executor>
+		<executor>com.fom.context.HdfsZipDownloader</executor>
 		<executor.min>10</executor.min>
 		<executor.max>10</executor.max>
 		<executor.aliveTime.seconds>30</executor.aliveTime.seconds>

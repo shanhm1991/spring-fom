@@ -3,9 +3,9 @@
 	<pool>
 		<name>demoEs</name>
 		<class>com.fom.util.db.pool.EsPool</class>
-		<clusterName>es-shanhm</clusterName>
+		<clusterName>selfES</clusterName>
 		<nodes>
-			<node>192.168.141.13:9300</node>
+			<node>192.168.141.21:9300</node>
 		</nodes>
 	</pool>
 

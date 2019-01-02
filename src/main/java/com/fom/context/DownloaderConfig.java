@@ -1,5 +1,7 @@
 package com.fom.context;
 
+import java.io.File;
+
 import com.fom.util.XmlUtil;
 
 /**
@@ -15,6 +17,7 @@ import com.fom.util.XmlUtil;
  * <executor.overTime.seconds>
  * <executor.overTime.cancle>
  * <downloader.src.del>
+ * <downloader.withTemp>
  * <downloader.dest.path>
  * 
  * @author shanhm
@@ -24,10 +27,12 @@ import com.fom.util.XmlUtil;
 public class DownloaderConfig extends Config {
 
 	boolean delSrc;
-	
-	String tempPath;
+
+	boolean withTemp;
 	
 	String destPath;
+	
+	String tempPath;
 
 	protected DownloaderConfig(String name) {
 		super(name);
@@ -37,6 +42,7 @@ public class DownloaderConfig extends Config {
 	void load() throws Exception {
 		super.load();
 		delSrc = XmlUtil.getBoolean(element, "src.del", false);
+		withTemp = XmlUtil.getBoolean(element, "downloader.withTemp", true);
 		destPath = parseEnvValue(XmlUtil.getString(element, "downloader.dest.path", ""));
 	}
 	
@@ -46,9 +52,19 @@ public class DownloaderConfig extends Config {
 			return false;
 		}
 		
-		//校验 destPath
-		
-		tempPath = XmlUtil.getString(element, "temp.path", "");//TODO
+		File dest = new File(destPath);
+		if(!dest.exists() && !dest.mkdirs()){
+			LOG.warn("无法创建目录[" + name + "]:" + destPath);
+			return false;
+		}
+		if(withTemp){
+			String tmp = System.getProperty("download.temp") + File.separator + name;
+			File temp = new File(tmp);
+			if(!temp.exists() && !temp.mkdirs()){
+				LOG.warn("无法创建目录[" + name + "]:" + tmp);
+				return false;
+			}
+		}
 		return true;
 	}
 	
@@ -56,6 +72,7 @@ public class DownloaderConfig extends Config {
 	public String toString() {
 		StringBuilder builder = new StringBuilder(super.toString());
 		builder.append("\nsrc.del=" + delSrc);
+		builder.append("\ndownloader.withTemp=" + withTemp);
 		builder.append("\ndownloader.dest.path=" + destPath);
 		return builder.toString();
 	}
@@ -75,10 +92,10 @@ public class DownloaderConfig extends Config {
 		}
 		
 		return delSrc = c.delSrc
-				&& tempPath.equals(c.tempPath)
+				&& withTemp == c.withTemp
 				&& destPath.equals(c.destPath);
 	}
-
+	
 	@Override
 	public final String getType() {
 		return TYPE_DOWNLOADER;

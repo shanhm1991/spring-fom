@@ -3,7 +3,6 @@ package com.fom.context;
 import java.io.File;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import com.fom.util.exception.WarnException;
 
@@ -15,7 +14,7 @@ import com.fom.util.exception.WarnException;
  * @param <E>
  */
 public abstract class Downloader<E extends DownloaderConfig> extends Executor<E>{
-
+	
 	protected Downloader(String name, String path) {
 		super(name, path);
 	}
@@ -31,7 +30,7 @@ public abstract class Downloader<E extends DownloaderConfig> extends Executor<E>
 	protected abstract void download(final E config) throws Exception;
 
 	protected void move(final E config) throws Exception{
-		if(StringUtils.isBlank(config.tempPath)){
+		if(!config.withTemp){
 			return;
 		}
 		

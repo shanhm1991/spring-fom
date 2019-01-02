@@ -14,7 +14,9 @@
 		<executor.overTime.cancle>false</executor.overTime.cancle>
 		<importer.batch>5000</importer.batch>
 		<extended>
-			<demo.conf>myconfig</demo.conf>
+			<es.index>demo</es.index>
+			<es.type>demo</es.type>
+			<es.json>/WEB-INF/index/index_demo.json</es.json>
 		</extended>
 	</fom>
 </foms>

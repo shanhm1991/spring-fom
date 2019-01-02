@@ -18,6 +18,8 @@ import com.fom.util.db.handler.JdbcHandler;
  *
  */
 public class LocalMysqlPoolImporter extends Importer<LocalImporterConfig, Map<String,Object>> {
+	
+	private static final String POOL = "demoMysql";
 
 	private static final String SQL = 
 			"insert into demo(id,name,source,filetype,importway) "
@@ -61,7 +63,7 @@ public class LocalMysqlPoolImporter extends Importer<LocalImporterConfig, Map<St
 	 */
 	@Override
 	protected void batchProcessLineData(LocalImporterConfig config, List<Map<String,Object>> lineDatas, long batchTime) throws Exception {
-		JdbcHandler.handler.batchExecute("demoMysql", SQL, lineDatas);
+		JdbcHandler.handler.batchExecute(POOL, SQL, lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());
 	}
 
