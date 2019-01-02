@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pools>
-	<!-- <pool>
+	<pool>
 		<name>demoEs</name>
-		<class>com.fom.util.db.pool.PoolEs</class>
-		<clusterName>myEs</clusterName>
+		<class>com.fom.util.db.pool.EsPool</class>
+		<clusterName>es-shanhm</clusterName>
 		<nodes>
 			<node>192.168.141.13:9300</node>
 		</nodes>
-	</pool> -->
+	</pool>
 
 	<pool>
 		<name>demoOracle</name>

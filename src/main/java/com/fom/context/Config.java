@@ -11,7 +11,6 @@ import org.apache.log4j.Logger;
 import org.dom4j.Element;
 import org.quartz.CronExpression;
 
-import com.fom.util.Utils;
 import com.fom.util.XmlUtil;
 import com.fom.util.log.LoggerFactory;
 
@@ -58,10 +57,6 @@ public abstract class Config implements IConfig {
 		return element.asXML();
 	}
 
-	public final File locationResource(String location) throws IOException{ 
-		return loader.getResource(location).getFile();
-	}
-
 	String srcPath;
 
 	String reg;
@@ -85,7 +80,7 @@ public abstract class Config implements IConfig {
 	boolean executorCancelOnOverTime;
 
 	void load() throws Exception {
-		srcPath = Utils.parsePath(XmlUtil.getString(element, "src.path", ""));
+		srcPath = parseEnvValue(XmlUtil.getString(element, "src.path", ""));
 		reg = XmlUtil.getString(element, "src.pattern", "");
 		delMatchFailFile = XmlUtil.getBoolean(element, "src.match.fail.del", false);
 		scannerClzz = XmlUtil.getString(element, "scanner", "");
@@ -221,5 +216,58 @@ public abstract class Config implements IConfig {
 			return true;
 		}
 		return pattern.matcher(srcName).find();
+	}
+	
+	/**
+	 * 通过spring上下文获取配置路径的文件
+	 * @param location
+	 * @return
+	 * @throws IOException
+	 */
+	public final File locationResource(String location) throws IOException{ 
+		return loader.getResource(location).getFile();
+	}
+	
+	/**
+	 * 获取带环境变量的字符串值，如${webapp.root}/test
+	 * @param val
+	 * @return
+	 * @throws IllegalArgumentException
+	 */
+	public final String parseEnvValue(String val) throws IllegalArgumentException {
+		String DELIM_START = "${";
+		char   DELIM_STOP  = '}';
+		int DELIM_START_LEN = 2;
+		int DELIM_STOP_LEN  = 1;
+		StringBuffer buffer = new StringBuffer();
+		int i = 0;
+		int j, k;
+		while(true) {
+			j = val.indexOf(DELIM_START, i);
+			if(j == -1) {
+				if(i==0) {
+					return val;
+				} else { 
+					buffer.append(val.substring(i, val.length()));
+					return buffer.toString();
+				}
+			} else {
+				buffer.append(val.substring(i, j));
+				k = val.indexOf(DELIM_STOP, j);
+				if(k == -1) {
+					throw new IllegalArgumentException('"' 
+							+ val + "\" has no closing brace. Opening brace at position " + j + '.');
+				} else {
+					j += DELIM_START_LEN;
+					String key = val.substring(j, k);
+					String replacement = System.getProperty(key);
+					if(replacement != null) {
+						String recursiveReplacement = parseEnvValue(replacement);
+						buffer.append(recursiveReplacement);
+					}
+					i = k + DELIM_STOP_LEN;
+				}
+			}
+		}
 	}
 }

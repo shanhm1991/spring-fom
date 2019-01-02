@@ -14,7 +14,7 @@ import org.apache.orc.OrcFile;
 import org.apache.orc.Reader;
 import org.apache.orc.RecordReader;
 
-import com.fom.util.Utils;
+import com.fom.util.IoUtil;
 
 /**
  * 
@@ -68,8 +68,8 @@ public class MultiReader implements Closeable {
 
 	@Override
 	public void close(){
-		Utils.close(recordReader);
-		Utils.close(buffReader);
+		IoUtil.close(recordReader);
+		IoUtil.close(buffReader);
 	}
 
 }

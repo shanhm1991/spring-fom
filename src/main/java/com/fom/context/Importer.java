@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
-import com.fom.util.Utils;
+import com.fom.util.IoUtil;
 import com.fom.util.exception.WarnException;
 
 /**
@@ -24,8 +24,8 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 
 	protected Importer(String name, String path) {
 		super(name, path);
-		String logPath = Utils.parsePath("${import.progress}" 
-				+ File.separator + name + File.separator + srcName + ".log");
+		String logPath = System.getProperty("import.progress")
+				+ File.separator + name + File.separator + srcName + ".log";
 		this.logFile = new File(logPath);
 	}
 
@@ -83,7 +83,7 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 			}
 			updateLogFile(file.getName(), lineIndex);
 		}finally{
-			Utils.close(reader);
+			IoUtil.close(reader);
 		}
 	}
 

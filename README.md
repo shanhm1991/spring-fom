@@ -1,5 +1,5 @@
 # fom 功能
-1.解析入库[支持数据库：mysql、oracle、elasticsearch]
+1.解析入库[支持数据库：mysql、oracle、elasticsearch(2.x)]
 
 1.1：本地文件
 

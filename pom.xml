@@ -140,6 +140,10 @@
 					<groupId>tomcat</groupId>
 					<artifactId>jasper-runtime</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -182,6 +186,10 @@
 				<exclusion>
 					<groupId>tomcat</groupId>
 					<artifactId>jasper-runtime</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>

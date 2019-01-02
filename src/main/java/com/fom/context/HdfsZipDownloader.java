@@ -18,7 +18,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 
-import com.fom.util.Utils;
+import com.fom.util.IoUtil;
 import com.fom.util.exception.WarnException;
 
 import net.lingala.zip4j.core.ZipFile;
@@ -110,11 +110,11 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 						zipOutStream.write(data, 0, count);
 					}
 				}finally{
-					Utils.close(buffer);
+					IoUtil.close(buffer);
 				}
 
 				if(contents >= config.getZipContent()){
-					Utils.close(zipOutStream);
+					IoUtil.close(zipOutStream);
 					//流管道关闭，如果继续写文件需要重新打开
 					isStreamClosed = true;
 					if(zipIndexAndGetNext(false, config)){
@@ -126,7 +126,7 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 				}
 			}
 		}finally{
-			Utils.close(zipOutStream);
+			IoUtil.close(zipOutStream);
 		}
 
 		//最后一个文件编入序列失败，线程自己没有机会再尝试了，只能结束自己，交给下一个线程来完成

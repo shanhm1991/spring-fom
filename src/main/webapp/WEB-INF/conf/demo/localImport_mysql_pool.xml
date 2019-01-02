@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
-	<fom name="LocalImporter_mysql_pool" config="com.fom.modules.importer.demo.local.LocalImporterConfig">
+	<fom name="LocalImport_mysql_pool" config="com.fom.modules.importer.demo.local.LocalImporterConfig">
 		<src.path>${webapp.root}/test</src.path>
 		<src.pattern>test.txt</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>

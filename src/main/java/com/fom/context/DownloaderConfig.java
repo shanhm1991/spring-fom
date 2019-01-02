@@ -1,6 +1,5 @@
 package com.fom.context;
 
-import com.fom.util.Utils;
 import com.fom.util.XmlUtil;
 
 /**
@@ -38,7 +37,7 @@ public class DownloaderConfig extends Config {
 	void load() throws Exception {
 		super.load();
 		delSrc = XmlUtil.getBoolean(element, "src.del", false);
-		destPath = Utils.parsePath(XmlUtil.getString(element, "downloader.dest.path", ""));
+		destPath = parseEnvValue(XmlUtil.getString(element, "downloader.dest.path", ""));
 	}
 	
 	@Override

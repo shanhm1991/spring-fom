@@ -19,7 +19,7 @@ import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
-import com.fom.util.Utils;
+import com.fom.util.IoUtil;
 import com.fom.util.exception.WarnException;
 import com.fom.util.log.LoggerFactory;
 
@@ -144,8 +144,8 @@ public class JdbcHelper {
 			return list;
 		}finally{
 			pool.release();
-			Utils.close(resultSet); 
-			Utils.close(ps); 
+			IoUtil.close(resultSet); 
+			IoUtil.close(ps); 
 		}
 	}
 
@@ -167,8 +167,8 @@ public class JdbcHelper {
 			cancelTransaction(poolName);
 			throw new Exception("回滚数据,事务执行异常", e);
 		}finally{
-			Utils.close(resultSet); 
-			Utils.close(ps); 
+			IoUtil.close(resultSet); 
+			IoUtil.close(ps); 
 		}
 	}
 
@@ -197,7 +197,7 @@ public class JdbcHelper {
 			LOG.info("[affects=" + num + ",cost=" + (System.currentTimeMillis() - eTime) + "ms]");
 			return num;
 		}finally{
-			Utils.close(ps); 
+			IoUtil.close(ps); 
 			pool.release();
 		}
 	}
@@ -218,7 +218,7 @@ public class JdbcHelper {
 			cancelTransaction(poolName);
 			throw new Exception("回滚数据,事务执行异常", e);
 		}finally{
-			Utils.close(ps); 
+			IoUtil.close(ps); 
 		}
 	}
 
@@ -254,7 +254,7 @@ public class JdbcHelper {
 			LOG.info("[affects=" + num + ",cost=" + (System.currentTimeMillis() - eTime) + "ms]");
 			return nums;
 		}finally{
-			Utils.close(ps); 
+			IoUtil.close(ps); 
 			pool.release();
 		}
 	}
@@ -281,7 +281,7 @@ public class JdbcHelper {
 			cancelTransaction(poolName);
 			throw new Exception("事务执行异常", e);
 		}finally{
-			Utils.close(ps); 
+			IoUtil.close(ps); 
 		}
 	}
 

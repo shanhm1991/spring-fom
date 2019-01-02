@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fom.context.ManagerService;
-import com.fom.util.Utils;
+import com.fom.util.IoUtil;
 
 /**
  * 
@@ -123,7 +123,7 @@ public class ManageController {
 	@ResponseBody
 	public Map<String,Object> logs() throws Exception{ 
 		Map<String,Object> map = new HashMap<>();
-		File logs = new File(Utils.parsePath("${webapp.root}" + File.separator + "log"));
+		File logs = new File(System.getProperty("webapp.root") + File.separator + "log");
 		String[] array = logs.list();
 		if(array != null){
 			map.put("logs", Arrays.asList(array));
@@ -134,7 +134,7 @@ public class ManageController {
 	@RequestMapping("/download")
 	@ResponseBody
 	public Map<String,Object> download(String file, HttpServletResponse resp) throws Exception{ 
-		String path = Utils.parsePath("${webapp.root}" + File.separator + "log"  + File.separator + file);
+		String path = System.getProperty("webapp.root") + File.separator + "log"  + File.separator + file;
 		File log = new File(path);
 		resp.reset();
 		resp.setContentType("application/octet-stream;charset=UTF-8");
@@ -148,7 +148,7 @@ public class ManageController {
 				resp.getOutputStream().write(bytes, 0, len);
 			}
 		}finally{
-			Utils.close(in);
+			IoUtil.close(in);
 		}
 		return null;
 	}

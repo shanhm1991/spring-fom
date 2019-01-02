@@ -184,7 +184,7 @@ public class Md5Util {
 			messagedigest.update(byteBuffer);
 			return bufferToHex(messagedigest.digest());
 		}finally{
-			Utils.close(in);
+			IoUtil.close(in);
 		}
 	}
 
