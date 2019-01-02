@@ -19,7 +19,7 @@ public abstract class Executor<E extends Config> extends Thread {
 
 	E config;
 	
-	DecimalFormat numFormat  = new DecimalFormat("0.00");
+	DecimalFormat numFormat  = new DecimalFormat("#.##");
 
 	protected final Logger log;
 

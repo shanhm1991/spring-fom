@@ -19,12 +19,16 @@ public class HdfsDownloader<E extends HdfsDownloaderConfig> extends Downloader<E
 
 	@Override
 	protected void download(E config) throws Exception {
-		String path = config.destPath;
+		long sTime = System.currentTimeMillis();
+		String dest = config.destPath;
 		if(config.withTemp){
-			path = config.tempPath;
+			dest = config.tempPath;
 		}
-		config.fs.copyToLocalFile(config.delSrc, new Path(config.srcPath), new Path(path), true);
-		double size = new File(path + File.separator + srcName).length() / 1024.0;
-		log.debug("下载文件结束(" + numFormat.format(size) + "KB)");
+		dest = dest + File.separator + srcName;
+
+		config.fs.copyToLocalFile(config.delSrc, new Path(srcPath), new Path(dest), true);
+		double size = new File(dest).length() / 1024.0;
+		log.info("下载文件结束(" 
+				+ numFormat.format(size) + "KB), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 	}
 }

@@ -30,9 +30,9 @@ import com.fom.util.XmlUtil;
  */
 public class HdfsDownloaderConfig extends DownloaderConfig implements IHdfsConfig {
 	
-	private String hdfs1_url;
+	private String hdfs_master;
 	
-	private String hdfs2_url;
+	private String hdfs_slave;
 	
 	FileSystem fs;
 	
@@ -46,17 +46,17 @@ public class HdfsDownloaderConfig extends DownloaderConfig implements IHdfsConfi
 	@Override
 	void load() throws Exception {
 		super.load();
-		hdfs1_url = XmlUtil.getString(element, "hdfs1.url", "");
-		hdfs2_url = XmlUtil.getString(element, "hdfs2.url", "");
+		hdfs_master = XmlUtil.getString(element, "hdfs.master", "");
+		hdfs_slave = XmlUtil.getString(element, "hdfs.slave", "");
 		signalFile = XmlUtil.getString(element, "signal.file", "");
 		Configuration conf = new Configuration();
-		conf.set("dfs.nameservices", "ngpcluster");//TODO
-		conf.set("dfs.ha.namenodes.ngpcluster", "nn1,nn2");
-		conf.set("dfs.namenode.rpc-address.ngpcluster.nn1", hdfs1_url);
-		conf.set("dfs.namenode.rpc-address.ngpcluster.nn2", hdfs2_url);
-		conf.set("dfs.client.failover.proxy.provider.ngpcluster",
+		conf.set("dfs.nameservices", "proxy");
+		conf.set("dfs.ha.namenodes.proxy", "nn1,nn2");
+		conf.set("dfs.namenode.rpc-address.proxy.nn1", hdfs_master);
+		conf.set("dfs.namenode.rpc-address.proxy.nn2", hdfs_slave);
+		conf.set("dfs.client.failover.proxy.provider.proxy",
 				"org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider");
-		conf.set("fs.defaultFS", "hdfs://ngpcluster");
+		conf.set("fs.defaultFS", "hdfs://proxy");
 		fs = FileSystem.get(conf);
 	}
 	
@@ -72,8 +72,8 @@ public class HdfsDownloaderConfig extends DownloaderConfig implements IHdfsConfi
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("\nhdfs1.url=" + hdfs1_url);
-		builder.append("\nhdfs2.url=" + hdfs2_url);
+		builder.append("\nhdfs.master=" + hdfs_master);
+		builder.append("\nhdfs.slave=" + hdfs_slave);
 		builder.append("\nsignal.file=" + signalFile);
 		return builder.toString();
 	}
@@ -92,8 +92,8 @@ public class HdfsDownloaderConfig extends DownloaderConfig implements IHdfsConfi
 			return false;
 		}
 		
-		return hdfs1_url.equals(c.hdfs1_url)
-				&& hdfs2_url.equals(c.hdfs2_url)
+		return hdfs_master.equals(c.hdfs_master)
+				&& hdfs_slave.equals(c.hdfs_slave)
 				&& signalFile.equals(c.signalFile);
 	}
 

@@ -6,7 +6,7 @@
 		<src.pattern></src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
 		<scanner>com.fom.context.HdfsScanner</scanner>
-		<scanner.cron>0 0/1 * * * ?</scanner.cron>
+		<scanner.cron>0 0/15 * * * ?</scanner.cron>
 		<executor>com.fom.context.HdfsZipDownloader</executor>
 		<executor.min>10</executor.min>
 		<executor.max>10</executor.max>
@@ -16,7 +16,7 @@
 		<downloader.src.del>false</downloader.src.del>
 		<downloader.withTemp>true</downloader.withTemp>
 		<downloader.dest.path>E:/test</downloader.dest.path>
-		<hdfs1.url>ip1:port</hdfs1.url>
-		<hdfs2.url>ip2:port</hdfs2.url>
+		<hdfs.master>master.ip:port</hdfs.master>
+		<hdfs.slave>slave.ip:port</hdfs.slave>
 	</fom>
 </foms>

@@ -58,10 +58,10 @@ public class DownloaderConfig extends Config {
 			return false;
 		}
 		if(withTemp){
-			String tmp = System.getProperty("download.temp") + File.separator + name;
-			File temp = new File(tmp);
+			tempPath = System.getProperty("download.temp") + File.separator + name;
+			File temp = new File(tempPath);
 			if(!temp.exists() && !temp.mkdirs()){
-				LOG.warn("无法创建目录[" + name + "]:" + tmp);
+				LOG.warn("无法创建目录[" + name + "]:" + tempPath);
 				return false;
 			}
 		}

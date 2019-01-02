@@ -5,7 +5,7 @@
 		<src.pattern>test.txt</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
 		<scanner>com.fom.context.LocalScanner</scanner>
-		<scanner.cron>0 0/1 * * * ?</scanner.cron>
+		<scanner.cron>0 0/15 * * * ?</scanner.cron>
 		<executor>com.fom.modules.importer.demo.local.mysql.pool.LocalMysqlPoolImporter</executor>
 		<executor.min>10</executor.min>
 		<executor.max>10</executor.max>

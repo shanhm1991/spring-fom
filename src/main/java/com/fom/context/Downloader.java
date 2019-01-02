@@ -2,8 +2,6 @@ package com.fom.context;
 
 import java.io.File;
 
-import org.apache.commons.lang.ArrayUtils;
-
 import com.fom.util.exception.WarnException;
 
 /**
@@ -33,16 +31,9 @@ public abstract class Downloader<E extends DownloaderConfig> extends Executor<E>
 		if(!config.withTemp){
 			return;
 		}
-		
-		File tempDir = new File(config.tempPath);
-		File[] files = tempDir.listFiles();
-		if(ArrayUtils.isEmpty(files)){
-			return;
-		}
-		for(File file : files){
-			if(!file.renameTo(new File(config.tempPath + File.separator + file.getName()))){
-				throw new WarnException("文件移动失败:" + file.getName());
-			}
+		File file = new File(config.tempPath + File.separator + srcName);
+		if(file.exists() && !file.renameTo(new File(config.destPath + File.separator + srcName))){
+			throw new WarnException("文件移动失败:" + file.getName()); 
 		}
 	}
 }

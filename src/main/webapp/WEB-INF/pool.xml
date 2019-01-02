@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pools>
-	<pool>
+	<!-- <pool>
 		<name>demoEs</name>
 		<class>com.fom.util.db.pool.EsPool</class>
 		<clusterName>selfES</clusterName>
 		<nodes>
 			<node>192.168.141.21:9300</node>
 		</nodes>
-	</pool>
+	</pool> -->
 
-	<pool>
+	<!-- <pool>
 		<name>demoOracle</name>
 		<core>20</core>
 		<max>20</max>
@@ -20,9 +20,9 @@
 		<url>jdbc:oracle:thin:@192.168.141.21:1521:orcl</url>
 		<user>scott</user>
 		<passwd>admin</passwd>
-	</pool>
+	</pool> -->
 	
-	<pool>
+	<!-- <pool>
 		<name>demoMysql</name>
 		<core>20</core>
 		<max>20</max>
@@ -33,5 +33,5 @@
 		<url>jdbc:mysql://192.168.141.13:3306/demo</url>
 		<user>shanhm</user>
 		<passwd>shanhm</passwd>
-	</pool>
+	</pool> -->
 </pools>

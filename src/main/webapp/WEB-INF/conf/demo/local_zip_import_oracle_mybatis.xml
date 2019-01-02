@@ -5,7 +5,7 @@
 		<src.pattern>demo.zip</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
 		<scanner>com.fom.context.LocalScanner</scanner>
-		<scanner.cron>0 0/2 * * * ?</scanner.cron>
+		<scanner.cron>0 0/15 * * * ?</scanner.cron>
 		<executor>com.fom.modules.importer.demo.local.oracle.mybatis.LocalOracleMybatisZipImporter</executor>
 		<executor.min>10</executor.min>
 		<executor.max>10</executor.max>
