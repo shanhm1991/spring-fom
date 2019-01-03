@@ -9,12 +9,12 @@ package com.fom.context;
  */
 public class Uploader<E extends UploaderConfig> extends Executor<E> {
 
-	protected Uploader(String name, String path) {
+	protected Uploader(String name, String path) throws Exception {
 		super(name, path);
 	}
 
 	@Override
-	void execute() throws Exception {
+	protected void execute(E config) throws Exception {
 		// TODO Auto-generated method stub
 	}
 

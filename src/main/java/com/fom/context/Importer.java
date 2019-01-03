@@ -29,7 +29,7 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 		this.logFile = new File(logPath);
 	}
 
-	void execute() throws Exception {
+	protected void execute(E config) throws Exception {
 		long sTime = System.currentTimeMillis();
 		int lineIndex = 0;
 		if(!logFile.exists()){

@@ -18,7 +18,7 @@ public abstract class Downloader<E extends DownloaderConfig> extends Executor<E>
 	}
 
 	@Override
-	final void execute() throws Exception {
+	protected void execute(E config) throws Exception {
 		
 		download(config);
 		

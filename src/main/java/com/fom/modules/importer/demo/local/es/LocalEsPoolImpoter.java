@@ -71,4 +71,5 @@ public class LocalEsPoolImpoter extends Importer<LocalEsImporterConfig, Map<Stri
 	protected void onComplete(LocalEsImporterConfig config) throws Exception {
 		log.info("complete process.");
 	}
+
 }

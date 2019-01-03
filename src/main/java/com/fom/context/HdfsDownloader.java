@@ -27,8 +27,7 @@ public class HdfsDownloader<E extends HdfsDownloaderConfig> extends Downloader<E
 		dest = dest + File.separator + srcName;
 
 		config.fs.copyToLocalFile(config.delSrc, new Path(srcPath), new Path(dest), true);
-		double size = new File(dest).length() / 1024.0;
 		log.info("下载文件结束(" 
-				+ numFormat.format(size) + "KB), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+				+ numFormat.format(srcSize) + "KB), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 	}
 }

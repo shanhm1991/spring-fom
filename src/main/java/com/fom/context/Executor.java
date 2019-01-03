@@ -3,6 +3,7 @@ package com.fom.context;
 import java.io.File;
 import java.text.DecimalFormat;
 
+import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 
 import com.fom.util.exception.WarnException;
@@ -18,7 +19,7 @@ import com.fom.util.log.LoggerFactory;
 public abstract class Executor<E extends Config> extends Thread {
 
 	E config;
-	
+
 	DecimalFormat numFormat  = new DecimalFormat("#.##");
 
 	protected final Logger log;
@@ -29,7 +30,7 @@ public abstract class Executor<E extends Config> extends Thread {
 
 	protected final File srcFile;
 
-	protected final double srcSize;
+	protected double srcSize;
 
 	protected final String srcName;
 
@@ -38,8 +39,9 @@ public abstract class Executor<E extends Config> extends Thread {
 		this.srcPath = path;
 		this.srcFile = new File(path);
 		this.srcName = srcFile.getName();
-		this.srcSize = srcFile.length() / 1024.0;
-		Config config = getRuntimeConfig();
+		this.calculatSize();
+		
+		config = getRuntimeConfig();
 		if(config == null){
 			throw new RuntimeException("任务取消.");
 		}
@@ -47,6 +49,19 @@ public abstract class Executor<E extends Config> extends Thread {
 		this.log = LoggerFactory.getLogger(config.getType() + "." + name);
 	}
 
+	private void calculatSize() {
+		if(config instanceof IHdfsConfig){
+			IHdfsConfig hconf = (IHdfsConfig)config;
+			try {
+				long len = hconf.getFs().getFileStatus(new Path(srcPath)).getLen();
+				srcSize = len / 1024.0; 
+			} catch (Exception e) {
+				
+			}
+		}
+		srcSize = srcFile.length() / 1024.0;
+	}
+	
 	/**
 	 * 获取最新的config
 	 * @return
@@ -67,9 +82,9 @@ public abstract class Executor<E extends Config> extends Thread {
 		long sTime = System.currentTimeMillis();
 		try {
 			onStart(config);
-			
-			execute();
-			
+
+			execute(config);
+
 			onComplete(config);
 			log.info(config.getTypeName() + "任务结束, 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 		} catch(WarnException e){
@@ -91,8 +106,8 @@ public abstract class Executor<E extends Config> extends Thread {
 
 	}
 
-	abstract void execute() throws Exception;
-	
+	protected abstract void execute(E config) throws Exception;
+
 	/**
 	 * 继承自Executor，在任务线程完成时执行的动作
 	 */

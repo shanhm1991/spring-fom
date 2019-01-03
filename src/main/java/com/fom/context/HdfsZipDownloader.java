@@ -47,6 +47,7 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 	protected HdfsZipDownloader(String name, String path) {
 		super(name, path);
 		this.tempZipName = srcName + ".temp.zip";
+
 		this.subTempPath = config.destPath;
 		if(config.withTemp){
 			subTempPath = config.tempPath;
@@ -80,20 +81,22 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 	 * 4.源目录文件下载完毕，最后一次将temp.zip编入序列，如果失败就异常停止
 	 */
 	private void zipDownload(FileStatus[] srcFiles) throws Exception { 
-		zipIndexAndGetNext(true, config); 
-		boolean isStreamClosed = true;
-		boolean hasZipOtherFile = false;
+		File tempZip = new File(subTempPath + File.separator + tempZipName);
 		ZipOutputStream zipOutStream = null;
+		boolean isStreamClosed = true;
+		
 		try{
+			if(tempZip.exists()){
+				zipOutStream = new ZipOutputStream(new CheckedOutputStream(new FileOutputStream(tempZip), new CRC32()));
+				isStreamClosed = false;
+				zipIndexAndGetNext(true, config, zipOutStream); 
+			}
+			
 			for(FileStatus status : srcFiles){
 				if(isStreamClosed){
-					File tempZip = new File(subTempPath + File.separator + tempZipName);
+					tempZip = new File(subTempPath + File.separator + tempZipName);
 					zipOutStream = new ZipOutputStream(new CheckedOutputStream(new FileOutputStream(tempZip), new CRC32()));
 					isStreamClosed = false; 
-					if(!hasZipOtherFile){
-						zipOtherFile(zipOutStream);
-						hasZipOtherFile = true;
-					}
 				}
 
 				long sTime = System.currentTimeMillis();
@@ -102,26 +105,25 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 				String size = numFormat.format(status.getLen() / 1024.0);
 				log.info("下载文件结束:" 
 						+ name + "(" + size + "KB), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
-				
+
 				if(++contents >= config.getZipContent()){
 					IoUtil.close(zipOutStream);
 					//流管道关闭，如果继续写文件需要重新打开
-					isStreamClosed = true;
-					if(zipIndexAndGetNext(false, config)){
+					isStreamClosed = true; 
+					if(zipIndexAndGetNext(false, config, zipOutStream)){
 						contents = 0;
-						hasZipOtherFile = false;
-					}else{
-						log.warn(tempZipName + "编入序列失败，继续下载"); 
+						continue;
 					}
+					log.warn(tempZipName + "编入序列失败，继续下载"); 
 				}
+			}
+
+			//最后一个文件编入序列失败，线程自己没有机会再尝试了，只能结束自己，交给下一个线程来完成
+			if(!zipIndexAndGetNext(false, config, zipOutStream)){
+				throw new WarnException(tempZipName + "编入序列失败,停止下载"); 
 			}
 		}finally{
 			IoUtil.close(zipOutStream);
-		}
-
-		//最后一个文件编入序列失败，线程自己没有机会再尝试了，只能结束自己，交给下一个线程来完成
-		if(!zipIndexAndGetNext(false, config)){
-			throw new WarnException(tempZipName + "编入序列失败,停止下载"); 
 		}
 	}
 
@@ -137,7 +139,8 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 	 * @throws IOException
 	 */
 	@SuppressWarnings("unchecked") 
-	private boolean zipIndexAndGetNext(boolean isRetry, final E config) throws Exception{ 
+	private boolean zipIndexAndGetNext(boolean isRetry, 
+			final E config, final ZipOutputStream zipOutStream) throws Exception{ 
 		File tempFile = new File(subTempPath + File.separator + tempZipName);
 		if(!tempFile.exists()){
 			return true;
@@ -155,9 +158,9 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 			List<FileStatus> srcFiles = Arrays.asList(config.fs.listStatus(new Path(srcPath)));
 			Iterator<FileHeader> headersIte = tempZip.getFileHeaders().iterator();
 			while(headersIte.hasNext()){
-				FileHeader header = headersIte.next();
+				String name = headersIte.next().getFileName();
 				for(FileStatus status : srcFiles){
-					if(header.getFileName().equals(status.getPath().getName())){
+					if(name.equals(status.getPath().getName())){
 						log.info("删除源文件：" + status.getPath());
 						if(!config.fs.delete(status.getPath(), true)){
 							throw new WarnException("删除源文件失败：" + status.getPath()); 
@@ -167,6 +170,8 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 				}
 			}
 		}
+
+		joinFiles(zipOutStream, tempZip.getFileHeaders());
 
 		if(isRetry){
 			contents = tempZip.getFileHeaders().size();
@@ -202,9 +207,9 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 			}
 		}
 		return index;
-	}
+	} 
 
-	protected void zipOtherFile(ZipOutputStream zipOutStream) throws IOException{
+	protected void joinFiles(ZipOutputStream zipOutStream, List<FileHeader> list) throws IOException{
 
 	}
 
