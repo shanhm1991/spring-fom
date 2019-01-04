@@ -42,7 +42,11 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 
 	protected String subTempPath;
 
-	private final String tempZipName;
+	protected File subTempDir;
+
+	protected final String tempZipName;
+
+	protected final File tempZip;
 
 	protected HdfsZipDownloader(String name, String path) {
 		super(name, path);
@@ -53,6 +57,12 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 			subTempPath = config.tempPath;
 		}
 		subTempPath = subTempPath + File.separator + srcName;
+
+		subTempDir = new File(subTempPath);
+		if(!subTempDir.exists() && !subTempDir.mkdirs()){
+			throw new RuntimeException("创建临时目录失败.");
+		}
+		tempZip = new File(subTempPath + File.separator + tempZipName);
 	}
 
 	@Override
@@ -75,26 +85,31 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 	}
 
 	/**
-	 * 1.将已有的temp.zip编入序列
-	 * 2.将源目录中文件逐个写入temp.zip(标记文件除外)
-	 * 3.当写入文件达到指定个数后，重复步骤1
-	 * 4.源目录文件下载完毕，最后一次将temp.zip编入序列，如果失败就异常停止
+	 * 
+	 * @param srcFiles
+	 * @throws Exception
 	 */
 	private void zipDownload(FileStatus[] srcFiles) throws Exception { 
-		File tempZip = new File(subTempPath + File.separator + tempZipName);
+		boolean isRetry = tempZip.exists();
 		ZipOutputStream zipOutStream = null;
 		boolean isStreamClosed = true;
-		
+
 		try{
-			if(tempZip.exists()){
-				zipOutStream = new ZipOutputStream(new CheckedOutputStream(new FileOutputStream(tempZip), new CRC32()));
-				isStreamClosed = false;
-				zipIndexAndGetNext(true, config, zipOutStream); 
-			}
+			indexTempZip(isRetry, config); 
 			
 			for(FileStatus status : srcFiles){
+				
+				
+				if(contents >= config.getZipContent()){
+					IoUtil.close(zipOutStream);
+					isStreamClosed = true; 
+				}
+				
+				
+				
+				
+				
 				if(isStreamClosed){
-					tempZip = new File(subTempPath + File.separator + tempZipName);
 					zipOutStream = new ZipOutputStream(new CheckedOutputStream(new FileOutputStream(tempZip), new CRC32()));
 					isStreamClosed = false; 
 				}
@@ -110,7 +125,7 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 					IoUtil.close(zipOutStream);
 					//流管道关闭，如果继续写文件需要重新打开
 					isStreamClosed = true; 
-					if(zipIndexAndGetNext(false, config, zipOutStream)){
+					if(indexTempZip(false, config)){
 						contents = 0;
 						continue;
 					}
@@ -119,7 +134,7 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 			}
 
 			//最后一个文件编入序列失败，线程自己没有机会再尝试了，只能结束自己，交给下一个线程来完成
-			if(!zipIndexAndGetNext(false, config, zipOutStream)){
+			if(!indexTempZip(false, config)){
 				throw new WarnException(tempZipName + "编入序列失败,停止下载"); 
 			}
 		}finally{
@@ -128,35 +143,37 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 	}
 
 	/**
-	 * 检查temp.zip
-	 * 如果存在，并且没有损坏: 将远程目录中与temp中同名的文件删除 ，然后将temp编入序列
-	 * 如果存在，但是是损坏的: 执行删除
-	 * 如果不存在: 直接返回ture
 	 * 
-	 * 过程中如果发生异常或者操作失败，就抛出异常使线程结束
-	 * 
-	 * @throws ZipException
-	 * @throws IOException
+	 * @param isRetry
+	 * @param config
+	 * @return
+	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked") 
-	private boolean zipIndexAndGetNext(boolean isRetry, 
-			final E config, final ZipOutputStream zipOutStream) throws Exception{ 
-		File tempFile = new File(subTempPath + File.separator + tempZipName);
-		if(!tempFile.exists()){
+	private boolean indexTempZip(boolean isRetry, final E config) throws Exception{ 
+		if(!tempZip.exists()){
 			return true;
 		}
 
-		ZipFile tempZip = new ZipFile(tempFile);
-		if(!tempZip.isValidZipFile()){
-			if(!tempFile.delete()){
+		ZipFile zip = new ZipFile(tempZip);
+		if(!zip.isValidZipFile()){
+			if(!tempZip.delete()){
 				throw new WarnException(tempZipName + "已经损坏, 删除失败."); 
 			}
+			return true;
+		}
+		
+		if(isRetry){
+			contents = zip.getFileHeaders().size();
+		}
+		
+		if(contents < config.getZipContent()){
 			return true;
 		}
 
 		if(config.delSrc){
 			List<FileStatus> srcFiles = Arrays.asList(config.fs.listStatus(new Path(srcPath)));
-			Iterator<FileHeader> headersIte = tempZip.getFileHeaders().iterator();
+			Iterator<FileHeader> headersIte = zip.getFileHeaders().iterator();
 			while(headersIte.hasNext()){
 				String name = headersIte.next().getFileName();
 				for(FileStatus status : srcFiles){
@@ -171,24 +188,27 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 			}
 		}
 
-		joinFiles(zipOutStream, tempZip.getFileHeaders());
+		joinOtherFiles(); //TODO
 
-		if(isRetry){
-			contents = tempZip.getFileHeaders().size();
-		}
-		File indexFile = nextZipFile(subTempPath, config);
-		log.info(tempZipName + "编入序列：" + indexFile.getName());
-		return tempFile.renameTo(indexFile); 
+		File indexZip = nextZipFile(subTempPath, config);
+		log.info(tempZipName + "编入序列：" + indexZip.getName());
+		return tempZip.renameTo(indexZip); 
 	}	
 
 	protected File nextZipFile(String path, final E config){
 		StringBuilder builder = new StringBuilder(path).append(File.separator); 
 		builder.append(srcName).append("_");
-		builder.append(getLastZipIndex() + 1).append("_").append(contents).append(".zip");
+		builder.append(nextIndex()).append("_").append(contents).append(".zip");
 		return new File(builder.toString());
 	}
 
-	private int getLastZipIndex(){
+	private int nextIndex(){
+		if(index > 0){
+			index++;
+			return index;
+		}
+
+
 		int index = 0;
 		String[] array = new File(subTempPath).list();
 		if(ArrayUtils.isEmpty(array)){
@@ -209,7 +229,7 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 		return index;
 	} 
 
-	protected void joinFiles(ZipOutputStream zipOutStream, List<FileHeader> list) throws IOException{
+	protected void joinOtherFiles() throws IOException{
 
 	}
 

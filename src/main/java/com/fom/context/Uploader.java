@@ -9,7 +9,7 @@ package com.fom.context;
  */
 public class Uploader<E extends UploaderConfig> extends Executor<E> {
 
-	protected Uploader(String name, String path) throws Exception {
+	protected Uploader(String name, String path) {
 		super(name, path);
 	}
 

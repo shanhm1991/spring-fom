@@ -39,12 +39,12 @@ public abstract class Executor<E extends Config> extends Thread {
 		this.srcPath = path;
 		this.srcFile = new File(path);
 		this.srcName = srcFile.getName();
-		this.calculatSize();
 		
 		config = getRuntimeConfig();
 		if(config == null){
 			throw new RuntimeException("任务取消.");
 		}
+		this.calculatSize();
 		this.setName(config.getType() + "[" + srcName + "]");
 		this.log = LoggerFactory.getLogger(config.getType() + "." + name);
 	}
@@ -55,6 +55,7 @@ public abstract class Executor<E extends Config> extends Thread {
 			try {
 				long len = hconf.getFs().getFileStatus(new Path(srcPath)).getLen();
 				srcSize = len / 1024.0; 
+				return;
 			} catch (Exception e) {
 				
 			}
