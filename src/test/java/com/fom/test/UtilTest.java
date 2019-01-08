@@ -1,0 +1,96 @@
+package com.fom.test;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.regex.Pattern;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.ql.exec.vector.VectorizedRowBatch;
+import org.apache.orc.OrcFile;
+import org.apache.orc.Reader;
+import org.apache.orc.RecordReader;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.SAXReader;
+import org.dom4j.io.XMLWriter;
+import org.junit.Test;
+import org.quartz.CronExpression;
+
+/**
+ * 
+ * @author shanhm
+ * @date 2018年12月23日
+ *
+ */
+public class UtilTest {
+
+	@Test
+	public void cron() throws ParseException{
+		CronExpression cron = new CronExpression("0 0 0/1 * * ?");
+		Date nextDate = cron.getNextValidTimeAfter(new Date());
+		System.out.println(new SimpleDateFormat("YYYYMMdd HH:mm:ss SSS").format(nextDate));
+	}
+
+	@Test
+	public void pattern(){
+		Pattern pattern = Pattern.compile(".\\.txt$");
+		System.out.println(pattern.matcher("新建文本文档.txt").find()); 
+	}
+	
+	@Test
+	public void xml() throws IOException, DocumentException{ 
+		String s = "<oprator name=\"test\">"
+				+"<importer/>"
+				+"<scanner/>"
+				+"<src.type>zip</src.type>"
+				+"<src.zip.subPattern/>"
+				+"<src.match.fail.del>false</src.match.fail.del>"
+				+"<importer.batch>5000</importer.batch>"
+				+"<importer.max>10</importer.max>"
+				+"<importer.aliveTime.seconds>30</importer.aliveTime.seconds>"
+				+"<importer.overTime.seconds>86400</importer.overTime.seconds>"
+				+"<importer.overTime.cancle>false</importer.overTime.cancle>"
+				+"<external>"
+				+"</external>"
+				+"</oprator>";
+
+		SAXReader reader = new SAXReader();
+		StringReader in=new StringReader(s);  
+	    Document doc=reader.read(in); 
+		
+		OutputFormat formater=OutputFormat.createPrettyPrint();  
+		formater.setEncoding("UTF-8");  
+	    StringWriter out=new StringWriter();  
+	    XMLWriter writer=new XMLWriter(out,formater);
+	    writer.write(doc);  
+	    writer.close();  
+	    System.out.println(out.toString());
+	}
+	
+	@Test
+	public void readOrc() throws IllegalArgumentException, IOException{ 
+		Configuration conf = new Configuration();
+		conf.set("fs.defaultFS", "file:///");
+		
+		Reader reader = OrcFile.createReader(new Path("E:/node.txt"), OrcFile.readerOptions(conf));
+		RecordReader rows = reader.rows();
+		VectorizedRowBatch batch = reader.getSchema().createRowBatch(1);
+		while (rows.nextBatch(batch)) {
+			int colums = batch.numCols;
+			for (int r = 0;r < batch.size;r++) { //row
+				for(int c = 0;c < colums;c++){
+					System.out.print(batch.cols[c]);
+				}
+				System.out.println();
+			}
+		}
+		rows.close();
+	}
+
+}

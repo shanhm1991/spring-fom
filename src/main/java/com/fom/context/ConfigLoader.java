@@ -99,12 +99,13 @@ class ConfigLoader extends AbstractRefreshableWebApplicationContext {
 		String fomPath = fomXml.getParent();
 		while(it.hasNext()){
 			Element element = (Element)it.next();
-			String location = element.getTextTrim();
-			//相对路径找不到再找绝对路径
+			String location = Config.parseEnvValue(element.getTextTrim());
+			//尝试读取绝对路径，如果不存在再以spring方式尝试
 			File xml = new File(fomPath + File.separator + location);
 			if(!xml.exists()){
 				xml = getResource(location).getFile();
 			}
+			
 			SAXReader reader = new SAXReader();
 			reader.setEncoding("UTF-8");
 			Document doc = reader.read(new FileInputStream(xml));

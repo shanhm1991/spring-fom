@@ -234,7 +234,7 @@ public abstract class Config implements IConfig {
 	 * @return
 	 * @throws IllegalArgumentException
 	 */
-	public final String parseEnvValue(String val) throws IllegalArgumentException {
+	public static final String parseEnvValue(String val) throws IllegalArgumentException {
 		String DELIM_START = "${";
 		char   DELIM_STOP  = '}';
 		int DELIM_START_LEN = 2;
