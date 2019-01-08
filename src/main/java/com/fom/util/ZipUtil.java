@@ -5,11 +5,24 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
+
+import org.apache.log4j.Logger;
+
+import com.fom.util.exception.WarnException;
+import com.fom.util.log.LoggerFactory;
+
+import net.lingala.zip4j.core.HeaderReader;
+import net.lingala.zip4j.model.FileHeader;
+import net.lingala.zip4j.model.ZipModel;
+import net.lingala.zip4j.util.InternalZipConstants;
 
 /**
  * 
@@ -18,16 +31,17 @@ import java.util.zip.ZipOutputStream;
  *
  */
 public class ZipUtil {
+	
+	private static final Logger LOG = LoggerFactory.getLogger("root");
 
 	/**
 	 * 
 	 * @param file
 	 * @param unzipDir
 	 * @return
-	 * @throws ZipException
 	 * @throws Exception
 	 */
-	public static final long unZip(File file, File unzipDir) throws ZipException, Exception{ 
+	public static final long unZip(File file, File unzipDir) throws Exception{ 
 		long sTime = System.currentTimeMillis();
 		ZipFile zip = null;
 		try {
@@ -56,6 +70,13 @@ public class ZipUtil {
 		}
 	}
 
+	/**
+	 * 
+	 * @param entryName
+	 * @param in
+	 * @param zipOutStream
+	 * @throws Exception
+	 */
 	public static final void zipEntry(String entryName, 
 			InputStream in, ZipOutputStream zipOutStream) throws Exception{
 		BufferedInputStream buffer = null;
@@ -74,4 +95,50 @@ public class ZipUtil {
 		}
 	}
 
+	/**
+	 * 
+	 * @param zip
+	 * @return
+	 */
+	public static final boolean validZip(File zip){
+		if(zip == null || !zip.exists() || !zip.canRead()){
+			return false;
+		}
+		
+		RandomAccessFile raf = null;
+		try{
+			raf = new RandomAccessFile(zip, InternalZipConstants.READ_MODE);
+			HeaderReader headerReader = new HeaderReader(raf);
+			ZipModel zipModel = headerReader.readAllHeaders("UTF-8");
+			if (zipModel != null) {
+				zipModel.setZipFile(zip.getPath());
+			}
+			return true;
+		}catch(Exception e){
+			LOG.error("invalid zip[" + zip.getName() + "]", e); 
+		}finally{
+			IoUtil.close(raf); 
+		}
+		return false;
+	}
+	
+	/**
+	 * 
+	 * @param file
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	public static final Set<String> getEntrySet(File file) throws Exception{
+		if(!validZip(file)){
+			throw new WarnException("非法zip文件:" + file.getName());
+		}
+		net.lingala.zip4j.core.ZipFile zip = new net.lingala.zip4j.core.ZipFile(file);
+		List<FileHeader> headers =  zip.getFileHeaders();
+		Set<String> set = new HashSet<>();
+		for(FileHeader header : headers){
+			set.add(header.getFileName());
+		}
+		return set;
+	}
 }

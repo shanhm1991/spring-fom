@@ -1,5 +1,7 @@
 package com.fom.context;
 
+import org.apache.log4j.helpers.OptionConverter;
+
 import com.fom.util.XmlUtil;
 
 /**
@@ -20,7 +22,8 @@ import com.fom.util.XmlUtil;
  * <hdfs1.url>
  * <hdfs2.url>
  * <signal.file>
- * <downloader.zip.content>
+ * <downloader.zip.entry.max>
+ * <downloader.zip.size.max>
  * 
  * @author shanhm
  * @date 2018年12月23日
@@ -30,7 +33,9 @@ public class HdfsZipDownloaderConfig extends HdfsDownloaderConfig {
 	
 	String signalFile;
 	
-	int zipContent;
+	int entryMax;
+	
+	long sizeMax;
 	
 	protected HdfsZipDownloaderConfig(String name) {
 		super(name);
@@ -40,7 +45,9 @@ public class HdfsZipDownloaderConfig extends HdfsDownloaderConfig {
 	void load() throws Exception {
 		super.load();
 		signalFile = XmlUtil.getString(element, "signal.file", "");
-		zipContent = XmlUtil.getInt(element, "downloader.zip.content", 50, 1, 500);
+		entryMax = XmlUtil.getInt(element, "downloader.zip.entry.max", Integer.MAX_VALUE, 1, Integer.MAX_VALUE);
+		String strSize = XmlUtil.getString(element, "downloader.zip.entry.max", "10GB");
+		sizeMax = OptionConverter.toFileSize(strSize, 1024*1024*1024 * 10L);
 	}
 	
 	@Override
@@ -66,7 +73,7 @@ public class HdfsZipDownloaderConfig extends HdfsDownloaderConfig {
 			return false;
 		}
 		
-		return zipContent == c.zipContent
+		return entryMax == c.entryMax
 				&& signalFile.equals(c.signalFile);
 	}
 	
@@ -74,17 +81,13 @@ public class HdfsZipDownloaderConfig extends HdfsDownloaderConfig {
 	public String toString() {
 		StringBuilder builder = new StringBuilder(super.toString());
 		builder.append("\nsignal.file=" + signalFile);
-		builder.append("\ndownloader.zip.content=" + zipContent);
+		builder.append("\ndownloader.zip.entry.max=" + entryMax);
 		return builder.toString();
 	}
 	
 	@Override
 	public final String getSignalFile() {
 		return signalFile;
-	}
-
-	public int getZipContent() {
-		return zipContent;
 	}
 	
 }

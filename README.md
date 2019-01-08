@@ -33,4 +33,19 @@
 6.hdfs_file_download：   下载HDFS服务指定目录下文件；
 7.hdfs_zip_download：      下载HDFS服务指定目录下文件并打包；
 
+#TODO
+页面logs,提供日志级别设置功能
+页面srcs,增加大小数目等统计信息
+页面添加实时新增模块功能
+HdfsUploader
+HttpScanner
+HttpUploader
+HttpDownloader
+HttpZipDownloader
+FtpUploader
+FtpDownloader
+FtpZipDownloader
+安装包/rpm/注册系统服务
+HttpClient连接池合入
+Connection校验
 

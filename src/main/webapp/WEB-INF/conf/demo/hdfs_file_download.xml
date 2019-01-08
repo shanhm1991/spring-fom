@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
 	<fom name="hdfs_file_download" config="com.fom.context.HdfsDownloaderConfig">
-		<src.path>/</src.path>
+		<src.path>/test</src.path>
 		<src.pattern></src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
 		<scanner>com.fom.context.HdfsScanner</scanner>

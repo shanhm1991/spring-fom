@@ -36,7 +36,7 @@ import oracle.sql.StructDescriptor;
  */
 public class JdbcHelper {
 
-	protected static final Logger LOG = LoggerFactory.getLogger("oracle");
+	protected static final Logger LOG = LoggerFactory.getLogger("jdbc");
 
 	protected JdbcHelper(){
 

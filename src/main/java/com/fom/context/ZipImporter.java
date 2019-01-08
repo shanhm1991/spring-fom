@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.zip.ZipException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -44,7 +43,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 	 * 6.删除日志文件
 	 * 上述任何步骤返回失败或出现异常则结束任务
 	 */
-	void execute() throws Exception {
+	protected void execute(E config) throws Exception {
 		if(logFile.exists()){
 			log.warn("继续处理任务遗留文件."); 
 			//上次任务在第5步失败
@@ -86,15 +85,15 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 					throw new WarnException("创建解压目录失败: " + unzipDir.getName());
 				}
 			}
-
-			try{
-				long cost = ZipUtil.unZip(srcFile, unzipDir);
-				log.info("解压结束(" + numFormat.format(srcSize) + "KB), 耗时=" + cost + "ms");
-			}catch(ZipException e){
-				log.error("解压失败", e); 
+			
+			if(!ZipUtil.validZip(srcFile)){
+				log.error("zip文件校验失败."); 
 				removeDirectly = true;
-				return; 
+				return;
 			}
+
+			long cost = ZipUtil.unZip(srcFile, unzipDir);
+			log.info("解压结束(" + numFormat.format(srcSize) + "KB), 耗时=" + cost + "ms");
 
 			String[] nameArray = unzipDir.list();
 			if(nameArray == null || nameArray.length == 0){ 

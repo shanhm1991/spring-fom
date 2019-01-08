@@ -41,7 +41,7 @@ public class DownloaderConfig extends Config {
 	@Override
 	void load() throws Exception {
 		super.load();
-		delSrc = XmlUtil.getBoolean(element, "src.del", false);
+		delSrc = XmlUtil.getBoolean(element, "downloader.src.del", false);
 		withTemp = XmlUtil.getBoolean(element, "downloader.withTemp", true);
 		destPath = parseEnvValue(XmlUtil.getString(element, "downloader.dest.path", ""));
 	}

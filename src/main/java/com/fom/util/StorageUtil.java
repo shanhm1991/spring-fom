@@ -16,6 +16,8 @@ import com.fh.search.storage.client.StorageEntity;
 import com.fom.util.log.LoggerFactory;
 
 /**
+ * 引入公司jar包为了上传文件到文件服务器，但是StorageClient不是线程安全的，所以这里封装下
+ * 另外StorageClient在服务地址配置错误时会自己无限重连，导致toomanyfileopens问题，需要注意
  * 
  * @author shanhm
  * @date 2018年12月23日

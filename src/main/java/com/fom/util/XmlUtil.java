@@ -41,6 +41,24 @@ public class XmlUtil {
 		return value;
 	}
 	
+	public static final long getLong(Element el, String key, long defaultValue, long min, long max){
+		Element e = el.element(key);
+		if(e == null){
+			return defaultValue;
+		}
+		long value = 0;
+		try{
+			value = Long.parseLong(e.getTextTrim());
+		}catch(Exception e1){
+			return defaultValue;
+		}
+
+		if(value < min || value > max){
+			return defaultValue;
+		}
+		return value;
+	}
+	
 	public static final boolean getBoolean(Element el, String key, boolean defaultValue){
 		Element e = el.element(key);
 		if(e == null){
