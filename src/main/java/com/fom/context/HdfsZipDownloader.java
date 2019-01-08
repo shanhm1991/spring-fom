@@ -95,7 +95,7 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 		ZipOutputStream zipOutStream = null;
 		boolean isStreamClosed = true;
 
-		indexTempZip(isRetry, false, config); 
+		renameTempZip(isRetry, false, config); 
 		try{
 			for(FileStatus status : srcFiles){
 				if(isStreamClosed){
@@ -117,13 +117,13 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 					//流管道关闭，如果继续写文件需要重新打开
 					IoUtil.close(zipOutStream);
 					isStreamClosed = true; 
-					indexTempZip(false, false, config);
+					renameTempZip(false, false, config);
 				}
 			}
 		}finally{
 			IoUtil.close(zipOutStream);
 		}
-		indexTempZip(false, true, config);
+		renameTempZip(false, true, config);
 	}
 
 	/**
@@ -134,7 +134,7 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 	 * @return
 	 * @throws Exception
 	 */
-	private void indexTempZip(boolean isRetry, boolean isLast, final E config) throws Exception{ 
+	private void renameTempZip(boolean isRetry, boolean isLast, final E config) throws Exception{ 
 		if(!tempZip.exists()){
 			return;
 		}
@@ -171,16 +171,16 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 
 		joinOtherFiles(tempZip); 
 
-		String name = nextZipName(config);
+		String name = getNextName(config);
 		if(!tempZip.renameTo(new File(name)) && isLast){
-			//最后一次编入序列失败则直接结束，交给下次任务补偿
-			throw new WarnException("编入序列失败:" + name); 
+			//最后一次命名失败则直接结束，交给下次任务补偿
+			throw new WarnException("文件命名失败:" + name); 
 		}
 		
 		index++;
 		entrySet.clear();
 		entryContents = 0;
-		log.info("编入序列：" + name);
+		log.info("文件命名：" + name);
 	}	
 
 	/**
@@ -188,10 +188,10 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 	 * @param config
 	 * @return
 	 */
-	protected String nextZipName(final E config){
+	protected String getNextName(final E config){
 		StringBuilder builder = new StringBuilder(subTempPath).append(File.separator); 
 		builder.append(srcName).append("_");
-		builder.append(currentIndex() + 1).append("_").append(entryContents).append(".zip");
+		builder.append(getCurrentIndex() + 1).append("_").append(entryContents).append(".zip");
 		return builder.toString();
 	}
 
@@ -199,7 +199,7 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends HdfsDo
 	 * 获取当前已有zip的最大序号
 	 * @return
 	 */
-	protected int currentIndex(){
+	protected int getCurrentIndex(){
 		if(index > 0){
 			return index;
 		}
