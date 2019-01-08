@@ -15,17 +15,17 @@ import com.fom.util.XmlUtil;
 import com.fom.util.log.LoggerFactory;
 
 /**
- * <src.path>
- * <src.pattern>
- * <src.match.fail.del>
- * <scanner.cron>
- * <scanner>
- * <executor>
- * <executor.min>
- * <executor.max>
- * <executor.aliveTime.seconds>
- * <executor.overTime.seconds>
- * <executor.overTime.cancle>
+ * <src.path>    源文件目录
+ * <src.pattern> 源文件正则表达式
+ * <src.match.fail.del>  源文件匹配失败是否删除
+ * <scanner.cron>  扫描源目录的cron表达式
+ * <scanner>       扫描源目录的实现方式
+ * <executor>      处理文件的实现方式
+ * <executor.min>  任务线程最小数
+ * <executor.max>  任务线程最大数
+ * <executor.aliveTime.seconds>  任务线程空闲存活最长时间
+ * <executor.overTime.seconds>   任务线程执行超时时间
+ * <executor.overTime.cancle>    任务线程执行超时是否中断
  * 
  * @author shanhm
  * @date 2018年12月23日

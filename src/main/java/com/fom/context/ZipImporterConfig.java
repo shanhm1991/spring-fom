@@ -7,19 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.fom.util.XmlUtil;
 
 /**
- * <src.path>
- * <src.pattern>
- * <src.match.fail.del>
- * <scanner.cron>
- * <scanner>
- * <executor>
- * <executor.min>
- * <executor.max>
- * <executor.aliveTime.seconds>
- * <executor.overTime.seconds>
- * <executor.overTime.cancle>
- * <importer.batch>
- * <importer.zip.subPattern>
+ * <importer.zip.subPattern> 根据正则表达式匹配zip中的文件是否需要处理
  * 
  * @author shanhm
  * @date 2018年12月23日

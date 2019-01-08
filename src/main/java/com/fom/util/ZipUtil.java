@@ -16,7 +16,6 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.log4j.Logger;
 
-import com.fom.util.exception.WarnException;
 import com.fom.util.log.LoggerFactory;
 
 import net.lingala.zip4j.core.HeaderReader;
@@ -130,12 +129,13 @@ public class ZipUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static final Set<String> getEntrySet(File file) throws Exception{
+		Set<String> set = new HashSet<>();
 		if(!validZip(file)){
-			throw new WarnException("非法zip文件:" + file.getName());
+			return set;
 		}
+		
 		net.lingala.zip4j.core.ZipFile zip = new net.lingala.zip4j.core.ZipFile(file);
 		List<FileHeader> headers =  zip.getFileHeaders();
-		Set<String> set = new HashSet<>();
 		for(FileHeader header : headers){
 			set.add(header.getFileName());
 		}

@@ -6,22 +6,8 @@ import org.apache.hadoop.fs.FileSystem;
 import com.fom.util.XmlUtil;
 
 /**
- * <src.path>
- * <src.pattern>
- * <src.match.fail.del>
- * <scanner.cron>
- * <scanner>
- * <executor>
- * <executor.min>
- * <executor.max>
- * <executor.aliveTime.seconds>
- * <executor.overTime.seconds>
- * <executor.overTime.cancle>
- * <downloader.src.del>
- * <downloader.withTemp>
- * <downloader.dest.path>
- * <hdfs1.url>
- * <hdfs2.url>
+ * <hdfs1.url> hdfs集群主节点ip:port
+ * <hdfs2.url> hdfs集群副节点ip:port
  * 
  * @author shanhm
  * @date 2018年12月23日

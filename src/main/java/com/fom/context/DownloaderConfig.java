@@ -5,20 +5,9 @@ import java.io.File;
 import com.fom.util.XmlUtil;
 
 /**
- * <src.path>
- * <src.pattern>
- * <src.match.fail.del>
- * <scanner.cron>
- * <scanner>
- * <executor>
- * <executor.min>
- * <executor.max>
- * <executor.aliveTime.seconds>
- * <executor.overTime.seconds>
- * <executor.overTime.cancle>
- * <downloader.src.del>
- * <downloader.withTemp>
- * <downloader.dest.path>
+ * <downloader.src.del>   源文件下载完是否删除
+ * <downloader.withTemp>  是否使用临时目录，先下载到临时目录然后再转移到目标目录
+ * <downloader.dest.path> 目标目录
  * 
  * @author shanhm
  * @date 2018年12月23日

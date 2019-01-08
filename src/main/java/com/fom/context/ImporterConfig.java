@@ -5,18 +5,7 @@ import java.io.File;
 import com.fom.util.XmlUtil;
 
 /**
- * <src.path>
- * <src.pattern>
- * <src.match.fail.del>
- * <scanner.cron>
- * <scanner>
- * <executor>
- * <executor.min>
- * <executor.max>
- * <executor.aliveTime.seconds>
- * <executor.overTime.seconds>
- * <executor.overTime.cancle>
- * <importer.batch>
+ * <importer.batch> 批处理行数
  * 
  * @author shanhm
  * @date 2018年12月23日
