@@ -8,7 +8,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 
-import com.fom.context.config.Config;
 import com.fom.context.config.IHdfsConfig;
 
 /**
@@ -20,7 +19,7 @@ import com.fom.context.config.IHdfsConfig;
  */
 public class HdfsScanner<E extends IHdfsConfig> extends Scanner<E>{
 
-	public HdfsScanner(String name, Config config) {
+	protected HdfsScanner(String name, E config) {
 		super(name, config);
 	}
 	

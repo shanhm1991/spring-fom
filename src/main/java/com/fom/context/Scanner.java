@@ -37,7 +37,7 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 	//scanner私有线程池，在Scanner结束时shutdown(),等待任务线程自行响应中断
 	private TimedExecutorPool pool = new TimedExecutorPool(4,30,new LinkedBlockingQueue<Runnable>(50));
 
-	public Scanner(String name, IConfig config){
+	protected Scanner(String name, E config){
 		this.name = name;
 		this.log = LoggerFactory.getLogger(config.getType() + "." + name);
 		this.setName("scanner[" + config.getSrcPath() + "]");

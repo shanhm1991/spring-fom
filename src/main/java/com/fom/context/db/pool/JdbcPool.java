@@ -125,17 +125,13 @@ class JdbcPool extends Pool<Connection>{
 				return false;
 			}
 			try{
-				if(!v.isClosed()){
+				if(!v.isClosed() && v.isValid(100)){
 					return true;
 				}
 			}catch(SQLException e){
 				LOG.error("连接检查异常[" + name + "]", e); 
 			}
 			
-			/**
-			 * 有可能connnection对象没有关闭，但是它的连接已经失效，这会导致入库线程异常失败，
-			 * 但是整体设计时考虑了失败恢复机制，所以可以忽略影响
-			 */
 			return false;
 		}
 	}

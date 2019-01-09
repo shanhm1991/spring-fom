@@ -159,7 +159,8 @@ public abstract class Config implements IConfig {
 	@SuppressWarnings("rawtypes")
 	void refreshScanner() throws Exception{
 		Class<?> clzz = Class.forName(scannerClzz);
-		Constructor<?> constructor = clzz.getConstructor(String.class, Config.class);
+		Constructor<?> constructor = clzz.getDeclaredConstructor(String.class, Config.class);
+		constructor.setAccessible(true); 
 		scanner = (Scanner)constructor.newInstance(name, this);
 	}
 

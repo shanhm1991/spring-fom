@@ -19,7 +19,7 @@ import com.fom.context.config.Config;
  */
 public class LocalScanner<E extends Config> extends Scanner<E> {
 
-	public LocalScanner(String name, Config config) {
+	protected LocalScanner(String name, E config) {
 		super(name, config);
 	}
 
