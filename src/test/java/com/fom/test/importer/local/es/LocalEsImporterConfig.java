@@ -4,8 +4,8 @@ import java.io.File;
 
 import org.dom4j.Element;
 
-import com.fom.context.Config;
-import com.fom.context.ImporterConfig;
+import com.fom.context.config.Config;
+import com.fom.context.config.ImporterConfig;
 import com.fom.util.XmlUtil;
 
 public class LocalEsImporterConfig extends ImporterConfig {

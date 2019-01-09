@@ -2,7 +2,7 @@ package com.fom.test.importer.local.oracle;
 
 import org.dom4j.Element;
 
-import com.fom.context.ZipImporterConfig;
+import com.fom.context.config.ZipImporterConfig;
 import com.fom.util.XmlUtil;
 
 /**

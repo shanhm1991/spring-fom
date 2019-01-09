@@ -7,8 +7,9 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
+import com.fom.context.config.ImporterConfig;
+import com.fom.context.exception.WarnException;
 import com.fom.util.IoUtil;
-import com.fom.util.exception.WarnException;
 
 /**
  * 
@@ -70,7 +71,7 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 				if(lineIndex <= StartLine){
 					continue;
 				}
-				if(config.batch > 0 && lineDatas.size() >= config.batch){
+				if(config.getBatch() > 0 && lineDatas.size() >= config.getBatch()){
 					batchProcessIfNotInterrupted(lineDatas, lineIndex, batchTime); 
 					updateLogFile(file.getName(), lineIndex);
 					lineDatas.clear();

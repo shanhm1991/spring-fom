@@ -2,7 +2,8 @@ package com.fom.context;
 
 import java.io.File;
 
-import com.fom.util.exception.WarnException;
+import com.fom.context.config.DownloaderConfig;
+import com.fom.context.exception.WarnException;
 
 /**
  * 
@@ -28,11 +29,11 @@ public abstract class Downloader<E extends DownloaderConfig> extends Executor<E>
 	protected abstract void download(final E config) throws Exception;
 
 	protected void move(final E config) throws Exception{
-		if(!config.withTemp){
+		if(!config.isWithTemp()){
 			return;
 		}
-		File file = new File(config.tempPath + File.separator + srcName);
-		if(file.exists() && !file.renameTo(new File(config.destPath + File.separator + srcName))){
+		File file = new File(config.getTempPath() + File.separator + srcName);
+		if(file.exists() && !file.renameTo(new File(config.getDestPath() + File.separator + srcName))){
 			throw new WarnException("文件移动失败:" + file.getName()); 
 		}
 	}

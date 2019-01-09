@@ -7,7 +7,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fom.context.ZipImporter;
-import com.fom.util.db.handler.JdbcHandler;
+import com.fom.context.db.handler.JdbcHandler;
 
 /**
  * 解析zip文件将数据导入oracle，使用自带pool

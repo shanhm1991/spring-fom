@@ -6,8 +6,10 @@ import java.text.DecimalFormat;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 
-import com.fom.util.exception.WarnException;
-import com.fom.util.log.LoggerFactory;
+import com.fom.context.config.Config;
+import com.fom.context.config.IHdfsConfig;
+import com.fom.context.exception.WarnException;
+import com.fom.context.log.LoggerFactory;
 
 /**
  * 
@@ -69,13 +71,13 @@ public abstract class Executor<E extends Config> extends Thread {
 	 */
 	@SuppressWarnings("unchecked")
 	protected final E getRuntimeConfig(){
-		return (E)ConfigManager.getConfig(name);
+		return (E)InnerConfigManager.getConfig(name);
 	}
 
 	@Override
 	public final void run(){
 		config = getRuntimeConfig();
-		if(config == null || !config.isRunning){
+		if(config == null || !config.isRunning()){
 			log.info("任务取消."); 
 			return;
 		}

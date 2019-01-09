@@ -12,8 +12,8 @@ import org.apache.log4j.Logger;
 
 import com.fh.search.storage.client.StorageClient;
 import com.fh.search.storage.client.StorageClient.ReturnFlag;
+import com.fom.context.log.LoggerFactory;
 import com.fh.search.storage.client.StorageEntity;
-import com.fom.util.log.LoggerFactory;
 
 /**
  * 引入公司jar包为了上传文件到文件服务器，但是StorageClient不是线程安全的，所以这里封装下

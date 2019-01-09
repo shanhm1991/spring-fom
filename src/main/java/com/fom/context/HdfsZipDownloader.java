@@ -10,6 +10,8 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 
+import com.fom.context.config.HdfsZipDownloaderConfig;
+
 /**
  * 
  * @author shanhm
@@ -25,13 +27,13 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends ZipDow
 	
 	@Override
 	protected List<String> getPathList() throws Exception {
-		FileStatus[] statusArray = config.fs.listStatus(new Path(srcPath), new PathFilter(){
+		FileStatus[] statusArray = config.getFs().listStatus(new Path(srcPath), new PathFilter(){
 			@Override
 			public boolean accept(Path path) {
-				if(StringUtils.isBlank(config.signalFile)){
+				if(StringUtils.isBlank(config.getSignalFile())){
 					return true;
 				}
-				return ! config.signalFile.equals(path.getName());
+				return ! config.getSignalFile().equals(path.getName());
 			}
 		}); 
 
@@ -47,16 +49,16 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends ZipDow
 	
 	@Override
 	protected InputStream getResourceInputStream(String path) throws Exception {
-		return config.fs.open(new Path(path));
+		return config.getFs().open(new Path(path));
 	}
 	
 	@Override
 	protected long getResourceSize(String path) throws Exception {
-		return config.fs.getFileStatus(new Path(path)).getLen();
+		return config.getFs().getFileStatus(new Path(path)).getLen();
 	}
 
 	@Override
 	protected boolean deletePath(String path) throws Exception {
-		return config.fs.delete(new Path(path), true);
+		return config.getFs().delete(new Path(path), true);
 	}
 }

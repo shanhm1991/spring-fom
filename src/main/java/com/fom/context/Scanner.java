@@ -14,7 +14,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
-import com.fom.util.log.LoggerFactory;
+import com.fom.context.config.IConfig;
+import com.fom.context.log.LoggerFactory;
 
 /**
  * 
@@ -47,7 +48,7 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 	public final void run(){
 		log.info("启动扫描."); 
 		while(true){
-			E config = (E)ConfigManager.getConfig(name);
+			E config = (E)InnerConfigManager.getConfig(name);
 			if(config == null || !config.isRunning()){ 
 				log.info("终止扫描."); 
 				pool.shutdownNow();
@@ -98,9 +99,9 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 		}
 	}
 
-	protected abstract List<String> scan(E config);
+	public abstract List<String> scan(E config);
 	
-	protected abstract List<String> filter(E config);
+	public abstract List<String> filter(E config);
 
 	private void cleanFuture(E config){
 		long cleanTime = System.currentTimeMillis() / 1000;

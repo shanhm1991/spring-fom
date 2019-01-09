@@ -4,6 +4,8 @@ import java.io.File;
 
 import org.apache.hadoop.fs.Path;
 
+import com.fom.context.config.HdfsDownloaderConfig;
+
 /**
  * 
  * @author shanhm
@@ -20,13 +22,13 @@ public class HdfsDownloader<E extends HdfsDownloaderConfig> extends Downloader<E
 	@Override
 	protected void download(E config) throws Exception {
 		long sTime = System.currentTimeMillis();
-		String dest = config.destPath;
-		if(config.withTemp){
-			dest = config.tempPath;
+		String dest = config.getDestPath();
+		if(config.isWithTemp()){
+			dest = config.getTempPath();
 		}
 		dest = dest + File.separator + srcName;
 
-		config.fs.copyToLocalFile(config.delSrc, new Path(srcPath), new Path(dest), true);
+		config.getFs().copyToLocalFile(config.isDelSrc(), new Path(srcPath), new Path(dest), true);
 		log.info("下载文件结束(" 
 				+ numFormat.format(srcSize) + "KB), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 	}

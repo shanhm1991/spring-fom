@@ -8,6 +8,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 
+import com.fom.context.config.Config;
+import com.fom.context.config.IHdfsConfig;
+
 /**
  * 
  * @author shanhm
@@ -32,7 +35,7 @@ public class HdfsScanner<E extends IHdfsConfig> extends Scanner<E>{
 	}
 
 	@Override
-	protected List<String> scan(E config) {
+	public List<String> scan(E config) {
 		List<String> list = new LinkedList<>();
 		FileStatus[] statusArray = scanHdfs(config);
 		if(ArrayUtils.isEmpty(statusArray)){
@@ -45,7 +48,7 @@ public class HdfsScanner<E extends IHdfsConfig> extends Scanner<E>{
 	}
 	
 	@Override
-	protected List<String> filter (E config){
+	public List<String> filter (E config){
 		List<String> pathList = new LinkedList<String>();
 		FileStatus[] statusArray = scanHdfs(config);
 		if(ArrayUtils.isEmpty(statusArray)){

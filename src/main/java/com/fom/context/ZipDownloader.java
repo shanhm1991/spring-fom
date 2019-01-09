@@ -13,9 +13,10 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.lang.ArrayUtils;
 
+import com.fom.context.config.ZipDownloaderConfig;
+import com.fom.context.exception.WarnException;
 import com.fom.util.IoUtil;
 import com.fom.util.ZipUtil;
-import com.fom.util.exception.WarnException;
 
 /**
  * 
@@ -46,9 +47,9 @@ public abstract class ZipDownloader<E extends ZipDownloaderConfig> extends Downl
 	protected ZipDownloader(String name, String path) {
 		super(name, path);
 		this.tempZipName = srcName + ".temp.zip";
-		this.subTempPath = config.destPath;
-		if(config.withTemp){
-			subTempPath = config.tempPath;
+		this.subTempPath = config.getDestPath();
+		if(config.isWithTemp()){
+			subTempPath = config.getTempPath();
 		}
 		subTempPath = subTempPath + File.separator + srcName;
 
@@ -93,7 +94,7 @@ public abstract class ZipDownloader<E extends ZipDownloaderConfig> extends Downl
 				log.info("下载文件结束:" 
 						+ name + "(" + size + "KB), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 
-				if(++entryContents >= config.entryMax || tempZip.length() >= config.sizeMax){
+				if(++entryContents >= config.getEntryMax() || tempZip.length() >= config.getSizeMax()){
 					//流管道关闭，如果继续写文件需要重新打开
 					IoUtil.close(zipOutStream);
 					isStreamClosed = true; 
@@ -127,11 +128,11 @@ public abstract class ZipDownloader<E extends ZipDownloaderConfig> extends Downl
 			entrySet = ZipUtil.getEntrySet(tempZip);
 			entryContents = getTempZipContents(entrySet);
 		}
-		if(!isLast && entryContents < config.entryMax && tempZip.length() < config.sizeMax){
+		if(!isLast && entryContents < config.getEntryMax() && tempZip.length() < config.getSizeMax()){
 			return;
 		}
 
-		if(config.delSrc){
+		if(config.isDelSrc()){
 			List<String> pathList = getPathList();
 			for(String name : entrySet){
 				for(String path : pathList){
@@ -236,7 +237,7 @@ public abstract class ZipDownloader<E extends ZipDownloaderConfig> extends Downl
 			return;
 		}
 		for(File file : files){
-			if(!file.renameTo(new File(config.destPath + File.separator + file.getName()))){
+			if(!file.renameTo(new File(config.getDestPath() + File.separator + file.getName()))){
 				throw new WarnException("文件移动失败:" + file.getName());
 			}
 		}
@@ -247,7 +248,7 @@ public abstract class ZipDownloader<E extends ZipDownloaderConfig> extends Downl
 
 	@Override
 	protected void onComplete(final E config) throws Exception{ 
-		if(config.delSrc && !deletePath(srcPath)){
+		if(config.isDelSrc() && !deletePath(srcPath)){
 			throw new WarnException("删除源目录失败."); 
 		}
 	}

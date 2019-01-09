@@ -1,5 +1,7 @@
 package com.fom.context;
 
+import com.fom.context.config.UploaderConfig;
+
 /**
  * 
  * @author shanhm

@@ -2,7 +2,7 @@ package com.fom.test.importer.local.mysql;
 
 import org.dom4j.Element;
 
-import com.fom.context.ImporterConfig;
+import com.fom.context.config.ImporterConfig;
 import com.fom.util.XmlUtil;
 
 /**

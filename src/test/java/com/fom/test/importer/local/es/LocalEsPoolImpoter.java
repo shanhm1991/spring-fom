@@ -7,7 +7,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fom.context.Importer;
-import com.fom.util.db.handler.EsHandler;
+import com.fom.context.db.handler.EsHandler;
 
 public class LocalEsPoolImpoter extends Importer<LocalEsImporterConfig, Map<String,Object>> {
 	

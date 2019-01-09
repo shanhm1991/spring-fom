@@ -8,6 +8,8 @@ import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
 
+import com.fom.context.config.Config;
+
 /**
  * 
  * @author shanhm
@@ -22,10 +24,10 @@ public class LocalScanner<E extends Config> extends Scanner<E> {
 	}
 
 	@Override
-	protected List<String> scan(E config) {
+	public List<String> scan(E config) {
 		List<String> list = new LinkedList<>();
 
-		String[] names = new File(config.srcPath).list();
+		String[] names = new File(config.getSrcPath()).list();
 		if(ArrayUtils.isEmpty(names)){
 			return list;
 		}
@@ -34,7 +36,7 @@ public class LocalScanner<E extends Config> extends Scanner<E> {
 	}
 
 	@Override
-	protected List<String> filter(E config) {
+	public List<String> filter(E config) {
 		List<String> list = scan(config);
 		if(list.isEmpty()){
 			return list;
@@ -48,7 +50,8 @@ public class LocalScanner<E extends Config> extends Scanner<E> {
 			}
 			
 			it.remove();
-			if(config.delMatchFailFile && !new File(config.srcPath + File.separator + name).delete()){
+			if(config.isDelMatchFailFile() 
+					&& !new File(config.getSrcPath() + File.separator + name).delete()){
 				log.warn("删除文件失败[不匹配]:" + name);
 			}
 		}
