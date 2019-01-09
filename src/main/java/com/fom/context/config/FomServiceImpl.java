@@ -1,6 +1,5 @@
 package com.fom.context.config;
 
-import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.text.DateFormat;
@@ -15,11 +14,8 @@ import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import com.fom.context.db.pool.PoolManager;
 import com.fom.web.service.FomService;
 
 /**
@@ -29,23 +25,8 @@ import com.fom.web.service.FomService;
  *
  */
 @Service(value="fomService")
-public class FomServiceImpl extends PoolManager implements FomService {
+public class FomServiceImpl implements FomService {
 	
-	static void listen(File poolXml){
-		if(!poolXml.exists()){
-			return;
-		}
-		listenPool(poolXml);
-	}
-
-	@Autowired
-	@Qualifier("configLoader")
-	ConfigLoader configLoader;
-	
-	public void setConfigLoader(ConfigLoader configLoader) {
-		this.configLoader = configLoader;
-	}
-
 	@Override
 	public Map<String, Map<String,String>> list() {
 		Map<String, Config> cmap = ConfigManager.getMap();
@@ -100,7 +81,7 @@ public class FomServiceImpl extends PoolManager implements FomService {
 		StringReader in=new StringReader(data);  
 		Document doc = reader.read(in); 
 		Element element = doc.getRootElement();
-		Config newConfig = configLoader.loadElement(element);
+		Config newConfig = Config.ConfigListener.loadElement(element);
 		if(!name.equals(newConfig.getName())){ 
 			return "failed, attribute[name] can not be change.";
 		}
@@ -126,7 +107,7 @@ public class FomServiceImpl extends PoolManager implements FomService {
 			return "failed, " + name + " config not changed.";
 		}
 		
-		configLoader.writeApply(newConfig, doc);
+		Config.ConfigListener.writeApply(newConfig, doc);
 		ConfigManager.register(newConfig); 
 		
 		if(oldConfig.scanner != null && (oldConfig.isRunning || oldConfig.scanner.isAlive())){

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
-	<fom name="hdfs_zip_download" config="com.fom.context.HdfsZipDownloaderConfig">
+	<fom name="hdfs_zip_download" config="com.fom.context.config.HdfsZipDownloaderConfig">
 		<src.path>/test</src.path>
 		<src.pattern></src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
@@ -18,7 +18,7 @@
 		<hdfs.master>master.ip:port</hdfs.master>
 		<hdfs.slave>slave.ip:port</hdfs.slave>
 		<signal.file>a.orc</signal.file>
-		<downloader.zip.entry.max>10</downloader.zip.entry.max>
-		<downloader.zip.size.max></downloader.zip.size.max>
+		<downloader.zip.entry.max>100</downloader.zip.entry.max>
+		<downloader.zip.size.max>5M</downloader.zip.size.max>
 	</fom>
 </foms>

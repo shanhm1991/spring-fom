@@ -33,15 +33,15 @@ import com.fom.util.XmlUtil;
  *
  */
 public abstract class Config implements IConfig {
-
+	
 	protected static final Logger LOG = LoggerFactory.getLogger("config");
+	
+	static volatile ConfigListener ConfigListener;
 
 	protected final String name;
 
 	Element element;
 
-	ConfigLoader loader;
-	
 	boolean valid;
 	
 	long loadTime;
@@ -226,7 +226,7 @@ public abstract class Config implements IConfig {
 	 * @throws IOException
 	 */
 	public final File locationResource(String location) throws IOException{ 
-		return loader.getResource(location).getFile();
+		return ConfigListener.getResource(location).getFile();
 	}
 	
 	/**

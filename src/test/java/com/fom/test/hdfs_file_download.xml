@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
-	<fom name="hdfs_file_download" config="com.fom.context.HdfsDownloaderConfig">
+	<fom name="hdfs_file_download" config="com.fom.context.config.HdfsDownloaderConfig">
 		<src.path>/test</src.path>
 		<src.pattern></src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>

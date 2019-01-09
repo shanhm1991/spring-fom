@@ -28,7 +28,7 @@ import com.fom.context.log.LoggerFactory;
 import com.fom.util.XmlUtil;
 
 /**
- * Listener负责监听配置变化和更新poolMap中的pool,Impoter从poolMap中获取使用pool
+ * 负责监听配置变化,更新和提高poolMap中的pool
  * 
  * @author shanhm
  * @date 2018年12月23日
@@ -235,7 +235,7 @@ public class PoolManager {
 		}
 	}
 
-	static final Pool<?> getPool(String poolName) {
+	public static final Pool<?> getPool(String poolName) {
 		return poolMap.get(poolName);
 	}
 }

@@ -7,6 +7,10 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.Iterator;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
@@ -16,7 +20,6 @@ import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.AbstractRefreshableWebApplicationContext;
 
 import com.fom.context.exception.WarnException;
@@ -29,26 +32,62 @@ import com.fom.util.IoUtil;
  * @date 2018年12月23日
  *
  */
-@Component(value="configLoader")
-public class ConfigLoader extends AbstractRefreshableWebApplicationContext {
-	
+class ConfigListener extends AbstractRefreshableWebApplicationContext implements ServletContextListener {
+
 	private static final Logger LOG = LoggerFactory.getLogger("config");
 
 	private File fomXml;
 
-	void load(String fomLocation) throws Exception {
+	@Override
+	public void contextInitialized(ServletContextEvent event) {
+		ServletContext context = event.getServletContext();
+		setSystem();
+		setServletContext(context); 
+		Config.ConfigListener = this;
+		try {
+			load(context.getInitParameter("fomConfigLocation"));
+		} catch (Exception e) {
+			LOG.error("config初始化失败", e);
+		}
+	}
+
+	private void setSystem(){
+		String root = System.getProperty("webapp.root");
+		String path = root + File.separator + "cache" + File.separator + "apply";
+		File cache = new File(path + File.separator + "history");
+		if(!cache.exists()){
+			cache.mkdirs();
+		}
+		System.setProperty("config.apply", path);
+
+		path = root + File.separator + "cache" + File.separator + "iprogress";
+		cache = new File(path);
+		if(!cache.exists()){
+			cache.mkdirs();
+		}
+		System.setProperty("import.progress", path);
+
+		path = root + File.separator + "cache" + File.separator + "dtemp";
+		cache = new File(path);
+		if(!cache.exists()){
+			cache.mkdirs();
+		}
+		System.setProperty("download.temp", path);
+	}
+
+	private void load(String fomLocation) throws Exception {
 		fomXml = getResource(fomLocation).getFile();
 		SAXReader reader = new SAXReader();
 		reader.setEncoding("UTF-8");
-		
+
 		Document doc = reader.read(new FileInputStream(fomXml));
 		Element root = doc.getRootElement();
 		loadElements(root);
-		
+
 		loadIncludes(root);
-		
+
 		loadApply();
-		
+
 		for(Config config : ConfigManager.getAll()){
 			if(config.valid){
 				config.scanner.start();
@@ -65,7 +104,7 @@ public class ConfigLoader extends AbstractRefreshableWebApplicationContext {
 			ConfigManager.register(config);
 		}
 	}
-	
+
 	public Config loadElement(Element element) {
 		String name = element.attributeValue("name");
 		String clzz = element.attributeValue("config");
@@ -77,7 +116,6 @@ public class ConfigLoader extends AbstractRefreshableWebApplicationContext {
 			config = (Config)constructor.newInstance(name);
 			config.loadTime = System.currentTimeMillis();
 			config.element = element;
-			config.loader = this;
 			config.load();
 			config.valid = config.valid();
 		}catch(Exception e){
@@ -105,14 +143,14 @@ public class ConfigLoader extends AbstractRefreshableWebApplicationContext {
 			if(!xml.exists()){
 				xml = getResource(location).getFile();
 			}
-			
+
 			SAXReader reader = new SAXReader();
 			reader.setEncoding("UTF-8");
 			Document doc = reader.read(new FileInputStream(xml));
 			loadElements(doc.getRootElement());
 		}
 	}
-	
+
 	private void loadApply() throws Exception{ 
 		File apply = new File(System.getProperty("config.apply"));
 		for(File file : apply.listFiles()){
@@ -144,7 +182,7 @@ public class ConfigLoader extends AbstractRefreshableWebApplicationContext {
 				throw new WarnException("删除文件失败:" + file.getName());
 			}
 		}
-		
+
 		OutputFormat formater=OutputFormat.createPrettyPrint();  
 		formater.setEncoding("UTF-8");  
 		File xml = new File(apply + File.separator + config.name + ".xml." + config.loadTime);
@@ -161,6 +199,32 @@ public class ConfigLoader extends AbstractRefreshableWebApplicationContext {
 			IoUtil.close(out); 
 		}
 		FileUtils.copyFile(xml, new File(apply + File.separator + "history" + File.separator + xml.getName()));
+	}
+
+	//	public void contextInitialized1(ServletContextEvent event) {
+	//		ServletContext context = event.getServletContext();
+	//		
+	//		
+	//		ApplicationContext springContext = WebApplicationContextUtils.getWebApplicationContext(context);
+	//		
+	//		
+	//		
+	//		PoolLoader poolLoader = (PoolLoader)springContext.getBean("poolLoader");
+	//		poolLoader.setServletContext(context); 
+	//		poolLoader.load(context.getInitParameter("poolConfigLocation"));
+	//		
+	//		ConfigLoader configloader = (ConfigLoader)springContext.getBean("configLoader");
+	//		configloader.setServletContext(context); 
+	//		try{
+	//			configloader.load(context.getInitParameter("fomConfigLocation"));
+	//		}catch(Exception e){
+	//			throw new RuntimeException("加载fom配置失败", e);
+	//		}
+	//	}
+
+	@Override
+	public void contextDestroyed(ServletContextEvent event) {
+
 	}
 
 	@Override
