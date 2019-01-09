@@ -11,6 +11,11 @@ import java.util.regex.Pattern;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.ql.exec.vector.VectorizedRowBatch;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.util.EntityUtils;
 import org.apache.orc.OrcFile;
 import org.apache.orc.Reader;
 import org.apache.orc.RecordReader;
@@ -21,6 +26,9 @@ import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 import org.junit.Test;
 import org.quartz.CronExpression;
+
+import com.fom.util.HttpUtil;
+import com.fom.util.IoUtil;
 
 /**
  * 
@@ -93,4 +101,24 @@ public class UtilTest {
 		rows.close();
 	}
 
+	@Test
+	public void http() throws Exception { 
+		HttpGet httpGet = new HttpGet("https://www.cnblogs.com/shanhm1991/p/9906917.html");
+				httpGet.setHeader("User-Agent", "Mozilla/5.0");
+		httpGet.setHeader("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+		httpGet.setHeader("Accept-Language", "zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3");
+		httpGet.setHeader("Accept-Charset", "ISO-8859-1,utf-8,gbk,gb2312;q=0.7,*;q=0.7");
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectionRequestTimeout(3000)
+                .setConnectTimeout(3000)
+                .setSocketTimeout(3000)
+                .build();
+        httpGet.setConfig(requestConfig); 
+        
+        CloseableHttpResponse response = HttpUtil.request(httpGet);
+		HttpEntity entity = response.getEntity();
+		System.out.println(EntityUtils.toString(entity, "utf-8")) ;
+        EntityUtils.consume(entity);
+        IoUtil.close(response); 
+	}
 }
