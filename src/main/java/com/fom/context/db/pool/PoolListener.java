@@ -14,12 +14,17 @@ import org.springframework.web.context.support.AbstractRefreshableWebApplication
 
 import com.fom.context.log.LoggerFactory;
 
-class PoolListener extends AbstractRefreshableWebApplicationContext implements ServletContextListener{
+public class PoolListener extends AbstractRefreshableWebApplicationContext implements ServletContextListener{
 
-	private static final Logger LOG = LoggerFactory.getLogger("pool");
+	private static Logger log;
+	
+	public PoolListener(){
+		
+	}
 
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
+		log = LoggerFactory.getLogger("pool");
 		ServletContext context = event.getServletContext();
 		setServletContext(context); 
 		try{
@@ -27,9 +32,9 @@ class PoolListener extends AbstractRefreshableWebApplicationContext implements S
 			if(!poolXml.exists()){
 				return;
 			}
-			PoolManager.listenPool(poolXml);
+			PoolManager.listen(poolXml);
 		}catch(Exception e){
-			LOG.warn("pool初始化失败", e); 
+			log.warn("pool初始化失败", e); 
 			return;
 		}
 	}

@@ -1,196 +1,70 @@
 package com.fom.util;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+
+import org.apache.log4j.Logger;
+
+import com.fom.context.log.LoggerFactory;
 
 /**
+ * 引入一个Md5工具类，修正线程安全问题
  * 
  * @author shanhm
  * @date 2018年12月23日
  *
  */
 public class Md5Util {
+
+	private static final Logger LOG = LoggerFactory.getLogger("root");
+	
 	/**
-	 * 默认的密码字符串组合，用来将字节转换成 16 进制表示的字符,apache校验下载的文件的正确性用的就是默认的这个组合
+	 * 默认的密码字符串组合，用来将字节转换成 16 进制表示的字符,
+	 * apache校验下载的文件的正确性用的就是默认的这个组合
 	 */
 	protected static char hexDigits[] = { '0', '1', '2', '3', '4', '5', '6',
 			'7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
-	
-	protected static MessageDigest messagedigest = null;
-	
+
+	private static MessageDigest messagedigest = null;
+
 	static {
 		try {
 			messagedigest = MessageDigest.getInstance("MD5");
-		} catch (NoSuchAlgorithmException nsaex) {
-			System.err.println(Md5Util.class.getName()
-					+ "初始化失败，MessageDigest不支持MD5Util。");
-			nsaex.printStackTrace();
-		}
-	}
-	
-	public static String getMD5String(String s) {
-		return getMD5String(s.getBytes());
-	}
-	
-	/**
-	 * 判断字符串的md5校验码是否与一个已知的md5码相匹配
-	 * 
-	 * @param password 要校验的字符串
-	 * @param md5PwdStr 已知的md5校验码
-	 * @return
-	 */
-	public static boolean checkPassword(String password, String md5PwdStr) {
-		String s = getMD5String(password);
-		return s.equals(md5PwdStr);
-	}
-	
-	/**
-	 * 生成文件的md5校验值
-	 * 
-	 * @param file
-	 * @return
-	 * @throws IOException
-	 */
-	public static String getFileMD5String(File file) throws IOException {		
-		InputStream fis;
-	    fis = new FileInputStream(file);
-	    byte[] buffer = new byte[1024];
-	    int numRead = 0;
-	    while ((numRead = fis.read(buffer)) > 0) {
-	    	messagedigest.update(buffer, 0, numRead);
-	    }
-	    fis.close();
-		return bufferToHex(messagedigest.digest());
-	}
-	/**
-	 * 从HTTP上取得文件，生成文件的md5校验值
-	 * 
-	 * @param file
-	 * @return
-	 * @throws IOException
-	 */
-	public static String getHttpFileMD5String(String url){
-		
-		BufferedInputStream fis = null;		 		
-		try {
-			URL realUrl = new URL(url); // 打开和URL之间的连接
-			URLConnection conn = (URLConnection)realUrl.openConnection();			
-			
-			conn.setDoOutput(true);
-			conn.setDoInput(true);
-
-	
-			// 定义BufferedReader输入流来读取URL的响应
-			fis = new BufferedInputStream(conn.getInputStream());
-			 byte[] buffer = new byte[1024];
-			    int numRead = 0;
-			    while ((numRead = fis.read(buffer)) > 0) {
-			    	messagedigest.update(buffer, 0, numRead);
-			    }
-			 return bufferToHex(messagedigest.digest());
 		} catch (Exception e) {
-		//	logger.error("发送 POST 请求出现异常！" + e);
-			System.out.println("发送 POST 请求出现异常！" + e);
-			e.printStackTrace();
-		}
-		// 使用finally块来关闭输出流、输入流
-		finally {
-			try {
-				
-				if (fis != null) {
-					fis.close();
-				}
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
-		}
-		return "";
-	}
-
-	
-	
-	/**
-	 * 从HTTP上取得文件，生成文件的md5校验值
-	 * 
-	 * @param file
-	 * @return
-	 * @throws IOException
-	 */
-	public static String getHttpContentMD5String(String url){
-		
-		BufferedInputStream fis = null;		 		
-		try {
-			URL realUrl = new URL(url); // 打开和URL之间的连接
-			HttpURLConnection conn = (HttpURLConnection)realUrl.openConnection();			
-			
-			conn.setDoOutput(true);
-			conn.setDoInput(true);
-			conn.setRequestMethod("POST");
-			// 定义BufferedReader输入流来读取URL的响应
-			fis = new BufferedInputStream(conn.getInputStream());
-			 byte[] buffer = new byte[1024];
-			    int numRead = 0;
-			    while ((numRead = fis.read(buffer)) > 0) {
-			    	messagedigest.update(buffer, 0, numRead);
-			    }
-			 return bufferToHex(messagedigest.digest());
-		} catch (Exception e) {
-		//	logger.error("发送 POST 请求出现异常！" + e);
-			System.out.println("发送 POST 请求出现异常！" + e);
-			e.printStackTrace();
-		}
-		// 使用finally块来关闭输出流、输入流
-		finally {
-			try {
-				
-				if (fis != null) {
-					fis.close();
-				}
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
-		}
-		return "";
-	}
-	/**
-	 * JDK1.4中不支持以MappedByteBuffer类型为参数update方法，并且网上有讨论要慎用MappedByteBuffer，
-	 * 原因是当使用 FileChannel.map 方法时，MappedByteBuffer 已经在系统内占用了一个句柄，
-	 * 而使用 FileChannel.close 方法是无法释放这个句柄的，且FileChannel有没有提供类似 unmap 的方法，
-	 * 因此会出现无法删除文件的情况。
-	 * 
-	 * 不推荐使用
-	 * 
-	 * @param file
-	 * @return
-	 * @throws IOException
-	 */
-	public static String getFileMD5String_old(File file) throws IOException {
-		FileInputStream in = new FileInputStream(file);
-		try{
-			FileChannel ch = in.getChannel();
-			MappedByteBuffer byteBuffer = ch.map(FileChannel.MapMode.READ_ONLY, 0,
-					file.length());
-			messagedigest.update(byteBuffer);
-			return bufferToHex(messagedigest.digest());
-		}finally{
-			IoUtil.close(in);
+			LOG.error("Md5初始化失败", e);
 		}
 	}
 
-	public static String getMD5String(byte[] bytes) {
+	public static String getMd5(String s) {
+		return getMd5(s.getBytes());
+	}
+
+	public static String getMd5(byte[] bytes) {
 		synchronized(messagedigest) {
 			messagedigest.update(bytes);
+			bytes = messagedigest.digest();
+		}
+		return bufferToHex(bytes);
+	}
+
+	public static String getMd5(File file) throws IOException {		
+		byte[] bytes = null;
+		synchronized(messagedigest) {
+			InputStream input = null;
+			try{
+				input = new FileInputStream(file);
+				byte[] buffer = new byte[1024];
+				int numRead = 0;
+				while ((numRead = input.read(buffer)) > 0) {
+					messagedigest.update(buffer, 0, numRead);
+				}
+			}finally{
+				IoUtil.close(input);
+			}
 			bytes = messagedigest.digest();
 		}
 		return bufferToHex(bytes);
@@ -210,8 +84,10 @@ public class Md5Util {
 	}
 
 	private static void appendHexPair(byte bt, StringBuffer stringbuffer) {
-		char c0 = hexDigits[(bt & 0xf0) >> 4];// 取字节中高 4 位的数字转换, >>> 为逻辑右移，将符号位一起右移,此处未发现两种符号有何不同 
-		char c1 = hexDigits[bt & 0xf];// 取字节中低 4 位的数字转换 
+		// 取字节中高 4 位的数字转换, >>> 为逻辑右移，将符号位一起右移,此处未发现两种符号有何不同 
+		// 取字节中低 4 位的数字转换 
+		char c0 = hexDigits[(bt & 0xf0) >> 4];
+		char c1 = hexDigits[bt & 0xf];
 		stringbuffer.append(c0);
 		stringbuffer.append(c1);
 	}

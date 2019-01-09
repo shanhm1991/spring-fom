@@ -74,7 +74,7 @@ public class ImporterConfig extends Config {
 		return NAME_IMPORTER;
 	}
 
-	public int getBatch() {
+	public final int getBatch() {
 		return batch;
 	}
 	

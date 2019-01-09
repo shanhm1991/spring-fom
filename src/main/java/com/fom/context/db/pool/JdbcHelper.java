@@ -288,7 +288,7 @@ public class JdbcHelper {
 	
 
 	private JdbcPool getPool(String poolName) throws WarnException{ 
-		JdbcPool pool = (JdbcPool)PoolManager.getPool(poolName);
+		JdbcPool pool = (JdbcPool)PoolManager.get(poolName);
 		if(pool == null){
 			throw new WarnException(poolName + "连接池不存在");
 		}

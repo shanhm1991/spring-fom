@@ -54,7 +54,7 @@ public class LocalEsImporterConfig extends ImporterConfig {
 	 */
 	@Override
 	protected boolean valid(Element extendedElement) throws Exception {
-		esJsonFile = locationResource(Config.parseEnvValue(esJson));
+		esJsonFile = locationResource(Config.parseEnvStr(esJson));
 		return true;
 	}
 	

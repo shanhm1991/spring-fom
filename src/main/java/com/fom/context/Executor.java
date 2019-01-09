@@ -7,6 +7,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 
 import com.fom.context.config.Config;
+import com.fom.context.config.ConfigManager;
 import com.fom.context.config.IHdfsConfig;
 import com.fom.context.exception.WarnException;
 import com.fom.context.log.LoggerFactory;
@@ -71,7 +72,7 @@ public abstract class Executor<E extends Config> extends Thread {
 	 */
 	@SuppressWarnings("unchecked")
 	protected final E getRuntimeConfig(){
-		return (E)InnerConfigManager.getConfig(name);
+		return (E)ConfigManager.get(name);
 	}
 
 	@Override

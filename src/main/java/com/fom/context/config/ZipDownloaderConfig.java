@@ -65,11 +65,11 @@ public class ZipDownloaderConfig extends DownloaderConfig {
 		return builder.toString();
 	}
 
-	public int getEntryMax() {
+	public final int getEntryMax() {
 		return entryMax;
 	}
 
-	public long getSizeMax() {
+	public final long getSizeMax() {
 		return sizeMax;
 	}
 	

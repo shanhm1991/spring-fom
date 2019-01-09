@@ -34,7 +34,7 @@ import com.fom.util.XmlUtil;
  * @date 2018年12月23日
  *
  */
-public class PoolManager {
+final class PoolManager {
 
 	protected static final Logger LOG = LoggerFactory.getLogger("pool");
 
@@ -46,27 +46,124 @@ public class PoolManager {
 
 	private static int cleanTimes = 0;
 
-	protected static void listenPool(File poolXml){
+	protected static void listen(File poolXml){
 		load(poolXml);//确保在加载启动任务前已经加载过pool
 		new Listener(poolXml).start();
 		new Monitor().start();
 	}
+	
+	static Pool<?> get(String poolName) {
+		return poolMap.get(poolName);
+	}
+	
+	private static void remve(String name){
+		Pool<?> pool = poolMap.remove(name);
+		if(pool != null){
+			pool.name = "removed-" + removeCount.incrementAndGet() + "-" + name;
+			LOG.warn("卸载:" + name + ",重命名为:" + pool.name); 
+			poolRemoved.add(pool);
+		}
+	}
+
+	private static void remveAll(){
+		Iterator<String> it = poolMap.keySet().iterator();
+		while(it.hasNext()){
+			String name = it.next();
+			remve(name);
+		}
+	}
+	
+	/**
+	 * Listener单线程调用
+	 * @param file
+	 */
+	@SuppressWarnings("rawtypes")
+	private static void load(File file){
+		SAXReader reader = new SAXReader();
+		reader.setEncoding("UTF-8");
+		LOG.info("------------------------------加载连接池------------------------------"); 
+		Document doc = null;
+		try{
+			doc = reader.read(new FileInputStream(file));
+		}catch(Exception e){
+			LOG.error("加载失败", e); 
+			remveAll();
+			LOG.info("------------------------------加载结束------------------------------"); 
+			return;
+		}
+
+		Element pools = doc.getRootElement();
+		Iterator it = pools.elementIterator("pool");
+
+		Set<String> nameSet = new HashSet<String>();
+		while (it.hasNext()) {
+			Element ePool = (Element) it.next();
+
+			String name = XmlUtil.getString(ePool, "name", null);
+			if(name == null){
+				LOG.warn("忽略没有name的pool"); 
+				continue;
+			}
+
+			if(nameSet.contains(name)){
+				LOG.warn("忽略重名的pool[" + name + "]"); 
+				continue;
+			}
+
+			String className = XmlUtil.getString(ePool, "class", null);
+			if(className == null){
+				LOG.warn(name + "加载失败,缺少配置class"); 
+				remve(name);
+				continue;
+			}
+
+			Pool pool = poolMap.get(name);
+			if(pool != null){
+				if(pool.getClass().getName().equals(className)){
+					try {
+						pool.load(ePool);
+						nameSet.add(name);
+					} catch (Exception e) {
+						LOG.error(name + "加载失败", e); 
+						remve(name);
+					}
+					continue;
+				}else{
+					remve(name);
+				}
+			}
+
+			try {
+				Class<?> poolClass = Class.forName(className);
+				Constructor ct = poolClass.getDeclaredConstructor(String.class);
+				ct.setAccessible(true);
+				pool = (Pool)ct.newInstance(name);
+				pool.load(ePool);
+				nameSet.add(name);
+				poolMap.put(name, pool);
+			} catch (Exception e) {
+				LOG.error(name + "加载失败", e); 
+			}
+		}
+		LOG.info("连接池列表=" + poolMap.keySet());
+		LOG.info("------------------------------加载结束------------------------------"); 
+	}
 
 	private static class Listener extends Thread {
-		
+
 		private final File poolXml;
-		
+
 		public Listener(File poolXml) {
 			this.setName("pool-listener");
 			this.setDaemon(true); 
 			this.poolXml = poolXml;
 		}
-		
+
 		@Override
 		public void run() {
 			String parentPath = poolXml.getParent();
 			String name = poolXml.getName();
-			
+
 			WatchService watch = null;
 			try {
 				watch = FileSystems.getDefault().newWatchService();
@@ -74,7 +171,7 @@ public class PoolManager {
 			} catch (IOException e) {
 				LOG.error("配置监听启动失败", e); 
 			}
-			
+
 			WatchKey key = null;
 			while(true){
 				try {
@@ -142,100 +239,4 @@ public class PoolManager {
 		}
 	}
 	
-	/**
-	 * Listener单线程调用
-	 * @param file
-	 */
-	@SuppressWarnings("rawtypes")
-	private static void load(File file){
-		SAXReader reader = new SAXReader();
-		reader.setEncoding("UTF-8");
-		LOG.info("------------------------------加载连接池------------------------------"); 
-		Document doc = null;
-		try{
-			doc = reader.read(new FileInputStream(file));
-		}catch(Exception e){
-			LOG.error("加载失败", e); 
-			remveAll();
-			LOG.info("------------------------------加载结束------------------------------"); 
-			return;
-		}
-
-		Element pools = doc.getRootElement();
-		Iterator it = pools.elementIterator("pool");
-
-		Set<String> nameSet = new HashSet<String>();
-		while (it.hasNext()) {
-			Element ePool = (Element) it.next();
-
-			String name = XmlUtil.getString(ePool, "name", null);
-			if(name == null){
-				LOG.warn("忽略没有name的pool"); 
-				continue;
-			}
-
-			if(nameSet.contains(name)){
-				LOG.warn("忽略重名的pool[" + name + "]"); 
-				continue;
-			}
-
-			String className = XmlUtil.getString(ePool, "class", null);
-			if(className == null){
-				LOG.warn(name + "加载失败,缺少配置class"); 
-				remvePool(name);
-				continue;
-			}
-
-			Pool pool = poolMap.get(name);
-			if(pool != null){
-				if(pool.getClass().getName().equals(className)){
-					try {
-						pool.load(ePool);
-						nameSet.add(name);
-					} catch (Exception e) {
-						LOG.error(name + "加载失败", e); 
-						remvePool(name);
-					}
-					continue;
-				}else{
-					remvePool(name);
-				}
-			}
-
-			try {
-				Class<?> poolClass = Class.forName(className);
-				Constructor ct = poolClass.getDeclaredConstructor(String.class);
-				ct.setAccessible(true);
-				pool = (Pool)ct.newInstance(name);
-				pool.load(ePool);
-				nameSet.add(name);
-				poolMap.put(name, pool);
-			} catch (Exception e) {
-				LOG.error(name + "加载失败", e); 
-			}
-		}
-		LOG.info("连接池列表=" + poolMap.keySet());
-		LOG.info("------------------------------加载结束------------------------------"); 
-	}
-
-	private static void remvePool(String name){
-		Pool<?> pool = poolMap.remove(name);
-		if(pool != null){
-			pool.name = "removed-" + removeCount.incrementAndGet() + "-" + name;
-			LOG.warn("卸载:" + name + ",重命名为:" + pool.name); 
-			poolRemoved.add(pool);
-		}
-	}
-
-	private static void remveAll(){
-		Iterator<String> it = poolMap.keySet().iterator();
-		while(it.hasNext()){
-			String name = it.next();
-			remvePool(name);
-		}
-	}
-
-	public static final Pool<?> getPool(String poolName) {
-		return poolMap.get(poolName);
-	}
 }

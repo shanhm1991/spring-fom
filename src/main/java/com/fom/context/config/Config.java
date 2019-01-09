@@ -81,7 +81,7 @@ public abstract class Config implements IConfig {
 	boolean executorCancelOnOverTime;
 
 	void load() throws Exception {
-		srcPath = parseEnvValue(XmlUtil.getString(element, "src.path", ""));
+		srcPath = parseEnvStr(XmlUtil.getString(element, "src.path", ""));
 		reg = XmlUtil.getString(element, "src.pattern", "");
 		delMatchFailFile = XmlUtil.getBoolean(element, "src.match.fail.del", false);
 		scannerClzz = XmlUtil.getString(element, "scanner", "");
@@ -235,7 +235,7 @@ public abstract class Config implements IConfig {
 	 * @return
 	 * @throws IllegalArgumentException
 	 */
-	public static final String parseEnvValue(String val) throws IllegalArgumentException {
+	public static final String parseEnvStr(String val) throws IllegalArgumentException {
 		String DELIM_START = "${";
 		char   DELIM_STOP  = '}';
 		int DELIM_START_LEN = 2;
@@ -263,7 +263,7 @@ public abstract class Config implements IConfig {
 					String key = val.substring(j, k);
 					String replacement = System.getProperty(key);
 					if(replacement != null) {
-						String recursiveReplacement = parseEnvValue(replacement);
+						String recursiveReplacement = parseEnvStr(replacement);
 						buffer.append(recursiveReplacement);
 					}
 					i = k + DELIM_STOP_LEN;
@@ -271,25 +271,8 @@ public abstract class Config implements IConfig {
 			}
 		}
 	}
-
-	public String getName() {
-		return name;
-	}
-
-	public boolean isValid() {
-		return valid;
-	}
-
-	public boolean isDelMatchFailFile() {
+	
+	public final boolean isDelMatchFailFile() {
 		return delMatchFailFile;
 	}
-
-	public long getLoadTime() {
-		return loadTime;
-	}
-
-	public long getStartTime() {
-		return startTime;
-	}
-	
 }

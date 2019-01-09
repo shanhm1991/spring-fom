@@ -38,7 +38,7 @@ public class FomServiceImpl implements FomService {
 			Config c = entry.getValue();
 			m.put("type", c.getTypeName());
 			m.put("lastLoad", format.format(c.loadTime));
-			m.put("valid", String.valueOf(c.isValid()));
+			m.put("valid", String.valueOf(c.valid));
 			if(c.isRunning()){
 				m.put("state", "Running");
 			}else{
@@ -81,8 +81,8 @@ public class FomServiceImpl implements FomService {
 		StringReader in=new StringReader(data);  
 		Document doc = reader.read(in); 
 		Element element = doc.getRootElement();
-		Config newConfig = Config.ConfigListener.loadElement(element);
-		if(!name.equals(newConfig.getName())){ 
+		Config newConfig = ConfigManager.load(element);
+		if(!name.equals(newConfig.name)){ 
 			return "failed, attribute[name] can not be change.";
 		}
 		
@@ -99,7 +99,7 @@ public class FomServiceImpl implements FomService {
 			return "failed, node[executor] can not be change.";
 		}
 		
-		if(!newConfig.isValid()){
+		if(!newConfig.valid){
 			return "failed, " + name + " config not valid.";
 		}
 		
@@ -107,7 +107,7 @@ public class FomServiceImpl implements FomService {
 			return "failed, " + name + " config not changed.";
 		}
 		
-		Config.ConfigListener.writeApply(newConfig, doc);
+		ConfigManager.apply(newConfig, doc);
 		ConfigManager.register(newConfig); 
 		
 		if(oldConfig.scanner != null && (oldConfig.isRunning || oldConfig.scanner.isAlive())){
@@ -127,7 +127,7 @@ public class FomServiceImpl implements FomService {
 		if(config == null){
 			return "failed, " + name + " not exist.";
 		}
-		if(!config.isValid()){
+		if(!config.valid){
 			return "failed, " + name + " not valid.";
 		}
 		if(!config.isRunning()){
@@ -144,17 +144,17 @@ public class FomServiceImpl implements FomService {
 		StringBuilder builder = new StringBuilder();
 		for(Entry<String, Config> entry : cmap.entrySet()){
 			Config config = entry.getValue();
-			if(!config.isValid()){
-				builder.append("failed, " + config.getName() + " not valid.<br>");
+			if(!config.valid){
+				builder.append("failed, " + config.name + " not valid.<br>");
 				continue;
 			}
 			if(!config.isRunning()){
-				builder.append("failed, " + config.getName() + " was not Running.<br>");
+				builder.append("failed, " + config.name + " was not Running.<br>");
 				continue;
 			}
 			config.isRunning = false;
 			config.scanner.interrupt();
-			builder.append("success, " + config.getName() + " stoped.<br>");
+			builder.append("success, " + config.name + " stoped.<br>");
 		}
 		return builder.toString();
 	}
@@ -165,7 +165,7 @@ public class FomServiceImpl implements FomService {
 		if(config == null){
 			return "failed, " + name + " not exist.";
 		}
-		if(!config.isValid()){
+		if(!config.valid){
 			return "failed, " + name + " not valid.";
 		}
 		if(config.isRunning()){
@@ -187,16 +187,16 @@ public class FomServiceImpl implements FomService {
 		StringBuilder builder = new StringBuilder();
 		for(Entry<String, Config> entry : cmap.entrySet()){
 			Config config = entry.getValue();
-			if(!config.isValid()){
-				builder.append("failed, " + config.getName() + " not valid.<br>");
+			if(!config.valid){
+				builder.append("failed, " + config.name + " not valid.<br>");
 				continue;
 			}
 			if(config.isRunning()){
-				builder.append("failed, " + config.getName() + " was already Running.<br>");
+				builder.append("failed, " + config.name + " was already Running.<br>");
 				continue;
 			}
 			if(config.scanner.isAlive()){
-				builder.append("failed, " + config.getName() + " was still alive, please try later.<br>");
+				builder.append("failed, " + config.name + " was still alive, please try later.<br>");
 				continue;
 			}
 			config.isRunning = true;
@@ -214,7 +214,7 @@ public class FomServiceImpl implements FomService {
 		if(config == null){
 			return "failed, " + name + " not exist.";
 		}
-		if(!config.isValid()){
+		if(!config.valid){
 			return "failed, " + name + " not valid.";
 		}
 		if(!config.isRunning()){
@@ -231,17 +231,17 @@ public class FomServiceImpl implements FomService {
 		StringBuilder builder = new StringBuilder();
 		for(Entry<String, Config> entry : cmap.entrySet()){
 			Config config = entry.getValue();
-			if(!config.isValid()){
-				builder.append("failed, " + config.getName() + " not valid.<br>");
+			if(!config.valid){
+				builder.append("failed, " + config.name + " not valid.<br>");
 				continue;
 			}
 			if(!config.isRunning()){
-				builder.append("failed, " + config.getName() + " was not Running.<br>");
+				builder.append("failed, " + config.name + " was not Running.<br>");
 				continue;
 			}
 			config.scanner.interrupt();
 			config.startTime = System.currentTimeMillis();
-			builder.append("success, " + config.getName() + " restarted.<br>");
+			builder.append("success, " + config.name + " restarted.<br>");
 		}
 		return builder.toString();
 	}

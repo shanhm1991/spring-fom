@@ -103,7 +103,7 @@ class EsPool extends Pool<TransportClient>{
 	}
 	
 	public static TransportClient getClient(String poolName) throws WarnException{
-		EsPool pool = (EsPool)PoolManager.getPool(poolName);
+		EsPool pool = (EsPool)PoolManager.get(poolName);
 		if(pool == null){
 			throw new WarnException(poolName + "连接池不存在"); 
 		}

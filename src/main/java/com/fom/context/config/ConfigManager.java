@@ -1,12 +1,22 @@
 package com.fom.context.config;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
 
+import com.fom.context.exception.WarnException;
 import com.fom.context.log.LoggerFactory;
+import com.fom.util.IoUtil;
 
 /**
  * 
@@ -14,31 +24,31 @@ import com.fom.context.log.LoggerFactory;
  * @date 2018年12月23日
  *
  */
-public class ConfigManager {
+public final class ConfigManager {
 
 	private static final Logger LOG = LoggerFactory.getLogger("config");
 
 	private static Map<String,Config> configMap = new ConcurrentHashMap<String,Config>();
 
-	protected static Config get(String key) {
+	public static Config get(String key) {
 		return configMap.get(key);
 	}
 
-	public static void register(Config config){
+	static void register(Config config){
 		if(config == null){
 			return;
 		}
-		if(null == configMap.put(config.getName(), config)){
-			if(config.isValid()){
+		if(null == configMap.put(config.name, config)){
+			if(config.valid){
 				LOG.info("\n");
-				LOG.info("#加载配置: " + config.getName() + "\n" + config);
+				LOG.info("#加载配置: " + config.name + "\n" + config);
 			}else{
 				LOG.info("\n");
-				LOG.warn("#非法配置: " + config.getName() + "\n" + config);
+				LOG.warn("#非法配置: " + config.name + "\n" + config);
 			}
 		}else{
 			LOG.info("\n");
-			LOG.info("#更新配置: " + config.getName() + "\n" + config);
+			LOG.info("#更新配置: " + config.name + "\n" + config);
 		}
 	}
 
@@ -50,4 +60,52 @@ public class ConfigManager {
 		return configMap;
 	}
 
+	static Config load(Element element) {
+		String name = element.attributeValue("name");
+		String clzz = element.attributeValue("config");
+		Config config = null;
+		try{
+			Class<?> configClass = Class.forName(clzz);
+			Constructor<?> constructor = configClass.getDeclaredConstructor(String.class); 
+			constructor.setAccessible(true); 
+			config = (Config)constructor.newInstance(name);
+			config.loadTime = System.currentTimeMillis();
+			config.element = element;
+			config.load();
+			config.valid = config.valid();
+		}catch(Exception e){
+			if(config != null){
+				config.valid = false;
+			}
+			LOG.info("\n"); 
+			LOG.error(name + "加载异常", e);
+		}
+		return config;
+	}
+
+	static void apply(Config config, Document doc) throws Exception { 
+		File apply = new File(System.getProperty("config.apply"));
+		for(File file : apply.listFiles()){
+			if(file.getName().startsWith(config.name + ".xml.") && !file.delete()){
+				throw new WarnException("删除文件失败:" + file.getName());
+			}
+		}
+
+		OutputFormat formater=OutputFormat.createPrettyPrint();  
+		formater.setEncoding("UTF-8");  
+		File xml = new File(apply + File.separator + config.name + ".xml." + config.loadTime);
+		FileOutputStream out = null;
+		XMLWriter writer = null;
+		try{
+			out = new FileOutputStream(xml);
+			writer=new XMLWriter(out,formater);
+			writer.setEscapeText(false);
+			writer.write(doc);  
+			writer.flush();
+			writer.close();
+		}finally{
+			IoUtil.close(out); 
+		}
+		FileUtils.copyFile(xml, new File(apply + File.separator + "history" + File.separator + xml.getName()));
+	}
 }
