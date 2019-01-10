@@ -63,7 +63,7 @@ public class LocalOracleMybatisZipImporter extends ZipImporter<LocalZipImporterC
 	@Override
 	protected void batchProcessLineData(LocalZipImporterConfig config, List<DemoBean> lineDatas, long batchTime)
 			throws Exception {
-		DemoDao demoDao = SpringUtil.getBeanById("oracleDemoDao", DemoDao.class);
+		DemoDao demoDao = SpringUtil.getBean("oracleDemoDao", DemoDao.class);
 		demoDao.batchInsertDemo(lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());
 	}

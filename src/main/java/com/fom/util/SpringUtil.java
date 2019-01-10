@@ -30,7 +30,7 @@ public class SpringUtil implements ApplicationContextAware {
      * @return
      */
     @SuppressWarnings("unchecked")
-	public static final <T> T getBeanById(String id, Class<T> clzz) throws Exception {
+	public static final <T> T getBean(String id, Class<T> clzz) throws Exception {
         return (T)applicationContext.getBean(id);
     }
      
@@ -39,7 +39,7 @@ public class SpringUtil implements ApplicationContextAware {
      * @param c
      * @return
      */
-    public static final <T> T getBeanByClass(Class<T> c){
+    public static final <T> T getBean(Class<T> c){
         return applicationContext.getBean(c);
     }
      
@@ -48,7 +48,7 @@ public class SpringUtil implements ApplicationContextAware {
      * @param c
      * @return
      */
-	public static final <T> Map<String,T> getBeansByClass(Class<T> c){
+	public static final <T> Map<String,T> getBeans(Class<T> c){
         return applicationContext.getBeansOfType(c);
     }
 }

@@ -53,7 +53,7 @@ public class LocalMysqlMybatisImporter extends Importer<LocalImporterConfig, Dem
 	 */
 	@Override
 	protected void batchProcessLineData(LocalImporterConfig config, List<DemoBean> lineDatas, long batchTime) throws Exception {
-		DemoDao demoDao = SpringUtil.getBeanById("mysqlDemoDao", DemoDao.class);
+		DemoDao demoDao = SpringUtil.getBean("mysqlDemoDao", DemoDao.class);
 		demoDao.batchInsertDemo(lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());
 	}

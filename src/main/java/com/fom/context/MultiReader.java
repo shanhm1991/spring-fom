@@ -18,6 +18,8 @@ import com.fom.util.IoUtil;
 
 /**
  * 
+ * 适配一个读取txt或者orc格式文本的util,非线程安全，请勿修改
+ * 
  * @author shanhm
  * @date 2018年12月23日
  *
@@ -49,7 +51,13 @@ public class MultiReader implements Closeable {
 		}
 	}
 
-	public String readLine() throws Exception{
+	@Override
+	public void close(){
+		IoUtil.close(recordReader);
+		IoUtil.close(buffReader);
+	}
+	
+	public final String readLine() throws Exception{
 		if(!isOrc){
 			return buffReader.readLine();
 		}
@@ -64,12 +72,6 @@ public class MultiReader implements Closeable {
 		}
 		
 		return null;
-	}
-
-	@Override
-	public void close(){
-		IoUtil.close(recordReader);
-		IoUtil.close(buffReader);
 	}
 
 }
