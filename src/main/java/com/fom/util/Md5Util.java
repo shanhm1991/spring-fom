@@ -39,11 +39,11 @@ public class Md5Util {
 		}
 	}
 
-	public static String getMd5(String s) {
+	public static final String getMd5(String s) {
 		return getMd5(s.getBytes());
 	}
 
-	public static String getMd5(byte[] bytes) {
+	public static final String getMd5(byte[] bytes) {
 		synchronized(messagedigest) {
 			messagedigest.update(bytes);
 			bytes = messagedigest.digest();
@@ -51,7 +51,7 @@ public class Md5Util {
 		return bufferToHex(bytes);
 	}
 
-	public static String getMd5(File file) throws IOException {		
+	public static final String getMd5(File file) throws IOException {		
 		byte[] bytes = null;
 		synchronized(messagedigest) {
 			InputStream input = null;

@@ -44,7 +44,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 	 * 6.删除日志文件
 	 * 上述任何步骤返回失败或出现异常则结束任务
 	 */
-	protected void execute(E config) throws Exception {
+	protected final void execImport(E config) throws Exception {
 		if(logFile.exists()){
 			log.warn("继续处理任务遗留文件."); 
 			//上次任务在第5步失败

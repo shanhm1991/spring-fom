@@ -87,7 +87,7 @@ public abstract class Executor<E extends Config> extends Thread {
 		try {
 			onStart(config);
 
-			execute(config);
+			exec(config);
 
 			onComplete(config);
 			log.info(config.getTypeName() + "任务结束, 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
@@ -110,7 +110,7 @@ public abstract class Executor<E extends Config> extends Thread {
 
 	}
 
-	protected abstract void execute(E config) throws Exception;
+	protected abstract void exec(E config) throws Exception;
 
 	/**
 	 * 继承自Executor，在任务线程完成时执行的动作

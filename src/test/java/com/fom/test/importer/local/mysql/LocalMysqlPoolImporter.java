@@ -32,7 +32,7 @@ public class LocalMysqlPoolImporter extends Importer<LocalImporterConfig, Map<St
 	 * 继承自Executor，在任务线程启动时执行的第一个动作，可以完成一些准备操作
 	 */
 	@Override
-	protected void onStart(LocalImporterConfig config) throws Exception {
+	public void onStart(LocalImporterConfig config) throws Exception {
 		log.info("start process.");
 	}
 
@@ -70,7 +70,7 @@ public class LocalMysqlPoolImporter extends Importer<LocalImporterConfig, Map<St
 	 * 继承自Executor，在任务线程完成时执行的动作
 	 */
 	@Override
-	protected void onComplete(LocalImporterConfig config) throws Exception {
+	public void onComplete(LocalImporterConfig config) throws Exception {
 		log.info("complete process.");
 	}
 }

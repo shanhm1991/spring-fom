@@ -9,15 +9,16 @@ import com.fom.context.config.UploaderConfig;
  *
  * @param <E>
  */
-public class Uploader<E extends UploaderConfig> extends Executor<E> {
+public abstract class Uploader<E extends UploaderConfig> extends Executor<E> {
 
 	protected Uploader(String name, String path) {
 		super(name, path);
 	}
 
 	@Override
-	protected void execute(E config) throws Exception {
-		// TODO Auto-generated method stub
+	protected final void exec(E config) throws Exception {
+		execUpload(config);
 	}
 
+	protected abstract void execUpload(final E config) throws Exception;
 }

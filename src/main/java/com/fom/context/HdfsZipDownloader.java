@@ -11,6 +11,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 
 import com.fom.context.config.HdfsZipDownloaderConfig;
+import com.fom.util.HdfsUtil;
 
 /**
  * 
@@ -49,7 +50,7 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends ZipDow
 	
 	@Override
 	protected InputStream getResourceInputStream(String path) throws Exception {
-		return config.getFs().open(new Path(path));
+		return HdfsUtil.downloadAsStream(config.getFs(), path);
 	}
 	
 	@Override
