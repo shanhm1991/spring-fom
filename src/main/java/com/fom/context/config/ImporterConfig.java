@@ -5,7 +5,7 @@ import java.io.File;
 import com.fom.util.XmlUtil;
 
 /**
- * <importer.batch> 批处理行数
+ * importer.batch 批处理行数
  * 
  * @author shanhm
  * @date 2018年12月23日

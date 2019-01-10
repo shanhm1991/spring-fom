@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.dom4j.Element;
 
-import com.fom.context.config.Config;
+import com.fom.context.ContextUtil;
 import com.fom.context.config.ImporterConfig;
 import com.fom.util.XmlUtil;
 
@@ -54,7 +54,7 @@ public class LocalEsImporterConfig extends ImporterConfig {
 	 */
 	@Override
 	protected boolean valid(Element extendedElement) throws Exception {
-		esJsonFile = locationResource(Config.parseEnvStr(esJson));
+		esJsonFile = locationResource(ContextUtil.parseEnvStr(esJson));
 		return true;
 	}
 	

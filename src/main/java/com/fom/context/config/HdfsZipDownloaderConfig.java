@@ -6,9 +6,9 @@ import com.fom.util.HdfsUtil;
 import com.fom.util.XmlUtil;
 
 /**
- * <hdfs1.url>
- * <hdfs2.url>
- * <signal.file>
+ * hdfs.master hdfs集群主节点ip:port<br>
+ * hdfs.slave  hdfs集群副节点ip:port<br>
+ * signal.file 目录是否下载的标记文件
  * 
  * @author shanhm
  * @date 2018年12月23日

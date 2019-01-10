@@ -6,8 +6,8 @@ import com.fom.util.HdfsUtil;
 import com.fom.util.XmlUtil;
 
 /**
- * <hdfs1.url> hdfs集群主节点ip:port
- * <hdfs2.url> hdfs集群副节点ip:port
+ * hdfs.master hdfs集群主节点ip:port<br>
+ * hdfs.slave hdfs集群副节点ip:port<br>
  * 
  * @author shanhm
  * @date 2018年12月23日

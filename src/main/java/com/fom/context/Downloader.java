@@ -21,12 +21,12 @@ public abstract class Downloader<E extends DownloaderConfig> extends Executor<E>
 	@Override
 	protected final void exec(E config) throws Exception {
 		
-		execDownload(config);
+		download(config);
 		
 		move(config);
 	}
 	
-	protected abstract void execDownload(final E config) throws Exception;
+	protected abstract void download(final E config) throws Exception;
 
 	protected void move(final E config) throws Exception{
 		if(!config.isWithTemp()){

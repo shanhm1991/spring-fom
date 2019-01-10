@@ -22,6 +22,8 @@ public interface IConfig {
 	
 	boolean isRunning();
 	
+	boolean isDelMatchFailFile();
+	
 	String getType();
 
 	String getTypeName();

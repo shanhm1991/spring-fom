@@ -30,11 +30,7 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 		this.logFile = new File(logPath);
 	}
 
-	protected final void exec(E config) throws Exception {
-		execImport(config);
-	}
-	
-	protected void execImport(E config) throws Exception {
+	protected void exec(E config) throws Exception {
 		long sTime = System.currentTimeMillis();
 		int lineIndex = 0;
 		if(!logFile.exists()){
@@ -100,7 +96,7 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 	 * @param batchTime
 	 * @throws Exception
 	 */
-	protected abstract void praseLineData(E config, List<V> lineDatas, String line, long batchTime) throws Exception;
+	public abstract void praseLineData(E config, List<V> lineDatas, String line, long batchTime) throws Exception;
 
 	//选择在每次批处理开始处检测中断，因为比较耗时的地方就两个(读取解析文件数据内容，数据入库)
 	void batchProcessIfNotInterrupted(List<V> lineDatas, int lineIndex, long batchTime) throws Exception {
@@ -118,7 +114,7 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 	 * @param batchTime
 	 * @throws Exception
 	 */
-	protected abstract void batchProcessLineData(E config, List<V> lineDatas, long batchTime) throws Exception;
+	public abstract void batchProcessLineData(E config, List<V> lineDatas, long batchTime) throws Exception;
 
 	void updateLogFile(String fileName, int lineIndex) throws IOException{ 
 		String data = fileName + "\n" + lineIndex;

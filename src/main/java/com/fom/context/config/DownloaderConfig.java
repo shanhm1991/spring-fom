@@ -2,12 +2,13 @@ package com.fom.context.config;
 
 import java.io.File;
 
+import com.fom.context.ContextUtil;
 import com.fom.util.XmlUtil;
 
 /**
- * <downloader.src.del>   源文件下载完是否删除
- * <downloader.withTemp>  是否使用临时目录，先下载到临时目录然后再转移到目标目录
- * <downloader.dest.path> 目标目录
+ * downloader.src.del   源文件下载完是否删除<br>
+ * downloader.withTemp  是否使用临时目录，先下载到临时目录然后再转移到目标目录<br>
+ * downloader.dest.path 目标目录<br>
  * 
  * @author shanhm
  * @date 2018年12月23日
@@ -32,7 +33,7 @@ public class DownloaderConfig extends Config {
 		super.load();
 		delSrc = XmlUtil.getBoolean(element, "downloader.src.del", false);
 		withTemp = XmlUtil.getBoolean(element, "downloader.withTemp", true);
-		destPath = parseEnvStr(XmlUtil.getString(element, "downloader.dest.path", ""));
+		destPath = ContextUtil.parseEnvStr(XmlUtil.getString(element, "downloader.dest.path", ""));
 	}
 	
 	@Override

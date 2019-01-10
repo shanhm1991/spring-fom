@@ -19,7 +19,7 @@ public class HdfsDownloader<E extends HdfsDownloaderConfig> extends Downloader<E
 	}
 
 	@Override
-	protected void execDownload(E config) throws Exception {
+	protected void download(E config) throws Exception {
 		long sTime = System.currentTimeMillis();
 		String dest = config.getDestPath();
 		if(config.isWithTemp()){

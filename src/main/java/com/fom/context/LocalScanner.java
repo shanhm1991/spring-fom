@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
 
-import com.fom.context.config.Config;
+import com.fom.context.config.IConfig;
 
 /**
  * 
@@ -17,7 +17,7 @@ import com.fom.context.config.Config;
  *
  * @param <E>
  */
-public class LocalScanner<E extends Config> extends Scanner<E> {
+public class LocalScanner<E extends IConfig> extends Scanner<E> {
 
 	protected LocalScanner(String name, E config) {
 		super(name, config);

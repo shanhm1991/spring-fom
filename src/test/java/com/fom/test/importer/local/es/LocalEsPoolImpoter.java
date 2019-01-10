@@ -35,7 +35,7 @@ public class LocalEsPoolImpoter extends Importer<LocalEsImporterConfig, Map<Stri
 	 * 异常则结束任务，保留文件，所以对错误数据导致的异常需要try-catch，一避免任务重复失败
 	 */
 	@Override
-	protected void praseLineData(LocalEsImporterConfig config, List<Map<String, Object>> lineDatas, String line,
+	public void praseLineData(LocalEsImporterConfig config, List<Map<String, Object>> lineDatas, String line,
 			long batchTime) throws Exception {
 		log.info("解析行数据:" + line);
 		if(StringUtils.isBlank(line)){
@@ -55,7 +55,7 @@ public class LocalEsPoolImpoter extends Importer<LocalEsImporterConfig, Map<Stri
 	 * [Abstract]继承自Importer, 批处理行数据解析结果, 异常则结束任务，保留文件
 	 */
 	@Override
-	protected void batchProcessLineData(LocalEsImporterConfig config, List<Map<String, Object>> lineDatas,
+	public void batchProcessLineData(LocalEsImporterConfig config, List<Map<String, Object>> lineDatas,
 			long batchTime) throws Exception {
 		Map<String,Map<String,Object>> map = new HashMap<>();
 		for(Map<String, Object> m : lineDatas){

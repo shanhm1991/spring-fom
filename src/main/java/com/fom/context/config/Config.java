@@ -3,30 +3,33 @@ package com.fom.context.config;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.dom4j.Element;
 import org.quartz.CronExpression;
 
+import com.fom.context.ContextUtil;
 import com.fom.context.Scanner;
 import com.fom.context.log.LoggerFactory;
 import com.fom.util.XmlUtil;
 
 /**
- * <src.path>    源文件目录
- * <src.pattern> 源文件正则表达式
- * <src.match.fail.del>  源文件匹配失败是否删除
- * <scanner.cron>  扫描源目录的cron表达式
- * <scanner>       扫描源目录的实现方式
- * <executor>      处理文件的实现方式
- * <executor.min>  任务线程最小数
- * <executor.max>  任务线程最大数
- * <executor.aliveTime.seconds>  任务线程空闲存活最长时间
- * <executor.overTime.seconds>   任务线程执行超时时间
- * <executor.overTime.cancle>    任务线程执行超时是否中断
+ * src.path    源文件目录<br>
+ * src.pattern 源文件正则表达式<br>
+ * src.match.fail.del  源文件匹配失败是否删除<br>
+ * scanner.cron  扫描源目录的cron表达式<br>
+ * scanner       扫描源目录的实现方式<br>
+ * executor      处理文件的实现方式<br>
+ * executor.min  任务线程最小数<br>
+ * executor.max  任务线程最大数<br>
+ * executor.aliveTime.seconds  任务线程空闲存活最长时间<br>
+ * executor.overTime.seconds   任务线程执行超时时间<br>
+ * executor.overTime.cancle    任务线程执行超时是否中断<br>
  * 
  * @author shanhm
  * @date 2018年12月23日
@@ -81,7 +84,7 @@ public abstract class Config implements IConfig {
 	boolean executorCancelOnOverTime;
 
 	void load() throws Exception {
-		srcPath = parseEnvStr(XmlUtil.getString(element, "src.path", ""));
+		srcPath = ContextUtil.parseEnvStr(XmlUtil.getString(element, "src.path", ""));
 		reg = XmlUtil.getString(element, "src.pattern", "");
 		delMatchFailFile = XmlUtil.getBoolean(element, "src.match.fail.del", false);
 		scannerClzz = XmlUtil.getString(element, "scanner", "");
@@ -159,9 +162,21 @@ public abstract class Config implements IConfig {
 	@SuppressWarnings("rawtypes")
 	void refreshScanner() throws Exception{
 		Class<?> clzz = Class.forName(scannerClzz);
-		Constructor<?> constructor = clzz.getDeclaredConstructor(String.class, Config.class);
+		Class<?> pclzz = getParameterType(getClass());
+		Constructor<?> constructor = clzz.getDeclaredConstructor(String.class, pclzz);
 		constructor.setAccessible(true); 
 		scanner = (Scanner)constructor.newInstance(name, this);
+	}
+	
+	private Class<?> getParameterType(Class<?> clzz) {
+		Type[] ts = clzz.getGenericInterfaces();
+		if(ArrayUtils.isEmpty(ts)){
+			Class<?> clazz = (Class<?>)ts[0];
+			clazz.asSubclass(IConfig.class);
+			return clazz;
+		}
+		Class<?> sclzz = (Class<?>)clzz.getGenericSuperclass();
+		return getParameterType(sclzz);
 	}
 
 	protected boolean valid(Element extendedElement) throws Exception {
@@ -171,6 +186,11 @@ public abstract class Config implements IConfig {
 	@Override
 	public final boolean isRunning(){
 		return isRunning;
+	}
+	
+	@Override
+	public final boolean isDelMatchFailFile() {
+		return delMatchFailFile;
 	}
 	
 	@Override
@@ -230,50 +250,4 @@ public abstract class Config implements IConfig {
 		return ConfigListener.getResource(location).getFile();
 	}
 	
-	/**
-	 * 获取带环境变量的字符串值，如${webapp.root}/test
-	 * @param val
-	 * @return
-	 * @throws IllegalArgumentException
-	 */
-	public static final String parseEnvStr(String val) throws IllegalArgumentException {
-		String DELIM_START = "${";
-		char   DELIM_STOP  = '}';
-		int DELIM_START_LEN = 2;
-		int DELIM_STOP_LEN  = 1;
-		StringBuffer buffer = new StringBuffer();
-		int i = 0;
-		int j, k;
-		while(true) {
-			j = val.indexOf(DELIM_START, i);
-			if(j == -1) {
-				if(i==0) {
-					return val;
-				} else { 
-					buffer.append(val.substring(i, val.length()));
-					return buffer.toString();
-				}
-			} else {
-				buffer.append(val.substring(i, j));
-				k = val.indexOf(DELIM_STOP, j);
-				if(k == -1) {
-					throw new IllegalArgumentException('"' 
-							+ val + "\" has no closing brace. Opening brace at position " + j + '.');
-				} else {
-					j += DELIM_START_LEN;
-					String key = val.substring(j, k);
-					String replacement = System.getProperty(key);
-					if(replacement != null) {
-						String recursiveReplacement = parseEnvStr(replacement);
-						buffer.append(recursiveReplacement);
-					}
-					i = k + DELIM_STOP_LEN;
-				}
-			}
-		}
-	}
-	
-	public final boolean isDelMatchFailFile() {
-		return delMatchFailFile;
-	}
 }

@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.fom.util.XmlUtil;
 
 /**
- * <importer.zip.subPattern> 根据正则表达式匹配zip中的文件是否需要处理
+ * importer.zip.subPattern 根据正则表达式匹配zip中的文件是否需要处理
  * 
  * @author shanhm
  * @date 2018年12月23日

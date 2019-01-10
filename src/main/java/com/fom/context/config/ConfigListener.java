@@ -17,6 +17,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.web.context.support.AbstractRefreshableWebApplicationContext;
 
+import com.fom.context.ContextUtil;
 import com.fom.context.log.LoggerFactory;
 import com.fom.util.IoUtil;
 
@@ -113,7 +114,7 @@ public class ConfigListener extends AbstractRefreshableWebApplicationContext imp
 		String fomPath = fomXml.getParent();
 		while(it.hasNext()){
 			Element element = (Element)it.next();
-			String location = Config.parseEnvStr(element.getTextTrim());
+			String location = ContextUtil.parseEnvStr(element.getTextTrim());
 			//尝试读取绝对路径，如果不存在再以spring方式尝试
 			File xml = new File(fomPath + File.separator + location);
 			if(!xml.exists()){

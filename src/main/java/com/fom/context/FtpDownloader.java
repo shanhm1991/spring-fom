@@ -16,7 +16,7 @@ public class FtpDownloader<E extends FtpDownloaderConfig> extends Downloader<E> 
 	}
 
 	@Override
-	protected void execDownload(E config) throws Exception {
+	protected void download(E config) throws Exception {
 		// TODO Auto-generated method stub
 	}
 

@@ -42,7 +42,7 @@ public class LocalMysqlPoolImporter extends Importer<LocalImporterConfig, Map<St
 	 * 异常则结束任务，保留文件，所以对错误数据导致的异常需要try-catch，一避免任务重复失败
 	 */
 	@Override
-	protected void praseLineData(LocalImporterConfig config, List<Map<String,Object>> lineDatas, String line, long batchTime) throws Exception {
+	public void praseLineData(LocalImporterConfig config, List<Map<String,Object>> lineDatas, String line, long batchTime) throws Exception {
 		log.info("解析行数据:" + line);
 		if(StringUtils.isBlank(line)){
 			return;
@@ -61,7 +61,7 @@ public class LocalMysqlPoolImporter extends Importer<LocalImporterConfig, Map<St
 	 * [Abstract]继承自Importer, 批处理行数据解析结果, 异常则结束任务，保留文件
 	 */
 	@Override
-	protected void batchProcessLineData(LocalImporterConfig config, List<Map<String,Object>> lineDatas, long batchTime) throws Exception {
+	public void batchProcessLineData(LocalImporterConfig config, List<Map<String,Object>> lineDatas, long batchTime) throws Exception {
 		JdbcHandler.handler.batchExecute(POOL, SQL, lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());
 	}

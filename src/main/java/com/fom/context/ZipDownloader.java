@@ -65,7 +65,7 @@ public abstract class ZipDownloader<E extends ZipDownloaderConfig> extends Downl
 	 * 2.挨个写入下载的文件流，如果压缩数或压缩文件大小大于阈值则重新命名，否则继续;
 	 */
 	@Override
-	protected final void execDownload(final E config) throws Exception {
+	protected void download(final E config) throws Exception {
 		List<String> pathList = getPathList();
 		if(pathList == null || pathList.isEmpty()){
 			return;

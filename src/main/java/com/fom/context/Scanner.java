@@ -19,6 +19,8 @@ import com.fom.context.config.IConfig;
 import com.fom.context.log.LoggerFactory;
 
 /**
+ * 由于java对泛型的擦除机制，在反射构造时对Scanner的泛型参数添加了接口类型约束<br>
+ * E的上限必须是IConfig或其子接口，构造器的E获取最关系最近的一个接口
  * 
  * @author shanhm
  * @date 2018年12月23日

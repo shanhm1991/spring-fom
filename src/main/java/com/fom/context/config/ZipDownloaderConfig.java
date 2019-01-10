@@ -5,8 +5,8 @@ import org.apache.log4j.helpers.OptionConverter;
 import com.fom.util.XmlUtil;
 
 /**
- * <downloader.zip.entry.max> 打包zip文件的最大entry个数
- * <downloader.zip.size.max>  打包zip文件的最大size
+ * downloader.zip.entry.max 打包zip文件的最大entry个数<br>
+ * downloader.zip.size.max  打包zip文件的最大size<br>
  * 
  * @author shanhm
  * @date 2018年12月23日
