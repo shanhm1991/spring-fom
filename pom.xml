@@ -142,7 +142,7 @@
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-elasticsearch</artifactId>
 		</dependency> -->
-		<!-- spring默认的elastic版本是6.4.3,我司这边装服务的2.x,所以暂时不用 -->
+		<!-- spring默认的elastic版本是6.4.3,为了对接2.x的ES服务,所以暂时不用 -->
 		<dependency>
 			<groupId>org.elasticsearch</groupId>
 			<artifactId>elasticsearch</artifactId>
