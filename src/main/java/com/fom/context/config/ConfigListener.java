@@ -2,7 +2,6 @@ package com.fom.context.config;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Iterator;
 
 import javax.servlet.ServletContext;
@@ -13,9 +12,6 @@ import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.web.context.support.AbstractRefreshableWebApplicationContext;
 
 import com.fom.context.ContextUtil;
 import com.fom.context.log.LoggerFactory;
@@ -27,7 +23,7 @@ import com.fom.util.IoUtil;
  * @date 2018年12月23日
  *
  */
-public class ConfigListener extends AbstractRefreshableWebApplicationContext implements ServletContextListener {
+public class ConfigListener implements ServletContextListener {
 
 	private static Logger log;
 
@@ -42,8 +38,6 @@ public class ConfigListener extends AbstractRefreshableWebApplicationContext imp
 		log = LoggerFactory.getLogger("config");
 		ServletContext context = event.getServletContext();
 		setSystem();
-		setServletContext(context); 
-		Config.ConfigListener = this;
 		try {
 			load(context.getInitParameter("fomConfigLocation"));
 		} catch (Exception e) {
@@ -76,7 +70,7 @@ public class ConfigListener extends AbstractRefreshableWebApplicationContext imp
 	}
 
 	private void load(String fomLocation) throws Exception {
-		fomXml = getResource(fomLocation).getFile();
+		fomXml = ContextUtil.getResourceFile(fomLocation);
 		SAXReader reader = new SAXReader();
 		reader.setEncoding("UTF-8");
 
@@ -118,7 +112,7 @@ public class ConfigListener extends AbstractRefreshableWebApplicationContext imp
 			//尝试读取绝对路径，如果不存在再以spring方式尝试
 			File xml = new File(fomPath + File.separator + location);
 			if(!xml.exists()){
-				xml = getResource(location).getFile();
+				xml = ContextUtil.getResourceFile(location);
 			}
 
 			SAXReader reader = new SAXReader();
@@ -155,10 +149,5 @@ public class ConfigListener extends AbstractRefreshableWebApplicationContext imp
 	@Override
 	public void contextDestroyed(ServletContextEvent event) {
 
-	}
-
-	@Override
-	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) 
-			throws BeansException, IOException {
 	}
 }

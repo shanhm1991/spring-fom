@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.SpringApplication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -34,7 +35,7 @@ public class FomController {
 	public void setService(FomService service) {
 		this.service = service;
 	}
-
+	
 	@RequestMapping("/list")
 	@ResponseBody
 	public Map<String,Map<String,String>> list() throws Exception{
@@ -152,4 +153,8 @@ public class FomController {
 		}
 		return null;
 	}
+	
+	public static void main(String[] args) {
+        SpringApplication.run(FomController.class, args); 
+    }
 }

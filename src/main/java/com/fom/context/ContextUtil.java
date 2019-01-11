@@ -1,12 +1,33 @@
 package com.fom.context;
 
+import java.io.File;
+import java.io.IOException;
+
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.web.context.support.AbstractRefreshableWebApplicationContext;
+
 /**
  * 
  * @author shanhm
  * @date 2019年1月10日
  *
  */
-public class ContextUtil {
+public class ContextUtil extends AbstractRefreshableWebApplicationContext {
+	
+	public static final ContextUtil INSTANCE = new ContextUtil();
+	
+	
+	/**
+	 * 借助spring的方式获取配置的文件
+	 * @param location
+	 * @return
+	 * @throws Exception
+	 */
+	public static final File getResourceFile(String location) throws Exception {
+		return INSTANCE.getResource(parseEnvStr(location)).getFile();
+	}
+	
 
 	/**
 	 * 获取带环境变量的字符串值，如${webapp.root}/test
@@ -50,6 +71,10 @@ public class ContextUtil {
 			}
 		}
 	}
-	
+
+	@Override
+	protected void loadBeanDefinitions(DefaultListableBeanFactory arg0) throws BeansException, IOException {
+		
+	}
 	
 }

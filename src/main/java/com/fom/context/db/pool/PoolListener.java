@@ -1,20 +1,23 @@
 package com.fom.context.db.pool;
 
 import java.io.File;
-import java.io.IOException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.apache.log4j.Logger;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.web.context.support.AbstractRefreshableWebApplicationContext;
 
+import com.fom.context.ContextUtil;
 import com.fom.context.log.LoggerFactory;
 
-public class PoolListener extends AbstractRefreshableWebApplicationContext implements ServletContextListener{
+/**
+ * 
+ * @author shanhm
+ * @date 2018年12月23日
+ *
+ */
+public class PoolListener implements ServletContextListener{
 
 	private static Logger log;
 	
@@ -26,9 +29,8 @@ public class PoolListener extends AbstractRefreshableWebApplicationContext imple
 	public void contextInitialized(ServletContextEvent event) {
 		log = LoggerFactory.getLogger("pool");
 		ServletContext context = event.getServletContext();
-		setServletContext(context); 
 		try{
-			File poolXml = getResource(context.getInitParameter("poolConfigLocation")).getFile();
+			File poolXml = ContextUtil.getResourceFile(context.getInitParameter("poolConfigLocation"));
 			if(!poolXml.exists()){
 				return;
 			}
@@ -42,10 +44,5 @@ public class PoolListener extends AbstractRefreshableWebApplicationContext imple
 	@Override
 	public void contextDestroyed(ServletContextEvent event) {
 
-	}
-
-	@Override
-	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) 
-			throws BeansException, IOException {
 	}
 }

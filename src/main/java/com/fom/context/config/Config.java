@@ -39,8 +39,6 @@ public abstract class Config implements IConfig {
 	
 	protected static final Logger LOG = LoggerFactory.getLogger("config");
 	
-	static volatile ConfigListener ConfigListener;
-
 	protected final String name;
 
 	Element element;
@@ -246,8 +244,8 @@ public abstract class Config implements IConfig {
 	 * @return
 	 * @throws IOException
 	 */
-	public final File locationResource(String location) throws IOException{ 
-		return ConfigListener.getResource(location).getFile();
+	public final File locationResource(String location) throws Exception{ 
+		return ContextUtil.getResourceFile(location);
 	}
 	
 }
