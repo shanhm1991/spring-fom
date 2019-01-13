@@ -5,7 +5,7 @@
 	<groupId>com</groupId>
 	<artifactId>fom</artifactId>
 	<version>1.0.1</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 
 	<name>fom</name>
 	<url>http://maven.apache.org</url>
@@ -28,6 +28,9 @@
 			<resource>
 				<directory>src/main/webapp</directory>
 			</resource>
+			<resource>
+				<directory>src/examples/resources</directory>
+			</resource>
 		</resources>
 		<testResources>
 			<testResource>
@@ -37,6 +40,7 @@
 				</excludes>
 			</testResource>
 		</testResources>
+		
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -48,14 +52,22 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<configuration>
-					<downloadSources>true</downloadSources>
-					<addVersionToProjectName>true</addVersionToProjectName>
-					<sourceExcludes>
-						<sourceExclude>**/.svn/**</sourceExclude>
-					</sourceExcludes>
-				</configuration>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>src/examples/java</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -72,11 +84,10 @@
 						<configuration>
 							<classesDirectory>${project.build.directory}/classes</classesDirectory>
 							<finalName>fom-${project.version}</finalName>
-							<excludes>
-								<exclude>js/**</exclude>
-								<exclude>html/**</exclude>
-								<exclude>WEB-INF/**</exclude>
-							</excludes>
+							<includes>
+							<include>com/**</include>
+							<include>META-INF/**</include>
+							</includes>
 						</configuration>
 					</execution>
 				</executions>
@@ -96,6 +107,16 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<configuration>
+					<downloadSources>true</downloadSources>
+					<addVersionToProjectName>true</addVersionToProjectName>
+					<sourceExcludes>
+						<sourceExclude>**/.svn/**</sourceExclude>
+					</sourceExcludes>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

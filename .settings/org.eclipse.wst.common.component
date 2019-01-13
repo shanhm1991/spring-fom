@@ -2,9 +2,9 @@
     <wb-module deploy-name="fom">
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/webapp"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/examples/java"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/examples/resources"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/webapp" tag="defaultRootSource"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/examples/resources"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/examples/java"/>
         <property name="context-root" value="fom"/>
         <property name="java-output-path" value="/fom/target/classes"/>
     </wb-module>

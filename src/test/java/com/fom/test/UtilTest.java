@@ -50,7 +50,7 @@ public class UtilTest {
 		Pattern pattern = Pattern.compile(".\\.txt$");
 		System.out.println(pattern.matcher("新建文本文档.txt").find()); 
 	}
-	
+
 	@Test
 	public void xml() throws IOException, DocumentException{ 
 		String s = "<oprator name=\"test\">"
@@ -70,55 +70,67 @@ public class UtilTest {
 
 		SAXReader reader = new SAXReader();
 		StringReader in=new StringReader(s);  
-	    Document doc=reader.read(in); 
-		
+		Document doc=reader.read(in); 
+
 		OutputFormat formater=OutputFormat.createPrettyPrint();  
 		formater.setEncoding("UTF-8");  
-	    StringWriter out=new StringWriter();  
-	    XMLWriter writer=new XMLWriter(out,formater);
-	    writer.write(doc);  
-	    writer.close();  
-	    System.out.println(out.toString());
-	}
-	
-	@Test
-	public void readOrc() throws IllegalArgumentException, IOException{ 
-		Configuration conf = new Configuration();
-		conf.set("fs.defaultFS", "file:///");
-		
-		Reader reader = OrcFile.createReader(new Path("E:/node.txt"), OrcFile.readerOptions(conf));
-		RecordReader rows = reader.rows();
-		VectorizedRowBatch batch = reader.getSchema().createRowBatch(1);
-		while (rows.nextBatch(batch)) {
-			int colums = batch.numCols;
-			for (int r = 0;r < batch.size;r++) { //row
-				for(int c = 0;c < colums;c++){
-					System.out.print(batch.cols[c]);
-				}
-				System.out.println();
-			}
-		}
-		rows.close();
+		StringWriter out=new StringWriter();  
+		XMLWriter writer=new XMLWriter(out,formater);
+		writer.write(doc);  
+		writer.close();  
+		System.out.println(out.toString());
 	}
 
 	@Test
-	public void http() throws Exception { 
+	public void readOrc() { 
+		Configuration conf = new Configuration();
+		conf.set("fs.defaultFS", "file:///");
+
+		Reader reader;
+		try {
+			reader = OrcFile.createReader(new Path("E:/node.txt"), OrcFile.readerOptions(conf));
+			RecordReader rows = reader.rows();
+			VectorizedRowBatch batch = reader.getSchema().createRowBatch(1);
+			while (rows.nextBatch(batch)) {
+				int colums = batch.numCols;
+				for (int r = 0;r < batch.size;r++) { //row
+					for(int c = 0;c < colums;c++){
+						System.out.print(batch.cols[c]);
+					}
+					System.out.println();
+				}
+			}
+			rows.close();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	public void http() { 
 		HttpGet httpGet = new HttpGet("https://www.cnblogs.com/shanhm1991/p/9906917.html");
-				httpGet.setHeader("User-Agent", "Mozilla/5.0");
+		httpGet.setHeader("User-Agent", "Mozilla/5.0");
 		httpGet.setHeader("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
 		httpGet.setHeader("Accept-Language", "zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3");
 		httpGet.setHeader("Accept-Charset", "ISO-8859-1,utf-8,gbk,gb2312;q=0.7,*;q=0.7");
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectionRequestTimeout(3000)
-                .setConnectTimeout(3000)
-                .setSocketTimeout(3000)
-                .build();
-        httpGet.setConfig(requestConfig); 
-        
-        CloseableHttpResponse response = HttpUtil.request(httpGet);
-		HttpEntity entity = response.getEntity();
-		System.out.println(EntityUtils.toString(entity, "utf-8")) ;
-        EntityUtils.consume(entity);
-        IoUtil.close(response); 
+		RequestConfig requestConfig = RequestConfig.custom()
+				.setConnectionRequestTimeout(3000)
+				.setConnectTimeout(3000)
+				.setSocketTimeout(3000)
+				.build();
+		httpGet.setConfig(requestConfig); 
+
+		try{
+			CloseableHttpResponse response = HttpUtil.request(httpGet);
+			HttpEntity entity = response.getEntity();
+			System.out.println(EntityUtils.toString(entity, "utf-8")) ;
+			EntityUtils.consume(entity);
+			IoUtil.close(response); 
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+
 	}
 }
