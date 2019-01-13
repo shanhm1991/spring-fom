@@ -1,11 +1,11 @@
-package com.fom.test.importer.dao;
+package com.fom.examples.importer.dao;
 
 import java.util.List;
 import java.util.Map;
 
 import org.mybatis.spring.support.SqlSessionDaoSupport;
 
-import com.fom.test.importer.DemoBean;
+import com.fom.examples.importer.DemoBean;
 
 public class MysqlDemoDaoImpl extends SqlSessionDaoSupport implements DemoDao {
 	

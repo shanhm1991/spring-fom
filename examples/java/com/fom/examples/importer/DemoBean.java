@@ -1,4 +1,4 @@
-package com.fom.test.importer;
+package com.fom.examples.importer;
 
 /**
  * 

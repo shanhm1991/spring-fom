@@ -1,4 +1,4 @@
-package com.fom.test.importer.local.es;
+package com.fom.examples.importer.local.es;
 
 import java.util.HashMap;
 import java.util.List;

@@ -1,7 +1,6 @@
 package com.fom.context.config;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.Map;
@@ -11,12 +10,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.Element;
-import org.dom4j.io.OutputFormat;
-import org.dom4j.io.XMLWriter;
 
 import com.fom.context.exception.WarnException;
 import com.fom.context.log.LoggerFactory;
-import com.fom.util.IoUtil;
+import com.fom.util.XmlUtil;
 
 /**
  * 
@@ -90,22 +87,8 @@ public final class ConfigManager {
 				throw new WarnException("删除文件失败:" + file.getName());
 			}
 		}
-
-		OutputFormat formater=OutputFormat.createPrettyPrint();  
-		formater.setEncoding("UTF-8");  
 		File xml = new File(apply + File.separator + config.name + ".xml." + config.loadTime);
-		FileOutputStream out = null;
-		XMLWriter writer = null;
-		try{
-			out = new FileOutputStream(xml);
-			writer=new XMLWriter(out,formater);
-			writer.setEscapeText(false);
-			writer.write(doc);  
-			writer.flush();
-			writer.close();
-		}finally{
-			IoUtil.close(out); 
-		}
+		XmlUtil.writeDocToFile(doc, xml);
 		FileUtils.copyFile(xml, new File(apply + File.separator + "history" + File.separator + xml.getName()));
 	}
 }

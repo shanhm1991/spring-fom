@@ -1,30 +1,24 @@
-package com.fom.test.importer.local.oracle;
+package com.fom.examples.importer.local.oracle;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.fom.context.ZipImporter;
-import com.fom.context.db.handler.JdbcHandler;
+import com.fom.examples.importer.DemoBean;
+import com.fom.examples.importer.dao.DemoDao;
+import com.fom.util.SpringUtil;
 
 /**
- * 解析zip文件将数据导入oracle，使用自带pool
- * 
+ * 解析zip文件将数据导入oracle，使用mybatis
+ * 	
  * @author shanhm
  * @date 2018年12月23日
  *
  */
-public class LocalOraclePoolZipImporter extends ZipImporter<LocalZipImporterConfig, Map<String,Object>>{
+public class LocalOracleMybatisZipImporter extends ZipImporter<LocalZipImporterConfig, DemoBean>{
 
-	private static final String POOL = "demoOracle";
-	
-	private static final String SQL = 
-			"insert into demo(id,name,source,filetype,importway) "
-					+ "values (#id#,#name#,#source#,#fileType#,#importWay#)";
-	
-	protected LocalOraclePoolZipImporter(String name, String path) {
+	protected LocalOracleMybatisZipImporter(String name, String path) {
 		super(name, path);
 	}
 
@@ -50,29 +44,27 @@ public class LocalOraclePoolZipImporter extends ZipImporter<LocalZipImporterConf
 	 * 异常则结束任务，保留文件，所以对错误数据导致的异常需要try-catch，一避免任务重复失败
 	 */
 	@Override
-	public void praseLineData(LocalZipImporterConfig config, List<Map<String,Object>> lineDatas, String line, long batchTime)
+	public void praseLineData(LocalZipImporterConfig config, List<DemoBean> lineDatas, String line, long batchTime)
 			throws Exception {
 		log.info("解析行数据:" + line);
 		if(StringUtils.isBlank(line)){
 			return;
 		}
-		String[] array = line.split("#"); 
-		Map<String,Object> map = new HashMap<>();
-		map.put("id", array[0]);
-		map.put("name", array[1]);
-		map.put("source", "local");
-		map.put("fileType", "zip(txt/orc)");
-		map.put("importWay", "pool");
-		lineDatas.add(map);
+		DemoBean bean = new DemoBean(line);
+		bean.setSource("local");
+		bean.setFileType("zip(txt/orc)");
+		bean.setImportWay("mybatis");
+		lineDatas.add(bean); 
 	}
 
 	/**
 	 * [Abstract]继承自Importer, 批处理行数据解析结果, 异常则结束任务，保留文件
 	 */
 	@Override
-	public void batchProcessLineData(LocalZipImporterConfig config, List<Map<String,Object>> lineDatas, long batchTime)
+	public void batchProcessLineData(LocalZipImporterConfig config, List<DemoBean> lineDatas, long batchTime)
 			throws Exception {
-		JdbcHandler.handler.batchExecute(POOL, SQL, lineDatas);
+		DemoDao demoDao = SpringUtil.getBean("oracleDemoDao", DemoDao.class);
+		demoDao.batchInsertDemo(lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());
 	}
 

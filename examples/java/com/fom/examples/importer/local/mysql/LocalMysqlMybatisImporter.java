@@ -1,12 +1,12 @@
-package com.fom.test.importer.local.mysql;
+package com.fom.examples.importer.local.mysql;
 
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.fom.context.Importer;
-import com.fom.test.importer.DemoBean;
-import com.fom.test.importer.dao.DemoDao;
+import com.fom.examples.importer.DemoBean;
+import com.fom.examples.importer.dao.DemoDao;
 import com.fom.util.SpringUtil;
 
 /**

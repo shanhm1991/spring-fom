@@ -5,7 +5,7 @@
 	<groupId>com</groupId>
 	<artifactId>fom</artifactId>
 	<version>1.0.1</version>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 
 	<name>fom</name>
 	<url>http://maven.apache.org</url>
@@ -22,16 +22,19 @@
 
 	<build>
 		<finalName>fom</finalName>
-		<sourceDirectory>java</sourceDirectory>
-		<testSourceDirectory>test</testSourceDirectory>
+		<sourceDirectory>src/main/java</sourceDirectory>
+		<testSourceDirectory>src/test/java</testSourceDirectory>
 		<resources>
 			<resource>
-				<directory>java</directory>
+				<directory>src/main/webapp</directory>
 			</resource>
 		</resources>
 		<testResources>
 			<testResource>
-				<directory>test</directory>
+				<directory>src/test</directory>
+				<excludes>
+					<exclude>src/test/java</exclude>
+				</excludes>
 			</testResource>
 		</testResources>
 		<plugins>
@@ -44,7 +47,6 @@
 					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
-
 			<plugin>
 				<artifactId>maven-eclipse-plugin</artifactId>
 				<configuration>
@@ -54,6 +56,46 @@
 						<sourceExclude>**/.svn/**</sourceExclude>
 					</sourceExcludes>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<encoding>UTF-8</encoding>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classesDirectory>${project.build.directory}/classes</classesDirectory>
+							<finalName>fom-${project.version}</finalName>
+							<excludes>
+								<exclude>js/**</exclude>
+								<exclude>html/**</exclude>
+								<exclude>WEB-INF/**</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptor>assembly.xml</descriptor>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
