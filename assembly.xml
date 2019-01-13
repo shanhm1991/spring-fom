@@ -7,23 +7,31 @@
 	</formats>
 	<dependencySets>
 		<dependencySet>
-			<useProjectArtifact>true</useProjectArtifact>
+			<useProjectArtifact>false</useProjectArtifact>
 			<outputDirectory>WEB-INF/lib</outputDirectory>
 		</dependencySet>
 	</dependencySets>
 	<fileSets>
 		<fileSet>
-            <directory>${project.basedir}\target\classes</directory>
-            <excludes>
-                <exclude>com/**</exclude>
-            </excludes>
-            <outputDirectory>\</outputDirectory>
-        </fileSet>
+			<directory>${project.build.directory}/classes</directory>
+			<excludes>
+				<exclude>com/**</exclude>
+			</excludes>
+			<outputDirectory>/</outputDirectory>
+		</fileSet>
 	</fileSets>
 	<files>
 		<file>
 			<source>README.md</source>
 			<outputDirectory>/</outputDirectory>
+		</file>
+		<file>
+			<source>${project.build.directory}/${project.name}-${project.version}.jar</source>
+			<outputDirectory>WEB-INF/lib</outputDirectory>
+		</file>
+		<file>
+			<source>${project.build.directory}/${project.name}-example.jar</source>
+			<outputDirectory>WEB-INF/lib</outputDirectory>
 		</file>
 	</files>
 </assembly>

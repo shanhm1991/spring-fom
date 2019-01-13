@@ -40,7 +40,7 @@
 				</excludes>
 			</testResource>
 		</testResources>
-		
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -77,16 +77,37 @@
 				</configuration>
 				<executions>
 					<execution>
+						<id>default-jar</id>
+						<phase>none</phase>
+					</execution>
+					<execution>
+						<id>fom</id>
 						<phase>package</phase>
 						<goals>
 							<goal>jar</goal>
 						</goals>
 						<configuration>
 							<classesDirectory>${project.build.directory}/classes</classesDirectory>
-							<finalName>fom-${project.version}</finalName>
+							<finalName>${project.name}-${project.version}</finalName>
 							<includes>
-							<include>com/**</include>
-							<include>META-INF/**</include>
+								<include>com/**</include>
+							</includes>
+							<excludes>
+								<exclude>com/fom/examples/**</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>example</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<finalName>${project.name}-example</finalName>
+							<classesDirectory>${project.build.directory}/classes</classesDirectory>
+							<includes>
+								<include>com/fom/examples/**</include>
 							</includes>
 						</configuration>
 					</execution>
@@ -97,7 +118,7 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>make-assembly</id>
+						<id>tar</id>
 						<phase>package</phase>
 						<goals>
 							<goal>single</goal>

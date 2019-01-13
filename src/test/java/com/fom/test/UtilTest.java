@@ -101,10 +101,10 @@ public class UtilTest {
 				}
 			}
 			rows.close();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
+		} catch (IllegalArgumentException e) { 
+			System.out.println("文件非法");
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("io异常"); 
 		}
 	}
 
@@ -125,11 +125,10 @@ public class UtilTest {
 		try{
 			CloseableHttpResponse response = HttpUtil.request(httpGet);
 			HttpEntity entity = response.getEntity();
-			System.out.println(EntityUtils.toString(entity, "utf-8")) ;
 			EntityUtils.consume(entity);
 			IoUtil.close(response); 
 		}catch(Exception e){
-			e.printStackTrace();
+			System.out.println("连接异常");
 		}
 
 	}
