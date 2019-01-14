@@ -9,4 +9,5 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 	</context:component-scan>
 	
 	<import resource="classpath:**/spring_datasource_*.xml"/>
+	<import resource="**/spring_datasource_*.xml"/>
 </beans>

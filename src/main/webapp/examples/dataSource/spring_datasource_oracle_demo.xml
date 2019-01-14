@@ -22,10 +22,10 @@
 
 	<bean id="oracleDemoSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<property name="dataSource" ref="oracleDemoDataSource" />
-		<property name="configLocation" value="classpath:com/fom/test/importer/dataSource/oracle_demo_mybatis.xml" />
+		<property name="configLocation" value="examples/dataSource/oracle_demo_mybatis.xml" />
 	</bean>
 
-	<bean id="oracleDemoDao" class="com.fom.test.importer.dao.OracleDemoDaoImpl">
+	<bean id="oracleDemoDao" class="com.fom.examples.importer.dao.OracleDemoDaoImpl">
 		<property name="sqlSessionFactory" ref="oracleDemoSqlSessionFactory" />
 	</bean>
 
