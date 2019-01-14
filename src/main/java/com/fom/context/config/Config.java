@@ -168,7 +168,7 @@ public abstract class Config implements IConfig {
 	
 	private Class<?> getParameterType(Class<?> clzz) {
 		Type[] ts = clzz.getGenericInterfaces();
-		if(ArrayUtils.isEmpty(ts)){
+		if(!ArrayUtils.isEmpty(ts)){
 			Class<?> clazz = (Class<?>)ts[0];
 			clazz.asSubclass(IConfig.class);
 			return clazz;

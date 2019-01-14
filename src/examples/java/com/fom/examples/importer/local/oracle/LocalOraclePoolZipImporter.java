@@ -18,7 +18,7 @@ import com.fom.context.db.handler.JdbcHandler;
  */
 public class LocalOraclePoolZipImporter extends ZipImporter<LocalZipImporterConfig, Map<String,Object>>{
 
-	private static final String POOL = "demoOracle";
+	private static final String POOL = "example_oracle";
 	
 	private static final String SQL = 
 			"insert into demo(id,name,source,filetype,importway) "

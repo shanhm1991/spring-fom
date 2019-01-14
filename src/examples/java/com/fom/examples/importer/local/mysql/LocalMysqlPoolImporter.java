@@ -18,7 +18,7 @@ import com.fom.context.db.handler.JdbcHandler;
  */
 public class LocalMysqlPoolImporter extends Importer<LocalImporterConfig, Map<String,Object>> {
 	
-	private static final String POOL = "demoMysql";
+	private static final String POOL = "example_mysql";
 
 	private static final String SQL = 
 			"insert into demo(id,name,source,filetype,importway) "

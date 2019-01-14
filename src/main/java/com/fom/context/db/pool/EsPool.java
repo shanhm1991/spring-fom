@@ -71,7 +71,7 @@ class EsPool extends Pool<TransportClient>{
 			}
 			client = newClient;
 			clientNode.v = client;
-			LOG.info("#加载完成, " + name + this);
+			LOG.info("#加载完成, " + this.name + this);
 		}
 	}
 

@@ -11,7 +11,7 @@ import com.fom.context.db.handler.EsHandler;
 
 public class LocalEsPoolImpoter extends Importer<LocalEsImporterConfig, Map<String,Object>> {
 	
-	private static final String POOL = "demoEs";
+	private static final String POOL = "example_es";
 	
 	protected LocalEsPoolImpoter(String name, String path) {
 		super(name, path);
