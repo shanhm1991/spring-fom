@@ -1,0 +1,62 @@
+2019-01-14 16:00:49 888 [INFO] localhost-startStop-1 [PoolManager.java:84] ------------------------------加载连接池------------------------------
+2019-01-14 16:00:51 114 [INFO] localhost-startStop-1 [EsPool.java:74] #加载完成, example_es
+example_es.clusterName=selfES
+example_es.nodes=[192.168.141.21:9300]
+2019-01-14 16:00:51 301 [INFO] localhost-startStop-1 [Pool.java:125] 获取连接[create], example_oracle连接池状态[空闲数/总数]：0/1
+2019-01-14 16:00:51 301 [INFO] localhost-startStop-1 [Pool.java:215] 释放连接, example_oracle连接池状态[空闲数/总数]：1/1
+2019-01-14 16:00:51 301 [INFO] localhost-startStop-1 [JdbcPool.java:59] #加载完成, example_oracle
+example_oracle.core=20
+example_oracle.max=20
+example_oracle.aliveTimeOut=120000
+example_oracle.waitTimeOut=120000
+example_oracle.driver=oracle.jdbc.driver.OracleDriver
+example_oracle.url=jdbc:oracle:thin:@192.168.141.21:1521:orcl
+example_oracle.user=scott
+example_oracle.passwd=admin
+2019-01-14 16:00:51 580 [ERROR] localhost-startStop-1 [PoolManager.java:145] example_mysql加载失败
+java.sql.SQLException: Unknown system variable 'query_cache_size'
+	at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:964)
+	at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3973)
+	at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3909)
+	at com.mysql.jdbc.MysqlIO.sendCommand(MysqlIO.java:2527)
+	at com.mysql.jdbc.MysqlIO.sqlQueryDirect(MysqlIO.java:2680)
+	at com.mysql.jdbc.ConnectionImpl.execSQL(ConnectionImpl.java:2497)
+	at com.mysql.jdbc.ConnectionImpl.execSQL(ConnectionImpl.java:2455)
+	at com.mysql.jdbc.StatementImpl.executeQuery(StatementImpl.java:1369)
+	at com.mysql.jdbc.ConnectionImpl.loadServerVariables(ConnectionImpl.java:3777)
+	at com.mysql.jdbc.ConnectionImpl.initializePropsFromServer(ConnectionImpl.java:3240)
+	at com.mysql.jdbc.ConnectionImpl.connectOneTryOnly(ConnectionImpl.java:2249)
+	at com.mysql.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:2035)
+	at com.mysql.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:790)
+	at com.mysql.jdbc.JDBC4Connection.<init>(JDBC4Connection.java:47)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:408)
+	at com.mysql.jdbc.Util.handleNewInstance(Util.java:425)
+	at com.mysql.jdbc.ConnectionImpl.getInstance(ConnectionImpl.java:400)
+	at com.mysql.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java:330)
+	at java.sql.DriverManager.getConnection(DriverManager.java:664)
+	at java.sql.DriverManager.getConnection(DriverManager.java:247)
+	at com.fom.context.db.pool.JdbcPool$JdbcNode.<init>(JdbcPool.java:103)
+	at com.fom.context.db.pool.JdbcPool.create(JdbcPool.java:70)
+	at com.fom.context.db.pool.JdbcPool.create(JdbcPool.java:1)
+	at com.fom.context.db.pool.Pool.acquire(Pool.java:121)
+	at com.fom.context.db.pool.JdbcPool.load(JdbcPool.java:56)
+	at com.fom.context.db.pool.PoolManager.load(PoolManager.java:141)
+	at com.fom.context.db.pool.PoolManager.listen(PoolManager.java:50)
+	at com.fom.context.db.pool.PoolListener.contextInitialized(PoolListener.java:37)
+	at org.apache.catalina.core.StandardContext.listenerStart(StandardContext.java:4725)
+	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:5189)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1419)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1409)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:745)
+2019-01-14 16:00:51 580 [INFO] localhost-startStop-1 [PoolManager.java:148] 连接池列表=[example_oracle, example_es]
+2019-01-14 16:00:51 580 [INFO] localhost-startStop-1 [PoolManager.java:149] ------------------------------加载结束------------------------------
+2019-01-14 16:11:23 660 [INFO] localhost-startStop-1 [PoolManager.java:84] ------------------------------加载连接池------------------------------
+2019-01-14 16:11:23 690 [INFO] localhost-startStop-1 [PoolManager.java:148] 连接池列表=[]
+2019-01-14 16:11:23 690 [INFO] localhost-startStop-1 [PoolManager.java:149] ------------------------------加载结束------------------------------

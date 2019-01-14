@@ -8,6 +8,12 @@ import org.springframework.context.annotation.ImportResource;
 import com.fom.context.config.ConfigListener;
 import com.fom.context.db.pool.PoolListener;
 
+/**
+ * 
+ * @author shanhm1991
+ * @date 2019年1月14日
+ *
+ */
 @Configuration
 @ImportResource(locations= {"WEB-INF/springContext.xml"})
 public class ApplicationConfiguration {
@@ -28,9 +34,4 @@ public class ApplicationConfiguration {
 		return listener;
 	}
 	
-	
-	
-	
-	
-
 }

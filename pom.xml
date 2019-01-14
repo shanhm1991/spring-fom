@@ -26,7 +26,7 @@
 		<testSourceDirectory>src/test/java</testSourceDirectory>
 		<resources>
 			<resource>
-				<directory>src/main/webapp</directory>
+				<directory>src/examples/resources</directory>
 			</resource>
 		</resources>
 		<testResources>

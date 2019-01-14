@@ -1,0 +1,89 @@
+
+2019-01-14 16:00:51 603 [INFO] localhost-startStop-1 [ConfigManager.java:41] #加载配置: example_importLocalFileToEsByPool
+type=导入
+valid=true
+src.path=/src/main/webapp/examples/source
+src.pattern=demo.bcp
+src.match.fail.del=false
+scanner=com.fom.context.LocalScanner
+scanner.cron=0 0/15 * * * ?
+executor=com.fom.examples.importer.local.es.LocalEsPoolImpoter
+executor.min=10
+executor.max=10
+executor.aliveTime.seconds=30
+executor.overTime.seconds=86400
+executor.overTime.cancle=false
+importer.batch=5000
+es.index=demo
+es.type=demo
+es.json=WEB-INF/index/index_demo.json
+
+2019-01-14 16:00:51 607 [INFO] localhost-startStop-1 [ConfigManager.java:41] #加载配置: example_importLocalFileToMysqlByMybatis
+type=导入
+valid=true
+src.path=/src/main/webapp/examples/source
+src.pattern=demo.txt
+src.match.fail.del=false
+scanner=com.fom.context.LocalScanner
+scanner.cron=0 0/15 * * * ?
+executor=com.fom.examples.importer.local.mysql.LocalMysqlMybatisImporter
+executor.min=10
+executor.max=10
+executor.aliveTime.seconds=30
+executor.overTime.seconds=86400
+executor.overTime.cancle=false
+importer.batch=5000
+demo.conf=myconfig
+
+2019-01-14 16:00:51 611 [INFO] localhost-startStop-1 [ConfigManager.java:41] #加载配置: example_importLocalFileToMysqlByPool
+type=导入
+valid=true
+src.path=/src/main/webapp/examples/source
+src.pattern=test.txt
+src.match.fail.del=false
+scanner=com.fom.context.LocalScanner
+scanner.cron=0 0/15 * * * ?
+executor=com.fom.examples.importer.local.mysql.LocalMysqlPoolImporter
+executor.min=10
+executor.max=10
+executor.aliveTime.seconds=30
+executor.overTime.seconds=86400
+executor.overTime.cancle=false
+importer.batch=5000
+demo.conf=myconfig
+
+2019-01-14 16:00:51 615 [INFO] localhost-startStop-1 [ConfigManager.java:41] #加载配置: example_importLocalZipToOracleByMybatis
+type=导入
+valid=true
+src.path=/src/main/webapp/examples/source
+src.pattern=demo.zip
+src.match.fail.del=false
+scanner=com.fom.context.LocalScanner
+scanner.cron=0 0/15 * * * ?
+executor=com.fom.examples.importer.local.oracle.LocalOracleMybatisZipImporter
+executor.min=10
+executor.max=10
+executor.aliveTime.seconds=30
+executor.overTime.seconds=86400
+executor.overTime.cancle=false
+importer.batch=5000
+importer.zip.subPattern=.\.bcp
+demo.conf=myconfig
+
+2019-01-14 16:00:51 619 [INFO] localhost-startStop-1 [ConfigManager.java:41] #加载配置: example_importLocalZipToOracleByPool
+type=导入
+valid=true
+src.path=/src/main/webapp/examples/source
+src.pattern=test.zip
+src.match.fail.del=false
+scanner=com.fom.context.LocalScanner
+scanner.cron=0 0/15 * * * ?
+executor=com.fom.examples.importer.local.oracle.LocalOraclePoolZipImporter
+executor.min=10
+executor.max=10
+executor.aliveTime.seconds=30
+executor.overTime.seconds=86400
+executor.overTime.cancle=false
+importer.batch=5000
+importer.zip.subPattern=.\.bcp
+demo.conf=myconfig

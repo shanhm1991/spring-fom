@@ -25,7 +25,9 @@ public class ContextUtil extends AbstractRefreshableWebApplicationContext {
 	 * @throws Exception
 	 */
 	public static final File getResourceFile(String location) throws Exception {
-		return INSTANCE.getResource(parseEnvStr(location)).getFile();
+		synchronized (INSTANCE) {
+			return INSTANCE.getResource(parseEnvStr(location)).getFile();
+		}
 	}
 	
 

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>file operation manage</title>
+<style type="text/css">
+a{ text-decoration : none; }
+span{ width:62px; padding:2px; display:inline-block;}
+table{ table-layout:fixed;}
+td{ word-wrap:break-word;}
+button{ margin-top: 2px; margin-bottom: 3px;}
+</style>
+</head>
+<body>
+<ul>
+<li><span><a href="#" onclick="list()">list</a></span></li> 
+<li><span><a href="#" onclick="srcs()">srcs</a></span><input id="srcs"/></li> 
+<li><span><a href="#" onclick="logs()">logs</a></span></li> 
+<li><span><a href="#" onclick="operation('start','start')">start</a></span><input id="start"/></li>
+<li><span><a href="#" onclick="operation('startAll')">startAll</a></li> 
+<li><span><a href="#" onclick="operation('stop','stop')">stop</a></span><input id="stop"/></li> 
+<li><span><a href="#" onclick="operation('stopAll')">stopAll</a></span></li>
+<li><span><a href="#" onclick="operation('restart','restart')">restart</a></span><input id="restart"/></li>
+<li><span><a href="#" onclick="operation('restartAll')">restartAll</a></li>
+</ul>
+<hr>
+<div id="content" style="overflow:auto; margin-top: 5px;"></div> 
+</body>
+<script src="../js/jquery-3.3.1.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	list();
+	window.onpopstate = function(event){
+	    if(event.state){
+	    	var f = event.state.fun
+	    	if(f == null){
+	    		list();
+	    		return;
+	    	}
+	    	var param = event.state.param
+	    	if(param == null){
+	    		f = f + "();"
+	    	}else{
+	    		f = f + "('" + param.arg1 + "','" + param.arg2 + "');";
+	    	}
+	    	eval(f);
+	    }
+	};
+});
+
+function list(){
+	$.ajax({
+        url: "/fom/list",
+        type: "POST",
+        dataType: "json",
+        success: function(data){
+         	$("#content").html("");
+         	var Tb = $("<table/>")
+            $.each(data,function(name,value) {
+          	     $("<tr/>").html("<td><a href='#' onclick='detail(&quot;" + name + "&quot;)'>" + name + "</a></td>"
+        			+ "<td>" + JSON.stringify(value, null, '\t') + "</td>").appendTo($(Tb));
+            });
+         	$("#content").append($(Tb));
+        },error:function(data,type, err){
+	        $("#content").text(err);
+	    }
+    });
+	window.history.pushState({"fun":"list"},"", "");
+}
+
+function operation(opt, id){
+	var name = $("#" + id).val();
+	if(id != null && name == ""){
+		return;
+	}
+	$.ajax({
+        url: "/fom/" + opt, 
+        type: "POST",
+        dataType: "json",
+        data: { "name" : name },
+        success: function(data){
+        	$("#content").html(data.msg);
+        },error:function(data,type, err){
+	        $("#content").text(err);
+	    }
+	});
+}
+
+function detail(name){
+	$.ajax({
+        url: "/fom/detail",
+        type: "POST",
+        dataType: "json",
+        data: { "name" : name },
+        success: function(data){
+        	$.each(data,function(name,value){
+        		$("#content").html("<button onclick='viewXml(&quot;" + name + "&quot;)'>viewXml</button>"
+        				+ "<br><label style='font-weight: bold;'>" + name + ":</label>");
+        		var div=document.createElement("div");
+          	    document.getElementById("content").appendChild(div);
+          	    div.innerText=value;
+         	});
+        },error:function(data,type, err){
+	        $("#content").text(err);
+	    }
+	 });
+	window.history.pushState({"fun":"detail","param":{"arg1":name}},"", "");
+}
+
+function viewXml(name){
+	$.ajax({
+        url: "/fom/xml", 
+        type: "POST",
+        dataType: "json",
+        data: { "name" : name },
+        success: function(data){
+        	$("#content").html("");
+        	$.each(data,function(name,value) {
+        		$("<div/>")
+        		.append($("<label style='font-weight: bold;'/>").text(name))
+        		.append($("<br>"))
+        		.append($("<button id='" + name + "' onclick='edit(&quot;" + name + "&quot;)'>Edit</button>"))
+        		.append($("<button id='b_" + name + "' hidden='true' onclick='apply(&quot;" + name + "&quot;)'>Apply</button>"))
+        		.append($("<br>"))
+        		.append($("<textarea id='t_" + name + "' spellcheck='false' disabled='disabled' rows='25' cols='125'/>").text(value))
+        		.appendTo($("#content"));
+         	});
+        },error:function(data,type, err){
+	        $("#content").text(err);
+	    }
+	});
+	window.history.pushState({"fun":"viewXml","param":{"arg1":name}},"", "");
+}
+
+function edit(name){
+	$("#" + name).attr("hidden",true);
+	$("#b_" + name).attr("hidden",false);
+	$("#t_" + name).attr("disabled",false); 
+	window.history.pushState({"fun":"edit","param":{"arg1":name}},"", "");
+}
+
+function apply(name){
+	$.ajax({
+        url: "/fom/apply", 
+        type: "POST",
+        dataType: "json",
+        data: { "name" : name, "data" : $("#t_" + name).val()},
+        success: function(data){
+        	$("#content").html(data.msg);
+        },error:function(data,type, err){
+	        $("#content").text(err);
+	    }
+	});
+}
+
+function logs(){
+	$.ajax({
+        url: "/fom/logs", 
+        type: "POST",
+        dataType: "json",
+        success: function(data){
+        	$("#content").html("");
+           	var Tb = $("<table width='100%'/>")
+           	var Tr;
+           	var TdArray = new Array();
+          	for (var i=0;i<data.logs.length;i++){
+          		if(i % 5 == 0){
+          			Tr = $("<tr/>")
+          			$(Tb).append($(Tr));
+          		}
+          		var value = $.trim(data.logs[i]);
+          		var url = "/fom/log/" + value;
+          		$(Tr).append($("<td><a href='#' onclick='load(&quot;" + url + "&quot;,&quot;" + value + "&quot;);'>" + value + "</a></td>"));
+           	}
+          	$("#content").append($(Tb)); 
+        },error:function(data,type, err){
+	        $("#content").text(err);
+	    }
+	});
+	window.history.pushState({"fun":"logs"},"", "");
+}
+
+function load(url, name){
+   var xmlhttp;
+   if(window.XMLHttpRequest){
+      xmlhttp=new XMLHttpRequest();
+   }else{
+      xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+   }
+   //0: 请求未初始化
+   //1: 服务器连接已建立
+   //2: 请求已接收
+   //3: 请求处理中
+   //4: 请求已完成，且响应已就绪
+   xmlhttp.onreadystatechange=function(){
+      if (xmlhttp.readyState==4 && xmlhttp.status==200){
+    	  $("#content").html("<label style='font-weight: bold;'>" + name + "</label>&nbsp;&nbsp;" +
+    			  "<button onclick='window.open(&quot;/fom/download?file=" + name + "&quot;);'>Download</button>")
+    	  var div=document.createElement("div");
+    	  div.style.height="450px";
+    	  div.style.margin="10px 0px 0px 0px";
+    	  div.style.overflow="auto";
+    	  document.getElementById("content").appendChild(div);
+    	  div.innerText=xmlhttp.responseText;
+      }
+   }
+   xmlhttp.open("GET", url, true);
+   xmlhttp.send();
+   window.history.pushState({"fun":"load","param":{"arg1":url,"arg2":name}},"", "");
+}
+
+function srcs(name, match){
+	if(name == null){
+		name = $("#srcs").val();
+	}
+	if(name == ""){
+		return;
+	}
+	if(match == null){
+		match = true;
+	}
+	$.ajax({
+        url: "/fom/srcs", 
+        type: "POST",
+        dataType: "json",
+        data: { "name" : name, "match" : match},
+        success: function(data){
+        	$("#content").html("<button onclick='srcs(&quot;" + name + "&quot;,false);'>AllFiles</button>");
+        	$("#content").append($("<div>").text(data.path));
+          	var Tb = $("<table width='100%'  border='1' cellspacing='0'/>")
+        	var Tr;
+        	var TdArray = new Array();
+        	for (var i = 0;i < data.srcs.length;i++){
+        		if(i % 5 == 0){
+        			var Tr = $("<tr/>");
+        			$(Tb).append($(Tr));
+        			for(var j = 0;j < 5;j++){
+        				var Td = $("<td/>");
+        				TdArray[j] = Td;
+        				$(Tr).append($(Td));
+        			}
+        		}
+        		$(TdArray[i % 5]).text($.trim(data.srcs[i]));
+        	}
+          	$("#content").append($(Tb)); 
+        },error:function(data,type, err){
+	        $("#content").text(err);	
+	    }
+	});
+	window.history.pushState({"fun":"srcs","param":{"arg1":name,"arg2":match}},"", "");
+}
+</script>
+</html>

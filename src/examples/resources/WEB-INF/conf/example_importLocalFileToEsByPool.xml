@@ -16,7 +16,7 @@
 		<extended>
 			<es.index>demo</es.index>
 			<es.type>demo</es.type>
-			<es.json>examples/index/index_demo.json</es.json>
+			<es.json>WEB-INF/index/index_demo.json</es.json>
 		</extended>
 	</fom>
 </foms>

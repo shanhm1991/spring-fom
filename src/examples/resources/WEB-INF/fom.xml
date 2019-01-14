@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<foms>
+	<includes>
+		<!-- <include>WEB-INF/conf/example_downloadHdfsFile.xml</include>
+		<include>WEB-INF/conf/example_downloadHdfsZip.xml</include> -->
+		<include>WEB-INF/conf/example_importLocalFileToEsByPool.xml</include>
+		<include>WEB-INF/conf/example_importLocalFileToMysqlByMybatis.xml</include>
+		<include>WEB-INF/conf/example_importLocalFileToMysqlByPool.xml</include>
+		<include>WEB-INF/conf/example_importLocalZipToOracleByMybatis.xml</include>
+		<include>WEB-INF/conf/example_importLocalZipToOracleByPool.xml</include>
+	</includes>
+</foms>
+

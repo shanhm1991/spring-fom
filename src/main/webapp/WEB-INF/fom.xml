@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
 	<includes>
-		<!-- <include>examples/example_downloadHdfsFile.xml</include>
-		<include>examples/example_downloadHdfsZip.xml</include> -->
-		<include>examples/example_importLocalFileToEsByPool.xml</include>
-		<include>examples/example_importLocalFileToMysqlByMybatis.xml</include>
-		<include>examples/example_importLocalFileToMysqlByPool.xml</include>
-		<include>examples/example_importLocalZipToOracleByMybatis.xml</include>
-		<include>examples/example_importLocalZipToOracleByPool.xml</include>
 	</includes>
 </foms>
 
