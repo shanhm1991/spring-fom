@@ -70,7 +70,7 @@ public class ConfigListener implements ServletContextListener {
 	}
 
 	private void load(String fomLocation) throws Exception {
-		fomXml = ContextUtil.getResourceFile(fomLocation);
+		fomXml = new File(ContextUtil.getRealPath(fomLocation));
 		SAXReader reader = new SAXReader();
 		reader.setEncoding("UTF-8");
 
@@ -113,7 +113,7 @@ public class ConfigListener implements ServletContextListener {
 				File xml = new File(fomPath + File.separator + location);
 				//尝试读取相对路径，如果不存在再从springContext获取
 				if(!xml.exists()){
-					xml = ContextUtil.getResourceFile(location);
+					xml = new File(ContextUtil.getRealPath(location));
 				}
 				SAXReader reader = new SAXReader();
 				reader.setEncoding("UTF-8");

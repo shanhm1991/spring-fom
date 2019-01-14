@@ -27,14 +27,14 @@
 4. start/startAll/stop/stopAll/restart/restartAll：
 * 启动/停止/重启模块
 
-##demo
-1. local_file_import_es_pool：             解析本地txt/orc文件，并用内置pool方式导入es；
-2. local_file_import_mysql_mybatis： 解析本地txt/orc文件，并用mybatis方式导入mysql；
-3. local_file_import_mysql_pool：       解析本地txt/orc文件，并用内置pool方式导入mysql；
-4. local_zip_import_oracle_mybatis： 解析本地zip(txt/orc)文件，并用mybatis方式导入oracle；
-5. local_zip_import_oracle_pool：       解析本地zip(txt/orc)文件，并用内置pool方式导入oracle；
-6. hdfs_file_download：   下载HDFS服务指定目录下文件；
-7. hdfs_zip_download：      下载HDFS服务指定目录下文件并打包；
+##examples
+1. example_importLocalFileToEsByPool        解析本地txt/orc文件，使用内置pool方式导入es；
+2. example_importLocalFileToMysqlByMybatis  解析本地txt/orc文件，使用mybatis方式导入mysql；
+3. example_importLocalFileToMysqlByPool     解析本地txt/orc文件，使用内置pool方式导入mysql；
+4. example_importLocalZipToOracleByMybatis  解析本地zip(txt/orc)文件，使用mybatis方式导入oracle；
+5. example_importLocalZipToOracleByPool     解析本地zip(txt/orc)文件，使用内置pool方式导入oracle；
+6. example_downloadHdfsFile     下载HDFS服务指定目录下文件；
+7. example_downloadHdfsZip      下载HDFS服务指定目录下文件并打包；
 
 ##TODO
 * 页面logs,提供日志级别设置功能

@@ -22,7 +22,7 @@
 	
 	<bean id="mysqlDemoSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<property name="dataSource" ref="mysqlDemoDataSource" />
-		<property name="configLocation" value="WEB-INF/dataSource/mysql_demo_mybatis.xml" />
+		<property name="configLocation" value="WEB-INF/examples/dataSource/mysql_demo_mybatis.xml" />
 	</bean>
 
 	<bean id="mysqlDemoDao" class="com.fom.examples.importer.dao.MysqlDemoDaoImpl">

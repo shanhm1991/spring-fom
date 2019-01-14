@@ -54,7 +54,11 @@ public class LocalEsImporterConfig extends ImporterConfig {
 	 */
 	@Override
 	protected boolean valid(Element extendedElement) throws Exception {
-		esJsonFile = locationResource(ContextUtil.parseEnvStr(esJson));
+		esJsonFile = new File(ContextUtil.getRealPath(esJson));
+		if(!esJsonFile.exists()){
+			LOG.error("文件不存在：" + esJson); 
+			return false;
+		}
 		return true;
 	}
 	

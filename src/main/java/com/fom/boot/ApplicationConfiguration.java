@@ -15,7 +15,7 @@ import com.fom.context.db.pool.PoolListener;
  *
  */
 @Configuration
-@ImportResource(locations= {"WEB-INF/springContext.xml"})
+@ImportResource(locations= {"WEB-INF/applicationContext.xml"})
 public class ApplicationConfiguration {
 	
 	@Bean

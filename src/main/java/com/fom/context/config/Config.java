@@ -1,7 +1,5 @@
 package com.fom.context.config;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.util.Date;
@@ -236,16 +234,6 @@ public abstract class Config implements IConfig {
 			return true;
 		}
 		return pattern.matcher(srcName).find();
-	}
-	
-	/**
-	 * 通过spring上下文获取配置路径的文件
-	 * @param location
-	 * @return
-	 * @throws IOException
-	 */
-	public final File locationResource(String location) throws Exception{ 
-		return ContextUtil.getResourceFile(location);
 	}
 	
 }

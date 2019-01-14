@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
 	<fom name="example_importLocalFileToEsByPool" config="com.fom.examples.importer.local.es.LocalEsImporterConfig">
-		<src.path>${webapp.root}/src/main/webapp/examples/source</src.path>
+		<src.path>${webapp.root}/WEB-INF/examples/source</src.path>
 		<src.pattern>demo.bcp</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
 		<scanner>com.fom.context.LocalScanner</scanner>
@@ -16,7 +16,7 @@
 		<extended>
 			<es.index>demo</es.index>
 			<es.type>demo</es.type>
-			<es.json>WEB-INF/index/index_demo.json</es.json>
+			<es.json>WEB-INF/examples/index/index_demo.json</es.json>
 		</extended>
 	</fom>
 </foms>

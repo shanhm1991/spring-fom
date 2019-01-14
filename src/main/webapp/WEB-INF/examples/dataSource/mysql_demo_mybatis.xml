@@ -12,6 +12,6 @@
 	</typeAliases>
 
 	<mappers>
-		<mapper resource="WEB-INF/mappers/oracle_demo.xml" />
+		<mapper resource="WEB-INF/examples/mappers/mysql_demo.xml" />
 	</mappers>
 </configuration> 

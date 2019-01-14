@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
-	<fom name="example_importLocalZipToOracleByPool" config="com.fom.examples.importer.local.oracle.LocalZipImporterConfig">
-		<src.path>${webapp.root}/src/main/webapp/examples/source</src.path>
-		<src.pattern>test.zip</src.pattern>
+	<fom name="example_importLocalZipToOracleByMybatis" config="com.fom.examples.importer.local.oracle.LocalZipImporterConfig">
+		<src.path>${webapp.root}/WEB-INF/examples/source</src.path>
+		<src.pattern>demo.zip</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
 		<scanner>com.fom.context.LocalScanner</scanner>
 		<scanner.cron>0 0/15 * * * ?</scanner.cron>
-		<executor>com.fom.examples.importer.local.oracle.LocalOraclePoolZipImporter</executor>
+		<executor>com.fom.examples.importer.local.oracle.LocalOracleMybatisZipImporter</executor>
 		<executor.min>10</executor.min>
 		<executor.max>10</executor.max>
 		<executor.aliveTime.seconds>30</executor.aliveTime.seconds>

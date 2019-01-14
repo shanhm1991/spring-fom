@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
-	<fom name="example_importLocalFileToMysqlByMybatis" config="com.fom.examples.importer.local.mysql.LocalImporterConfig">
-		<src.path>${webapp.root}/src/main/webapp/examples/source</src.path>
-		<src.pattern>demo.txt</src.pattern>
+	<fom name="example_importLocalZipToOracleByPool" config="com.fom.examples.importer.local.oracle.LocalZipImporterConfig">
+		<src.path>${webapp.root}/WEB-INF/examples/source</src.path>
+		<src.pattern>test.zip</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
 		<scanner>com.fom.context.LocalScanner</scanner>
 		<scanner.cron>0 0/15 * * * ?</scanner.cron>
-		<executor>com.fom.examples.importer.local.mysql.LocalMysqlMybatisImporter</executor>
+		<executor>com.fom.examples.importer.local.oracle.LocalOraclePoolZipImporter</executor>
 		<executor.min>10</executor.min>
 		<executor.max>10</executor.max>
 		<executor.aliveTime.seconds>30</executor.aliveTime.seconds>
 		<executor.overTime.seconds>86400</executor.overTime.seconds>
 		<executor.overTime.cancle>false</executor.overTime.cancle>
 		<importer.batch>5000</importer.batch>
+		<importer.zip.subPattern>.\.bcp</importer.zip.subPattern>
 		<extended>
 			<demo.conf>myconfig</demo.conf>
 		</extended>

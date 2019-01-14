@@ -1,11 +1,6 @@
 package com.fom.context;
 
-import java.io.File;
-import java.io.IOException;
-
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.web.context.support.AbstractRefreshableWebApplicationContext;
+import javax.servlet.ServletContext;
 
 /**
  * 
@@ -13,23 +8,27 @@ import org.springframework.web.context.support.AbstractRefreshableWebApplication
  * @date 2019年1月10日
  *
  */
-public class ContextUtil extends AbstractRefreshableWebApplicationContext {
+public class ContextUtil {
+
+	private static volatile ServletContext scontext;
 	
-	public static final ContextUtil INSTANCE = new ContextUtil();
-	
-	
+	public final static void setContext(ServletContext context) {
+		if(scontext == null){
+			scontext = context;
+		}
+	}
+
+
 	/**
-	 * 借助spring的方式获取配置的文件
+	 * Return the real path for a given virtual path, if possible; otherwise return <code>null</code>.
 	 * @param location
 	 * @return
 	 * @throws Exception
 	 */
-	public static final File getResourceFile(String location) throws Exception {
-		synchronized (INSTANCE) {
-			return INSTANCE.getResource(parseEnvStr(location)).getFile();
-		}
+	public static final String getRealPath(String path) {
+		return scontext.getRealPath(parseEnvStr(path));
 	}
-	
+
 
 	/**
 	 * 获取带环境变量的字符串值，如${webapp.root}/test
@@ -74,9 +73,4 @@ public class ContextUtil extends AbstractRefreshableWebApplicationContext {
 		}
 	}
 
-	@Override
-	protected void loadBeanDefinitions(DefaultListableBeanFactory arg0) throws BeansException, IOException {
-		
-	}
-	
 }

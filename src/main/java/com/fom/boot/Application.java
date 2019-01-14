@@ -14,10 +14,7 @@ import org.springframework.context.annotation.ComponentScan;
 import com.fom.context.ContextUtil;
 
 /**
- * 有个问题，在eclipse中测试examples，<br>
- * 需要把src/main/webapp下的文件替换为src/examples/resources下的文件<br>
- * 
- * 启动参数:-Dwebapp.root="E:\repository\fom"<br>
+ * 启动参数:-Dwebapp.root="E:\repository\fom\target\classes"<br>
  * 
  * @author shanhm1991
  * @date 2019年1月14日
@@ -34,7 +31,7 @@ public class Application implements ServletContextInitializer {
 	@Override
 	public void onStartup(ServletContext context) throws ServletException {
 		PropertyConfigurator.configure(context.getRealPath("/WEB-INF/log4j.properties"));
-		ContextUtil.INSTANCE.setServletContext(context);
+		ContextUtil.setContext(context);
 		context.setInitParameter("fomConfigLocation", "/WEB-INF/fom.xml");
 		context.setInitParameter("poolConfigLocation", "/WEB-INF/pool.xml");	
 	}
