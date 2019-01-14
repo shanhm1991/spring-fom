@@ -14,7 +14,10 @@ import org.springframework.context.annotation.ComponentScan;
 import com.fom.context.ContextUtil;
 
 /**
- * 启动参数:-Dwebapp.root="E:\repository\fom"
+ * 有个问题，在eclipse中测试examples，<br>
+ * 需要把src/main/webapp下的文件替换为src/examples/resources下的文件<br>
+ * 
+ * 启动参数:-Dwebapp.root="E:\repository\fom"<br>
  * 
  * @author shanhm1991
  * @date 2019年1月14日
