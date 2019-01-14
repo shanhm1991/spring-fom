@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
-	<fom name="hdfs_zip_download" config="com.fom.context.config.HdfsZipDownloaderConfig">
+	<fom name="example_downloadHdfsZip" config="com.fom.context.config.HdfsZipDownloaderConfig">
 		<src.path>/test</src.path>
 		<src.pattern></src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
@@ -14,7 +14,7 @@
 		<executor.overTime.cancle>false</executor.overTime.cancle>
 		<downloader.src.del>false</downloader.src.del>
 		<downloader.withTemp>true</downloader.withTemp>
-		<downloader.dest.path>E:/test</downloader.dest.path>
+		<downloader.dest.path>download/example_downloadHdfsZip</downloader.dest.path>
 		<hdfs.master>master.ip:port</hdfs.master>
 		<hdfs.slave>slave.ip:port</hdfs.slave>
 		<signal.file>a.orc</signal.file>

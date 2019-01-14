@@ -109,16 +109,20 @@ public class ConfigListener implements ServletContextListener {
 		while(it.hasNext()){
 			Element element = (Element)it.next();
 			String location = ContextUtil.parseEnvStr(element.getTextTrim());
-			//尝试读取绝对路径，如果不存在再以spring方式尝试
-			File xml = new File(fomPath + File.separator + location);
-			if(!xml.exists()){
-				xml = ContextUtil.getResourceFile(location);
+			try{
+				File xml = new File(fomPath + File.separator + location);
+				//尝试读取相对路径，如果不存在再从springContext获取
+				if(!xml.exists()){
+					xml = ContextUtil.getResourceFile(location);
+				}
+				SAXReader reader = new SAXReader();
+				reader.setEncoding("UTF-8");
+				Document doc = reader.read(new FileInputStream(xml));
+				loadElements(doc.getRootElement());
+			}catch(Exception e){
+				log.error("加载失败:" + location, e); 
 			}
-
-			SAXReader reader = new SAXReader();
-			reader.setEncoding("UTF-8");
-			Document doc = reader.read(new FileInputStream(xml));
-			loadElements(doc.getRootElement());
+			
 		}
 	}
 

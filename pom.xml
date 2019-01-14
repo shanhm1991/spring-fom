@@ -34,10 +34,7 @@
 		</resources>
 		<testResources>
 			<testResource>
-				<directory>src/test</directory>
-				<excludes>
-					<exclude>src/test/java</exclude>
-				</excludes>
+				<directory>src/test/resources</directory>
 			</testResource>
 		</testResources>
 		<plugins>
@@ -55,7 +52,7 @@
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>add-example</id>
+						<id>example-source</id>
 						<phase>initialize</phase>
 						<goals>
 							<goal>add-source</goal>

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
 	<includes>
-		<!-- <include>classpath:com/fom/test/local_file_import_mysql_mybatis.xml</include> -->
-		<!-- <include>classpath:com/fom/test/local_file_import_mysql_pool.xml</include> -->
-		<!-- <include>classpath:com/fom/test/local_zip_import_oracle_mybatis.xml</include> -->
-		<!-- <include>classpath:com/fom/test/local_zip_import_oracle_pool.xml</include> -->
-		<!-- <include>classpath:com/fom/test/local_file_import_es_pool.xml</include> -->
-		<!-- <include>classpath:com/fom/test/hdfs_file_download.xml</include> -->
-		<!-- <include>classpath:com/fom/test/hdfs_zip_download.xml</include> -->
+		<!-- <include>examples/example_downloadHdfsFile.xml</include>
+		<include>examples/example_downloadHdfsZip.xml</include> -->
+		<include>examples/example_importLocalFileToEsByPool.xml</include>
+		<include>examples/example_importLocalFileToMysqlByMybatis.xml</include>
+		<include>examples/example_importLocalFileToMysqlByPool.xml</include>
+		<include>examples/example_importLocalZipToOracleByMybatis.xml</include>
+		<include>examples/example_importLocalZipToOracleByPool.xml</include>
 	</includes>
 </foms>
 

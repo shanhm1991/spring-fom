@@ -30,9 +30,6 @@ public class PoolListener implements ServletContextListener{
 		log = LoggerFactory.getLogger("pool");
 		ServletContext context = event.getServletContext();
 		try{
-			
-			System.out.println(context.getInitParameter("poolConfigLocation")); 
-			
 			File poolXml = ContextUtil.getResourceFile(context.getInitParameter("poolConfigLocation"));
 			if(!poolXml.exists()){
 				return;

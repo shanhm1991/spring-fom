@@ -1,1 +1,5 @@
 /target/
+/cache/
+/data/
+/log/
+logfile.log

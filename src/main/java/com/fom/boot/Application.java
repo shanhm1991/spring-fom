@@ -1,7 +1,6 @@
 package com.fom.boot;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -28,16 +27,14 @@ public class Application implements ServletContextInitializer {
 	public void onStartup(ServletContext context) throws ServletException {
 		context.setInitParameter("fomConfigLocation", "/WEB-INF/fom.xml");
 		context.setInitParameter("poolConfigLocation", "/WEB-INF/pool.xml");		
-		
+		ContextUtil.INSTANCE.setServletContext(context);
 		try {
-			String ss = ResourceUtils.getURL("classpath:").getPath();
-			System.out.println(ss);
-		} catch (FileNotFoundException e) {
+			System.out.println(new File("").getAbsolutePath()); 
+			System.out.println(ResourceUtils.getURL("classpath:").getPath()); 
+			System.out.println(ContextUtil.getResourceFile("/WEB-INF/fom.xml").getAbsolutePath());
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println(new File("").getAbsolutePath()); 
-		
-		ContextUtil.INSTANCE.setServletContext(context);
 		
 	}
 }

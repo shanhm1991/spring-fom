@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
-	<fom name="local_zip_import_oracle_pool" config="com.fom.test.importer.local.oracle.LocalZipImporterConfig">
+	<fom name="example_importLocalFileToEsByPool" config="com.fom.examples.importer.local.es.LocalEsImporterConfig">
 		<src.path>${webapp.root}/WEB-INF/classes/com/fom/test/source</src.path>
-		<src.pattern>test.zip</src.pattern>
+		<src.pattern>demo.bcp</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
 		<scanner>com.fom.context.LocalScanner</scanner>
 		<scanner.cron>0 0/15 * * * ?</scanner.cron>
-		<executor>com.fom.test.importer.local.oracle.LocalOraclePoolZipImporter</executor>
+		<executor>com.fom.examples.importer.local.es.LocalEsPoolImpoter</executor>
 		<executor.min>10</executor.min>
 		<executor.max>10</executor.max>
 		<executor.aliveTime.seconds>30</executor.aliveTime.seconds>
 		<executor.overTime.seconds>86400</executor.overTime.seconds>
 		<executor.overTime.cancle>false</executor.overTime.cancle>
 		<importer.batch>5000</importer.batch>
-		<importer.zip.subPattern>.\.bcp</importer.zip.subPattern>
 		<extended>
-			<demo.conf>myconfig</demo.conf>
+			<es.index>demo</es.index>
+			<es.type>demo</es.type>
+			<es.json>examples/index/index_demo.json</es.json>
 		</extended>
 	</fom>
 </foms>
