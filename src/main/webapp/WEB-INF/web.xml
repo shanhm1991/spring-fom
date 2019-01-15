@@ -13,7 +13,7 @@
 	</context-param>
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>/WEB-INF/springContext.xml</param-value>
+		<param-value>classpath*:applicationContext.xml</param-value>
 	</context-param>
 	<context-param>
 		<param-name>fomConfigLocation</param-name>

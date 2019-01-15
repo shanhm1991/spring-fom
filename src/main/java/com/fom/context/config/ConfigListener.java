@@ -8,6 +8,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -28,16 +29,16 @@ public class ConfigListener implements ServletContextListener {
 	private static Logger log;
 
 	private File fomXml;
-	
+
 	public ConfigListener(){
-		
+
 	}
 
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
 		log = LoggerFactory.getLogger("config");
 		ServletContext context = event.getServletContext();
-		setSystem();
+		setSystem(context);
 		try {
 			load(context.getInitParameter("fomConfigLocation"));
 		} catch (Exception e) {
@@ -45,26 +46,34 @@ public class ConfigListener implements ServletContextListener {
 		}
 	}
 
-	private void setSystem(){
-		String root = System.getProperty("webapp.root");
-		String path = root + File.separator + "cache" + File.separator + "apply";
-		File cache = new File(path + File.separator + "history");
-		if(!cache.exists()){
-			cache.mkdirs();
+	private void setSystem(ServletContext context){
+		String cacheRoot = System.getProperty("cache.root");
+		if(StringUtils.isBlank(cacheRoot)){
+			cacheRoot = context.getRealPath("/WEB-INF/cache");
+			if(StringUtils.isBlank(cacheRoot)){
+				String root = System.getProperty("webapp.root");
+				cacheRoot = root + File.separator + "cache";
+			}
+		}
+
+		String path = cacheRoot + File.separator + "apply";
+		File dir = new File(path + File.separator + "history");
+		if(!dir.exists()){
+			dir.mkdirs();
 		}
 		System.setProperty("config.apply", path);
 
-		path = root + File.separator + "cache" + File.separator + "iprogress";
-		cache = new File(path);
-		if(!cache.exists()){
-			cache.mkdirs();
+		path = cacheRoot + File.separator + "iprogress";
+		dir = new File(path);
+		if(!dir.exists()){
+			dir.mkdirs();
 		}
 		System.setProperty("import.progress", path);
 
-		path = root + File.separator + "cache" + File.separator + "dtemp";
-		cache = new File(path);
-		if(!cache.exists()){
-			cache.mkdirs();
+		path = cacheRoot + File.separator + "dtemp";
+		dir = new File(path);
+		if(!dir.exists()){
+			dir.mkdirs();
 		}
 		System.setProperty("download.temp", path);
 	}
@@ -122,7 +131,7 @@ public class ConfigListener implements ServletContextListener {
 			}catch(Exception e){
 				log.error("加载失败:" + location, e); 
 			}
-			
+
 		}
 	}
 

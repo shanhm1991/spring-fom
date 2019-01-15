@@ -50,7 +50,7 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends ZipDow
 	
 	@Override
 	protected InputStream getResourceInputStream(String path) throws Exception {
-		return HdfsUtil.downloadAsStream(config.getFs(), path);
+		return HdfsUtil.open(config.getFs(), path);
 	}
 	
 	@Override

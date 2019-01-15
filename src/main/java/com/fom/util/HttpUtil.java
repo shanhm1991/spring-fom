@@ -1,6 +1,9 @@
 package com.fom.util;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.net.UnknownHostException;
 
@@ -13,6 +16,7 @@ import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.Registry;
@@ -101,7 +105,7 @@ public class HttpUtil {
 			IoUtil.close(response);
 		}
 	}
-	
+
 	/**
 	 * 需要自行关闭response
 	 * @param request
@@ -110,5 +114,66 @@ public class HttpUtil {
 	 */
 	public static final CloseableHttpResponse request(HttpUriRequest request) throws Exception{
 		return httpClient.execute(request);
+	}
+
+	/**
+	 * 下载http服务文件到本地
+	 * @param url
+	 * @param file
+	 * @throws Exception
+	 */
+	public static final void downloadAsFile(String url, File file) throws Exception {
+		downloadAsFile(new HttpGet(url), file);
+	}
+	
+	/**
+	 * 下载http服务文件到本地
+	 * @param httpGet
+	 * @param file
+	 * @throws Exception
+	 */
+	public static final void downloadAsFile(HttpGet httpGet, File file) throws Exception {
+		CloseableHttpResponse resp = request(httpGet);
+		InputStream input = null;
+		FileOutputStream output = null;
+		try{
+			input = resp.getEntity().getContent();
+			output = new FileOutputStream(file);
+			int index;
+			byte[] bytes = new byte[1024];
+			while ((index = input.read(bytes)) != -1) {
+				output.write(bytes, 0, index);
+				output.flush();
+			}
+		}finally{
+			IoUtil.close(input);
+			IoUtil.close(output);
+		}
+	}
+	
+	/**
+	 * 获取http服务文件流
+	 * @param url
+	 * @param file
+	 * @return
+	 * @throws Exception
+	 */
+	public static final InputStream open(String url, File file) throws Exception {
+		return request(new HttpGet(url)).getEntity().getContent();
+	}
+	
+	/**
+	 * 获取http服务文件流
+	 * @param httpGet
+	 * @param file
+	 * @return
+	 * @throws Exception
+	 */
+	public static final InputStream open(HttpGet httpGet, File file) throws Exception {
+		return request(httpGet).getEntity().getContent();
+	}
+	
+	public static final void list(){
+		
 	}
 }

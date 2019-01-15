@@ -80,6 +80,8 @@
 							<finalName>${project.name}-${project.version}</finalName>
 							<includes>
 								<include>com/**</include>
+								<include>META-INF/**</include>
+								<include>application.properties</include>
 							</includes>
 							<excludes>
 								<exclude>com/fom/examples/**</exclude>
@@ -109,9 +111,6 @@
 					<descriptors>
 						<descriptor>assembly.xml</descriptor>
 					</descriptors>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
 				</configuration>
 				<executions>
 					<execution>
@@ -216,13 +215,11 @@
 			<artifactId>c3p0</artifactId>
 			<version>0.9.5.1</version>
 		</dependency>
-		<!-- <dependency> <groupId>org.springframework.data</groupId> <artifactId>spring-data-elasticsearch</artifactId> 
-			</dependency> -->
 		<dependency>
 			<groupId>org.elasticsearch</groupId>
 			<artifactId>elasticsearch</artifactId>
 			<version>2.4.0</version>
-			<!-- 想保留之前对接es2.x的代码，所以这里使用旧版本 -->
+			<!-- 想保留之前对接Es2.x的代码，所以这里使用旧版本 -->
 		</dependency>
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>

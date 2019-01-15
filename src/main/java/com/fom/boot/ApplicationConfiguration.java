@@ -10,12 +10,12 @@ import com.fom.context.db.pool.PoolListener;
 
 /**
  * 
- * @author shanhm1991
+ * @author shanhm
  * @date 2019年1月14日
  *
  */
 @Configuration
-@ImportResource(locations= {"WEB-INF/applicationContext.xml"})
+@ImportResource(locations= {"classpath*:applicationContext.xml"})
 public class ApplicationConfiguration {
 	
 	@Bean

@@ -7,6 +7,12 @@ import org.mybatis.spring.support.SqlSessionDaoSupport;
 
 import com.fom.examples.importer.DemoBean;
 
+/**
+ * 
+ * @author shanhm
+ * @date 2019年1月15日
+ *
+ */
 public class OracleDemoDaoImpl extends SqlSessionDaoSupport implements DemoDao {
 
 	@Override

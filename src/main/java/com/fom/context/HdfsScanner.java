@@ -9,6 +9,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 
 import com.fom.context.config.IHdfsConfig;
+import com.fom.util.HdfsUtil;
 
 /**
  * 
@@ -23,33 +24,27 @@ public class HdfsScanner<E extends IHdfsConfig> extends Scanner<E>{
 		super(name, config);
 	}
 	
-	private FileStatus[] scanHdfs(E config){
-		FileStatus[] statusArray = null;
-		try {
-			statusArray = config.getFs().listStatus(new Path(config.getSrcPath()));
+	@Override
+	public List<String> scan(E config) {
+		try{
+			return HdfsUtil.listName(config.getFs(), config.getSrcPath());
 		} catch (Exception e) {
 			log.error("扫描异常",e);
 		}
-		return statusArray;
-	}
-
-	@Override
-	public List<String> scan(E config) {
-		List<String> list = new LinkedList<>();
-		FileStatus[] statusArray = scanHdfs(config);
-		if(ArrayUtils.isEmpty(statusArray)){
-			return list;
-		}
-		for(FileStatus status : statusArray){
-			list.add(status.getPath().getName());
-		}
-		return list;
+		return new LinkedList<String>();
 	}
 	
 	@Override
 	public List<String> filter (E config){
 		List<String> pathList = new LinkedList<String>();
-		FileStatus[] statusArray = scanHdfs(config);
+		FileStatus[] statusArray = null;
+		try {
+			statusArray = config.getFs().listStatus(new Path(config.getSrcPath()));
+		} catch (Exception e) {
+			log.error("扫描异常",e);
+			return pathList;
+		}
+		
 		if(ArrayUtils.isEmpty(statusArray)){
 			return pathList;
 		}

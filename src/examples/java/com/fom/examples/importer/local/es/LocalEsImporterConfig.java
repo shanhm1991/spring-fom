@@ -8,6 +8,12 @@ import com.fom.context.ContextUtil;
 import com.fom.context.config.ImporterConfig;
 import com.fom.util.XmlUtil;
 
+/**
+ * 
+ * @author shanhm
+ * @date 2019年1月15日
+ *
+ */
 public class LocalEsImporterConfig extends ImporterConfig {
 	
 	private String esIndex;
