@@ -172,8 +172,5 @@ public class HttpUtil {
 	public static final InputStream open(HttpGet httpGet, File file) throws Exception {
 		return request(httpGet).getEntity().getContent();
 	}
-	
-	public static final void list(){
-		
-	}
+
 }

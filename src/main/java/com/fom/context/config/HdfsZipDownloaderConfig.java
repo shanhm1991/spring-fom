@@ -38,8 +38,8 @@ public class HdfsZipDownloaderConfig extends ZipDownloaderConfig implements IHdf
 	}
 
 	@Override
-	boolean valid() throws Exception {
-		if(!super.valid()){
+	boolean isValid() throws Exception {
+		if(!super.isValid()){
 			return false;
 		}
 		//...

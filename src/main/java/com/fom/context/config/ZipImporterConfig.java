@@ -33,8 +33,8 @@ public class ZipImporterConfig extends ImporterConfig {
 	}
 	
 	@Override
-	boolean valid() throws Exception {
-		if(!super.valid()){
+	boolean isValid() throws Exception {
+		if(!super.isValid()){
 			return false;
 		}
 		if(!StringUtils.isBlank(subReg)){

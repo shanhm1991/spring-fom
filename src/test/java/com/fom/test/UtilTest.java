@@ -1,9 +1,6 @@
 package com.fom.test;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.text.ParseException;
@@ -135,28 +132,4 @@ public class UtilTest {
 		}
 	}
 	
-	
-	
-	public static void main(String[] args) throws Exception {
-		
-		HttpGet httpGet = new HttpGet("http://192.168.141.21/boot");
-		CloseableHttpResponse resp = HttpUtil.request(httpGet);
-		
-		InputStream input = resp.getEntity().getContent();
-		
-		FileOutputStream downloadFile = new FileOutputStream(new File("D:/as.txt"));
-		
-		
-		int index;
-		byte[] bytes = new byte[1024];
-		while ((index = input.read(bytes)) != -1) {
-			downloadFile.write(bytes, 0, index);
-			downloadFile.flush();
-		}
-		downloadFile.close();
-		input.close();
-		
-		IoUtil.close(input);
-		IoUtil.close(downloadFile);
-	}
 }

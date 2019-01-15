@@ -34,8 +34,8 @@ public class HdfsDownloaderConfig extends DownloaderConfig implements IHdfsConfi
 	}
 	
 	@Override
-	boolean valid() throws Exception {
-		if(!super.valid()){
+	boolean isValid() throws Exception {
+		if(!super.isValid()){
 			return false;
 		}
 		//...

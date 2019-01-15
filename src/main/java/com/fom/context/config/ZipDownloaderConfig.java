@@ -31,8 +31,8 @@ public class ZipDownloaderConfig extends DownloaderConfig {
 	}
 	
 	@Override
-	boolean valid() throws Exception {
-		if(!super.valid()){
+	boolean isValid() throws Exception {
+		if(!super.isValid()){
 			return false;
 		}
 		//...

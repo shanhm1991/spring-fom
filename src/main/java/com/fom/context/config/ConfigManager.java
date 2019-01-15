@@ -69,7 +69,7 @@ public final class ConfigManager {
 			config.loadTime = System.currentTimeMillis();
 			config.element = element;
 			config.load();
-			config.valid = config.valid();
+			config.valid = config.isValid();
 		}catch(Exception e){
 			if(config != null){
 				config.valid = false;

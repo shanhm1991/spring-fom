@@ -59,7 +59,7 @@ public class LocalEsImporterConfig extends ImporterConfig {
 	 * 继承自Config，自定义校验<extended>中的配置项
 	 */
 	@Override
-	protected boolean valid(Element extendedElement) throws Exception {
+	protected boolean valid() throws Exception {
 		esJsonFile = new File(ContextUtil.getRealPath(esJson));
 		if(!esJsonFile.exists()){
 			LOG.error("文件不存在：" + esJson); 

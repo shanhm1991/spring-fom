@@ -146,13 +146,13 @@ public abstract class Config implements IConfig {
 
 	private CronExpression cronExpression;
 
-	boolean valid() throws Exception {
+	boolean isValid() throws Exception {
 		if(!StringUtils.isBlank(reg)){
 			pattern = Pattern.compile(reg);
 		}
 		cronExpression = new CronExpression(scannerCron);
 		refreshScanner();
-		return valid(element.element("extended"));
+		return valid();
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -175,7 +175,7 @@ public abstract class Config implements IConfig {
 		return getParameterType(sclzz);
 	}
 
-	protected boolean valid(Element extendedElement) throws Exception {
+	protected boolean valid() throws Exception {
 		return true;
 	}
 	

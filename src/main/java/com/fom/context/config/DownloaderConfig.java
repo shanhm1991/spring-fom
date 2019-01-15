@@ -37,8 +37,8 @@ public class DownloaderConfig extends Config {
 	}
 	
 	@Override
-	boolean valid() throws Exception {
-		if(!super.valid()){
+	boolean isValid() throws Exception {
+		if(!super.isValid()){
 			return false;
 		}
 		
