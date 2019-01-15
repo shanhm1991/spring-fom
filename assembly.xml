@@ -30,7 +30,7 @@
 			<outputDirectory>WEB-INF/lib</outputDirectory>
 		</file>
 		<file>
-			<source>${project.build.directory}/${project.name}-example.jar</source>
+			<source>${project.build.directory}/${project.name}-example-${project.version}.jar</source>
 			<outputDirectory>WEB-INF/lib</outputDirectory>
 		</file>
 	</files>
