@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
 	<fom name="example_importLocalFileToMysqlByMybatis" config="com.fom.examples.importer.local.mysql.LocalImporterConfig">
-		<src.path>${webapp.root}/WEB-INF/examples/source</src.path>
+		<src.path>${webapp.root}/source</src.path>
 		<src.pattern>demo.txt</src.pattern>
 		<src.match.fail.del>false</src.match.fail.del>
 		<scanner>com.fom.context.LocalScanner</scanner>

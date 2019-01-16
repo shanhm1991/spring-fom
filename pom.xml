@@ -26,7 +26,13 @@
 		<testSourceDirectory>src/test/java</testSourceDirectory>
 		<resources>
 			<resource>
-				<directory>src/main/webapp</directory>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>META-INF/**</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/examples/resources</directory>
 			</resource>
 		</resources>
 		<testResources>
@@ -76,8 +82,8 @@
 							<goal>jar</goal>
 						</goals>
 						<configuration>
+							<finalName>${project.name}-context-${project.version}</finalName>
 							<classesDirectory>${project.build.directory}/classes</classesDirectory>
-							<finalName>${project.name}-${project.version}</finalName>
 							<includes>
 								<include>com/**</include>
 								<include>META-INF/**</include>
@@ -95,7 +101,7 @@
 							<goal>jar</goal>
 						</goals>
 						<configuration>
-							<classifier>example-${project.version}</classifier>
+							<classifier>examples-${project.version}</classifier>
 							<classesDirectory>${project.build.directory}/classes</classesDirectory>
 							<includes>
 								<include>com/fom/examples/**</include>

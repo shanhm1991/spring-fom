@@ -81,7 +81,7 @@ public class UtilTest {
 		System.out.println(out.toString());
 	}
 
-	@Test
+	//@Test
 	public void readOrc() { 
 		Configuration conf = new Configuration();
 		conf.set("fs.defaultFS", "file:///");
@@ -101,20 +101,14 @@ public class UtilTest {
 				}
 			}
 			rows.close();
-		} catch (IllegalArgumentException e) { 
+		} catch (Exception e) { 
 			System.out.println("文件非法");
-		} catch (IOException e) {
-			System.out.println("io异常"); 
-		}
+		} 
 	}
 
-	@Test
+	//@Test
 	public void http() { 
 		HttpGet httpGet = new HttpGet("https://www.cnblogs.com/shanhm1991/p/9906917.html");
-		httpGet.setHeader("User-Agent", "Mozilla/5.0");
-		httpGet.setHeader("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-		httpGet.setHeader("Accept-Language", "zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3");
-		httpGet.setHeader("Accept-Charset", "ISO-8859-1,utf-8,gbk,gb2312;q=0.7,*;q=0.7");
 		RequestConfig requestConfig = RequestConfig.custom()
 				.setConnectionRequestTimeout(3000)
 				.setConnectTimeout(3000)

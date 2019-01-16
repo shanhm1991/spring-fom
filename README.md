@@ -34,13 +34,12 @@
 4. example_importLocalZipToOracleByMybatis  解析本地zip(txt/orc)文件，使用mybatis方式导入oracle；
 5. example_importLocalZipToOracleByPool     解析本地zip(txt/orc)文件，使用内置pool方式导入oracle；
 6. example_downloadHdfsFile     下载HDFS服务指定目录下文件；
-7. example_downloadHdfsZip      下载HDFS服务指定目录下文件并打包；
+7. example_downloadHdfsZip      下载并打包HDFS服务指定目录下文件；
 
 ##TODO
 * 页面logs,提供日志级别设置功能
 * 页面srcs,增加大小数目等统计信息
 * 页面添加实时新增模块功能
 * 安装包/rpm/注册系统服务
-* jar方式提供
 
 
