@@ -18,9 +18,8 @@ import com.fom.context.db.pool.PoolListener;
  *
  */
 @Configuration
-@ImportResource(locations= {"classpath*:applicationContext.xml"})
+@ImportResource(locations= {"**/*spring*.xml"})  
 public class ApplicationConfiguration {
-	
 	@Bean
 	public ServletListenerRegistrationBean<PoolListener> listenPool(){
 		ServletListenerRegistrationBean<PoolListener> listener = new ServletListenerRegistrationBean<>();

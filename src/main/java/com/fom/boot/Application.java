@@ -1,5 +1,7 @@
 package com.fom.boot;
 
+import java.io.File;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
@@ -18,6 +20,7 @@ import com.fom.context.ContextUtil;
  * 启动参数:<br>
  * -Dwebapp.root="/"<br>
  * -Dcache.root="/WEB-INF/cache"<br>
+ * -Dlog.root="/log"<br>
  * -Dlog4jConfigLocation="/WEB-INF/log4j.properties"<br>
  * -DfomConfigLocation="/WEB-INF/fom.xml"<br>
  * -DpoolConfigLocation="/WEB-INF/pool.xml"<br>
@@ -35,6 +38,12 @@ public class Application implements ServletContextInitializer {
 		if(StringUtils.isBlank(rootPath)){
 			rootPath = Application.class.getResource("/").getPath();
 			System.setProperty("webapp.root", rootPath);
+		}
+		
+		//在tomcat容器中部署启动时最早只能在PoolListener中设置了此变量
+		String logRoot = System.getProperty("log.root");
+		if(StringUtils.isBlank(logRoot)){ 
+			System.setProperty("log.root", rootPath + File.separator + "log");
 		}
 		SpringApplication.run(Application.class, args);
 	}

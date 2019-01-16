@@ -39,13 +39,13 @@
 * -DfomConfigLocation：    设置fom配置文件路径，默认读取文件：/WEB-INF/fom.xml
 * -DpoolConfigLocation：  设置pool配置文件路径，默认读取文件：/WEB-INF/pool.xml
 2. 配置
-* spring：应用启动时会加载所有目录下以spring_开头的配置文件，和com.fom包下面所有的注解
+* spring：应用启动时会加载所有目录带spring名字的xml文件，以及com.fom包下面所有的spring注解
 * log4j：在/WEB-INF/log4j.properties或-Dlog4jConfigLocation指定的配置文件中进行配置
 * fom:   在/WEB-INF/fom.xml或-DfomConfigLocation指定的配置文件中进行配置
 * pool：  在/WEB-INF/pool.xml或-DpoolConfigLocation指定的配置文件中进行配置
 3. 启动
 * 在eclipse中启动：如果不设置-Dwebapp.root，应用会以eclipse的编译结果目录作为根目录
-* 在tomcat容器中启动：保留了web.xml和springnvc.xml就是为了兼容以往的web工程部署方式，将其和需要的resource以文件夹或war包形式放到tomcat目录下启动即可
+* 在tomcat容器中启动：工程中保留了web.xml和applicationContext.xml以及springnvc.xml就是为了兼容以往的web工程部署方式，将它们和需要的依赖文件一起以文件夹或war包形式放到tomcat目录下启动即可
 * java命令启动：打成jar包和需要的依赖以及resource一起部署到目录下，通过java指定classpath启动
 4. examples
 * example_importLocalFileToEsByPool        解析本地txt/orc文件，使用内置pool方式导入es；

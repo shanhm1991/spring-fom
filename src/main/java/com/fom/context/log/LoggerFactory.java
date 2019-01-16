@@ -30,9 +30,8 @@ public class LoggerFactory {
 		appender.setLayout(layout); 
 		appender.setEncoding("UTF-8");
 		appender.setAppend(true);
-		String logFile = System.getProperty("webapp.root")
-				+ File.separator + "log" + File.separator + name + ".log";
-		appender.setFile(logFile);
+		appender.setFile(System.getProperty("log.root") 
+				+ File.separator + "log" + File.separator + name + ".log");
 		appender.setRolling("false"); 
 		appender.activateOptions();
 		logger.addAppender(appender);  
