@@ -42,7 +42,7 @@ public abstract class Executor<E extends Config> extends Thread {
 		this.srcPath = path;
 		this.srcFile = new File(path);
 		this.srcName = srcFile.getName();
-		
+
 		config = getRuntimeConfig();
 		if(config == null){
 			throw new RuntimeException("任务取消.");
@@ -60,12 +60,12 @@ public abstract class Executor<E extends Config> extends Thread {
 				srcSize = len / 1024.0; 
 				return;
 			} catch (Exception e) {
-				
+
 			}
 		}
 		srcSize = srcFile.length() / 1024.0;
 	}
-	
+
 	/**
 	 * 获取最新的config
 	 * @return
@@ -104,23 +104,28 @@ public abstract class Executor<E extends Config> extends Thread {
 	}
 
 	/**
-	 * 继承自Executor，在任务线程启动时执行的第一个动作，可以完成一些准备操作
+	 * 在文件处理前时执行的动作
 	 */
 	protected void onStart(E config) throws Exception {
-
+		log.info("ready to process the file,if you want to do something before it,"
+				+ "you could override the method:[void onStart(E config) throws Exception]");
 	}
 
-	protected abstract void exec(E config) throws Exception;
+	protected void exec(E config) throws Exception {
+		log.warn("nothing to do,if you want to do something with the file,"
+				+ "you should override the method:[void exec(E config) throws Exception]");
+	}
 
 	/**
-	 * 继承自Executor，在任务线程完成时执行的动作
+	 * 在文件处理完成时执行的动作
 	 */
 	protected void onComplete(E config) throws Exception {
-
+		log.info("the file process completed,if you want to do something after it,"
+				+ "you could override the method:[void onComplete(E config) throws Exception]");
 	}
 
 	void onFinally() {
-
+		
 	}
 
 }

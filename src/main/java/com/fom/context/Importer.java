@@ -22,6 +22,10 @@ import com.fom.util.IoUtil;
 public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> { 
 
 	final File logFile;
+	
+	private boolean praseLineData_warned;
+	
+	private boolean batchProcessLineData_warned;
 
 	protected Importer(String name, String path) {
 		super(name, path);
@@ -30,6 +34,7 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 		this.logFile = new File(logPath);
 	}
 
+	@Override
 	protected void exec(E config) throws Exception {
 		long sTime = System.currentTimeMillis();
 		int lineIndex = 0;
@@ -88,16 +93,6 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 		}
 	}
 
-	/**
-	 * 继承自Importer, 解析行数据, 异常则结束任务，保留文件，所以务必对错误数据导致的异常进行try-catch
-	 * @param config
-	 * @param line
-	 * @param lineDatas
-	 * @param batchTime
-	 * @throws Exception
-	 */
-	public abstract void praseLineData(E config, List<V> lineDatas, String line, long batchTime) throws Exception;
-
 	//选择在每次批处理开始处检测中断，因为比较耗时的地方就两个(读取解析文件数据内容，数据入库)
 	void batchProcessIfNotInterrupted(List<V> lineDatas, int lineIndex, long batchTime) throws Exception {
 		if(interrupted()){
@@ -106,15 +101,40 @@ public abstract class Importer<E extends ImporterConfig,V> extends Executor<E> {
 		batchProcessLineData(config, lineDatas, batchTime); 
 		log.info("批处理结束[" + lineDatas.size() + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 	}
+	
+	/**
+	 * 解析行数据, 异常则结束任务，保留文件，所以务必对错误数据导致的异常进行try-catch
+	 * @param config
+	 * @param line
+	 * @param lineDatas
+	 * @param batchTime
+	 * @throws Exception
+	 */
+	public void praseLineData(E config, List<V> lineDatas, String line, long batchTime) throws Exception {
+		if(!praseLineData_warned){
+			praseLineData_warned = true;
+		}
+		log.warn("all line datas ignored,if you want to deal with it,you should override the method:"
+				+ "[void praseLineData(E config, List<V> lineDatas, String line, long batchTime) throws Exception],"
+				+ "in the method,you should prase the line string to a instance of V and add to the given list in the end.");
+	}
 
 	/**
-	 * 继承自Importer, 批处理行数据解析结果, 异常则结束任务，保留文件
+	 * 批处理行数据解析结果, 异常则结束任务，保留文件
 	 * @param lineDatas
 	 * @param config
 	 * @param batchTime
 	 * @throws Exception
 	 */
-	public abstract void batchProcessLineData(E config, List<V> lineDatas, long batchTime) throws Exception;
+	public void batchProcessLineData(E config, List<V> lineDatas, long batchTime) throws Exception {
+		if(!batchProcessLineData_warned){
+			batchProcessLineData_warned = true;
+		}
+		log.warn("no data will be imported,you should override the method:"
+				+ "[void batchProcessLineData(E config, List<V> lineDatas, long batchTime) throws Exception],"
+				+ "and import the data which in the given list to the db.");
+		
+	}
 
 	void updateLogFile(String fileName, int lineIndex) throws IOException{ 
 		String data = fileName + "\n" + lineIndex;

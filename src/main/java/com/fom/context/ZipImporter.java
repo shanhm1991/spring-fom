@@ -86,7 +86,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 					throw new WarnException("创建解压目录失败: " + unzipDir.getName());
 				}
 			}
-			
+
 			if(!ZipUtil.validZip(srcFile)){
 				log.error("zip文件校验失败."); 
 				removeDirectly = true;
@@ -117,6 +117,8 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 	}
 
 	protected boolean validContents(E config, List<String> nameList) {
+		log.info("valid default true,you can valid the zip contents by yourself with override the method:"
+				+ "[boolean validContents(E config, List<String> nameList)]");
 		return true;
 	}
 
@@ -174,7 +176,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 			readFile(file, 0);
 			log.info("处理文件结束[" + name + "(" 
 					+ numFormat.format(size) + "KB)], 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
-			
+
 			it.remove();
 			if(!file.delete()){
 				throw new WarnException("删除文件失败:" + file.getName()); 

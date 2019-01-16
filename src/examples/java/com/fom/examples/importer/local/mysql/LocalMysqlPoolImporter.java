@@ -29,16 +29,8 @@ public class LocalMysqlPoolImporter extends Importer<LocalImporterConfig, Map<St
 	}
 
 	/**
-	 * 继承自Executor，在任务线程启动时执行的第一个动作，可以完成一些准备操作
-	 */
-	@Override
-	public void onStart(LocalImporterConfig config) throws Exception {
-		log.info("start process.");
-	}
-
-	/**
 	 * 
-	 * [Abstract]继承自Importer, 将行数据line解析成DemoBean，并添加到lineDatas中去
+	 * 将行数据line解析成DemoBean，并添加到lineDatas中去
 	 * 异常则结束任务，保留文件，所以对错误数据导致的异常需要try-catch，一避免任务重复失败
 	 */
 	@Override
@@ -58,7 +50,7 @@ public class LocalMysqlPoolImporter extends Importer<LocalImporterConfig, Map<St
 	}
 
 	/**
-	 * [Abstract]继承自Importer, 批处理行数据解析结果, 异常则结束任务，保留文件
+	 * 批处理行数据解析结果, 异常则结束任务，保留文件
 	 */
 	@Override
 	public void batchProcessLineData(LocalImporterConfig config, List<Map<String,Object>> lineDatas, long batchTime) throws Exception {
@@ -66,11 +58,4 @@ public class LocalMysqlPoolImporter extends Importer<LocalImporterConfig, Map<St
 		log.info("处理数据入库:" + lineDatas.size());
 	}
 
-	/**
-	 * 继承自Executor，在任务线程完成时执行的动作
-	 */
-	@Override
-	public void onComplete(LocalImporterConfig config) throws Exception {
-		log.info("complete process.");
-	}
 }

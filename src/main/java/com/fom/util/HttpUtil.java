@@ -56,7 +56,7 @@ public class HttpUtil {
 				.setConnectionManager(manager)
 				.setRetryHandler(new HttpRequestRetryHandler() {
 					public boolean retryRequest(IOException exception,int executionCount, HttpContext context) {
-						if (executionCount >= 3) {// 如果已经重试了3次，就放弃                    
+						if (executionCount >= 2) {// 如果已经重试了2次，就放弃                    
 							return false;
 						}
 						if (exception instanceof NoHttpResponseException) {// 如果服务器丢掉了连接，那么就重试                    
