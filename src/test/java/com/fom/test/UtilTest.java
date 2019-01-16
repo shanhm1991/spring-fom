@@ -81,7 +81,7 @@ public class UtilTest {
 		System.out.println(out.toString());
 	}
 
-	//@Test
+	@Test
 	public void readOrc() { 
 		Configuration conf = new Configuration();
 		conf.set("fs.defaultFS", "file:///");
@@ -106,7 +106,7 @@ public class UtilTest {
 		} 
 	}
 
-	//@Test
+	@Test
 	public void http() { 
 		HttpGet httpGet = new HttpGet("https://www.cnblogs.com/shanhm1991/p/9906917.html");
 		RequestConfig requestConfig = RequestConfig.custom()

@@ -16,7 +16,7 @@
 3. 上传[TODO]
 * 支持上传服务：HDFS服务、HTTP服务、FTP服务；
 
-##维护（http://ip:port/fom/html/index.html）
+##维护（http://ip:port/.../index.html）
 1. list: 
 * 列出已加载的所有模块（包括信息：名称、类型、加载时间、启动时间、运行状态、配置是否合法），
 * 点击可以查看加载的详细信息，并且可以查看、修改(实时生效)所加载的实际xml配置
@@ -27,14 +27,34 @@
 4. start/startAll/stop/stopAll/restart/restartAll：
 * 启动/停止/重启模块
 
-##examples
-1. example_importLocalFileToEsByPool        解析本地txt/orc文件，使用内置pool方式导入es；
-2. example_importLocalFileToMysqlByMybatis  解析本地txt/orc文件，使用mybatis方式导入mysql；
-3. example_importLocalFileToMysqlByPool     解析本地txt/orc文件，使用内置pool方式导入mysql；
-4. example_importLocalZipToOracleByMybatis  解析本地zip(txt/orc)文件，使用mybatis方式导入oracle；
-5. example_importLocalZipToOracleByPool     解析本地zip(txt/orc)文件，使用内置pool方式导入oracle；
-6. example_downloadHdfsFile     下载HDFS服务指定目录下文件；
-7. example_downloadHdfsZip      下载并打包HDFS服务指定目录下文件；
+##打包
+* 在工程目录下执行cmd: mvn clean package(跳过测试：mvn clean package -Dmaven.test.skip=true)
+
+##测试 (启动类：com.fom.boot.Application)
+1. 启动参数
+* -Dwebapp.root：设置应用即StandardContext的根目录(默认为class.getResource("/"))
+* -Dcache.root：  设置缓存即应用处理过程中临时文件的根目录(默认为根目录下的WEB-INF/cache，如果找不到则设为根目录下的cache)
+* -Dlog.root:    设置生成日志文件的根目录，默认为根目录下的log
+* -Dlog4jConfigLocation：设置log4j配置文件路径，默认读取文件：/WEB-INF/log4j.properties
+* -DfomConfigLocation：    设置fom配置文件路径，默认读取文件：/WEB-INF/fom.xml
+* -DpoolConfigLocation：  设置pool配置文件路径，默认读取文件：/WEB-INF/pool.xml
+2. 配置
+* spring：应用启动时会加载所有目录下以spring_开头的配置文件，和com.fom包下面所有的注解
+* log4j：在/WEB-INF/log4j.properties或-Dlog4jConfigLocation指定的配置文件中进行配置
+* fom:   在/WEB-INF/fom.xml或-DfomConfigLocation指定的配置文件中进行配置
+* pool：  在/WEB-INF/pool.xml或-DpoolConfigLocation指定的配置文件中进行配置
+3. 启动
+* 在eclipse中启动：如果不设置-Dwebapp.root，应用会以eclipse的编译结果目录作为根目录
+* 在tomcat容器中启动：保留了web.xml和springnvc.xml就是为了兼容以往的web工程部署方式，将其和需要的resource以文件夹或war包形式放到tomcat目录下启动即可
+* java命令启动：打成jar包和需要的依赖以及resource一起部署到目录下，通过java指定classpath启动
+4. examples
+* example_importLocalFileToEsByPool        解析本地txt/orc文件，使用内置pool方式导入es；
+* example_importLocalFileToMysqlByMybatis  解析本地txt/orc文件，使用mybatis方式导入mysql；
+* example_importLocalFileToMysqlByPool     解析本地txt/orc文件，使用内置pool方式导入mysql；
+* example_importLocalZipToOracleByMybatis  解析本地zip(txt/orc)文件，使用mybatis方式导入oracle；
+* example_importLocalZipToOracleByPool     解析本地zip(txt/orc)文件，使用内置pool方式导入oracle；
+* example_downloadHdfsFile     下载HDFS服务指定目录下文件；
+* example_downloadHdfsZip      下载并打包HDFS服务指定目录下文件；
 
 ##TODO
 * 页面logs,提供日志级别设置功能
