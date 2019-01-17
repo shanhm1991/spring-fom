@@ -5,7 +5,7 @@
 
 ##功能
 > Fom在上下文中对模块配置管理，任务线程分配作了统一处理，解决了可能出现的文件操作冲突、超时及异常问题，
-> 实现了失败补偿和错误恢复以及断电续传等问题，另外提供一了个简单地运维页面，可以实时监控和修改各模块的运行状态和配置信息
+> 实现了失败补偿、错误恢复以及断点续传等机制，另外提供一了个简单地运维页面，可以实时监控和修改各模块的运行状态和配置信息
 > 目前实现的文件操作有解析入库、下载、上传，理论上应该可以实现任何关于文件的操作需求，暂时还没想到。
 1. 解析入库
 * 支持数据库：mysql、oracle、elasticsearch(2.x)；
@@ -51,11 +51,11 @@
 * 在tomcat容器中启动：工程中保留了web.xml和applicationContext.xml以及springnvc.xml就是为了兼容以往的web工程部署方式，将它们和需要的依赖文件一起以文件夹或war包形式放到tomcat目录下启动即可
 * java命令启动：打成jar包和需要的依赖以及resource一起部署到目录下，通过java指定classpath启动
 4. examples
-* example_importLocalFileToEsByPool        解析本地txt/orc文件，使用内置pool方式导入es；
+* example_importLocalFileToEsByPool        解析本地txt/orc文件，使用自定义pool方式导入es；
 * example_importLocalFileToMysqlByMybatis  解析本地txt/orc文件，使用mybatis方式导入mysql；
-* example_importLocalFileToMysqlByPool     解析本地txt/orc文件，使用内置pool方式导入mysql；
+* example_importLocalFileToMysqlByPool     解析本地txt/orc文件，使用自定义pool方式导入mysql；
 * example_importLocalZipToOracleByMybatis  解析本地zip(txt/orc)文件，使用mybatis方式导入oracle；
-* example_importLocalZipToOracleByPool     解析本地zip(txt/orc)文件，使用内置pool方式导入oracle；
+* example_importLocalZipToOracleByPool     解析本地zip(txt/orc)文件，使用自定义pool方式导入oracle；
 * example_downloadHdfsFile     下载HDFS服务指定目录下文件；
 * example_downloadHdfsZip      下载并打包HDFS服务指定目录下文件；
 
