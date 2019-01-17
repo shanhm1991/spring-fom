@@ -124,7 +124,7 @@ public class FomController {
 	@ResponseBody
 	public Map<String,Object> logs() throws Exception{ 
 		Map<String,Object> map = new HashMap<>();
-		File logs = new File(System.getProperty("webapp.root") + File.separator + "log");
+		File logs = new File(System.getProperty("log.root"));
 		String[] array = logs.list();
 		if(array != null){
 			map.put("logs", Arrays.asList(array));
@@ -135,7 +135,7 @@ public class FomController {
 	@RequestMapping("/download")
 	@ResponseBody
 	public Map<String,Object> download(String file, HttpServletResponse resp) throws Exception{ 
-		String path = System.getProperty("webapp.root") + File.separator + "log"  + File.separator + file;
+		String path = System.getProperty("log.root") + File.separator + file;
 		File log = new File(path);
 		resp.reset();
 		resp.setContentType("application/octet-stream;charset=UTF-8");
