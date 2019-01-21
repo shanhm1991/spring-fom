@@ -74,9 +74,10 @@ public class ZipUtil {
 	 * @param entryName
 	 * @param in
 	 * @param zipOutStream
+	 * @return
 	 * @throws Exception
 	 */
-	public static final void zipEntry(String entryName, 
+	public static final long zipEntry(String entryName, 
 			InputStream in, ZipOutputStream zipOutStream) throws Exception{
 		BufferedInputStream buffer = null;
 		try{
@@ -89,6 +90,7 @@ public class ZipUtil {
 			while((count=buffer.read(data, 0, BUFFER))!=-1){
 				zipOutStream.write(data, 0, count);
 			}
+			return zipEntry.getSize();
 		}finally{
 			IoUtil.close(buffer);
 		}
