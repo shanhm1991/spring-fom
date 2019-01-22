@@ -12,8 +12,8 @@ import org.dom4j.Element;
 import org.quartz.CronExpression;
 
 import com.fom.context.ContextUtil;
-import com.fom.context.Scanner;
-import com.fom.context.log.LoggerFactory;
+import com.fom.context.scanner.Scanner;
+import com.fom.log.LoggerFactory;
 import com.fom.util.XmlUtil;
 
 /**

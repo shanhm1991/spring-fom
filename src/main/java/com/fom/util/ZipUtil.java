@@ -16,7 +16,7 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.log4j.Logger;
 
-import com.fom.context.log.LoggerFactory;
+import com.fom.log.LoggerFactory;
 
 import net.lingala.zip4j.core.HeaderReader;
 import net.lingala.zip4j.model.FileHeader;

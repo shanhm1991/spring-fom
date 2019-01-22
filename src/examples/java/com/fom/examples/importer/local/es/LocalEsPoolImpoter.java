@@ -6,8 +6,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.fom.context.Importer;
-import com.fom.context.db.handler.EsHandler;
+import com.fom.context.executor.Importer;
+import com.fom.db.handler.EsHandler;
 
 /**
  * 

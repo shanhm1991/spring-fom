@@ -1,6 +1,7 @@
 package com.fom.context;
 
 import com.fom.context.config.HttpUploaderConfig;
+import com.fom.context.executor.Uploader;
 
 /**
  * 

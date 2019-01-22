@@ -8,7 +8,7 @@ import java.security.MessageDigest;
 
 import org.apache.log4j.Logger;
 
-import com.fom.context.log.LoggerFactory;
+import com.fom.log.LoggerFactory;
 
 /**
  * 引入一个Md5工具类，修正线程安全问题

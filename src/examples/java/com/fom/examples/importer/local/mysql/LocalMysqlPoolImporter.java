@@ -6,8 +6,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.fom.context.Importer;
-import com.fom.context.db.handler.JdbcHandler;
+import com.fom.context.executor.Importer;
+import com.fom.db.handler.JdbcHandler;
 
 /**
  * 解析文本文件将数据导入mysql，使用自带pool

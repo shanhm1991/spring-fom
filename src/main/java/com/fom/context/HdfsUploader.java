@@ -1,6 +1,7 @@
 package com.fom.context;
 
 import com.fom.context.config.HdfsUploaderConfig;
+import com.fom.context.executor.Uploader;
 
 /**
  * 

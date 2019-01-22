@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 
 import com.fom.context.config.ConfigListener;
-import com.fom.context.db.pool.PoolListener;
+import com.fom.db.pool.PoolListener;
 
 /**
  * 

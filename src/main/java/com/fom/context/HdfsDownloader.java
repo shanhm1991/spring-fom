@@ -3,6 +3,7 @@ package com.fom.context;
 import java.io.File;
 
 import com.fom.context.config.HdfsDownloaderConfig;
+import com.fom.context.executor.Downloader;
 import com.fom.util.HdfsUtil;
 
 /**

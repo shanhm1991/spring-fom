@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.fom.context.Importer;
+import com.fom.context.executor.Importer;
 import com.fom.examples.importer.DemoBean;
 import com.fom.examples.importer.dao.DemoDao;
 import com.fom.util.SpringUtil;

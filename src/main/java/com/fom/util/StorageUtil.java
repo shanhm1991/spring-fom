@@ -12,7 +12,7 @@ import org.apache.log4j.Logger;
 
 import com.fh.search.storage.client.StorageClient;
 import com.fh.search.storage.client.StorageClient.ReturnFlag;
-import com.fom.context.log.LoggerFactory;
+import com.fom.log.LoggerFactory;
 import com.fh.search.storage.client.StorageEntity;
 
 /**

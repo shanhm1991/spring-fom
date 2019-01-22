@@ -12,7 +12,7 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 
 import com.fom.context.exception.WarnException;
-import com.fom.context.log.LoggerFactory;
+import com.fom.log.LoggerFactory;
 import com.fom.util.XmlUtil;
 
 /**

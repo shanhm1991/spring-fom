@@ -15,7 +15,7 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
 import com.fom.context.ContextUtil;
-import com.fom.context.log.LoggerFactory;
+import com.fom.log.LoggerFactory;
 import com.fom.util.IoUtil;
 
 /**
