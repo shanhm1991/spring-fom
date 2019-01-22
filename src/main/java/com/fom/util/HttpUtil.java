@@ -122,8 +122,8 @@ public class HttpUtil {
 	 * @param file
 	 * @throws Exception
 	 */
-	public static final void downloadAsFile(String url, File file) throws Exception {
-		downloadAsFile(new HttpGet(url), file);
+	public static final void download(String url, File file) throws Exception {
+		download(new HttpGet(url), file);
 	}
 	
 	/**
@@ -132,7 +132,7 @@ public class HttpUtil {
 	 * @param file
 	 * @throws Exception
 	 */
-	public static final void downloadAsFile(HttpGet httpGet, File file) throws Exception {
+	public static final void download(HttpGet httpGet, File file) throws Exception {
 		CloseableHttpResponse resp = request(httpGet);
 		InputStream input = null;
 		FileOutputStream output = null;

@@ -10,6 +10,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 
 /**
  * 
@@ -46,8 +47,8 @@ public class HdfsUtil {
 	 * @param dest
 	 * @throws Exception
 	 */
-	public static final void downloadAsFile(FileSystem fs, boolean isDelSrc, String src, String dest) throws Exception{
-		downloadAsFile(fs, isDelSrc, new Path(src), new Path(dest)); 
+	public static final void download(FileSystem fs, boolean isDelSrc, String src, String dest) throws Exception{
+		download(fs, isDelSrc, new Path(src), new Path(dest)); 
 	}
 	
 	/**
@@ -58,7 +59,7 @@ public class HdfsUtil {
 	 * @param dest
 	 * @throws Exception
 	 */
-	public static final void downloadAsFile(FileSystem fs, boolean isDelSrc, Path src, Path dest) throws Exception{
+	public static final void download(FileSystem fs, boolean isDelSrc, Path src, Path dest) throws Exception{
 		fs.copyToLocalFile(isDelSrc, src, dest, true); 
 	}
 	
@@ -87,56 +88,72 @@ public class HdfsUtil {
 	}
 	
 	/**
-	 * 列举目录下文件
+	 * 列举目录下文件路径
 	 * @param fs
 	 * @param path
+	 * @param filter
 	 * @return
 	 * @throws Exception
 	 */
-	public static final List<Path> listPath(FileSystem fs, String path) throws Exception {
-		return listPath(fs, new Path(path));
+	public static final List<String> listPath(FileSystem fs, String path, PathFilter filter) throws Exception {
+		return listPath(fs, new Path(path), filter);
 	}
 	
 	/**
-	 * 列举目录下文件
+	 * 列举目录下文件路径
 	 * @param fs
 	 * @param path
+	 * @param filter
 	 * @return
 	 * @throws Exception
 	 */
-	public static final List<Path> listPath(FileSystem fs, Path path) throws Exception {
-		List<Path> list = new LinkedList<>();
-		FileStatus[] statusArray = fs.listStatus(path);
+	public static final List<String> listPath(FileSystem fs, Path path, PathFilter filter) throws Exception {
+		List<String> list = new LinkedList<>();
+		FileStatus[] statusArray = null;   
+		if(filter == null){
+			statusArray = fs.listStatus(path);
+		}else{
+			statusArray = fs.listStatus(path, filter);
+		}
+		
 		if(ArrayUtils.isEmpty(statusArray)){
 			return list;
 		}
 		for(FileStatus status : statusArray){
-			list.add(status.getPath());
+			list.add(status.getPath().toString());
 		}
 		return list;
 	}
 	
 	/**
-	 * 列举目录下文件的名称列表
+	 * 列举目录下文件路径
 	 * @param fs
 	 * @param path
+	 * @param filter
 	 * @return
 	 * @throws Exception
 	 */
-	public static final List<String> listName(FileSystem fs, String path) throws Exception {
-		return listName(fs, new Path(path));
+	public static final List<String> listName(FileSystem fs, String path, PathFilter filter) throws Exception {
+		return listName(fs, new Path(path), filter);
 	}
 	
 	/**
-	 * 列举目录下文件的名称列表
+	 * 列举目录下文件路径
 	 * @param fs
 	 * @param path
+	 * @param filter
 	 * @return
 	 * @throws Exception
 	 */
-	public static final List<String> listName(FileSystem fs, Path path) throws Exception {
+	public static final List<String> listName(FileSystem fs, Path path, PathFilter filter) throws Exception {
 		List<String> list = new LinkedList<>();
-		FileStatus[] statusArray = fs.listStatus(path);
+		FileStatus[] statusArray = null; 
+		if(filter == null){
+			statusArray = fs.listStatus(path);
+		}else{
+			statusArray = fs.listStatus(path, filter);
+		}
+		
 		if(ArrayUtils.isEmpty(statusArray)){
 			return list;
 		}
@@ -146,4 +163,25 @@ public class HdfsUtil {
 		return list;
 	}
 	
+	/**
+	 * 删除指定文件
+	 * @param fs
+	 * @param path
+	 * @return
+	 * @throws Exception
+	 */
+	public static final boolean delete(FileSystem fs, String path) throws Exception {
+		return delete(fs, new Path(path));
+	}
+	
+	/**
+	 * 删除指定文件
+	 * @param fs
+	 * @param path
+	 * @return
+	 * @throws Exception
+	 */
+	public static final boolean delete(FileSystem fs, Path path) throws Exception {
+		return fs.delete(path, true);
+	}
 }

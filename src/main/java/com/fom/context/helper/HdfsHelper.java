@@ -3,6 +3,10 @@ package com.fom.context.helper;
 import java.io.File;
 import java.io.InputStream;
 
+import org.apache.hadoop.fs.FileSystem;
+
+import com.fom.util.HdfsUtil;
+
 /**
  * 
  * @author shanhm
@@ -10,23 +14,30 @@ import java.io.InputStream;
  *
  */
 public class HdfsHelper implements Helper {
+	
+	private final FileSystem fs;
+	
+	private final boolean isDelSrc;
+	
+	public HdfsHelper(FileSystem fs, boolean isDelSrc){
+		this.fs = fs;
+		this.isDelSrc = isDelSrc;
+	}
 
 	@Override
 	public InputStream open(String url) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		return HdfsUtil.open(fs, url);
 	}
 
 	@Override
 	public void download(String url, File file) throws Exception {
-		// TODO Auto-generated method stub
+		HdfsUtil.download(fs, isDelSrc, url, file.getPath());
 		
 	}
-
+ 
 	@Override
 	public boolean delete(String url) throws Exception {
-		// TODO Auto-generated method stub
-		return false;
+		return HdfsUtil.delete(fs, url);
 	}
 
 }

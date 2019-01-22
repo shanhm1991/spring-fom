@@ -3,7 +3,6 @@ package com.fom.context.executor;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.fom.context.exception.WarnException;
+import com.fom.context.helper.Helper;
 import com.fom.log.LoggerFactory;
 import com.fom.util.IoUtil;
 import com.fom.util.ZipUtil;
@@ -27,9 +27,11 @@ import com.fom.util.ZipUtil;
  * @date 2019年1月21日
  *
  */
-public abstract class ZipDownloader {
+public class ZipDownloader implements Executor {
 
 	protected final Logger log;
+	
+	protected final Helper helper;
 
 	/**
 	 * zip文件基础名称(不带后缀)
@@ -56,7 +58,7 @@ public abstract class ZipDownloader {
 	protected final boolean isDelSrc;
 
 	protected final List<String> urlList;
-
+	
 	//已编入的序列的zip文件的最大序号
 	protected int index;
 
@@ -75,8 +77,8 @@ public abstract class ZipDownloader {
 	 * @param zipName
 	 * @param destPath
 	 */
-	public ZipDownloader(String name, List<String> urlList, String zipName, String destPath){
-		this(name, urlList, zipName, destPath, 100, 100 * 1024 * 1024, true, true);
+	public ZipDownloader(String name, List<String> urlList, String zipName, String destPath, Helper helper){
+		this(name, urlList, zipName, destPath, 100, 100 * 1024 * 1024, true, true, helper);
 	}
 
 	/**
@@ -91,7 +93,7 @@ public abstract class ZipDownloader {
 	 * @param isDelSrc
 	 */
 	public ZipDownloader(String name, List<String> urlList, String zipName, String destPath, 
-			int entryMax, int sizeMax, boolean withTemp, boolean isDelSrc) {
+			int entryMax, long sizeMax, boolean withTemp, boolean isDelSrc, Helper helper) {
 		if(entryMax <= 0 || sizeMax <= 0 || urlList == null
 				|| StringUtils.isBlank(name)
 				|| StringUtils.isBlank(zipName)
@@ -105,6 +107,7 @@ public abstract class ZipDownloader {
 		this.urlList = urlList;
 		this.destPath = destPath;
 		this.isDelSrc = isDelSrc;
+		this.helper = helper;
 		if(withTemp){
 			this.tempPath = System.getProperty("download.temp") + File.separator + name + File.separator + zipName;
 		}else{
@@ -121,6 +124,7 @@ public abstract class ZipDownloader {
 	 * 1.打开tempZip的输出流(如果tempZip已经存在则直接打开，否则新建);
 	 * 2.挨个写入下载的文件流，如果压缩数或压缩文件大小大于阈值则重新命名，否则继续;
 	 */
+	@Override
 	public void exec() throws Exception {
 		if(urlList.isEmpty()){
 			return;
@@ -142,7 +146,7 @@ public abstract class ZipDownloader {
 					log.warn("忽略重复下载的文件:" + name); 
 					continue;
 				}
-				long size = ZipUtil.zipEntry(name, getResourceInputStream(path), zipOutStream);
+				long size = ZipUtil.zipEntry(name, helper.open(path), zipOutStream);
 				entrySet.add(name); //TODO
 				log.info("下载文件结束:" + name + "(" 
 						+ numFormat.format(size / 1024.0) + "KB), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
@@ -190,7 +194,7 @@ public abstract class ZipDownloader {
 					String pathName = new File(path).getName();
 					if(name.equals(pathName)){
 						log.info("删除源文件：" + name);
-						if(!deletePath(path)){
+						if(!helper.delete(path)){
 							throw new WarnException("删除源文件失败：" + name); 
 						}
 						break;
@@ -302,20 +306,20 @@ public abstract class ZipDownloader {
 	//		}
 	//	}
 
-	/**
-	 * 根据路径打开远程文件的输入流
-	 * @param path
-	 * @return
-	 * @throws Exception
-	 */
-	protected abstract InputStream getResourceInputStream(String path) throws Exception;
-
-	/**
-	 * 根据路径删除远程文件
-	 * @param path
-	 * @return
-	 * @throws Exception
-	 */
-	protected abstract boolean deletePath(String path) throws Exception;
+//	/**
+//	 * 根据路径打开远程文件的输入流
+//	 * @param url
+//	 * @return
+//	 * @throws Exception
+//	 */
+//	protected abstract InputStream open(String url) throws Exception;
+//
+//	/**
+//	 * 根据路径删除远程文件
+//	 * @param url
+//	 * @return
+//	 * @throws Exception
+//	 */
+//	protected abstract boolean delete(String url) throws Exception;
 
 }

@@ -6,7 +6,7 @@ package com.fom.context.exception;
  * @date 2018年12月23日
  *
  */
-public class WarnException extends Exception {
+public class WarnException extends RuntimeException {
 	private static final long serialVersionUID = -7951679678790524526L;
 
 	public WarnException(String message) {
