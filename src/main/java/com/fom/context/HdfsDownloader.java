@@ -1,9 +1,8 @@
 package com.fom.context;
 
-import com.fom.context.config.HdfsDownloaderConfig;
 import com.fom.context.executor.Downloader;
 import com.fom.context.executor.Executor;
-import com.fom.context.helper.HdfsHelper;
+import com.fom.context.executor.helper.downloader.HdfsDownloaderHelper;
 
 /**
  * 
@@ -18,9 +17,9 @@ public class HdfsDownloader<E extends HdfsDownloaderConfig> extends Context<E> {
 	}
 
 	@Override
-	protected void exec(E config) throws Exception {
-		HdfsHelper helper = new HdfsHelper(config.getFs(), config.isDelSrc());
-		Executor executor = new Downloader(name, srcPath, config.getDestPath(), srcName, true, true, helper);
+	protected final void exec(E config) throws Exception {
+		HdfsDownloaderHelper helper = new HdfsDownloaderHelper(config.getFs(), config.isDelSrc());
+		Executor executor = new Downloader(name, config, helper);
 		executor.exec();
 	}
 	

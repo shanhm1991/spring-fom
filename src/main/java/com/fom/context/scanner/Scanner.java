@@ -43,7 +43,7 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 	protected Scanner(String name, E config){
 		this.name = name;
 		this.log = LoggerFactory.getLogger(config.getType() + "." + name);
-		this.setName("scanner[" + config.getSrcPath() + "]");
+		this.setName("scanner[" + config.getUri() + "]");
 		pool.allowCoreThreadTimeOut(true);
 	}
 
@@ -58,7 +58,7 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 				pool.shutdownNow();
 				return;
 			}
-			Thread.currentThread().setName("scanner[" + config.getSrcPath() + "]");
+			Thread.currentThread().setName("scanner[" + config.getUri() + "]");
 			if(pool.getCorePoolSize() != config.getExecutorMin()){
 				pool.setCorePoolSize(config.getExecutorMin());
 			}
@@ -74,7 +74,7 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 			List<String> fileNameList = filter(config);
 			if(fileNameList != null){
 				for (String fileName : fileNameList){
-					String path = config.getSrcPath() + File.separator + fileName;
+					String path = config.getUri() + File.separator + fileName;
 					if(isExecutorAlive(fileName)){
 						continue;
 					}
@@ -95,7 +95,7 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 			}
 			synchronized (this) {
 				try {
-					wait(config.getCronTime());
+					wait(config.nextScanTime());
 				} catch (InterruptedException e) {
 					log.info("wait interrupted."); 
 				}
@@ -121,7 +121,7 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 			}else{
 				long existTime = cleanTime - future.getCreateTime();
 				if(existTime > config.getExecutorOverTime()) {
-					if(config.getExecutorCancelOnOverTime()){
+					if(config.getInterruptOnOverTime()){
 						future.cancel(true);
 						log.warn(config.getTypeName() + "任务超时中断[" + entry.getKey() + "]," + existTime + "s"); 
 					}else{

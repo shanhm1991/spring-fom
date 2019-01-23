@@ -16,7 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.fom.context.exception.WarnException;
-import com.fom.context.helper.Helper;
+import com.fom.context.executor.helper.downloader.DownloaderHelper;
 import com.fom.log.LoggerFactory;
 import com.fom.util.IoUtil;
 import com.fom.util.ZipUtil;
@@ -31,7 +31,11 @@ public class ZipDownloader implements Executor {
 
 	protected final Logger log;
 	
-	protected final Helper helper;
+	protected final String name;
+	
+	protected final List<String> urlList;
+	
+	protected final DownloaderHelper helper;
 
 	/**
 	 * zip文件基础名称(不带后缀)
@@ -57,8 +61,6 @@ public class ZipDownloader implements Executor {
 
 	protected final boolean isDelSrc;
 
-	protected final List<String> urlList;
-	
 	//已编入的序列的zip文件的最大序号
 	protected int index;
 
@@ -74,41 +76,24 @@ public class ZipDownloader implements Executor {
 	 * 
 	 * @param name
 	 * @param urlList
-	 * @param zipName
-	 * @param destPath
+	 * @param config
+	 * @param helper
 	 */
-	public ZipDownloader(String name, List<String> urlList, String zipName, String destPath, Helper helper){
-		this(name, urlList, zipName, destPath, 100, 100 * 1024 * 1024, true, true, helper);
-	}
-
-	/**
-	 * 
-	 * @param name
-	 * @param urlList
-	 * @param zipName
-	 * @param destPath
-	 * @param entryMax
-	 * @param sizeMax
-	 * @param withTemp
-	 * @param isDelSrc
-	 */
-	public ZipDownloader(String name, List<String> urlList, String zipName, String destPath, 
-			int entryMax, long sizeMax, boolean withTemp, boolean isDelSrc, Helper helper) {
-		if(entryMax <= 0 || sizeMax <= 0 || urlList == null
-				|| StringUtils.isBlank(name)
-				|| StringUtils.isBlank(zipName)
-				|| StringUtils.isBlank(destPath)){
+	public ZipDownloader(String name, List<String> urlList, IZipDownloaderConfig config, DownloaderHelper helper) {
+		if(StringUtils.isBlank(name) || config == null || helper == null || urlList == null) {
 			throw new IllegalArgumentException();
 		}
-		this.log = LoggerFactory.getLogger(name);
-		this.zipName = zipName;
-		this.entryMax = entryMax;
-		this.sizeMax = sizeMax;
-		this.urlList = urlList;
-		this.destPath = destPath;
-		this.isDelSrc = isDelSrc;
 		this.helper = helper;
-		if(withTemp){
+		this.urlList = urlList;
+		this.name = name;
+		this.log = LoggerFactory.getLogger(name);
+		
+		this.zipName = config.getFileName();
+		this.entryMax = config.getEntryMax();
+		this.sizeMax = config.getSizeMax();
+		this.destPath = config.getDestPath();
+		this.isDelSrc = config.isDelSrc();
+		if(config.isWithTemp()){
 			this.tempPath = System.getProperty("download.temp") + File.separator + name + File.separator + zipName;
 		}else{
 			this.tempPath = destPath + File.separator + zipName;

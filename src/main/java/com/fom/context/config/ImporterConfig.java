@@ -71,7 +71,7 @@ public class ImporterConfig extends Config {
 
 	@Override
 	public final String getTypeName() {
-		return NAME_IMPORTER;
+		return TYPENAME_IMPORTER;
 	}
 
 	public final int getBatch() {

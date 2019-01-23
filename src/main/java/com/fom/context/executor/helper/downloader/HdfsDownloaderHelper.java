@@ -1,4 +1,4 @@
-package com.fom.context.helper;
+package com.fom.context.executor.helper.downloader;
 
 import java.io.File;
 import java.io.InputStream;
@@ -13,13 +13,13 @@ import com.fom.util.HdfsUtil;
  * @date 2019年1月22日
  *
  */
-public class HdfsHelper implements Helper {
+public class HdfsDownloaderHelper implements DownloaderHelper {
 	
 	private final FileSystem fs;
 	
 	private final boolean isDelSrc;
 	
-	public HdfsHelper(FileSystem fs, boolean isDelSrc){
+	public HdfsDownloaderHelper(FileSystem fs, boolean isDelSrc){
 		this.fs = fs;
 		this.isDelSrc = isDelSrc;
 	}

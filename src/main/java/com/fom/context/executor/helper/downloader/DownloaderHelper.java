@@ -1,4 +1,4 @@
-package com.fom.context.helper;
+package com.fom.context.executor.helper.downloader;
 
 import java.io.File;
 import java.io.InputStream;
@@ -9,7 +9,7 @@ import java.io.InputStream;
  * @date 2019年1月22日
  *
  */
-public interface Helper {  
+public interface DownloaderHelper {  
 	
 	/**
 	 * 根据url打开文件输入流

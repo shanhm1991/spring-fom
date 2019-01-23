@@ -12,6 +12,6 @@ public interface IHdfsConfig extends IConfig {
 
 	FileSystem getFs();
 
-	String getSignalFile();
+	String getSignalFileName();
 
 }

@@ -6,7 +6,7 @@ import java.text.DecimalFormat;
 import org.apache.log4j.Logger;
 
 import com.fom.context.exception.WarnException;
-import com.fom.context.helper.Helper;
+import com.fom.context.executor.helper.downloader.DownloaderHelper;
 import com.fom.log.LoggerFactory;
 
 /**
@@ -19,11 +19,11 @@ public class Downloader implements Executor {
 	
 	protected final Logger log;
 	
-	protected final Helper helper;
-	
 	protected final String name;
 	
-	protected final String url;
+	protected final DownloaderHelper helper;
+	
+	protected final String uri;
 	
 	protected final String fileName;
 	
@@ -40,28 +40,28 @@ public class Downloader implements Executor {
 	/**
 	 * 
 	 * @param name
-	 * @param url
-	 * @param destPath
-	 * @param fileName
-	 * @param withTemp
-	 * @param isDelSrc
+	 * @param config
 	 * @param helper
 	 */
-	public Downloader(String name, String url, String destPath, String fileName, 
-			boolean withTemp, boolean isDelSrc, Helper helper) {
-		this.name = name;
-		this.url = url;
-		this.destPath = destPath;
-		this.fileName = fileName;
+	public Downloader(String name, IDownloaderConfig config, DownloaderHelper helper) {
 		this.helper = helper;
-		this.withTemp = withTemp;
+		this.name = name;
+		this.log = LoggerFactory.getLogger(name);
+		
+		this.uri = config.getUri();
+		this.fileName = config.getFileName();
+		this.destPath = config.getDestPath();
+		this.isDelSrc = config.isDelSrc();
+		this.withTemp = config.isWithTemp();
 		if(withTemp){
 			this.tempPath = System.getProperty("download.temp") + File.separator + name;
 		}else{
 			this.tempPath = destPath;
 		}
-		this.isDelSrc = isDelSrc;
-		this.log = LoggerFactory.getLogger(name);
+		File path = new File(tempPath);
+		if(!path.exists() && !path.mkdirs()){
+			throw new IllegalArgumentException("无法创建临时目录:" + tempPath); 
+		}
 	}
 
 	public final void exec() throws Exception {
@@ -72,7 +72,7 @@ public class Downloader implements Executor {
 		}
 		File file = new File(path + File.separator + fileName);
 		
-		helper.download(url, file);
+		helper.download(uri, file);
 		long size = file.length();
 		log.info("下载文件结束(" + numFormat.format(size) + "KB), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 		move();

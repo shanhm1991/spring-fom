@@ -24,7 +24,7 @@ public class UploaderConfig extends Config {
 
 	@Override
 	public final String getTypeName() {
-		return NAME_UPLOADER;
+		return TYPENAME_UPLOADER;
 	}
 
 }

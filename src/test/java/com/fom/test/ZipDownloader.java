@@ -13,9 +13,9 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.lang.ArrayUtils;
 
-import com.fom.context.config.ZipDownloaderConfig;
 import com.fom.context.exception.WarnException;
 import com.fom.context.executor.Downloader;
+import com.fom.context.executor.IZipDownloaderConfig;
 import com.fom.util.IoUtil;
 import com.fom.util.ZipUtil;
 
@@ -26,7 +26,7 @@ import com.fom.util.ZipUtil;
  *
  * @param <E>
  */
-public abstract class ZipDownloader<E extends ZipDownloaderConfig> extends Downloader<E>{
+public abstract class ZipDownloader<E extends IZipDownloaderConfig> extends Downloader<E>{
 
 	//已编入的序列的zip文件的最大序号
 	protected int index;

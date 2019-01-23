@@ -27,7 +27,7 @@ public class HdfsScanner<E extends IHdfsConfig> extends Scanner<E>{
 	@Override
 	public List<String> scan(E config) {
 		try{
-			return HdfsUtil.listName(config.getFs(), config.getSrcPath());
+			return HdfsUtil.listName(config.getFs(), config.getUri());
 		} catch (Exception e) {
 			log.error("扫描异常",e);
 		}
@@ -39,7 +39,7 @@ public class HdfsScanner<E extends IHdfsConfig> extends Scanner<E>{
 		List<String> pathList = new LinkedList<String>();
 		FileStatus[] statusArray = null;
 		try {
-			statusArray = config.getFs().listStatus(new Path(config.getSrcPath()));
+			statusArray = config.getFs().listStatus(new Path(config.getUri()));
 		} catch (Exception e) {
 			log.error("扫描异常",e);
 			return pathList;
@@ -73,13 +73,13 @@ public class HdfsScanner<E extends IHdfsConfig> extends Scanner<E>{
 				continue;
 			}
 			
-			if(StringUtils.isBlank(config.getSignalFile())){
+			if(StringUtils.isBlank(config.getSignalFileName())){
 				pathList.add(status.getPath().getName());
 				continue;
 			}
 			
 			for (FileStatus sub : subStatus){
-				if(config.getSignalFile().equals(sub.getPath().getName())){
+				if(config.getSignalFileName().equals(sub.getPath().getName())){
 					pathList.add(status.getPath().getName());
 					break;
 				}

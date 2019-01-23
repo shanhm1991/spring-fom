@@ -21,7 +21,7 @@ public class HdfsUploaderConfig extends UploaderConfig implements IHdfsConfig {
 	}
 
 	@Override
-	public String getSignalFile() {
+	public String getSignalFileName() {
 		// TODO Auto-generated method stub
 		return null;
 	}

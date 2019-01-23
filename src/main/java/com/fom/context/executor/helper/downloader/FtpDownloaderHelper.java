@@ -1,4 +1,4 @@
-package com.fom.context.helper;
+package com.fom.context.executor.helper.downloader;
 
 import java.io.File;
 import java.io.InputStream;
@@ -9,7 +9,7 @@ import java.io.InputStream;
  * @date 2019年1月22日
  *
  */
-public class FtpHelper implements Helper {
+public class FtpDownloaderHelper implements DownloaderHelper {
 
 	@Override
 	public InputStream open(String url) throws Exception {

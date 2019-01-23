@@ -27,7 +27,7 @@ public class LocalScanner<E extends IConfig> extends Scanner<E> {
 	public List<String> scan(E config) {
 		List<String> list = new LinkedList<>();
 
-		String[] names = new File(config.getSrcPath()).list();
+		String[] names = new File(config.getUri()).list();
 		if(ArrayUtils.isEmpty(names)){
 			return list;
 		}
@@ -51,7 +51,7 @@ public class LocalScanner<E extends IConfig> extends Scanner<E> {
 			
 			it.remove();
 			if(config.isDelMatchFailFile() 
-					&& !new File(config.getSrcPath() + File.separator + name).delete()){
+					&& !new File(config.getUri() + File.separator + name).delete()){
 				log.warn("删除文件失败[不匹配]:" + name);
 			}
 		}

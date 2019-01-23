@@ -190,7 +190,7 @@ public abstract class Config implements IConfig {
 	}
 	
 	@Override
-	public final String getSrcPath() {
+	public final String getUri() {
 		return srcPath;
 	}
 
@@ -215,7 +215,7 @@ public abstract class Config implements IConfig {
 	}
 
 	@Override
-	public final boolean getExecutorCancelOnOverTime() {
+	public final boolean getInterruptOnOverTime() {
 		return executorCancelOnOverTime;
 	}
 
@@ -224,7 +224,7 @@ public abstract class Config implements IConfig {
 		return executorClzz;
 	}
 
-	public final long getCronTime(){
+	public final long nextScanTime(){
 		Date nextDate = cronExpression.getTimeAfter(new Date());
 		return nextDate.getTime() - System.currentTimeMillis();
 	}
