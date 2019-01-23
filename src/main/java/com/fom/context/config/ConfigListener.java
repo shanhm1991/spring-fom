@@ -117,7 +117,7 @@ public class ConfigListener implements ServletContextListener {
 		String fomPath = fomXml.getParent();
 		while(it.hasNext()){
 			Element element = (Element)it.next();
-			String location = ContextUtil.parseEnvStr(element.getTextTrim());
+			String location = ContextUtil.getEnvStr(element.getTextTrim());
 			try{
 				File xml = new File(fomPath + File.separator + location);
 				//尝试读取相对路径，如果不存在再从springContext获取

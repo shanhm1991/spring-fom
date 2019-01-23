@@ -51,7 +51,7 @@ public class HdfsZipDownloaderConfig extends Config implements IHdfsConfig, IZip
 
 		isDelSrc = XmlUtil.getBoolean(e, "downloader.isSrcDel", false);
 		isWithTemp = XmlUtil.getBoolean(e, "downloader.isWithTemp", true);
-		destPath = ContextUtil.parseEnvStr(XmlUtil.getString(e, "downloader.desPath", ""));
+		destPath = ContextUtil.getEnvStr(XmlUtil.getString(e, "downloader.desPath", ""));
 		
 		entryMax = XmlUtil.getInt(e, "downloader.zip.entryMax", Integer.MAX_VALUE, 1, Integer.MAX_VALUE);
 		String strSize = XmlUtil.getString(e, "downloader.zip.sizeMax", "1GB");

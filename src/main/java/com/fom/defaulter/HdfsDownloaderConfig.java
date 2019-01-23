@@ -48,7 +48,7 @@ public class HdfsDownloaderConfig extends Config implements IHdfsConfig, IDownlo
 		
 		isDelSrc = XmlUtil.getBoolean(e, "downloader.isSrcDel", false);
 		isWithTemp = XmlUtil.getBoolean(e, "downloader.isWithTemp", true);
-		destPath = ContextUtil.parseEnvStr(XmlUtil.getString(e, "downloader.desPath", ""));
+		destPath = ContextUtil.getEnvStr(XmlUtil.getString(e, "downloader.desPath", ""));
 	}
 	
 	@Override

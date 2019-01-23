@@ -80,7 +80,7 @@ public abstract class Config implements IConfig {
 	boolean executorCancelOnOverTime;
 
 	void load() throws Exception {
-		srcPath = ContextUtil.parseEnvStr(XmlUtil.getString(element, "src.path", ""));
+		srcPath = ContextUtil.getEnvStr(XmlUtil.getString(element, "src.path", ""));
 		reg = XmlUtil.getString(element, "src.pattern", "");
 		delMatchFailFile = XmlUtil.getBoolean(element, "src.match.fail.del", false);
 		scannerClzz = XmlUtil.getString(element, "scanner", "");

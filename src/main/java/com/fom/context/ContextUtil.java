@@ -26,7 +26,7 @@ public class ContextUtil {
 	 * @throws Exception
 	 */
 	public static final String getRealPath(String path) {
-		return scontext.getRealPath(parseEnvStr(path));
+		return scontext.getRealPath(getEnvStr(path));
 	}
 
 
@@ -36,7 +36,7 @@ public class ContextUtil {
 	 * @return
 	 * @throws IllegalArgumentException
 	 */
-	public static final String parseEnvStr(String val) throws IllegalArgumentException {
+	public static final String getEnvStr(String val) throws IllegalArgumentException {
 		String DELIM_START = "${";
 		char   DELIM_STOP  = '}';
 		int DELIM_START_LEN = 2;
@@ -64,7 +64,7 @@ public class ContextUtil {
 					String key = val.substring(j, k);
 					String replacement = System.getProperty(key);
 					if(replacement != null) {
-						String recursiveReplacement = parseEnvStr(replacement);
+						String recursiveReplacement = getEnvStr(replacement);
 						buffer.append(recursiveReplacement);
 					}
 					i = k + DELIM_STOP_LEN;

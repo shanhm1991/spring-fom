@@ -48,18 +48,10 @@ public abstract class Context<E extends Config> extends Thread {
 		this.srcName = srcFile.getName();
 	}
 
-	/**
-	 * 获取最新的config
-	 * @return
-	 */
 	@SuppressWarnings("unchecked")
-	protected final E getRuntimeConfig(){
-		return (E)ConfigManager.get(name);
-	}
-
 	@Override
 	public final void run(){
-		E config = getRuntimeConfig();
+		E config = (E)ConfigManager.get(name);
 		if(config == null || !config.isRunning()){
 			log.info("任务已取消."); 
 			return;
@@ -93,6 +85,11 @@ public abstract class Context<E extends Config> extends Thread {
 				+ "you could override the method:[void onStart(E config) throws Exception]");
 	}
 
+	/**
+	 * 文件处理
+	 * @param config
+	 * @throws Exception
+	 */
 	protected void exec(E config) throws Exception {
 		log.warn("nothing to do,if you want to do something with the file,"
 				+ "you should override the method:[void exec(E config) throws Exception]");
@@ -106,7 +103,10 @@ public abstract class Context<E extends Config> extends Thread {
 				+ "you could override the method:[void onComplete(E config) throws Exception]");
 	}
 
-	void onFinally() {
+	/**
+	 * 最终结束时执行的动作
+	 */
+	protected void onFinally() {
 		
 	}
 
