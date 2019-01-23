@@ -5,7 +5,7 @@ import java.io.File;
 import org.dom4j.Element;
 
 import com.fom.context.ContextUtil;
-import com.fom.context.config.ImporterConfig;
+import com.fom.context.executor.IImporterConfig;
 import com.fom.util.XmlUtil;
 
 /**
@@ -14,7 +14,7 @@ import com.fom.util.XmlUtil;
  * @date 2019年1月15日
  *
  */
-public class LocalEsImporterConfig extends ImporterConfig {
+public class LocalEsImporterConfig extends IImporterConfig {
 	
 	private String esIndex;
 	

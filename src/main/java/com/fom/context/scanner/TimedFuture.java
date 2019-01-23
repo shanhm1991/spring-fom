@@ -15,7 +15,7 @@ public class TimedFuture<T> extends FutureTask<T> {
 
 	public TimedFuture(Runnable runnable, T result) {
 		super(runnable, result);
-		createTime = System.currentTimeMillis() / 1000;
+		createTime = System.currentTimeMillis();
 	}
 
 	public long getCreateTime() {

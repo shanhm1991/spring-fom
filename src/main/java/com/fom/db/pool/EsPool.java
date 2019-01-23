@@ -10,7 +10,6 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
-import com.fom.context.exception.WarnException;
 import com.fom.util.XmlUtil;
 
 /**
@@ -102,10 +101,10 @@ class EsPool extends Pool<TransportClient>{
 		return null;
 	}
 	
-	public static TransportClient getClient(String poolName) throws WarnException{
+	public static TransportClient getClient(String poolName) {
 		EsPool pool = (EsPool)PoolManager.get(poolName);
 		if(pool == null){
-			throw new WarnException(poolName + "连接池不存在"); 
+			throw new RuntimeException(poolName + "连接池不存在"); 
 		}
 		return pool.clientNode.v;
 	}

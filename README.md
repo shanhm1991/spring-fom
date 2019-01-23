@@ -12,7 +12,7 @@
 * 支持入库方式：mybatis、内置pool；
 * 支持文件来源：本地、HDFS服务、HTTP服务、FTP服务；
 * 支持文件类型：文本、zip包；
-* 支持文件文本格式：txt/orc、xml[TODO]；
+* 支持文件文本格式：txt/orc、Excel[TODO]；
 2. 下载
 * 支持下载方式：文件下载、文件打包下载；
 * 支持下载服务：HDFS服务、HTTP服务、FTP服务；

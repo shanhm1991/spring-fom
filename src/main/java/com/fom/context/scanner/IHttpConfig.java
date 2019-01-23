@@ -1,4 +1,6 @@
-package com.fom.context.config;
+package com.fom.context.scanner;
+
+import com.fom.context.config.IConfig;
 
 /**
  * 

@@ -19,7 +19,6 @@ import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
-import com.fom.context.exception.WarnException;
 import com.fom.log.LoggerFactory;
 import com.fom.util.IoUtil;
 
@@ -287,10 +286,10 @@ public class JdbcHelper {
 
 	
 
-	private JdbcPool getPool(String poolName) throws WarnException{ 
+	private JdbcPool getPool(String poolName) { 
 		JdbcPool pool = (JdbcPool)PoolManager.get(poolName);
 		if(pool == null){
-			throw new WarnException(poolName + "连接池不存在");
+			throw new RuntimeException(poolName + "连接池不存在");
 		}
 		return pool;
 	}

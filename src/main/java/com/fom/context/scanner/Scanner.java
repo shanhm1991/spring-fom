@@ -108,7 +108,6 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 	public abstract List<String> filter(E config);
 
 	private void cleanFuture(E config){
-		long cleanTime = System.currentTimeMillis() / 1000;
 		Iterator<Map.Entry<String, TimedFuture<Void>>> it = futureMap.entrySet().iterator();
 		while(it.hasNext()){
 			Entry<String, TimedFuture<Void>> entry = it.next();
@@ -119,7 +118,7 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 			if(future.isDone()){
 				it.remove();
 			}else{
-				long existTime = cleanTime - future.getCreateTime();
+				long existTime = (System.currentTimeMillis() - future.getCreateTime()) / 1000;
 				if(existTime > config.getExecutorOverTime()) {
 					if(config.getInterruptOnOverTime()){
 						future.cancel(true);

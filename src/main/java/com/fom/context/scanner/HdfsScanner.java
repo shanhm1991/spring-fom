@@ -8,7 +8,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 
-import com.fom.context.config.IHdfsConfig;
 import com.fom.util.HdfsUtil;
 
 /**

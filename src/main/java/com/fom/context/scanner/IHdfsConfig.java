@@ -1,6 +1,8 @@
-package com.fom.context.config;
+package com.fom.context.scanner;
 
 import org.apache.hadoop.fs.FileSystem;
+
+import com.fom.context.config.IConfig;
 
 /**
  * 

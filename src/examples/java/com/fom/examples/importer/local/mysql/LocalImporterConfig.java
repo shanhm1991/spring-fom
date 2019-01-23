@@ -2,7 +2,7 @@ package com.fom.examples.importer.local.mysql;
 
 import org.dom4j.Element;
 
-import com.fom.context.config.ImporterConfig;
+import com.fom.context.executor.IImporterConfig;
 import com.fom.util.XmlUtil;
 
 /**
@@ -12,7 +12,7 @@ import com.fom.util.XmlUtil;
  * @date 2018年12月23日
  *
  */
-public class LocalImporterConfig extends ImporterConfig {
+public class LocalImporterConfig extends IImporterConfig {
 	
 	private String myconf;
 	

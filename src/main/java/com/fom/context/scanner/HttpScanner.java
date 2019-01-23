@@ -2,8 +2,6 @@ package com.fom.context.scanner;
 
 import java.util.List;
 
-import com.fom.context.config.IHttpConfig;
-
 /**
  * 
  * @author shanhm
