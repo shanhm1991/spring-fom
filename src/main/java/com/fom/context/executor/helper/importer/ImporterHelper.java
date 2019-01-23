@@ -2,6 +2,8 @@ package com.fom.context.executor.helper.importer;
 
 import java.util.List;
 
+import com.fom.context.executor.reader.Reader;
+
 
 /**
  * 
@@ -10,6 +12,14 @@ import java.util.List;
  *
  */
 public interface ImporterHelper<V> {
+	
+	/**
+	 * 获取对应文件的reader
+	 * @param uri
+	 * @return
+	 * @throws Exception
+	 */
+	Reader getReader(String uri) throws Exception;
 
 	/**
 	 * 解析行数据
@@ -27,6 +37,8 @@ public interface ImporterHelper<V> {
 	 * @throws Exception
 	 */
 	void batchProcessLineData(List<V> lineDatas, long batchTime) throws Exception;
+	
+	
 	
 	/**
 	 * 根据uri删除文件

@@ -1,14 +1,11 @@
 package com.fom.context;
 
 import java.io.File;
-import java.text.DecimalFormat;
 
-import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 
 import com.fom.context.config.Config;
 import com.fom.context.config.ConfigManager;
-import com.fom.context.config.IHdfsConfig;
 import com.fom.context.exception.WarnException;
 import com.fom.log.LoggerFactory;
 
@@ -21,49 +18,34 @@ import com.fom.log.LoggerFactory;
  */
 public abstract class Context<E extends Config> extends Thread {
 
-	E config;
-
-	DecimalFormat numFormat  = new DecimalFormat("#.##");
-
 	protected final Logger log;
 
+	/**
+	 * 模块名称
+	 */
 	protected final String name;
+	
+	/**
+	 * 目标资源文件的uri
+	 */
+	protected final String uri;
+	
+	/**
+	 * new File(uri)
+	 */
+	protected File srcFile;
+	
+	/**
+	 * new File(uri).getName()
+	 */
+	protected String srcName;
 
-	protected final String srcPath;
-
-	protected final File srcFile;
-
-	protected double srcSize;
-
-	protected final String srcName;
-
-	protected Context(String name, String path) { 
+	protected Context(String name, String uri) { 
 		this.name = name;
-		this.srcPath = path;
-		this.srcFile = new File(path);
+		this.log = LoggerFactory.getLogger(name);
+		this.uri = uri;
+		this.srcFile = new File(uri);
 		this.srcName = srcFile.getName();
-
-		config = getRuntimeConfig();
-		if(config == null){
-			throw new RuntimeException("任务取消.");
-		}
-		this.calculatSize();
-		this.setName(config.getType() + "[" + srcName + "]");
-		this.log = LoggerFactory.getLogger(config.getType() + "." + name);
-	}
-
-	private void calculatSize() {
-		if(config instanceof IHdfsConfig){
-			IHdfsConfig hconf = (IHdfsConfig)config;
-			try {
-				long len = hconf.getFs().getFileStatus(new Path(srcPath)).getLen();
-				srcSize = len / 1024.0; 
-				return;
-			} catch (Exception e) {
-
-			}
-		}
-		srcSize = srcFile.length() / 1024.0;
 	}
 
 	/**
@@ -77,12 +59,13 @@ public abstract class Context<E extends Config> extends Thread {
 
 	@Override
 	public final void run(){
-		config = getRuntimeConfig();
+		E config = getRuntimeConfig();
 		if(config == null || !config.isRunning()){
-			log.info("任务取消."); 
+			log.info("任务已取消."); 
 			return;
 		}
-		Thread.currentThread().setName(config.getType() + "[" + srcName + "]");
+		
+		this.setName(config.getType() + "[" + srcName + "]");
 		long sTime = System.currentTimeMillis();
 		try {
 			onStart(config);
@@ -94,7 +77,6 @@ public abstract class Context<E extends Config> extends Thread {
 		} catch(WarnException e){
 			log.warn(config.getTypeName() + "任务错误结束[" + e.getMessage() + "], 耗时=" + (System.currentTimeMillis() - sTime + "ms"));
 		} catch (InterruptedException e) {
-			//检测点:impoter每次batchProcessLineData之前
 			log.warn(config.getTypeName() + "任务中断[" + e.getMessage() + "], 耗时=" + (System.currentTimeMillis() - sTime + "ms"));
 		} catch(Throwable e) {
 			log.error(config.getTypeName() + "任务异常结束, 耗时=" + (System.currentTimeMillis() - sTime + "ms"), e);

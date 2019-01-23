@@ -1,6 +1,7 @@
 package com.fom.context.executor;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -15,6 +16,7 @@ import com.fom.context.exception.WarnException;
 import com.fom.context.executor.helper.importer.ZipImporterHelper;
 import com.fom.context.executor.reader.Reader;
 import com.fom.log.LoggerFactory;
+import com.fom.util.IoUtil;
 import com.fom.util.ZipUtil;
 
 /**
@@ -42,8 +44,6 @@ public class ZipImporter implements Executor {
 	@SuppressWarnings("rawtypes")
 	protected final ZipImporterHelper helper;
 
-	protected final Reader reader;
-	
 	protected final File unzipDir;
 
 	private boolean removeDirectly;
@@ -53,13 +53,12 @@ public class ZipImporter implements Executor {
 	protected final DecimalFormat numFormat  = new DecimalFormat("#.##");
 	
 	@SuppressWarnings("rawtypes")
-	public ZipImporter(String name, String uri, int batch, ZipImporterHelper helper, Reader reader) {
+	public ZipImporter(String name, String uri, int batch, ZipImporterHelper helper) {
 		this.name = name;
 		this.log = LoggerFactory.getLogger(name);
 		
 		this.batch = batch;
 		this.helper = helper;
-		this.reader = reader;
 		
 		this.uri = uri;
 		this.srcName = helper.getFileName(uri);
@@ -155,7 +154,7 @@ public class ZipImporter implements Executor {
 	private boolean matchContents(){
 		List<String> list = new LinkedList<>();
 		for(String name : nameList){
-			if(config.matchZipContent(name)){
+			if(helper.matchZipSubFile(name)){
 				list.add(name);
 			}
 		}
@@ -187,7 +186,7 @@ public class ZipImporter implements Executor {
 			log.warn("获取文件处理进度失败,将从第0行开始处理:" + name);
 		}
 
-		readFile(file, lineIndex);
+		read(file.getPath(), lineIndex); 
 		nameList.remove(name);
 		log.info("处理文件结束[" + name + "(" 
 				+ numFormat.format(size) + "KB)], 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
@@ -203,7 +202,7 @@ public class ZipImporter implements Executor {
 			long sTime = System.currentTimeMillis();
 			File file = new File(unzipDir + File.separator + name);
 			double size = file.length() / 1024.0;
-			readFile(file, 0);
+			read(file.getPath(), 0);
 			log.info("处理文件结束[" + name + "(" 
 					+ numFormat.format(size) + "KB)], 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 
@@ -212,6 +211,43 @@ public class ZipImporter implements Executor {
 				throw new WarnException("删除文件失败:" + file.getName()); 
 			}
 		}
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void read(String uri, int StartLine) throws Exception {
+		int lineIndex = 0;
+		String line = "";
+		Reader reader = null;
+		try{
+			reader = helper.getReader(uri);
+			List lineDatas = new LinkedList<>(); 
+			long batchTime = System.currentTimeMillis();
+			while ((line = reader.readLine()) != null) {
+				lineIndex++;
+				if(lineIndex <= StartLine){
+					continue;
+				}
+				if(batch > 0 && lineDatas.size() >= batch){
+					helper.batchProcessLineData(lineDatas, batchTime); 
+					logProcess(uri, lineIndex);
+					lineDatas.clear();
+					batchTime = System.currentTimeMillis();
+				}
+				helper.praseLineData(lineDatas, line, batchTime);
+			}
+			if(!lineDatas.isEmpty()){
+				helper.batchProcessLineData(lineDatas, batchTime); 
+			}
+			logProcess(uri, lineIndex);
+		}finally{
+			IoUtil.close(reader);
+		}
+	}
+
+	private void logProcess(String uri, int lineIndex) throws IOException{ 
+		String data = uri + "\n" + lineIndex;
+		log.info("已读取行数:" + lineIndex);
+		FileUtils.writeStringToFile(logFile, data, false);
 	}
 
 	void onFinally() {

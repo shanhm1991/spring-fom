@@ -9,6 +9,6 @@ package com.fom.context.executor.helper.importer;
  */
 public interface ZipImporterHelper<V> extends ImporterHelper<V> {
 
-	
+	boolean matchZipSubFile(String name);
 	
 }

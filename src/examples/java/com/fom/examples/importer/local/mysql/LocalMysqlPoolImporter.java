@@ -1,13 +1,6 @@
 package com.fom.examples.importer.local.mysql;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.fom.context.executor.Importer;
-import com.fom.db.handler.JdbcHandler;
+import com.fom.context.Context;
 
 /**
  * 解析文本文件将数据导入mysql，使用自带pool
@@ -16,7 +9,7 @@ import com.fom.db.handler.JdbcHandler;
  * @date 2018年12月23日
  *
  */
-public class LocalMysqlPoolImporter extends Importer<LocalImporterConfig, Map<String,Object>> {
+public class LocalMysqlPoolImporter extends Context<LocalImporterConfig> {
 	
 	private static final String POOL = "example_mysql";
 
@@ -27,35 +20,41 @@ public class LocalMysqlPoolImporter extends Importer<LocalImporterConfig, Map<St
 	protected LocalMysqlPoolImporter(String name, String path) {
 		super(name, path);
 	}
-
-	/**
-	 * 
-	 * 将行数据line解析成DemoBean，并添加到lineDatas中去
-	 * 异常则结束任务，保留文件，所以对错误数据导致的异常需要try-catch，一避免任务重复失败
-	 */
+	
+	
 	@Override
-	public void praseLineData(LocalImporterConfig config, List<Map<String,Object>> lineDatas, String line, long batchTime) throws Exception {
-		log.info("解析行数据:" + line);
-		if(StringUtils.isBlank(line)){
-			return;
-		}
-		String[] array = line.split("#"); 
-		Map<String,Object> map = new HashMap<>();
-		map.put("id", array[0]);
-		map.put("name", array[1]);
-		map.put("source", "local");
-		map.put("fileType", "txt/orc");
-		map.put("importWay", "pool");
-		lineDatas.add(map);
+	protected void exec(LocalImporterConfig config) throws Exception {
+		// TODO Auto-generated method stub
 	}
 
-	/**
-	 * 批处理行数据解析结果, 异常则结束任务，保留文件
-	 */
-	@Override
-	public void batchProcessLineData(LocalImporterConfig config, List<Map<String,Object>> lineDatas, long batchTime) throws Exception {
-		JdbcHandler.handler.batchExecute(POOL, SQL, lineDatas);
-		log.info("处理数据入库:" + lineDatas.size());
-	}
+//	/**
+//	 * 
+//	 * 将行数据line解析成DemoBean，并添加到lineDatas中去
+//	 * 异常则结束任务，保留文件，所以对错误数据导致的异常需要try-catch，一避免任务重复失败
+//	 */
+//	@Override
+//	public void praseLineData(LocalImporterConfig config, List<Map<String,Object>> lineDatas, String line, long batchTime) throws Exception {
+//		log.info("解析行数据:" + line);
+//		if(StringUtils.isBlank(line)){
+//			return;
+//		}
+//		String[] array = line.split("#"); 
+//		Map<String,Object> map = new HashMap<>();
+//		map.put("id", array[0]);
+//		map.put("name", array[1]);
+//		map.put("source", "local");
+//		map.put("fileType", "txt/orc");
+//		map.put("importWay", "pool");
+//		lineDatas.add(map);
+//	}
+//
+//	/**
+//	 * 批处理行数据解析结果, 异常则结束任务，保留文件
+//	 */
+//	@Override
+//	public void batchProcessLineData(LocalImporterConfig config, List<Map<String,Object>> lineDatas, long batchTime) throws Exception {
+//		JdbcHandler.handler.batchExecute(POOL, SQL, lineDatas);
+//		log.info("处理数据入库:" + lineDatas.size());
+//	}
 
 }

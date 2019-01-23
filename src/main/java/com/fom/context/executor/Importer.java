@@ -40,16 +40,13 @@ public class Importer implements Executor {
 	@SuppressWarnings("rawtypes")
 	protected final ImporterHelper helper;
 
-	protected final Reader reader;
-
 	@SuppressWarnings("rawtypes")
-	public Importer(String name, String uri, int batch, ImporterHelper helper, Reader reader){
+	public Importer(String name, String uri, int batch, ImporterHelper helper){
 		this.name = name;
 		this.log = LoggerFactory.getLogger(name);
 
 		this.batch = batch;
 		this.helper = helper;
-		this.reader = reader;
 
 		this.uri = uri;
 		this.srcName = helper.getFileName(uri);
@@ -70,14 +67,14 @@ public class Importer implements Executor {
 			log.warn("继续处理任务遗留文件."); 
 			List<String> lines = FileUtils.readLines(logFile);
 			try{
-				lineIndex = Integer.valueOf(lines.get(1));
+				lineIndex = Integer.valueOf(lines.get(0));
 				log.info("获取文件处理进度:" + lineIndex); 
 			}catch(Exception e){
 				log.warn("获取文件处理进度失败,将从第0行开始处理.");
 			}
 		}
 
-		readFile(lineIndex);
+		read(lineIndex);
 		log.info("处理文件结束(" 
 				+ new DecimalFormat("#.##").format(srcSize) + "KB),耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 		if(!helper.delete(uri)){ 
@@ -89,11 +86,12 @@ public class Importer implements Executor {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	void readFile(int StartLine) throws Exception {
+	private void read(int StartLine) throws Exception {
 		int lineIndex = 0;
 		String line = "";
+		Reader reader = null;
 		try{
-			reader.init(uri);
+			reader = helper.getReader(uri);
 			List lineDatas = new LinkedList<>(); 
 			long batchTime = System.currentTimeMillis();
 			while ((line = reader.readLine()) != null) {
@@ -103,7 +101,7 @@ public class Importer implements Executor {
 				}
 				if(batch > 0 && lineDatas.size() >= batch){
 					helper.batchProcessLineData(lineDatas, batchTime); 
-					updateLogFile(uri, lineIndex);
+					logProcess(uri, lineIndex);
 					lineDatas.clear();
 					batchTime = System.currentTimeMillis();
 				}
@@ -112,15 +110,14 @@ public class Importer implements Executor {
 			if(!lineDatas.isEmpty()){
 				helper.batchProcessLineData(lineDatas, batchTime); 
 			}
-			updateLogFile(uri, lineIndex);
+			logProcess(uri, lineIndex);
 		}finally{
 			IoUtil.close(reader);
 		}
 	}
 
-	void updateLogFile(String uri, int lineIndex) throws IOException{ 
-		String data = uri + "\n" + lineIndex;
+	private void logProcess(String uri, int lineIndex) throws IOException{ 
 		log.info("已读取行数:" + lineIndex);
-		FileUtils.writeStringToFile(logFile, data, false);
+		FileUtils.writeStringToFile(logFile, String.valueOf(lineIndex), false);
 	}
 }

@@ -1,10 +1,11 @@
-package com.fom.context;
+package com.fom.defaulter;
 
 import java.io.File;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.dom4j.Element;
 
+import com.fom.context.ContextUtil;
 import com.fom.context.config.Config;
 import com.fom.context.config.IHdfsConfig;
 import com.fom.context.executor.IDownloaderConfig;
