@@ -70,7 +70,7 @@ public class ZipDownloader implements Executor {
 	//tempZip中所有entry的名字集合
 	protected Set<String> entrySet;
 
-	DecimalFormat numFormat  = new DecimalFormat("#.##");
+	protected final DecimalFormat numFormat  = new DecimalFormat("#.##");
 
 	/**
 	 * 
@@ -83,12 +83,13 @@ public class ZipDownloader implements Executor {
 		if(StringUtils.isBlank(name) || config == null || helper == null || urlList == null) {
 			throw new IllegalArgumentException();
 		}
-		this.helper = helper;
-		this.urlList = urlList;
+		
 		this.name = name;
 		this.log = LoggerFactory.getLogger(name);
+		this.helper = helper;
+		this.urlList = urlList;
 		
-		this.zipName = config.getFileName();
+		this.zipName = config.getDestName();
 		this.entryMax = config.getEntryMax();
 		this.sizeMax = config.getSizeMax();
 		this.destPath = config.getDestPath();
@@ -156,7 +157,7 @@ public class ZipDownloader implements Executor {
 	 * @throws Exception
 	 */
 	private void renameTempZip(boolean isRetry, boolean isLast) throws Exception{ 
-		if(!ZipUtil.validZip(tempZip)){ 
+		if(!ZipUtil.valid(tempZip)){ 
 			if(tempZip.exists() && !tempZip.delete()){
 				throw new WarnException(tempZip.getName() + "已经损坏, 删除失败."); 
 			}

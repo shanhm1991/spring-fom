@@ -32,15 +32,26 @@ import net.lingala.zip4j.util.InternalZipConstants;
 public class ZipUtil {
 	
 	private static final Logger LOG = LoggerFactory.getLogger("root");
-
+	
 	/**
-	 * 
-	 * @param file
-	 * @param unzipDir
+	 * 解压指定uri的zip文件到指定目录
+	 * @param uri
+	 * @param destDir
 	 * @return
 	 * @throws Exception
 	 */
-	public static final long unZip(File file, File unzipDir) throws Exception{ 
+	public static final long unZip(String uri, File destDir) throws Exception {
+		return unZip(new File(uri), destDir);
+	}
+
+	/**
+	 * 解压zip文件到指定目录
+	 * @param file
+	 * @param destDir
+	 * @return
+	 * @throws Exception
+	 */
+	public static final long unZip(File file, File destDir) throws Exception{ 
 		long sTime = System.currentTimeMillis();
 		ZipFile zip = null;
 		try {
@@ -52,7 +63,7 @@ public class ZipUtil {
 				OutputStream outStream = null;
 				try{
 					inStream = zip.getInputStream(entry);
-					outStream = new FileOutputStream(new File(unzipDir + File.separator + entryName));
+					outStream = new FileOutputStream(new File(destDir + File.separator + entryName));
 					byte[] buff = new byte[1024];
 					int len = 0;
 					while((len = inStream.read(buff)) > 0){
@@ -70,7 +81,43 @@ public class ZipUtil {
 	}
 
 	/**
-	 * 
+	 * 校验指定uri的zip文件是否合法
+	 * @param uri
+	 * @return
+	 */
+	public static final boolean valid(String uri){
+		return valid(new File(uri));
+	}
+	
+	/**
+	 * 校验zip文件是否合法
+	 * @param zip
+	 * @return
+	 */
+	public static final boolean valid(File zip){
+		if(zip == null || !zip.exists() || !zip.canRead()){
+			return false;
+		}
+		
+		RandomAccessFile raf = null;
+		try{
+			raf = new RandomAccessFile(zip, InternalZipConstants.READ_MODE);
+			HeaderReader headerReader = new HeaderReader(raf);
+			ZipModel zipModel = headerReader.readAllHeaders("UTF-8");
+			if (zipModel != null) {
+				zipModel.setZipFile(zip.getPath());
+			}
+			return true;
+		}catch(Exception e){
+			LOG.error("invalid zip[" + zip.getName() + "]", e); 
+		}finally{
+			IoUtil.close(raf); 
+		}
+		return false;
+	}
+	
+	/**
+	 * 将给定的InputStream写入给定的zipOutStream，并返回写入前InputStream的字节数
 	 * @param entryName
 	 * @param in
 	 * @param zipOutStream
@@ -95,33 +142,6 @@ public class ZipUtil {
 			IoUtil.close(buffer);
 		}
 	}
-
-	/**
-	 * 
-	 * @param zip
-	 * @return
-	 */
-	public static final boolean validZip(File zip){
-		if(zip == null || !zip.exists() || !zip.canRead()){
-			return false;
-		}
-		
-		RandomAccessFile raf = null;
-		try{
-			raf = new RandomAccessFile(zip, InternalZipConstants.READ_MODE);
-			HeaderReader headerReader = new HeaderReader(raf);
-			ZipModel zipModel = headerReader.readAllHeaders("UTF-8");
-			if (zipModel != null) {
-				zipModel.setZipFile(zip.getPath());
-			}
-			return true;
-		}catch(Exception e){
-			LOG.error("invalid zip[" + zip.getName() + "]", e); 
-		}finally{
-			IoUtil.close(raf); 
-		}
-		return false;
-	}
 	
 	/**
 	 * 
@@ -132,7 +152,7 @@ public class ZipUtil {
 	@SuppressWarnings("unchecked")
 	public static final Set<String> getEntrySet(File file) throws Exception{
 		Set<String> set = new HashSet<>();
-		if(!validZip(file)){
+		if(!valid(file)){
 			return set;
 		}
 		

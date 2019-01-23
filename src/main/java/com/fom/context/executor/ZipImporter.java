@@ -1,6 +1,7 @@
 package com.fom.context.executor;
 
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -8,9 +9,12 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.log4j.Logger;
 
-import com.fom.context.config.ZipImporterConfig;
 import com.fom.context.exception.WarnException;
+import com.fom.context.executor.helper.importer.ZipImporterHelper;
+import com.fom.context.executor.reader.Reader;
+import com.fom.log.LoggerFactory;
 import com.fom.util.ZipUtil;
 
 /**
@@ -18,23 +22,54 @@ import com.fom.util.ZipUtil;
  * @author shanhm
  * @date 2018年12月23日
  *
- * @param <E>
- * @param <V>
  */
-public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importer<E,V> {
+public class ZipImporter implements Executor {
+	
+	protected final Logger log;
 
+	protected final String name;
+
+	protected final File logFile;
+	
+	protected final String uri;
+	
+	protected final String srcName;
+
+	protected final long srcSize;
+	
+	protected final int batch;
+	
+	@SuppressWarnings("rawtypes")
+	protected final ZipImporterHelper helper;
+
+	protected final Reader reader;
+	
 	protected final File unzipDir;
 
 	private boolean removeDirectly;
 
 	private List<String> nameList;
-
-	protected ZipImporter(String name, String path) {
-		super(name, path);
+	
+	protected final DecimalFormat numFormat  = new DecimalFormat("#.##");
+	
+	@SuppressWarnings("rawtypes")
+	public ZipImporter(String name, String uri, int batch, ZipImporterHelper helper, Reader reader) {
+		this.name = name;
+		this.log = LoggerFactory.getLogger(name);
+		
+		this.batch = batch;
+		this.helper = helper;
+		this.reader = reader;
+		
+		this.uri = uri;
+		this.srcName = helper.getFileName(uri);
+		this.srcSize = helper.getFileSize(uri);
+		this.logFile = new File(System.getProperty("import.progress") 
+				+ File.separator + name + File.separator + srcName + ".log");
 		this.unzipDir = new File(System.getProperty("import.progress")
 				+ File.separator + name + File.separator + srcName);
 	}
-
+	
 	/**
 	 * 1.解压到缓存目录，并校验解压结果是否合法
 	 * 2.创建对应的处理日志文件
@@ -44,7 +79,8 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 	 * 6.删除日志文件
 	 * 上述任何步骤返回失败或出现异常则结束任务
 	 */
-	protected void exec(E config) throws Exception {
+	@Override
+	public void exec() throws Exception {
 		if(logFile.exists()){
 			log.warn("继续处理任务遗留文件."); 
 			//上次任务在第5步失败
@@ -61,7 +97,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 			}
 			nameList = Arrays.asList(nameArray);
 			//失败在第4步
-			if(!matchContents() || !validContents(config, nameList)){
+			if(!matchContents()){
 				removeDirectly = true;
 				return;
 			}
@@ -87,13 +123,13 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 				}
 			}
 
-			if(!ZipUtil.validZip(srcFile)){
-				log.error("zip文件校验失败."); 
+			if(!ZipUtil.valid(uri)){ 
+				log.error(srcName + "校验失败，直接清除."); 
 				removeDirectly = true;
 				return;
 			}
 
-			long cost = ZipUtil.unZip(srcFile, unzipDir);
+			long cost = ZipUtil.unZip(uri, unzipDir);
 			log.info("解压结束(" + numFormat.format(srcSize) + "KB), 耗时=" + cost + "ms");
 
 			String[] nameArray = unzipDir.list();
@@ -103,7 +139,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 			}
 
 			nameList = Arrays.asList(nameArray);
-			if(!matchContents() || !validContents(config, nameList)){
+			if(!matchContents()){
 				removeDirectly = true;
 				return;
 			}
@@ -114,12 +150,6 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 		}
 
 		processFiles();
-	}
-
-	protected boolean validContents(E config, List<String> nameList) {
-		log.info("valid default true,you can valid the zip contents by yourself with override the method:"
-				+ "[boolean validContents(E config, List<String> nameList)]");
-		return true;
 	}
 
 	private boolean matchContents(){
@@ -207,7 +237,7 @@ public abstract class ZipImporter<E extends ZipImporterConfig,V> extends Importe
 		}
 
 		//srcFile.exist = true
-		if(!srcFile.delete()){ 
+		if(!helper.delete(uri)){ 
 			log.warn("清除源文件失败."); 
 			return;
 		}

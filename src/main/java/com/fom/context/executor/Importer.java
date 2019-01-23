@@ -2,14 +2,17 @@ package com.fom.context.executor;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 
-import com.fom.context.Context;
-import com.fom.context.config.ImporterConfig;
 import com.fom.context.exception.WarnException;
+import com.fom.context.executor.helper.importer.ImporterHelper;
+import com.fom.context.executor.reader.Reader;
+import com.fom.log.LoggerFactory;
 import com.fom.util.IoUtil;
 
 /**
@@ -17,26 +20,46 @@ import com.fom.util.IoUtil;
  * @author shanhm
  * @date 2018年12月23日
  *
- * @param <E>
- * @param <V>
  */
-public abstract class Importer<E extends ImporterConfig,V> extends Context<E> { 
+public class Importer implements Executor {
 
-	final File logFile;
-	
-	private boolean praseLineData_warned;
-	
-	private boolean batchProcessLineData_warned;
+	protected final Logger log;
 
-	protected Importer(String name, String path) {
-		super(name, path);
-		String logPath = System.getProperty("import.progress")
-				+ File.separator + name + File.separator + srcName + ".log";
-		this.logFile = new File(logPath);
+	protected final String name;
+
+	protected final File logFile;
+
+	protected final String uri;
+
+	protected final String srcName;
+
+	protected final long srcSize;
+
+	protected final int batch;
+
+	@SuppressWarnings("rawtypes")
+	protected final ImporterHelper helper;
+
+	protected final Reader reader;
+
+	@SuppressWarnings("rawtypes")
+	public Importer(String name, String uri, int batch, ImporterHelper helper, Reader reader){
+		this.name = name;
+		this.log = LoggerFactory.getLogger(name);
+
+		this.batch = batch;
+		this.helper = helper;
+		this.reader = reader;
+
+		this.uri = uri;
+		this.srcName = helper.getFileName(uri);
+		this.srcSize = helper.getFileSize(uri);
+		this.logFile = new File(System.getProperty("import.progress") 
+				+ File.separator + name + File.separator + srcName + ".log");
 	}
 
 	@Override
-	protected void exec(E config) throws Exception {
+	public final void exec() throws Exception {
 		long sTime = System.currentTimeMillis();
 		int lineIndex = 0;
 		if(!logFile.exists()){
@@ -54,9 +77,10 @@ public abstract class Importer<E extends ImporterConfig,V> extends Context<E> {
 			}
 		}
 
-		readFile(srcFile, lineIndex);
-		log.info("处理文件结束(" + numFormat.format(srcSize) + "KB),耗时=" + (System.currentTimeMillis() - sTime) + "ms");
-		if(!srcFile.delete()){
+		readFile(lineIndex);
+		log.info("处理文件结束(" 
+				+ new DecimalFormat("#.##").format(srcSize) + "KB),耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+		if(!helper.delete(uri)){ 
 			throw new WarnException("删除文件失败."); 
 		}
 		if(!logFile.delete()){
@@ -64,81 +88,38 @@ public abstract class Importer<E extends ImporterConfig,V> extends Context<E> {
 		}
 	}
 
-	void readFile(File file, int StartLine) throws Exception {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	void readFile(int StartLine) throws Exception {
 		int lineIndex = 0;
-		MultiReader reader = null;
 		String line = "";
 		try{
-			reader = new MultiReader(file);
-			List<V> lineDatas = new LinkedList<>(); 
+			reader.init(uri);
+			List lineDatas = new LinkedList<>(); 
 			long batchTime = System.currentTimeMillis();
 			while ((line = reader.readLine()) != null) {
 				lineIndex++;
 				if(lineIndex <= StartLine){
 					continue;
 				}
-				if(config.getBatch() > 0 && lineDatas.size() >= config.getBatch()){
-					batchProcessIfNotInterrupted(lineDatas, lineIndex, batchTime); 
-					updateLogFile(file.getName(), lineIndex);
+				if(batch > 0 && lineDatas.size() >= batch){
+					helper.batchProcessLineData(lineDatas, batchTime); 
+					updateLogFile(uri, lineIndex);
 					lineDatas.clear();
 					batchTime = System.currentTimeMillis();
 				}
-				praseLineData(config, lineDatas, line, batchTime);
+				helper.praseLineData(lineDatas, line, batchTime);
 			}
 			if(!lineDatas.isEmpty()){
-				batchProcessIfNotInterrupted(lineDatas, lineIndex, batchTime); 
+				helper.batchProcessLineData(lineDatas, batchTime); 
 			}
-			updateLogFile(file.getName(), lineIndex);
+			updateLogFile(uri, lineIndex);
 		}finally{
 			IoUtil.close(reader);
 		}
 	}
 
-	//选择在每次批处理开始处检测中断，因为比较耗时的地方就两个(读取解析文件数据内容，数据入库)
-	void batchProcessIfNotInterrupted(List<V> lineDatas, int lineIndex, long batchTime) throws Exception {
-		if(interrupted()){
-			throw new InterruptedException("processLine");
-		}
-		batchProcessLineData(config, lineDatas, batchTime); 
-		log.info("批处理结束[" + lineDatas.size() + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
-	}
-	
-	/**
-	 * 解析行数据, 异常则结束任务，保留文件，所以务必对错误数据导致的异常进行try-catch
-	 * @param config
-	 * @param line
-	 * @param lineDatas
-	 * @param batchTime
-	 * @throws Exception
-	 */
-	public void praseLineData(E config, List<V> lineDatas, String line, long batchTime) throws Exception {
-		if(!praseLineData_warned){
-			praseLineData_warned = true;
-		}
-		log.warn("all line datas ignored,if you want to deal with it,you should override the method:"
-				+ "[void praseLineData(E config, List<V> lineDatas, String line, long batchTime) throws Exception],"
-				+ "in the method,you should prase the line string to a instance of V and add to the given list in the end.");
-	}
-
-	/**
-	 * 批处理行数据解析结果, 异常则结束任务，保留文件
-	 * @param lineDatas
-	 * @param config
-	 * @param batchTime
-	 * @throws Exception
-	 */
-	public void batchProcessLineData(E config, List<V> lineDatas, long batchTime) throws Exception {
-		if(!batchProcessLineData_warned){
-			batchProcessLineData_warned = true;
-		}
-		log.warn("no data will be imported,you should override the method:"
-				+ "[void batchProcessLineData(E config, List<V> lineDatas, long batchTime) throws Exception],"
-				+ "and import the data which in the given list to the db.");
-		
-	}
-
-	void updateLogFile(String fileName, int lineIndex) throws IOException{ 
-		String data = fileName + "\n" + lineIndex;
+	void updateLogFile(String uri, int lineIndex) throws IOException{ 
+		String data = uri + "\n" + lineIndex;
 		log.info("已读取行数:" + lineIndex);
 		FileUtils.writeStringToFile(logFile, data, false);
 	}

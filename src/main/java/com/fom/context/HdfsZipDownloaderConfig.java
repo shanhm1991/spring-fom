@@ -83,7 +83,7 @@ public class HdfsZipDownloaderConfig extends Config implements IHdfsConfig, IZip
 	}
 
 	@Override
-	public String getFileName() {
+	public String getDestName() {
 		return new File(getUri()).getName();
 	}
 

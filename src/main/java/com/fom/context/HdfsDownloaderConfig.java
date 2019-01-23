@@ -76,7 +76,7 @@ public class HdfsDownloaderConfig extends Config implements IHdfsConfig, IDownlo
 	}
 
 	@Override
-	public String getFileName() {
+	public String getDestName() {
 		return new File(getUri()).getName();
 	}
 

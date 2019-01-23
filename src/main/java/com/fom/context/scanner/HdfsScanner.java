@@ -27,7 +27,7 @@ public class HdfsScanner<E extends IHdfsConfig> extends Scanner<E>{
 	@Override
 	public List<String> scan(E config) {
 		try{
-			return HdfsUtil.listName(config.getFs(), config.getUri());
+			return HdfsUtil.listName(config.getFs(), config.getUri(), null);
 		} catch (Exception e) {
 			log.error("扫描异常",e);
 		}

@@ -16,27 +16,25 @@ import com.fom.log.LoggerFactory;
  *
  */
 public class Downloader implements Executor {
-	
+
 	protected final Logger log;
-	
+
 	protected final String name;
-	
+
 	protected final DownloaderHelper helper;
-	
+
 	protected final String uri;
-	
+
 	protected final String fileName;
-	
+
 	protected final String destPath;
-	
+
 	protected final boolean withTemp;
-	
+
 	protected final boolean isDelSrc;
-	
+
 	protected final String tempPath;
-	
-	protected final DecimalFormat numFormat  = new DecimalFormat("#.##");
-	
+
 	/**
 	 * 
 	 * @param name
@@ -44,12 +42,12 @@ public class Downloader implements Executor {
 	 * @param helper
 	 */
 	public Downloader(String name, IDownloaderConfig config, DownloaderHelper helper) {
-		this.helper = helper;
 		this.name = name;
 		this.log = LoggerFactory.getLogger(name);
-		
+		this.helper = helper;
+
 		this.uri = config.getUri();
-		this.fileName = config.getFileName();
+		this.fileName = config.getDestName();
 		this.destPath = config.getDestPath();
 		this.isDelSrc = config.isDelSrc();
 		this.withTemp = config.isWithTemp();
@@ -71,13 +69,14 @@ public class Downloader implements Executor {
 			path = tempPath;
 		}
 		File file = new File(path + File.separator + fileName);
-		
+
 		helper.download(uri, file);
 		long size = file.length();
-		log.info("下载文件结束(" + numFormat.format(size) + "KB), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+		log.info("下载文件结束(" 
+				+ new DecimalFormat("#.##").format(size) + "KB), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 		move();
 	}
-	
+
 	protected void move() {
 		if(!withTemp){
 			return;

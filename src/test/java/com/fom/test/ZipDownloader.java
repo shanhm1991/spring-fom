@@ -117,7 +117,7 @@ public abstract class ZipDownloader<E extends IZipDownloaderConfig> extends Down
 	 * @throws Exception
 	 */
 	private void renameTempZip(boolean isRetry, boolean isLast, final E config) throws Exception{ 
-		if(!ZipUtil.validZip(tempZip)){ 
+		if(!ZipUtil.valid(tempZip)){ 
 			if(tempZip.exists() && !tempZip.delete()){
 				throw new WarnException(tempZipName + "已经损坏, 删除失败."); 
 			}
