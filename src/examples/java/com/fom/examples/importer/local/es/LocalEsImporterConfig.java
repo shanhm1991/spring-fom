@@ -4,9 +4,9 @@ import java.io.File;
 
 import org.dom4j.Element;
 
+import com.fom.context.Config;
 import com.fom.context.ContextUtil;
-import com.fom.context.config.Config;
-import com.fom.context.executor.IImporterConfig;
+import com.fom.context.executor.config.IImporterConfig;
 import com.fom.util.XmlUtil;
 
 /**

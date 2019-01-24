@@ -6,7 +6,8 @@ import java.text.DecimalFormat;
 import org.apache.log4j.Logger;
 
 import com.fom.context.exception.WarnException;
-import com.fom.context.executor.helper.downloader.DownloaderHelper;
+import com.fom.context.executor.config.IDownloaderConfig;
+import com.fom.context.executor.helper.DownloaderHelper;
 import com.fom.log.LoggerFactory;
 
 /**

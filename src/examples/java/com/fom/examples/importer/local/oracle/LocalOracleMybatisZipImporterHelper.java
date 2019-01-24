@@ -1,4 +1,4 @@
-package com.fom.examples.importer.local.mysql;
+package com.fom.examples.importer.local.oracle;
 
 import java.io.File;
 import java.util.List;
@@ -18,9 +18,9 @@ import com.fom.util.SpringUtil;
  * @date 2019年1月24日
  *
  */
-public class LocalMysqlMybatisImporterHelper extends abstractImporterHelper<DemoBean> {
+public class LocalOracleMybatisZipImporterHelper extends abstractImporterHelper<DemoBean> {
 
-	public LocalMysqlMybatisImporterHelper(String name) {
+	public LocalOracleMybatisZipImporterHelper(String name) {
 		super(name);
 	}
 
@@ -37,18 +37,18 @@ public class LocalMysqlMybatisImporterHelper extends abstractImporterHelper<Demo
 		}
 		DemoBean bean = new DemoBean(line);
 		bean.setSource("local");
-		bean.setFileType("txt/orc");
+		bean.setFileType("zip(txt)");
 		bean.setImportWay("mybatis");
 		lineDatas.add(bean); 
 	}
-
+	
 	@Override
 	public void batchProcessIfNotInterrupted(List<DemoBean> lineDatas, long batchTime) throws Exception {
-		DemoDao demoDao = SpringUtil.getBean("mysqlDemoDao", DemoDao.class);
+		DemoDao demoDao = SpringUtil.getBean("oracleDemoDao", DemoDao.class);
 		demoDao.batchInsertDemo(lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());
 	}
-	
+
 	@Override
 	public boolean delete(String sourceUri) {
 		return new File(sourceUri).delete();
@@ -63,5 +63,4 @@ public class LocalMysqlMybatisImporterHelper extends abstractImporterHelper<Demo
 	public String getFileName(String sourceUri) {
 		return new File(sourceUri).getName();
 	}
-
 }

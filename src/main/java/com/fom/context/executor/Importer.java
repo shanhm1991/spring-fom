@@ -10,7 +10,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import com.fom.context.exception.WarnException;
-import com.fom.context.executor.helper.importer.ImporterHelper;
+import com.fom.context.executor.config.IImporterConfig;
+import com.fom.context.executor.helper.ImporterHelper;
 import com.fom.context.executor.reader.Reader;
 import com.fom.log.LoggerFactory;
 import com.fom.util.IoUtil;

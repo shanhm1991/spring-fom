@@ -4,8 +4,6 @@ import java.io.File;
 
 import org.apache.log4j.Logger;
 
-import com.fom.context.config.Config;
-import com.fom.context.config.ConfigManager;
 import com.fom.context.exception.WarnException;
 import com.fom.log.LoggerFactory;
 
@@ -31,12 +29,12 @@ public abstract class Context<E extends Config> extends Thread {
 	protected final String sourceUri;
 	
 	/**
-	 * new File(uri)
+	 * new File(sourceUri)
 	 */
 	protected File srcFile;
 	
 	/**
-	 * new File(uri).getName()
+	 * new File(sourceUri).getName()
 	 */
 	protected String srcName;
 
@@ -90,10 +88,7 @@ public abstract class Context<E extends Config> extends Thread {
 	 * @param config
 	 * @throws Exception
 	 */
-	protected void exec(E config) throws Exception {
-		log.warn("nothing to do,if you want to do something with the file,"
-				+ "you should override the method:[void exec(E config) throws Exception]");
-	}
+	protected abstract void exec(E config) throws Exception;
 
 	/**
 	 * 在文件处理完成时执行的动作

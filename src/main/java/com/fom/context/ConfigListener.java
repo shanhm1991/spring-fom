@@ -1,4 +1,4 @@
-package com.fom.context.config;
+package com.fom.context;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,7 +14,6 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-import com.fom.context.ContextUtil;
 import com.fom.log.LoggerFactory;
 import com.fom.util.IoUtil;
 

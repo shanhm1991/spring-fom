@@ -14,9 +14,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
+import com.fom.context.ConfigManager;
 import com.fom.context.Context;
-import com.fom.context.config.ConfigManager;
-import com.fom.context.config.IConfig;
+import com.fom.context.IConfig;
 import com.fom.log.LoggerFactory;
 
 /**

@@ -10,8 +10,8 @@ import com.fom.context.Context;
 import com.fom.context.exception.WarnException;
 import com.fom.context.executor.Executor;
 import com.fom.context.executor.ZipDownloader;
-import com.fom.context.executor.helper.downloader.DownloaderHelper;
-import com.fom.context.executor.helper.downloader.HdfsDownloaderHelper;
+import com.fom.context.executor.helper.DownloaderHelper;
+import com.fom.context.executor.helper.HdfsDownloaderHelper;
 import com.fom.util.HdfsUtil;
 
 /**

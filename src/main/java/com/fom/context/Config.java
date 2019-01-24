@@ -1,4 +1,4 @@
-package com.fom.context.config;
+package com.fom.context;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
@@ -11,7 +11,6 @@ import org.apache.log4j.Logger;
 import org.dom4j.Element;
 import org.quartz.CronExpression;
 
-import com.fom.context.ContextUtil;
 import com.fom.context.scanner.Scanner;
 import com.fom.log.LoggerFactory;
 import com.fom.util.XmlUtil;

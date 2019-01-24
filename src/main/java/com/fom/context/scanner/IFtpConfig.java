@@ -1,6 +1,6 @@
 package com.fom.context.scanner;
 
-import com.fom.context.config.IConfig;
+import com.fom.context.IConfig;
 
 /**
  * 

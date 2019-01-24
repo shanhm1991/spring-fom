@@ -1,4 +1,4 @@
-package com.fom.context.config;
+package com.fom.context;
 
 /**
  * 

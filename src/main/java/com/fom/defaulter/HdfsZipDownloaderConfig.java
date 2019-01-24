@@ -6,9 +6,9 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.log4j.helpers.OptionConverter;
 import org.dom4j.Element;
 
+import com.fom.context.Config;
 import com.fom.context.ContextUtil;
-import com.fom.context.config.Config;
-import com.fom.context.executor.IZipDownloaderConfig;
+import com.fom.context.executor.config.IZipDownloaderConfig;
 import com.fom.context.scanner.IHdfsConfig;
 import com.fom.util.HdfsUtil;
 import com.fom.util.XmlUtil;

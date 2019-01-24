@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 
-import com.fom.context.config.ConfigListener;
+import com.fom.context.ConfigListener;
 import com.fom.db.pool.PoolListener;
 
 /**

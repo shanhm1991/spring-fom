@@ -1,9 +1,8 @@
-package com.fom.context.executor.helper.importer;
+package com.fom.context.executor.helper;
 
 import java.util.List;
 
 import com.fom.context.executor.reader.Reader;
-
 
 /**
  * 
@@ -38,10 +37,8 @@ public interface ImporterHelper<V> {
 	 */
 	void batchProcessLineData(List<V> lineDatas, long batchTime) throws Exception;
 	
-	
-	
 	/**
-	 * 根据uri删除文件
+	 * 根据sourceUri删除文件
 	 * @param sourceUri
 	 * @return
 	 * @throws Exception
@@ -49,14 +46,14 @@ public interface ImporterHelper<V> {
 	boolean delete(String sourceUri);
 	
 	/**
-	 * 获取指定uri的文件的大小
+	 * 获取指定sourceUri的文件的大小
 	 * @param sourceUri
 	 * @return
 	 */
 	long getFileSize(String sourceUri);
 	
 	/**
-	 * 获取指定uri的文件的名称
+	 * 获取指定sourceUri的文件的名称
 	 * @param sourceUri
 	 * @return
 	 */

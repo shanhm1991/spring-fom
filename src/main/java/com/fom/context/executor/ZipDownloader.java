@@ -16,7 +16,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.fom.context.exception.WarnException;
-import com.fom.context.executor.helper.downloader.DownloaderHelper;
+import com.fom.context.executor.config.IZipDownloaderConfig;
+import com.fom.context.executor.helper.DownloaderHelper;
 import com.fom.log.LoggerFactory;
 import com.fom.util.IoUtil;
 import com.fom.util.ZipUtil;
@@ -284,28 +285,4 @@ public class ZipDownloader implements Executor {
 			throw new WarnException("删除临时目录失败.");
 		}
 	}
-
-	//	@Override
-	//	protected void onComplete(final E config) throws Exception{ 
-	//		if(config.isDelSrc() && !deletePath(srcPath)){
-	//			throw new WarnException("删除源目录失败."); 
-	//		}
-	//	}
-
-//	/**
-//	 * 根据路径打开远程文件的输入流
-//	 * @param url
-//	 * @return
-//	 * @throws Exception
-//	 */
-//	protected abstract InputStream open(String url) throws Exception;
-//
-//	/**
-//	 * 根据路径删除远程文件
-//	 * @param url
-//	 * @return
-//	 * @throws Exception
-//	 */
-//	protected abstract boolean delete(String url) throws Exception;
-
 }

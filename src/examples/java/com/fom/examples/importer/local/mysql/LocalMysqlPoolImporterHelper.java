@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.fom.context.executor.helper.importer.abstractImporterHelper;
+import com.fom.context.executor.helper.abstractImporterHelper;
 import com.fom.context.executor.reader.Reader;
 import com.fom.context.executor.reader.TextReader;
 import com.fom.db.handler.JdbcHandler;

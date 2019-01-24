@@ -1,4 +1,5 @@
-package com.fom.context.executor;
+package com.fom.context.executor.config;
+
 
 /**
  * 
@@ -8,8 +9,16 @@ package com.fom.context.executor;
  */
 public interface IZipDownloaderConfig extends IDownloaderConfig {
 	
+	/**
+	 * 下载打包zip时的最大文件数
+	 * @return
+	 */
 	int getEntryMax();
 	
+	/**
+	 * 下载打包zip时的最大字节数
+	 * @return
+	 */
 	long getSizeMax();
 
 }

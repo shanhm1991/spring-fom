@@ -13,7 +13,8 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 
 import com.fom.context.exception.WarnException;
-import com.fom.context.executor.helper.importer.LocalZipImporterHelper;
+import com.fom.context.executor.config.ILocalZipImporterConfig;
+import com.fom.context.executor.helper.ImporterHelper;
 import com.fom.context.executor.reader.Reader;
 import com.fom.log.LoggerFactory;
 import com.fom.util.IoUtil;
@@ -33,36 +34,35 @@ public class LocalZipImporter implements Executor {
 
 	protected final File logFile;
 	
-	protected final String uri;
+	protected final String sourceUri;
 	
 	protected final String srcName;
 
 	protected final long srcSize;
 	
-	protected final int batch;
+	protected final File unzipDir;
 	
 	@SuppressWarnings("rawtypes")
-	protected final LocalZipImporterHelper helper;
-
-	protected final File unzipDir;
+	protected final ImporterHelper helper;
 
 	private boolean removeDirectly;
 
 	private List<String> nameList;
 	
+	private final ILocalZipImporterConfig config;
+	
 	protected final DecimalFormat numFormat  = new DecimalFormat("#.##");
 	
 	@SuppressWarnings("rawtypes")
-	public LocalZipImporter(String name, String uri, int batch, LocalZipImporterHelper helper) {
+	public LocalZipImporter(String name, String sourceUri, ILocalZipImporterConfig config, ImporterHelper helper) {
 		this.name = name;
 		this.log = LoggerFactory.getLogger(name);
-		
-		this.batch = batch;
+		this.config = config;
 		this.helper = helper;
 		
-		this.uri = uri;
-		this.srcName = helper.getFileName(uri);
-		this.srcSize = helper.getFileSize(uri);
+		this.sourceUri = sourceUri;
+		this.srcName = helper.getFileName(sourceUri);
+		this.srcSize = helper.getFileSize(sourceUri);
 		this.logFile = new File(System.getProperty("import.progress") 
 				+ File.separator + name + File.separator + srcName + ".log");
 		this.unzipDir = new File(System.getProperty("import.progress")
@@ -122,13 +122,13 @@ public class LocalZipImporter implements Executor {
 				}
 			}
 
-			if(!ZipUtil.valid(uri)){ 
+			if(!ZipUtil.valid(sourceUri)){ 
 				log.error(srcName + "校验失败，直接清除."); 
 				removeDirectly = true;
 				return;
 			}
 
-			long cost = ZipUtil.unZip(uri, unzipDir);
+			long cost = ZipUtil.unZip(sourceUri, unzipDir);
 			log.info("解压结束(" + numFormat.format(srcSize) + "KB), 耗时=" + cost + "ms");
 
 			String[] nameArray = unzipDir.list();
@@ -154,7 +154,7 @@ public class LocalZipImporter implements Executor {
 	private boolean matchContents(){
 		List<String> list = new LinkedList<>();
 		for(String name : nameList){
-			if(helper.matchZipSubFile(name)){
+			if(config.matchSubFile(name)){
 				list.add(name);
 			}
 		}
@@ -227,7 +227,7 @@ public class LocalZipImporter implements Executor {
 				if(lineIndex <= StartLine){
 					continue;
 				}
-				if(batch > 0 && lineDatas.size() >= batch){
+				if(config.getBatch() > 0 && lineDatas.size() >= config.getBatch()){
 					helper.batchProcessLineData(lineDatas, batchTime); 
 					logProcess(uri, lineIndex);
 					lineDatas.clear();
@@ -250,7 +250,7 @@ public class LocalZipImporter implements Executor {
 		FileUtils.writeStringToFile(logFile, data, false);
 	}
 
-	void onFinally() {
+	void onFinally() { //TODO
 		if(!removeDirectly && nameList.size() > 0){
 			log.warn("遗留任务文件, 等待下次处理."); 
 			return;
@@ -273,7 +273,7 @@ public class LocalZipImporter implements Executor {
 		}
 
 		//srcFile.exist = true
-		if(!helper.delete(uri)){ 
+		if(!helper.delete(sourceUri)){ 
 			log.warn("清除源文件失败."); 
 			return;
 		}

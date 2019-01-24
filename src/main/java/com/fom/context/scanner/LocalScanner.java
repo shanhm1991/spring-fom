@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
 
-import com.fom.context.config.IConfig;
+import com.fom.context.IConfig;
 
 /**
  * 

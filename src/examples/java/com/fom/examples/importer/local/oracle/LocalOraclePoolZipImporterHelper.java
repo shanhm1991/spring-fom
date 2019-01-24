@@ -1,4 +1,4 @@
-package com.fom.examples.importer.local.es;
+package com.fom.examples.importer.local.oracle;
 
 import java.io.File;
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.fom.context.executor.helper.abstractImporterHelper;
 import com.fom.context.executor.reader.Reader;
 import com.fom.context.executor.reader.TextReader;
-import com.fom.db.handler.EsHandler;
+import com.fom.db.handler.JdbcHandler;
 
 /**
  * 
@@ -18,18 +18,16 @@ import com.fom.db.handler.EsHandler;
  * @date 2019年1月24日
  *
  */
-public class LocalEsPoolImpoterHelper extends abstractImporterHelper<Map<String, Object>> {
-	
-	private static final String POOL = "example_es";
-	
-	private final String esIndex;
-	
-	private final String esType;
+public class LocalOraclePoolZipImporterHelper extends abstractImporterHelper<Map<String, Object>> {
 
-	public LocalEsPoolImpoterHelper(String name, String esIndex, String esType) {
+	private static final String POOL = "example_oracle";
+
+	private static final String SQL = 
+			"insert into demo(id,name,source,filetype,importway) "
+					+ "values (#id#,#name#,#source#,#fileType#,#importWay#)";
+
+	public LocalOraclePoolZipImporterHelper(String name) {
 		super(name);
-		this.esIndex = esIndex;
-		this.esType = esType;
 	}
 
 	@Override
@@ -45,21 +43,18 @@ public class LocalEsPoolImpoterHelper extends abstractImporterHelper<Map<String,
 		}
 		String[] array = line.split("#"); 
 		Map<String,Object> map = new HashMap<>();
-		map.put("ID", array[0]);
-		map.put("NAME", array[1]);
-		map.put("SOURCE", "local");
-		map.put("FILETYPE", "txt/orc");
-		map.put("IMPORTWAY", "pool");
+		map.put("id", array[0]);
+		map.put("name", array[1]);
+		map.put("source", "local");
+		map.put("fileType", "zip(txt)");
+		map.put("importWay", "pool");
 		lineDatas.add(map);
 	}
-	
+
 	@Override
 	public void batchProcessIfNotInterrupted(List<Map<String, Object>> lineDatas, long batchTime) throws Exception {
-		Map<String,Map<String,Object>> map = new HashMap<>();
-		for(Map<String, Object> m : lineDatas){
-			map.put(String.valueOf(m.get("ID")), m);
-		}
-		EsHandler.handler.bulkInsert(POOL, esIndex, esType, map); 
+		JdbcHandler.handler.batchExecute(POOL, SQL, lineDatas);
+		log.info("处理数据入库:" + lineDatas.size());
 	}
 
 	@Override
@@ -76,6 +71,4 @@ public class LocalEsPoolImpoterHelper extends abstractImporterHelper<Map<String,
 	public String getFileName(String sourceUri) {
 		return new File(sourceUri).getName();
 	}
-
-
 }
