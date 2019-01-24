@@ -2,6 +2,8 @@ package com.fom.context.scanner;
 
 import java.util.List;
 
+import com.fom.context.Scanner;
+
 /**
  * 
  * @author shanhm

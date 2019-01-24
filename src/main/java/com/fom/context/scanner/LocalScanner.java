@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.commons.lang.ArrayUtils;
 
 import com.fom.context.IConfig;
+import com.fom.context.Scanner;
 
 /**
  * 

@@ -1,8 +1,8 @@
 package com.fom.defaulter;
 
 import com.fom.context.Context;
+import com.fom.context.Executor;
 import com.fom.context.executor.Downloader;
-import com.fom.context.executor.Executor;
 import com.fom.context.executor.helper.HdfsDownloaderHelper;
 
 /**

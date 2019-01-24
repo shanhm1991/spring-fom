@@ -33,18 +33,6 @@ public interface IConfig {
 	String getTypeName();
 	
 	/**
-	 * 当前模块是否在运行
-	 * @return
-	 */
-	boolean isRunning();
-	
-	/**
-	 * 当前模块的执行器
-	 * @return
-	 */
-	String getExecutorClass();
-	
-	/**
 	 * 当前模块扫描线程等待下一次执行的时间
 	 * @return
 	 */
@@ -69,33 +57,4 @@ public interface IConfig {
 	 */
 	String getUri();
 
-	/**
-	 * 当前模块执行线程数的最小数
-	 * @return
-	 */
-	int getExecutorMin();
-
-	/**
-	 * 当前模块执行线程数的最大数
-	 * @return
-	 */
-	int getExecutorMax();
-
-	/**
-	 * 当前模块执行线程的最长空闲时间
-	 * @return
-	 */
-	int getExecutorAliveTime();
-
-	/**
-	 * 当前模块执行线程的超时时间 
-	 * @return
-	 */
-	int getExecutorOverTime();
-
-	/**
-	 * 当前模块执行线程的如果超时是否中断
-	 * @return
-	 */
-	boolean getInterruptOnOverTime();
 }

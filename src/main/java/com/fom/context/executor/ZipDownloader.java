@@ -15,6 +15,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.fom.context.Executor;
 import com.fom.context.exception.WarnException;
 import com.fom.context.executor.helper.DownloaderHelper;
 import com.fom.log.LoggerFactory;

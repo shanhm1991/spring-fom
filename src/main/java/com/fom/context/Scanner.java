@@ -1,4 +1,4 @@
-package com.fom.context.scanner;
+package com.fom.context;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -14,9 +14,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
-import com.fom.context.ConfigManager;
-import com.fom.context.Context;
-import com.fom.context.IConfig;
+import com.fom.context.scanner.TimedExecutorPool;
+import com.fom.context.scanner.TimedFuture;
 import com.fom.log.LoggerFactory;
 
 /**
@@ -49,26 +48,27 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 	public final void run(){
 		log.info("启动扫描."); 
 		while(true){
-			E config = (E)ConfigManager.get(name);
-			if(config == null || !config.isRunning()){ 
+			Config config = ConfigManager.get(name);
+			if(config == null || !config.isRunning){ 
 				log.info("终止扫描."); 
 				pool.shutdownNow();
 				return;
 			}
 			this.setName("scanner[" + config.getUri() + "]");
-			if(pool.getCorePoolSize() != config.getExecutorMin()){
-				pool.setCorePoolSize(config.getExecutorMin());
+			if(pool.getCorePoolSize() != config.threadCore){
+				pool.setCorePoolSize(config.threadCore);
 			}
-			if(pool.getMaximumPoolSize() != config.getExecutorMax()){
-				pool.setMaximumPoolSize(config.getExecutorMax());
+			if(pool.getMaximumPoolSize() != config.threadMax){
+				pool.setMaximumPoolSize(config.threadMax);
 			}
-			if(pool.getKeepAliveTime(TimeUnit.SECONDS) != config.getExecutorAliveTime()){
-				pool.setKeepAliveTime(config.getExecutorAliveTime(), TimeUnit.SECONDS);
+			if(pool.getKeepAliveTime(TimeUnit.SECONDS) != config.threadAliveTime){
+				pool.setKeepAliveTime(config.threadAliveTime, TimeUnit.SECONDS);
 			}
 
 			cleanFuture(config);
 
-			List<String> fileNameList = filter(config);
+			E subConfig = (E)config;
+			List<String> fileNameList = filter(subConfig);
 			if(fileNameList != null){
 				for (String fileName : fileNameList){
 					String path = config.getUri() + File.separator + fileName;
@@ -76,11 +76,11 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 						continue;
 					}
 					try {
-						Class<?> clzz = Class.forName(config.getExecutorClass());
+						Class<?> clzz = Class.forName(config.contextClass);
 						Constructor<?> constructor = clzz.getDeclaredConstructor(String.class, String.class);
 						constructor.setAccessible(true);
-						Context executor = (Context)constructor.newInstance(name, path);
-						futureMap.put(path, pool.submit(executor));
+						Context context = (Context)constructor.newInstance(name, path);
+						futureMap.put(path, pool.submit(context)); 
 						log.info("新建" + config.getTypeName() + "任务" + config.getType() + "[" + fileName + "]"); 
 					} catch (RejectedExecutionException e) {
 						log.warn(config.getTypeName() + "任务提交被拒绝,等待下次提交[" + fileName + "].");
@@ -104,7 +104,7 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 	
 	public abstract List<String> filter(E config);
 
-	private void cleanFuture(E config){
+	private void cleanFuture(Config config){
 		Iterator<Map.Entry<String, TimedFuture<Void>>> it = futureMap.entrySet().iterator();
 		while(it.hasNext()){
 			Entry<String, TimedFuture<Void>> entry = it.next();
@@ -116,8 +116,8 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 				it.remove();
 			}else{
 				long existTime = (System.currentTimeMillis() - future.getCreateTime()) / 1000;
-				if(existTime > config.getExecutorOverTime()) {
-					if(config.getInterruptOnOverTime()){
+				if(existTime > config.threadOverTime) {
+					if(config.threadCancellable){
 						future.cancel(true);
 						log.warn(config.getTypeName() + "任务超时中断[" + entry.getKey() + "]," + existTime + "s"); 
 					}else{

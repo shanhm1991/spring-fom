@@ -7,8 +7,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 
 import com.fom.context.Context;
+import com.fom.context.Executor;
 import com.fom.context.exception.WarnException;
-import com.fom.context.executor.Executor;
 import com.fom.context.executor.ZipDownloader;
 import com.fom.context.executor.helper.DownloaderHelper;
 import com.fom.context.executor.helper.HdfsDownloaderHelper;

@@ -11,7 +11,6 @@ import org.apache.log4j.Logger;
 import org.dom4j.Element;
 import org.quartz.CronExpression;
 
-import com.fom.context.scanner.Scanner;
 import com.fom.log.LoggerFactory;
 import com.fom.util.XmlUtil;
 
@@ -36,10 +35,35 @@ public abstract class Config implements IConfig {
 
 	protected static final Logger LOG = LoggerFactory.getLogger("config");
 
+	/**
+	 * 模块名称
+	 */
 	protected final String name;
 
+	String srcUri;
+
+	private Pattern pattern;
+
+	private CronExpression cron;
+
+	private boolean delMatchFail;
+
+	String scannerClass;
+
+	String contextClass;
+
+	int threadCore;
+
+	int threadMax;
+
+	int threadAliveTime;
+
+	int threadOverTime;
+
+	boolean threadCancellable;
+
 	Element element;
-	
+
 	Element extendsElement;
 
 	boolean valid;
@@ -50,119 +74,96 @@ public abstract class Config implements IConfig {
 
 	volatile boolean isRunning = false;
 
-	String srcUri;
+	@SuppressWarnings("rawtypes")
+	Scanner scanner;
 
-	private String reg;
-
-	private boolean delMatchFailFile;
-
-	String scannerClzz;
-
-	String scannerCron;
-
-	String executorClzz;
-
-	private int threadMin;
-
-	private int threadMax;
-
-	private int threadAliveTime;
-
-	private int threadOverTime;
-
-	private boolean threadCancelOnOverTime;
-	
 	protected Config(String name){
 		this.name = name;
 	}
 
 	void load() throws Exception {
-		srcUri = ContextUtil.getEnvStr(XmlUtil.getString(element, "src.path", ""));
-		reg = XmlUtil.getString(element, "src.pattern", "");
-		delMatchFailFile = XmlUtil.getBoolean(element, "src.match.fail.del", false);
-		scannerClzz = XmlUtil.getString(element, "scanner", "");
-		scannerCron = XmlUtil.getString(element, "scanner.cron", "");
-		executorClzz = XmlUtil.getString(element, "executor", "");
-		threadMin = XmlUtil.getInt(element, "executor.min", 4, 1, 10);
-		threadMax = XmlUtil.getInt(element, "executor.max", 20, 10, 50);
-		threadAliveTime = XmlUtil.getInt(element, "executor.aliveTime.seconds", 30, 3, 300);
-		threadOverTime = XmlUtil.getInt(element, "executor.overTime.seconds", 3600, 300, 86400);
-		threadCancelOnOverTime = XmlUtil.getBoolean(element, "executor.overTime.cancle", false);
-		
+		srcUri = ContextUtil.getEnvStr(load(element, "src.uri", ""));
+		String regex = load(element, "src.pattern", "");
+		if(!StringUtils.isBlank(regex)){
+			pattern = Pattern.compile(regex);
+		}
+		delMatchFail = load(element, "src.delMatchFail", false);
+
+		scannerClass = load(element, "scanner", ""); 
+		String strCron = load(element, "scanner.cron", "");
+		cron = new CronExpression(strCron);
+
+		contextClass = load(element, "context", "");
+		threadCore = load(element, "thread.core", 4, 1, 10); 
+		threadMax = load(element, "thread.max", 20, 10, 50);
+		threadAliveTime = load(element, "thread.aliveTime", 30, 3, 300);
+		threadOverTime = load(element, "thread.overTime", 3600, 300, 86400);
+		threadCancellable = load(element, "thread.cancellable", false); 
+
 		loadExtends();
 	}
 
-	@SuppressWarnings("rawtypes")
-	Scanner scanner;
-
-	Pattern pattern;
-
-	private CronExpression cronExpression;
-
 	boolean isValid() throws Exception {
-		if(!StringUtils.isBlank(reg)){
-			pattern = Pattern.compile(reg);
-		}
-		cronExpression = new CronExpression(scannerCron);
+
 		refreshScanner();
 		return valid();
 	}
 
 	@SuppressWarnings("rawtypes")
 	void refreshScanner() throws Exception{
-		Class<?> clzz = Class.forName(scannerClzz);
+		Class<?> clzz = Class.forName(scannerClass);
 		Constructor<?> constructor = clzz.getDeclaredConstructor(String.class);
 		constructor.setAccessible(true); 
 		scanner = (Scanner)constructor.newInstance(name);
 	}
 
-	@Override
-	public final boolean isRunning(){
-		return isRunning;
-	}
-
-	@Override
-	public final boolean isDelMatchFailFile() {
-		return delMatchFailFile;
-	}
-
-	@Override
-	public final String getUri() {
-		return srcUri;
-	}
-
-	@Override
-	public final int getExecutorMin() {
-		return threadMin;
-	}
-
-	@Override
-	public final int getExecutorMax() {
-		return threadMax;
-	}
-
-	@Override
-	public final int getExecutorAliveTime() {
-		return threadAliveTime;
-	}
-
-	@Override
-	public final int getExecutorOverTime() {
-		return threadOverTime;
-	}
-
-	@Override
-	public final boolean getInterruptOnOverTime() {
-		return threadCancelOnOverTime;
-	}
-
-	@Override
-	public final String getExecutorClass() {
-		return executorClzz;
-	}
+	//	@Override
+	//	public final boolean isRunning(){
+	//		return isRunning;
+	//	}
+	//
+	//	@Override
+	//	public final boolean isDelMatchFailFile() {
+	//		return delMatchFail;
+	//	}
+	//
+	//	@Override
+	//	public final String getUri() {
+	//		return srcUri;
+	//	}
+	//
+	//	@Override
+	//	public final int getExecutorMin() {
+	//		return threadMin;
+	//	}
+	//
+	//	@Override
+	//	public final int getExecutorMax() {
+	//		return threadMax;
+	//	}
+	//
+	//	@Override
+	//	public final int getExecutorAliveTime() {
+	//		return threadAliveTime;
+	//	}
+	//
+	//	@Override
+	//	public final int getExecutorOverTime() {
+	//		return threadOverTime;
+	//	}
+	//
+	//	@Override
+	//	public final boolean getInterruptOnOverTime() {
+	//		return threadCancellable;
+	//	}
+	//
+	//	@Override
+	//	public final String getExecutorClass() {
+	//		return contextClass;
+	//	}
 
 	public final long nextScanTime(){
-		Date nextDate = cronExpression.getTimeAfter(new Date());
+		Date nextDate = cron.getTimeAfter(new Date());
 		return nextDate.getTime() - System.currentTimeMillis();
 	}
 
@@ -172,7 +173,7 @@ public abstract class Config implements IConfig {
 		}
 		return pattern.matcher(srcName).find();
 	}
-	
+
 	/**
 	 * 获取config加载的xml
 	 * @return
@@ -181,11 +182,29 @@ public abstract class Config implements IConfig {
 		return element.asXML();
 	}
 
-	/**
-	 * 子类自定义加载<extends>中的配置
-	 * @throws Exception
-	 */
-	protected abstract void loadExtends() throws Exception;
+	private String load(Element e, String key, String defaultValue) {
+		String value =  XmlUtil.getString(e, key, defaultValue);
+		entryMap.put(key, value);
+		return value;
+	}
+
+	private int load(Element e, String key, int defaultValue, int min, int max){
+		int value = XmlUtil.getInt(e, key, defaultValue, min, max);
+		entryMap.put(key, String.valueOf(value)); 
+		return value;
+	}
+
+	private long load(Element e, String key, long defaultValue, long min, long max){
+		long value = XmlUtil.getLong(e, key, defaultValue, min, max);
+		entryMap.put(key, String.valueOf(value)); 
+		return value;
+	}
+
+	private boolean load(Element e, String key, boolean defaultValue){
+		boolean value = XmlUtil.getBoolean(extendsElement, key, defaultValue);
+		entryMap.put(key, String.valueOf(value)); 
+		return value;
+	}
 
 	/**
 	 * 加载<extends>中的String配置
@@ -194,9 +213,7 @@ public abstract class Config implements IConfig {
 	 * @return
 	 */
 	protected final String loadExtends(String key, String defaultValue) {
-		String value =  XmlUtil.getString(extendsElement, key, defaultValue);
-		entryMap.put(key, value);
-		return value;
+		return load(extendsElement, key, defaultValue);
 	}
 
 	/**
@@ -208,11 +225,9 @@ public abstract class Config implements IConfig {
 	 * @return
 	 */
 	protected final int loadExtends(String key, int defaultValue, int min, int max){
-		int value = XmlUtil.getInt(extendsElement, key, defaultValue, min, max);
-		entryMap.put(key, String.valueOf(value)); 
-		return value;
+		return load(extendsElement, key, defaultValue, min, max);
 	}
-	
+
 	/**
 	 * 加载<extends>中的long配置
 	 * @param key
@@ -222,11 +237,9 @@ public abstract class Config implements IConfig {
 	 * @return
 	 */
 	protected final long loadExtends(String key, long defaultValue, long min, long max){
-		long value = XmlUtil.getLong(extendsElement, key, defaultValue, min, max);
-		entryMap.put(key, String.valueOf(value)); 
-		return value;
+		return load(extendsElement, key, defaultValue, min, max);
 	}
-	
+
 	/**
 	 * 加载<extends>中的boolean配置
 	 * @param key
@@ -234,11 +247,15 @@ public abstract class Config implements IConfig {
 	 * @return
 	 */
 	protected final boolean loadExtends(String key, boolean defaultValue){
-		boolean value = XmlUtil.getBoolean(extendsElement, key, defaultValue);
-		entryMap.put(key, String.valueOf(value)); 
-		return value;
+		return load(extendsElement, key, defaultValue);
 	}
-	
+
+	/**
+	 * 子类自定义加载<extends>中的配置
+	 * @throws Exception
+	 */
+	protected abstract void loadExtends() throws Exception;
+
 	/**
 	 * 子类自定义校验<extends>中的配置加载结果，默认返回true
 	 * @return
@@ -247,9 +264,9 @@ public abstract class Config implements IConfig {
 	protected boolean valid() throws Exception {
 		return true;
 	}
-	
+
 	private Map<String,String> entryMap = new HashMap<>();
-	
+
 	@Override
 	public final boolean equals(Object object){
 		if(!(object instanceof Config)){

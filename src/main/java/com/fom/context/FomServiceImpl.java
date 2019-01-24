@@ -89,11 +89,11 @@ public class FomServiceImpl implements FomService {
 			return "failed, attribute[config] can not be change.";
 		}
 		
-		if(!newConfig.scannerClzz.equals(oldConfig.scannerClzz)){ 
+		if(!newConfig.scannerClass.equals(oldConfig.scannerClass)){ 
 			return "failed, node[scanner] can not be change.";
 		}
 		
-		if(!newConfig.executorClzz.equals(oldConfig.executorClzz)){ 
+		if(!newConfig.contextClass.equals(oldConfig.contextClass)){ 
 			return "failed, node[executor] can not be change.";
 		}
 		

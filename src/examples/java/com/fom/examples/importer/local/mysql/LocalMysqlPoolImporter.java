@@ -1,7 +1,7 @@
 package com.fom.examples.importer.local.mysql;
 
 import com.fom.context.Context;
-import com.fom.context.executor.Executor;
+import com.fom.context.Executor;
 import com.fom.context.executor.Importer;
 
 /**

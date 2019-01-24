@@ -50,7 +50,7 @@ public abstract class Context<E extends Config> extends Thread {
 	@Override
 	public final void run(){
 		E config = (E)ConfigManager.get(name);
-		if(config == null || !config.isRunning()){
+		if(config == null || !config.isRunning){
 			log.info("任务已取消."); 
 			return;
 		}
