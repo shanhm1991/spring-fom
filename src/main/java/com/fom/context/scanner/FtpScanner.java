@@ -9,10 +9,10 @@ import java.util.List;
  *
  * @param <E>
  */
-public class FtpScanner<E extends IFtpConfig> extends Scanner<E>{
+public class FtpScanner<E extends FtpConfig> extends Scanner<E>{
 
-	protected FtpScanner(String name, E config) {
-		super(name, config);
+	protected FtpScanner(String name) {
+		super(name);
 	}
 
 	@Override

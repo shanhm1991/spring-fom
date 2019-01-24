@@ -10,7 +10,7 @@ import com.fom.context.IConfig;
  * @date 2018年12月23日
  *
  */
-public interface IHdfsConfig extends IConfig {
+public interface HdfsConfig extends IConfig {
 
 	FileSystem getFs();
 

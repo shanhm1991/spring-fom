@@ -8,6 +8,6 @@ import com.fom.context.IConfig;
  * @date 2018年12月23日
  *
  */
-public interface IHttpConfig extends IConfig {
+public interface FtpConfig extends IConfig {
 
 }

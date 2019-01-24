@@ -10,14 +10,14 @@ import com.fom.context.executor.Importer;
  * @date 2018年12月23日
  *
  */
-public class LocalMysqlPoolImporter extends Context<LocalImporterConfig> {
+public class LocalMysqlPoolImporter extends Context<LocalTextImporterConfig> {
 	
 	protected LocalMysqlPoolImporter(String name, String path) {
 		super(name, path);
 	}
 	
 	@Override
-	protected void exec(LocalImporterConfig config) throws Exception {
+	protected void exec(LocalTextImporterConfig config) throws Exception {
 		LocalMysqlPoolImporterHelper helper = new LocalMysqlPoolImporterHelper(name);
 		Executor executor = new Importer(name, sourceUri, config, helper);
 		executor.exec();

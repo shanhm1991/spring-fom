@@ -1,4 +1,4 @@
-package com.fom.context.executor.config;
+package com.fom.context.executor;
 
 /**
  * 
@@ -6,7 +6,7 @@ package com.fom.context.executor.config;
  * @date 2018年12月23日
  *
  */
-public interface IImporterConfig {
+public interface ImporterConfig {
 	
 	/**
 	 * 获取入库时的批处理数

@@ -4,14 +4,12 @@ import java.io.File;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.log4j.helpers.OptionConverter;
-import org.dom4j.Element;
 
 import com.fom.context.Config;
 import com.fom.context.ContextUtil;
-import com.fom.context.executor.config.IZipDownloaderConfig;
-import com.fom.context.scanner.IHdfsConfig;
+import com.fom.context.executor.ZipDownloaderConfig;
+import com.fom.context.scanner.HdfsConfig;
 import com.fom.util.HdfsUtil;
-import com.fom.util.XmlUtil;
 
 /**
  * 
@@ -19,11 +17,7 @@ import com.fom.util.XmlUtil;
  * @date 2019年1月23日
  *
  */
-public class HdfsZipDownloaderConfig extends Config implements IHdfsConfig, IZipDownloaderConfig {
-
-	private String hdfsMaster;
-
-	private String hdfsSlave;
+public class HdfsZipDownloaderConfig extends Config implements HdfsConfig, ZipDownloaderConfig {
 
 	private FileSystem fs;
 
@@ -42,20 +36,20 @@ public class HdfsZipDownloaderConfig extends Config implements IHdfsConfig, IZip
 	protected HdfsZipDownloaderConfig(String name) {
 		super(name);
 	}
-
-	protected void load(Element e) throws Exception {
-		hdfsMaster = XmlUtil.getString(e, "hdfs.master", "");
-		hdfsSlave = XmlUtil.getString(e, "hdfs.slave", "");
+	
+	@Override
+	protected void loadExtends() throws Exception {
+		String hdfsMaster = loadExtends("hdfs.master", "");
+		String hdfsSlave = loadExtends("hdfs.slave", "");
 		fs = HdfsUtil.getFileSystem(hdfsMaster, hdfsSlave);
-		signalFileName = XmlUtil.getString(e, "hdfs.signalFile", "");
-
-		isDelSrc = XmlUtil.getBoolean(e, "downloader.isSrcDel", false);
-		isWithTemp = XmlUtil.getBoolean(e, "downloader.isWithTemp", true);
-		destPath = ContextUtil.getEnvStr(XmlUtil.getString(e, "downloader.desPath", ""));
+		signalFileName = loadExtends("hdfs.signalFile", "");
 		
-		entryMax = XmlUtil.getInt(e, "downloader.zip.entryMax", Integer.MAX_VALUE, 1, Integer.MAX_VALUE);
-		String strSize = XmlUtil.getString(e, "downloader.zip.sizeMax", "1GB");
-		sizeMax = OptionConverter.toFileSize(strSize, 1024*1024*1024L);
+		isDelSrc = loadExtends("downloader.isSrcDel", false);
+		isWithTemp = loadExtends("downloader.isWithTemp", false);
+		destPath = ContextUtil.getEnvStr(loadExtends("downloader.desPath", ""));
+		
+		entryMax = loadExtends("downloader.zip.entryMax", Integer.MAX_VALUE, 1, Integer.MAX_VALUE);
+		sizeMax = OptionConverter.toFileSize(loadExtends("downloader.zip.sizeMax", "1GB"), 1024*1024*1024L);
 	}
 
 	@Override

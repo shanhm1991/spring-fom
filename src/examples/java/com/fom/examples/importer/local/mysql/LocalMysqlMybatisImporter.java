@@ -11,14 +11,14 @@ import com.fom.context.executor.Importer;
  * @date 2018年12月23日
  *
  */
-public class LocalMysqlMybatisImporter extends Context<LocalImporterConfig> {
+public class LocalMysqlMybatisImporter extends Context<LocalTextImporterConfig> {
 
 	protected LocalMysqlMybatisImporter(String name, String path) {
 		super(name, path);
 	}
 	
 	@Override
-	protected void exec(LocalImporterConfig config) throws Exception {
+	protected void exec(LocalTextImporterConfig config) throws Exception {
 		LocalMysqlMybatisImporterHelper helper = new LocalMysqlMybatisImporterHelper(name);
 		Executor executor = new Importer(name, sourceUri, config, helper);
 		executor.exec();

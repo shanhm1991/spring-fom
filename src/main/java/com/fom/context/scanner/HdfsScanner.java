@@ -17,10 +17,10 @@ import com.fom.util.HdfsUtil;
  *
  * @param <E>
  */
-public class HdfsScanner<E extends IHdfsConfig> extends Scanner<E>{
+public class HdfsScanner<E extends HdfsConfig> extends Scanner<E>{
 
-	protected HdfsScanner(String name, E config) {
-		super(name, config);
+	protected HdfsScanner(String name) {
+		super(name);
 	}
 	
 	@Override

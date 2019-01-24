@@ -1,11 +1,11 @@
 package com.fom.context;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Type;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.dom4j.Element;
@@ -33,34 +33,28 @@ import com.fom.util.XmlUtil;
  *
  */
 public abstract class Config implements IConfig {
-	
+
 	protected static final Logger LOG = LoggerFactory.getLogger("config");
-	
+
 	protected final String name;
 
 	Element element;
+	
+	Element extendsElement;
 
 	boolean valid;
-	
+
 	long loadTime;
-	
+
 	long startTime;
-	
+
 	volatile boolean isRunning = false;
 
-	protected Config(String name){
-		this.name = name;
-	}
+	String srcUri;
 
-	public final String toXml(){
-		return element.asXML();
-	}
+	private String reg;
 
-	String srcPath;
-
-	String reg;
-
-	boolean delMatchFailFile;
+	private boolean delMatchFailFile;
 
 	String scannerClzz;
 
@@ -68,29 +62,34 @@ public abstract class Config implements IConfig {
 
 	String executorClzz;
 
-	int executorMin;
+	private int threadMin;
 
-	int executorMax;
+	private int threadMax;
 
-	int executorAliveTime;
+	private int threadAliveTime;
 
-	int executorOverTime;
+	private int threadOverTime;
 
-	boolean executorCancelOnOverTime;
+	private boolean threadCancelOnOverTime;
+	
+	protected Config(String name){
+		this.name = name;
+	}
 
 	void load() throws Exception {
-		srcPath = ContextUtil.getEnvStr(XmlUtil.getString(element, "src.path", ""));
+		srcUri = ContextUtil.getEnvStr(XmlUtil.getString(element, "src.path", ""));
 		reg = XmlUtil.getString(element, "src.pattern", "");
 		delMatchFailFile = XmlUtil.getBoolean(element, "src.match.fail.del", false);
 		scannerClzz = XmlUtil.getString(element, "scanner", "");
 		scannerCron = XmlUtil.getString(element, "scanner.cron", "");
 		executorClzz = XmlUtil.getString(element, "executor", "");
-		executorMin = XmlUtil.getInt(element, "executor.min", 4, 1, 10);
-		executorMax = XmlUtil.getInt(element, "executor.max", 20, 10, 50);
-		executorAliveTime = XmlUtil.getInt(element, "executor.aliveTime.seconds", 30, 3, 300);
-		executorOverTime = XmlUtil.getInt(element, "executor.overTime.seconds", 3600, 300, 86400);
-		executorCancelOnOverTime = XmlUtil.getBoolean(element, "executor.overTime.cancle", false);
-		load(element.element("extended"));
+		threadMin = XmlUtil.getInt(element, "executor.min", 4, 1, 10);
+		threadMax = XmlUtil.getInt(element, "executor.max", 20, 10, 50);
+		threadAliveTime = XmlUtil.getInt(element, "executor.aliveTime.seconds", 30, 3, 300);
+		threadOverTime = XmlUtil.getInt(element, "executor.overTime.seconds", 3600, 300, 86400);
+		threadCancelOnOverTime = XmlUtil.getBoolean(element, "executor.overTime.cancle", false);
+		
+		loadExtends();
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -108,65 +107,53 @@ public abstract class Config implements IConfig {
 		refreshScanner();
 		return valid();
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	void refreshScanner() throws Exception{
 		Class<?> clzz = Class.forName(scannerClzz);
-		Class<?> pclzz = getParameterType(getClass());
-		Constructor<?> constructor = clzz.getDeclaredConstructor(String.class, pclzz);
+		Constructor<?> constructor = clzz.getDeclaredConstructor(String.class);
 		constructor.setAccessible(true); 
-		scanner = (Scanner)constructor.newInstance(name, this);
-	}
-	
-	private Class<?> getParameterType(Class<?> clzz) {
-		Type[] ts = clzz.getGenericInterfaces();
-		if(!ArrayUtils.isEmpty(ts)){
-			Class<?> clazz = (Class<?>)ts[0];
-			clazz.asSubclass(IConfig.class);
-			return clazz;
-		}
-		Class<?> sclzz = (Class<?>)clzz.getGenericSuperclass();
-		return getParameterType(sclzz);
+		scanner = (Scanner)constructor.newInstance(name);
 	}
 
 	@Override
 	public final boolean isRunning(){
 		return isRunning;
 	}
-	
+
 	@Override
 	public final boolean isDelMatchFailFile() {
 		return delMatchFailFile;
 	}
-	
+
 	@Override
 	public final String getUri() {
-		return srcPath;
+		return srcUri;
 	}
 
 	@Override
 	public final int getExecutorMin() {
-		return executorMin;
+		return threadMin;
 	}
 
 	@Override
 	public final int getExecutorMax() {
-		return executorMax;
+		return threadMax;
 	}
 
 	@Override
 	public final int getExecutorAliveTime() {
-		return executorAliveTime;
+		return threadAliveTime;
 	}
 
 	@Override
 	public final int getExecutorOverTime() {
-		return executorOverTime;
+		return threadOverTime;
 	}
 
 	@Override
 	public final boolean getInterruptOnOverTime() {
-		return executorCancelOnOverTime;
+		return threadCancelOnOverTime;
 	}
 
 	@Override
@@ -187,16 +174,73 @@ public abstract class Config implements IConfig {
 	}
 	
 	/**
-	 * 子类负责自定义加载<extended>中的配置
-	 * @param e
+	 * 获取config加载的xml
+	 * @return
+	 */
+	public final String getXml(){
+		return element.asXML();
+	}
+
+	/**
+	 * 子类自定义加载<extends>中的配置
 	 * @throws Exception
 	 */
-	protected void load(Element e) throws Exception {
+	protected abstract void loadExtends() throws Exception;
 
+	/**
+	 * 加载<extends>中的String配置
+	 * @param key
+	 * @param defaultValue
+	 * @return
+	 */
+	protected final String loadExtends(String key, String defaultValue) {
+		String value =  XmlUtil.getString(extendsElement, key, defaultValue);
+		entryMap.put(key, value);
+		return value;
+	}
+
+	/**
+	 * 加载<extends>中的int配置
+	 * @param key
+	 * @param defaultValue
+	 * @param min
+	 * @param max
+	 * @return
+	 */
+	protected final int loadExtends(String key, int defaultValue, int min, int max){
+		int value = XmlUtil.getInt(extendsElement, key, defaultValue, min, max);
+		entryMap.put(key, String.valueOf(value)); 
+		return value;
 	}
 	
 	/**
-	 * 子类负责自定义校验<extended>中的配置加载结果，默认返回true
+	 * 加载<extends>中的long配置
+	 * @param key
+	 * @param defaultValue
+	 * @param min
+	 * @param max
+	 * @return
+	 */
+	protected final long loadExtends(String key, long defaultValue, long min, long max){
+		long value = XmlUtil.getLong(extendsElement, key, defaultValue, min, max);
+		entryMap.put(key, String.valueOf(value)); 
+		return value;
+	}
+	
+	/**
+	 * 加载<extends>中的boolean配置
+	 * @param key
+	 * @param defaultValue
+	 * @return
+	 */
+	protected final boolean loadExtends(String key, boolean defaultValue){
+		boolean value = XmlUtil.getBoolean(extendsElement, key, defaultValue);
+		entryMap.put(key, String.valueOf(value)); 
+		return value;
+	}
+	
+	/**
+	 * 子类自定义校验<extends>中的配置加载结果，默认返回true
 	 * @return
 	 * @throws Exception
 	 */
@@ -204,46 +248,26 @@ public abstract class Config implements IConfig {
 		return true;
 	}
 	
-	//TODO
+	private Map<String,String> entryMap = new HashMap<>();
+	
 	@Override
-	public boolean equals(Object o){
-		if(!(o instanceof Config)){
+	public final boolean equals(Object object){
+		if(!(object instanceof Config)){
 			return false;
 		}
-		if(o == this){
+		if(object == this){
 			return true;
 		}
-		Config c = (Config)o;
-		return srcPath.equals(c.srcPath)
-				&& reg.equals(c.reg)
-				&& delMatchFailFile == c.delMatchFailFile
-				&& scannerClzz.equals(c.scannerClzz)
-				&& scannerCron.equals(c.scannerCron)
-				&& executorClzz.equals(c.executorClzz)
-				&& executorMin == c.executorMin
-				&& executorMax == c.executorMax
-				&& executorAliveTime == c.executorAliveTime
-				&& executorOverTime == c.executorOverTime
-				&& executorCancelOnOverTime == c.executorCancelOnOverTime;
+		Config config = (Config)object;
+		return entryMap.equals(config.entryMap);
 	}
-	
-	//TODO
+
 	@Override
-	public String toString() {
+	public final String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("type=" + getTypeName());
 		builder.append("\nvalid=" + valid);
-		builder.append("\nsrc.path=" + srcPath);
-		builder.append("\nsrc.pattern=" + reg);
-		builder.append("\nsrc.match.fail.del=" + delMatchFailFile);
-		builder.append("\nscanner=" + scannerClzz);
-		builder.append("\nscanner.cron=" + scannerCron);
-		builder.append("\nexecutor=" + executorClzz);
-		builder.append("\nexecutor.min=" + executorMin);
-		builder.append("\nexecutor.max=" + executorMax);
-		builder.append("\nexecutor.aliveTime.seconds=" + executorAliveTime);
-		builder.append("\nexecutor.overTime.seconds=" + executorOverTime);
-		builder.append("\nexecutor.overTime.cancle=" + executorCancelOnOverTime);
+		builder.append("\n" + entryMap);
 		return builder.toString();
 	}
 

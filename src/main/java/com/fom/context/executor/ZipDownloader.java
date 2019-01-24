@@ -16,7 +16,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.fom.context.exception.WarnException;
-import com.fom.context.executor.config.IZipDownloaderConfig;
 import com.fom.context.executor.helper.DownloaderHelper;
 import com.fom.log.LoggerFactory;
 import com.fom.util.IoUtil;
@@ -80,7 +79,7 @@ public class ZipDownloader implements Executor {
 	 * @param config
 	 * @param helper
 	 */
-	public ZipDownloader(String name, List<String> urlList, IZipDownloaderConfig config, DownloaderHelper helper) {
+	public ZipDownloader(String name, List<String> urlList, ZipDownloaderConfig config, DownloaderHelper helper) {
 		if(StringUtils.isBlank(name) || config == null || helper == null || urlList == null) {
 			throw new IllegalArgumentException();
 		}

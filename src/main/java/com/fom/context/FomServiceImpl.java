@@ -16,8 +16,6 @@ import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 import org.springframework.stereotype.Service;
 
-import com.fom.web.service.FomService;
-
 /**
  * 
  * @author shanhm
@@ -63,7 +61,7 @@ public class FomServiceImpl implements FomService {
 	public String xml(String name) throws Exception{
 		Config config = ConfigManager.get(name);
 		SAXReader reader = new SAXReader();
-		StringReader in=new StringReader(config.toXml());  
+		StringReader in=new StringReader(config.getXml());  
 		Document doc=reader.read(in); 
 		OutputFormat formater=OutputFormat.createPrettyPrint();  
 		formater.setEncoding("UTF-8");  
@@ -254,7 +252,7 @@ public class FomServiceImpl implements FomService {
 		if(config == null){
 			return map;
 		}
-		map.put("path", config.srcPath);
+		map.put("path", config.srcUri);
 		if(match){
 			map.put("srcs", config.scanner.filter(config));
 		}else{

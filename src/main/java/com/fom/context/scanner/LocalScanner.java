@@ -19,8 +19,8 @@ import com.fom.context.IConfig;
  */
 public class LocalScanner<E extends IConfig> extends Scanner<E> {
 
-	protected LocalScanner(String name, E config) {
-		super(name, config);
+	protected LocalScanner(String name) {
+		super(name);
 	}
 
 	@Override

@@ -10,7 +10,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import com.fom.context.exception.WarnException;
-import com.fom.context.executor.config.IImporterConfig;
 import com.fom.context.executor.helper.ImporterHelper;
 import com.fom.context.executor.reader.Reader;
 import com.fom.log.LoggerFactory;
@@ -42,7 +41,7 @@ public class Importer implements Executor {
 	protected final ImporterHelper helper;
 
 	@SuppressWarnings("rawtypes")
-	public Importer(String name, String sourceUri, IImporterConfig config, ImporterHelper helper){
+	public Importer(String name, String sourceUri, ImporterConfig config, ImporterHelper helper){
 		this.name = name;
 		this.log = LoggerFactory.getLogger(name);
 

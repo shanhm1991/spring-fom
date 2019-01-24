@@ -8,6 +8,6 @@ import com.fom.context.IConfig;
  * @date 2018年12月23日
  *
  */
-public interface IFtpConfig extends IConfig {
+public interface HttpConfig extends IConfig {
 
 }

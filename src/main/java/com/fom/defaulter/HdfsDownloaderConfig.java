@@ -3,28 +3,20 @@ package com.fom.defaulter;
 import java.io.File;
 
 import org.apache.hadoop.fs.FileSystem;
-import org.dom4j.Element;
 
 import com.fom.context.Config;
 import com.fom.context.ContextUtil;
-import com.fom.context.executor.config.IDownloaderConfig;
-import com.fom.context.scanner.IHdfsConfig;
+import com.fom.context.executor.DownloaderConfig;
+import com.fom.context.scanner.HdfsConfig;
 import com.fom.util.HdfsUtil;
-import com.fom.util.XmlUtil;
 
 /**
- * hdfs.master hdfs集群主节点ip:port<br>
- * hdfs.slave hdfs集群副节点ip:port<br>
  * 
  * @author shanhm
  * @date 2018年12月23日
  *
  */
-public class HdfsDownloaderConfig extends Config implements IHdfsConfig, IDownloaderConfig {
-	
-	private String hdfsMaster;
-	
-	private String hdfsSlave;
+public class HdfsDownloaderConfig extends Config implements HdfsConfig, DownloaderConfig {
 	
 	private FileSystem fs;
 	
@@ -40,15 +32,16 @@ public class HdfsDownloaderConfig extends Config implements IHdfsConfig, IDownlo
 		super(name);
 	}
 	
-	protected void load(Element e) throws Exception {
-		String hdfsMaster = XmlUtil.getString(e, "hdfs.master", "");
-		String hdfsSlave = XmlUtil.getString(e, "hdfs.slave", "");
+	@Override
+	protected void loadExtends() throws Exception {
+		String hdfsMaster = loadExtends("hdfs.master", "");
+		String hdfsSlave = loadExtends("hdfs.slave", "");
 		fs = HdfsUtil.getFileSystem(hdfsMaster, hdfsSlave);
-		signalFileName = XmlUtil.getString(e, "hdfs.signalFile", "");
+		signalFileName = loadExtends("hdfs.signalFile", "");
 		
-		isDelSrc = XmlUtil.getBoolean(e, "downloader.isSrcDel", false);
-		isWithTemp = XmlUtil.getBoolean(e, "downloader.isWithTemp", true);
-		destPath = ContextUtil.getEnvStr(XmlUtil.getString(e, "downloader.desPath", ""));
+		isDelSrc = loadExtends("downloader.isSrcDel", false);
+		isWithTemp = loadExtends("downloader.isWithTemp", false);
+		destPath = ContextUtil.getEnvStr(loadExtends("downloader.desPath", ""));
 	}
 	
 	@Override
@@ -89,31 +82,5 @@ public class HdfsDownloaderConfig extends Config implements IHdfsConfig, IDownlo
 	@Override
 	public boolean isDelSrc() {
 		return isDelSrc;
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("\nhdfs.master=" + hdfsMaster);
-		builder.append("\nhdfs.slave=" + hdfsSlave);
-		return builder.toString();
-	}
-	
-	@Override
-	public boolean equals(Object o){
-		if(!(o instanceof HdfsDownloaderConfig)){
-			return false;
-		}
-		if(o == this){
-			return true;
-		}
-		
-		HdfsDownloaderConfig c = (HdfsDownloaderConfig)o; 
-		if(!super.equals(c)){
-			return false;
-		}
-		
-		return hdfsMaster.equals(c.hdfsMaster)
-				&& hdfsSlave.equals(c.hdfsSlave);
 	}
 }

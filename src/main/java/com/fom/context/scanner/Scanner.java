@@ -20,8 +20,6 @@ import com.fom.context.IConfig;
 import com.fom.log.LoggerFactory;
 
 /**
- * 由于java对泛型的擦除机制，在反射构造时对Scanner的泛型参数添加了接口类型约束<br>
- * E的上限必须是IConfig或其子接口，构造器的E获取最关系最近的一个接口
  * 
  * @author shanhm
  * @date 2018年12月23日
@@ -40,10 +38,9 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 	//scanner私有线程池，在Scanner结束时shutdown(),等待任务线程自行响应中断
 	private TimedExecutorPool pool = new TimedExecutorPool(4,30,new LinkedBlockingQueue<Runnable>(50));
 
-	protected Scanner(String name, E config){
+	protected Scanner(String name){
 		this.name = name;
-		this.log = LoggerFactory.getLogger(config.getType() + "." + name);
-		this.setName("scanner[" + config.getUri() + "]");
+		this.log = LoggerFactory.getLogger(name);
 		pool.allowCoreThreadTimeOut(true);
 	}
 
@@ -58,7 +55,7 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 				pool.shutdownNow();
 				return;
 			}
-			Thread.currentThread().setName("scanner[" + config.getUri() + "]");
+			this.setName("scanner[" + config.getUri() + "]");
 			if(pool.getCorePoolSize() != config.getExecutorMin()){
 				pool.setCorePoolSize(config.getExecutorMin());
 			}

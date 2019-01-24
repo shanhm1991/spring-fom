@@ -13,7 +13,6 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 
 import com.fom.context.exception.WarnException;
-import com.fom.context.executor.config.ILocalZipImporterConfig;
 import com.fom.context.executor.helper.ImporterHelper;
 import com.fom.context.executor.reader.Reader;
 import com.fom.log.LoggerFactory;
@@ -49,12 +48,12 @@ public class LocalZipImporter implements Executor {
 
 	private List<String> nameList;
 	
-	private final ILocalZipImporterConfig config;
+	private final LocalZipImporterConfig config;
 	
 	protected final DecimalFormat numFormat  = new DecimalFormat("#.##");
 	
 	@SuppressWarnings("rawtypes")
-	public LocalZipImporter(String name, String sourceUri, ILocalZipImporterConfig config, ImporterHelper helper) {
+	public LocalZipImporter(String name, String sourceUri, LocalZipImporterConfig config, ImporterHelper helper) {
 		this.name = name;
 		this.log = LoggerFactory.getLogger(name);
 		this.config = config;

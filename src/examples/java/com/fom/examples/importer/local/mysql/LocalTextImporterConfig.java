@@ -1,10 +1,7 @@
 package com.fom.examples.importer.local.mysql;
 
-import org.dom4j.Element;
-
 import com.fom.context.Config;
-import com.fom.context.executor.config.IImporterConfig;
-import com.fom.util.XmlUtil;
+import com.fom.context.executor.ImporterConfig;
 
 /**
  * 
@@ -12,12 +9,17 @@ import com.fom.util.XmlUtil;
  * @date 2018年12月23日
  *
  */
-public class LocalImporterConfig extends Config implements IImporterConfig {
+public class LocalTextImporterConfig extends Config implements ImporterConfig {
 	
 	private int batch;
 
-	protected LocalImporterConfig(String name) {
+	protected LocalTextImporterConfig(String name) {
 		super(name);
+	}
+	
+	@Override
+	protected void loadExtends() throws Exception {
+		batch = loadExtends("importer.batch", 5000, 1, 50000);
 	}
 
 	@Override
@@ -35,8 +37,4 @@ public class LocalImporterConfig extends Config implements IImporterConfig {
 		return batch;
 	}
 	
-	@Override
-	protected void load(Element e) throws Exception {
-		batch = XmlUtil.getInt(e, "importer.batch", 5000, 1, 50000);
-	}
 }

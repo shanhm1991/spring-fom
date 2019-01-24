@@ -1,4 +1,4 @@
-package com.fom.context.executor.config;
+package com.fom.context.executor;
 
 
 /**
@@ -7,7 +7,7 @@ package com.fom.context.executor.config;
  * @date 2018年12月23日
  *
  */
-public interface ILocalZipImporterConfig extends IImporterConfig {
+public interface LocalZipImporterConfig extends ImporterConfig {
 	
 	/**
 	 * 通过名称匹配zip子文件是否需要处理

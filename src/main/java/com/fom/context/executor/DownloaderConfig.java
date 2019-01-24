@@ -1,4 +1,4 @@
-package com.fom.context.executor.config;
+package com.fom.context.executor;
 
 /**
  * 
@@ -6,7 +6,7 @@ package com.fom.context.executor.config;
  * @date 2019年1月23日
  *
  */
-public interface IDownloaderConfig {
+public interface DownloaderConfig {
 	
 	/**
 	 * 获取下载文件的资源uri
