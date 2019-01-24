@@ -15,14 +15,14 @@ public interface ImporterHelper<V> {
 	
 	/**
 	 * 获取对应文件的reader
-	 * @param uri
+	 * @param sourceUri
 	 * @return
 	 * @throws Exception
 	 */
-	Reader getReader(String uri) throws Exception;
+	Reader getReader(String sourceUri) throws Exception;
 
 	/**
-	 * 解析行数据
+	 * 解析行数据，并将结果V添加到lineDatas中
 	 * @param lineDatas
 	 * @param line
 	 * @param batchTime
@@ -31,7 +31,7 @@ public interface ImporterHelper<V> {
 	void praseLineData(List<V> lineDatas, String line, long batchTime) throws Exception;
 
 	/**
-	 * 批处理行数据解析结果
+	 * 批处理行数据解析结果，将lineDatas中的V入库
 	 * @param lineDatas
 	 * @param batchTime
 	 * @throws Exception
@@ -42,23 +42,23 @@ public interface ImporterHelper<V> {
 	
 	/**
 	 * 根据uri删除文件
-	 * @param uri
+	 * @param sourceUri
 	 * @return
 	 * @throws Exception
 	 */
-	boolean delete(String uri);
+	boolean delete(String sourceUri);
 	
 	/**
 	 * 获取指定uri的文件的大小
-	 * @param uri
+	 * @param sourceUri
 	 * @return
 	 */
-	long getFileSize(String uri);
+	long getFileSize(String sourceUri);
 	
 	/**
 	 * 获取指定uri的文件的名称
-	 * @param uri
+	 * @param sourceUri
 	 * @return
 	 */
-	String getFileName(String uri);
+	String getFileName(String sourceUri);
 }

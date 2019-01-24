@@ -2,7 +2,7 @@ package com.fom.examples.importer.local.oracle;
 
 import org.dom4j.Element;
 
-import com.fom.context.executor.IZipImporterConfig;
+import com.fom.context.executor.ILocalZipImporterConfig;
 import com.fom.util.XmlUtil;
 
 /**
@@ -18,7 +18,7 @@ import com.fom.util.XmlUtil;
  * @date 2018年12月23日
  *
  */
-public class LocalZipImporterConfig extends IZipImporterConfig {
+public class LocalZipImporterConfig extends ILocalZipImporterConfig {
 
 	private String myconf;
 

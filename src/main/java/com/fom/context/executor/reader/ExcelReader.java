@@ -1,7 +1,6 @@
 package com.fom.context.executor.reader;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * 
@@ -12,28 +11,14 @@ import java.io.InputStream;
 public class ExcelReader implements Reader {
 
 	@Override
-	public void close() throws IOException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public String readLine() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void init(String uri) {
+	public void close() throws IOException {
 		// TODO Auto-generated method stub
 		
 	}
-
-	@Override
-	public void init(InputStream in) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
 }

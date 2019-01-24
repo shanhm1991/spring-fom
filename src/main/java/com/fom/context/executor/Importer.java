@@ -27,39 +27,39 @@ public class Importer implements Executor {
 
 	protected final String name;
 
-	protected final File logFile;
-
-	protected final String uri;
-
-	protected final String srcName;
-
-	protected final long srcSize;
-
 	protected final int batch;
+	
+	protected final String sourceUri;
+
+	protected final String sourceName;
+
+	protected final long sourceSize;
+
+	protected final File logFile;
 
 	@SuppressWarnings("rawtypes")
 	protected final ImporterHelper helper;
 
 	@SuppressWarnings("rawtypes")
-	public Importer(String name, String uri, int batch, ImporterHelper helper){
+	public Importer(String name, String sourceUri, IImporterConfig config, ImporterHelper helper){
 		this.name = name;
 		this.log = LoggerFactory.getLogger(name);
 
-		this.batch = batch;
+		this.batch = config.getBatch();
 		this.helper = helper;
 
-		this.uri = uri;
-		this.srcName = helper.getFileName(uri);
-		this.srcSize = helper.getFileSize(uri);
+		this.sourceUri = sourceUri;
+		this.sourceName = helper.getFileName(sourceUri);
+		this.sourceSize = helper.getFileSize(sourceUri);
 		this.logFile = new File(System.getProperty("import.progress") 
-				+ File.separator + name + File.separator + srcName + ".log");
+				+ File.separator + name + File.separator + sourceName + ".log");
 	}
 
 	@Override
 	public final void exec() throws Exception {
 		long sTime = System.currentTimeMillis();
 		int lineIndex = 0;
-		if(!logFile.exists()){
+		if(!logFile.exists()){ //TODO 创建父目录
 			if(!logFile.createNewFile()){
 				throw new WarnException("创建日志文件失败.");
 			}
@@ -76,8 +76,8 @@ public class Importer implements Executor {
 
 		read(lineIndex);
 		log.info("处理文件结束(" 
-				+ new DecimalFormat("#.##").format(srcSize) + "KB),耗时=" + (System.currentTimeMillis() - sTime) + "ms");
-		if(!helper.delete(uri)){ 
+				+ new DecimalFormat("#.##").format(sourceSize) + "KB),耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+		if(!helper.delete(sourceUri)){ 
 			throw new WarnException("删除文件失败."); 
 		}
 		if(!logFile.delete()){
@@ -91,7 +91,7 @@ public class Importer implements Executor {
 		String line = "";
 		Reader reader = null;
 		try{
-			reader = helper.getReader(uri);
+			reader = helper.getReader(sourceUri);
 			List lineDatas = new LinkedList<>(); 
 			long batchTime = System.currentTimeMillis();
 			while ((line = reader.readLine()) != null) {
@@ -101,7 +101,7 @@ public class Importer implements Executor {
 				}
 				if(batch > 0 && lineDatas.size() >= batch){
 					helper.batchProcessLineData(lineDatas, batchTime); 
-					logProcess(uri, lineIndex);
+					logProcess(sourceUri, lineIndex);
 					lineDatas.clear();
 					batchTime = System.currentTimeMillis();
 				}
@@ -110,7 +110,7 @@ public class Importer implements Executor {
 			if(!lineDatas.isEmpty()){
 				helper.batchProcessLineData(lineDatas, batchTime); 
 			}
-			logProcess(uri, lineIndex);
+			logProcess(sourceUri, lineIndex);
 		}finally{
 			IoUtil.close(reader);
 		}

@@ -1,7 +1,6 @@
 package com.fom.context.executor.reader;
 
 import java.io.Closeable;
-import java.io.InputStream;
 
 /**
  * 
@@ -11,10 +10,6 @@ import java.io.InputStream;
  */
 public interface Reader extends Closeable {
 	
-	void init(String uri);
-	
-	void init(InputStream in);
-
-	String readLine();
+	String readLine() throws Exception;
 	
 }

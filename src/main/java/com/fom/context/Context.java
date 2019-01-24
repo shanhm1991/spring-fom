@@ -28,7 +28,7 @@ public abstract class Context<E extends Config> extends Thread {
 	/**
 	 * 目标资源文件的uri
 	 */
-	protected final String uri;
+	protected final String sourceUri;
 	
 	/**
 	 * new File(uri)
@@ -40,11 +40,11 @@ public abstract class Context<E extends Config> extends Thread {
 	 */
 	protected String srcName;
 
-	protected Context(String name, String uri) { 
+	protected Context(String name, String sourceUri) { 
 		this.name = name;
 		this.log = LoggerFactory.getLogger(name);
-		this.uri = uri;
-		this.srcFile = new File(uri);
+		this.sourceUri = sourceUri;
+		this.srcFile = new File(sourceUri);
 		this.srcName = srcFile.getName();
 	}
 

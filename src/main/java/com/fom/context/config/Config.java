@@ -94,51 +94,6 @@ public abstract class Config implements IConfig {
 		load(element.element("extended"));
 	}
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("type=" + getTypeName());
-		builder.append("\nvalid=" + valid);
-		builder.append("\nsrc.path=" + srcPath);
-		builder.append("\nsrc.pattern=" + reg);
-		builder.append("\nsrc.match.fail.del=" + delMatchFailFile);
-		builder.append("\nscanner=" + scannerClzz);
-		builder.append("\nscanner.cron=" + scannerCron);
-		builder.append("\nexecutor=" + executorClzz);
-		builder.append("\nexecutor.min=" + executorMin);
-		builder.append("\nexecutor.max=" + executorMax);
-		builder.append("\nexecutor.aliveTime.seconds=" + executorAliveTime);
-		builder.append("\nexecutor.overTime.seconds=" + executorOverTime);
-		builder.append("\nexecutor.overTime.cancle=" + executorCancelOnOverTime);
-		return builder.toString();
-	}
-
-	@Override
-	public boolean equals(Object o){
-		if(!(o instanceof Config)){
-			return false;
-		}
-		if(o == this){
-			return true;
-		}
-		Config c = (Config)o;
-		return srcPath.equals(c.srcPath)
-				&& reg.equals(c.reg)
-				&& delMatchFailFile == c.delMatchFailFile
-				&& scannerClzz.equals(c.scannerClzz)
-				&& scannerCron.equals(c.scannerCron)
-				&& executorClzz.equals(c.executorClzz)
-				&& executorMin == c.executorMin
-				&& executorMax == c.executorMax
-				&& executorAliveTime == c.executorAliveTime
-				&& executorOverTime == c.executorOverTime
-				&& executorCancelOnOverTime == c.executorCancelOnOverTime;
-	}
-
-	protected void load(Element extendedElement) throws Exception {
-
-	}
-
 	@SuppressWarnings("rawtypes")
 	Scanner scanner;
 
@@ -175,10 +130,6 @@ public abstract class Config implements IConfig {
 		return getParameterType(sclzz);
 	}
 
-	protected boolean valid() throws Exception {
-		return true;
-	}
-	
 	@Override
 	public final boolean isRunning(){
 		return isRunning;
@@ -236,4 +187,65 @@ public abstract class Config implements IConfig {
 		return pattern.matcher(srcName).find();
 	}
 	
+	/**
+	 * 子类负责自定义加载<extended>中的配置
+	 * @param e
+	 * @throws Exception
+	 */
+	protected void load(Element e) throws Exception {
+
+	}
+	
+	/**
+	 * 子类负责自定义校验<extended>中的配置加载结果，默认返回true
+	 * @return
+	 * @throws Exception
+	 */
+	protected boolean valid() throws Exception {
+		return true;
+	}
+	
+	//TODO
+	@Override
+	public boolean equals(Object o){
+		if(!(o instanceof Config)){
+			return false;
+		}
+		if(o == this){
+			return true;
+		}
+		Config c = (Config)o;
+		return srcPath.equals(c.srcPath)
+				&& reg.equals(c.reg)
+				&& delMatchFailFile == c.delMatchFailFile
+				&& scannerClzz.equals(c.scannerClzz)
+				&& scannerCron.equals(c.scannerCron)
+				&& executorClzz.equals(c.executorClzz)
+				&& executorMin == c.executorMin
+				&& executorMax == c.executorMax
+				&& executorAliveTime == c.executorAliveTime
+				&& executorOverTime == c.executorOverTime
+				&& executorCancelOnOverTime == c.executorCancelOnOverTime;
+	}
+	
+	//TODO
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("type=" + getTypeName());
+		builder.append("\nvalid=" + valid);
+		builder.append("\nsrc.path=" + srcPath);
+		builder.append("\nsrc.pattern=" + reg);
+		builder.append("\nsrc.match.fail.del=" + delMatchFailFile);
+		builder.append("\nscanner=" + scannerClzz);
+		builder.append("\nscanner.cron=" + scannerCron);
+		builder.append("\nexecutor=" + executorClzz);
+		builder.append("\nexecutor.min=" + executorMin);
+		builder.append("\nexecutor.max=" + executorMax);
+		builder.append("\nexecutor.aliveTime.seconds=" + executorAliveTime);
+		builder.append("\nexecutor.overTime.seconds=" + executorOverTime);
+		builder.append("\nexecutor.overTime.cancle=" + executorCancelOnOverTime);
+		return builder.toString();
+	}
+
 }

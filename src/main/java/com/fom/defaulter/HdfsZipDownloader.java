@@ -30,7 +30,7 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends Contex
 
 	@Override
 	protected final void exec(E config) throws Exception {
-		List<String> pathList = HdfsUtil.listPath(config.getFs(), uri, new PathFilter(){
+		List<String> pathList = HdfsUtil.listPath(config.getFs(), sourceUri, new PathFilter(){
 			@Override
 			public boolean accept(Path path) {
 				if(StringUtils.isBlank(config.getSignalFileName())){
@@ -46,7 +46,7 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends Contex
 
 	@Override
 	protected void onComplete(final E config) throws Exception{ 
-		if(config.isDelSrc() && !helper.delete(uri)){
+		if(config.isDelSrc() && !helper.delete(sourceUri)){
 			throw new WarnException("删除源目录失败."); 
 		}
 	}

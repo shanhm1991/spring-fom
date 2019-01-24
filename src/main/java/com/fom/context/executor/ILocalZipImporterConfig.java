@@ -6,7 +6,7 @@ package com.fom.context.executor;
  * @date 2018年12月23日
  *
  */
-public interface IZipImporterConfig extends IImporterConfig {
+public interface ILocalZipImporterConfig extends IImporterConfig {
 
 //	protected ZipImporterConfig(String name) {
 //		super(name);

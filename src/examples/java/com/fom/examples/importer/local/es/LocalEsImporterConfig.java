@@ -5,6 +5,7 @@ import java.io.File;
 import org.dom4j.Element;
 
 import com.fom.context.ContextUtil;
+import com.fom.context.config.Config;
 import com.fom.context.executor.IImporterConfig;
 import com.fom.util.XmlUtil;
 
@@ -14,7 +15,9 @@ import com.fom.util.XmlUtil;
  * @date 2019年1月15日
  *
  */
-public class LocalEsImporterConfig extends IImporterConfig {
+public class LocalEsImporterConfig extends Config implements IImporterConfig {
+	
+	private int batch;
 	
 	private String esIndex;
 	
@@ -24,6 +27,24 @@ public class LocalEsImporterConfig extends IImporterConfig {
 	
 	private File esJsonFile;
 	
+	protected LocalEsImporterConfig(String name) {
+		super(name);
+	}
+	
+	@Override
+	public String getType() {
+		return TYPE_IMPORTER;
+	}
+
+	@Override
+	public String getTypeName() {
+		return TYPENAME_IMPORTER;
+	}
+	
+	@Override
+	public int getBatch() {
+		return batch;
+	}
 
 	public String getEsIndex() {
 		return esIndex;
@@ -41,23 +62,15 @@ public class LocalEsImporterConfig extends IImporterConfig {
 		return esJsonFile;
 	}
 
-	protected LocalEsImporterConfig(String name) {
-		super(name);
+	
+	@Override
+	protected void load(Element e) throws Exception {
+		batch = XmlUtil.getInt(e, "importer.batch", 5000, 1, 50000);
+		esIndex = XmlUtil.getString(e, "es.index", ""); 
+		esType = XmlUtil.getString(e, "es.type", ""); 
+		esJson = XmlUtil.getString(e, "es.json", ""); 
 	}
 	
-	/**
-	 * 继承自Config，自定义加载<extended>中的配置项
-	 */
-	@Override
-	protected void load(Element extendedElement) throws Exception {
-		esIndex = XmlUtil.getString(extendedElement, "es.index", ""); 
-		esType = XmlUtil.getString(extendedElement, "es.type", ""); 
-		esJson = XmlUtil.getString(extendedElement, "es.json", ""); 
-	}
-
-	/**
-	 * 继承自Config，自定义校验<extended>中的配置项
-	 */
 	@Override
 	protected boolean valid() throws Exception {
 		esJsonFile = new File(ContextUtil.getRealPath(esJson));
@@ -68,21 +81,6 @@ public class LocalEsImporterConfig extends IImporterConfig {
 		return true;
 	}
 	
-	/**
-	 * 需要继承父类复写，在打日志的时候以及页面展示的时候即调用的toString()
-	 */
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("\nes.index=" + esIndex);
-		builder.append("\nes.type=" + esType);
-		builder.append("\nes.json=" + esJson);
-		return builder.toString();
-	}
-	
-	/**
-	 * 需要继承父类复写，再修改配置时判断config配置项有没有变化时即调用的equals(Object o)
-	 */
 	@Override
 	public boolean equals(Object o) {
 		if(!(o instanceof LocalEsImporterConfig)){
@@ -102,4 +100,14 @@ public class LocalEsImporterConfig extends IImporterConfig {
 				&& esType.equals(config.esType)
 				&& esJson.equals(config.esJson); 
 	}
+	
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("\nes.index=" + esIndex);
+		builder.append("\nes.type=" + esType);
+		builder.append("\nes.json=" + esJson);
+		return builder.toString();
+	}
+
 }

@@ -13,7 +13,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 
 import com.fom.context.exception.WarnException;
-import com.fom.context.executor.helper.importer.ZipImporterHelper;
+import com.fom.context.executor.helper.importer.LocalZipImporterHelper;
 import com.fom.context.executor.reader.Reader;
 import com.fom.log.LoggerFactory;
 import com.fom.util.IoUtil;
@@ -25,7 +25,7 @@ import com.fom.util.ZipUtil;
  * @date 2018年12月23日
  *
  */
-public class ZipImporter implements Executor {
+public class LocalZipImporter implements Executor {
 	
 	protected final Logger log;
 
@@ -42,7 +42,7 @@ public class ZipImporter implements Executor {
 	protected final int batch;
 	
 	@SuppressWarnings("rawtypes")
-	protected final ZipImporterHelper helper;
+	protected final LocalZipImporterHelper helper;
 
 	protected final File unzipDir;
 
@@ -53,7 +53,7 @@ public class ZipImporter implements Executor {
 	protected final DecimalFormat numFormat  = new DecimalFormat("#.##");
 	
 	@SuppressWarnings("rawtypes")
-	public ZipImporter(String name, String uri, int batch, ZipImporterHelper helper) {
+	public LocalZipImporter(String name, String uri, int batch, LocalZipImporterHelper helper) {
 		this.name = name;
 		this.log = LoggerFactory.getLogger(name);
 		
