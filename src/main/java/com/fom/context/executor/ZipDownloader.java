@@ -7,6 +7,7 @@ import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedOutputStream;
 import java.util.zip.ZipOutputStream;
@@ -30,37 +31,23 @@ import com.fom.util.ZipUtil;
  */
 public class ZipDownloader implements Executor {
 
+	private static AtomicInteger num = new AtomicInteger(0);
+
 	protected final Logger log;
-	
-	protected final String name;
-	
-	protected final List<String> urlList;
-	
-	protected final DownloaderHelper helper;
 
-	/**
-	 * zip文件基础名称(不带后缀)
-	 */
-	protected final String zipName;
+	private List<String> uriList;
 
-	/**
-	 * zip最大压缩文件个数
-	 */
-	protected final int entryMax;
+	private ZipDownloaderConfig config;
 
-	/**
-	 * zip文件最大字节数
-	 */
-	protected final long sizeMax;
+	private DownloaderHelper helper;
+
+	private String zipName;
+
+	private String downloadPath;
+
+	private File downloadZip; 
 
 
-	protected final String tempPath;
-
-	protected final String destPath;
-
-	protected final File tempZip;
-
-	protected final boolean isDelSrc;
 
 	//已编入的序列的zip文件的最大序号
 	protected int index;
@@ -75,36 +62,25 @@ public class ZipDownloader implements Executor {
 
 	/**
 	 * 
-	 * @param name
-	 * @param urlList
-	 * @param config
-	 * @param helper
+	 * @param name 模块名称
+	 * @param zipName 指定下载打包zip的名称(不带后缀)
+	 * @param uriList 下载资源uri列表
+	 * @param config ZipDownloaderConfig
+	 * @param helper DownloaderHelper
 	 */
-	public ZipDownloader(String name, List<String> urlList, ZipDownloaderConfig config, DownloaderHelper helper) {
-		if(StringUtils.isBlank(name) || config == null || helper == null || urlList == null) {
+	public ZipDownloader(String name, String zipName, List<String> uriList, ZipDownloaderConfig config, DownloaderHelper helper) {
+		if(StringUtils.isBlank(name) || StringUtils.isBlank(zipName) 
+				|| config == null || helper == null || uriList == null) {
 			throw new IllegalArgumentException();
 		}
-		
-		this.name = name;
 		this.log = LoggerFactory.getLogger(name);
+		this.zipName = zipName;
+		this.uriList = uriList;
+		this.config = config;
 		this.helper = helper;
-		this.urlList = urlList;
-		
-		this.zipName = config.getDestName();
-		this.entryMax = config.getEntryMax();
-		this.sizeMax = config.getSizeMax();
-		this.destPath = config.getDestPath();
-		this.isDelSrc = config.isDelSrc();
-		if(config.isWithTemp()){
-			this.tempPath = System.getProperty("download.temp") + File.separator + name + File.separator + zipName;
-		}else{
-			this.tempPath = destPath + File.separator + zipName;
-		}
-		File path = new File(tempPath);
-		if(!path.exists() && !path.mkdirs()){
-			throw new IllegalArgumentException("无法创建临时目录:" + tempPath); 
-		}
-		tempZip = new File(tempPath + File.separator + zipName + ".temp.zip");
+		this.downloadPath = System.getProperty("download.temp")
+				+ File.separator + name + File.separator + zipName + (num.incrementAndGet() / 1000000);
+		this.downloadZip = new File(downloadPath + File.separator + zipName + ".zip");
 	}
 
 	/**
@@ -113,18 +89,24 @@ public class ZipDownloader implements Executor {
 	 */
 	@Override
 	public void exec() throws Exception {
-		if(urlList.isEmpty()){
+		if(uriList.isEmpty()){
 			return;
 		}
-		boolean isRetry = tempZip.exists();
+		
+		File file = new File(downloadPath);
+		if(!file.exists() && !file.mkdirs()){
+			throw new IllegalArgumentException("下载目录创建失败:" + downloadPath); 
+		}
+		
+		boolean isRetry = downloadZip.exists();
 		ZipOutputStream zipOutStream = null;
 		boolean isStreamClosed = true;
 
 		renameTempZip(isRetry, false); 
 		try{
-			for(String path : urlList){
+			for(String path : uriList){
 				if(isStreamClosed){
-					zipOutStream = new ZipOutputStream(new CheckedOutputStream(new FileOutputStream(tempZip), new CRC32()));
+					zipOutStream = new ZipOutputStream(new CheckedOutputStream(new FileOutputStream(downloadZip), new CRC32()));
 					isStreamClosed = false; 
 				}
 				long sTime = System.currentTimeMillis();
@@ -137,7 +119,7 @@ public class ZipDownloader implements Executor {
 				entrySet.add(name); //TODO
 				log.info("下载文件结束:" + name + "(" 
 						+ numFormat.format(size / 1024.0) + "KB), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
-				if(++entryContents >= entryMax || tempZip.length() >= sizeMax){
+				if(++entryContents >= config.getEntryMax() || downloadZip.length() >= config.getSizeMax()){
 					//流管道关闭，如果继续写文件需要重新打开
 					IoUtil.close(zipOutStream);
 					isStreamClosed = true; 
@@ -158,24 +140,24 @@ public class ZipDownloader implements Executor {
 	 * @throws Exception
 	 */
 	private void renameTempZip(boolean isRetry, boolean isLast) throws Exception{ 
-		if(!ZipUtil.valid(tempZip)){ 
-			if(tempZip.exists() && !tempZip.delete()){
-				throw new WarnException(tempZip.getName() + "已经损坏, 删除失败."); 
+		if(!ZipUtil.valid(downloadZip)){ 
+			if(downloadZip.exists() && !downloadZip.delete()){
+				throw new WarnException(downloadZip.getName() + "已经损坏, 删除失败."); 
 			}
 			entrySet = new HashSet<String>();
 			return;
 		}
 
 		if(isRetry){
-			entrySet = ZipUtil.getEntrySet(tempZip);
+			entrySet = ZipUtil.getEntrySet(downloadZip);
 			entryContents = getTempZipContents(entrySet);
 		}
-		if(!isLast && entryContents < entryMax && tempZip.length() < sizeMax){
+		if(!isLast && entryContents < config.getEntryMax() && downloadZip.length() < config.getSizeMax()){
 			return;
 		}
 
-		if(isDelSrc){
-			List<String> pathList = urlList; //TODO pathlist维护
+		if(config.isDelSrc()){
+			List<String> pathList = uriList; //TODO pathlist维护
 			for(String name : entrySet){
 				for(String path : pathList){
 					String pathName = new File(path).getName();
@@ -190,10 +172,10 @@ public class ZipDownloader implements Executor {
 			}
 		}
 
-		joinOtherFiles(tempZip); 
+		joinOtherFiles(downloadZip); 
 
 		String name = getNextName();
-		if(!tempZip.renameTo(new File(tempPath + File.separator + name))){ 
+		if(!downloadZip.renameTo(new File(tempPath + File.separator + name))){ 
 			if(!isLast){
 				//继续下载下一个文件，然后再次尝试
 				return;
@@ -234,7 +216,7 @@ public class ZipDownloader implements Executor {
 			return index;
 		}
 		for(String name : array){
-			if(!name.startsWith(zipName) || name.equals(tempZip.getName())){
+			if(!name.startsWith(zipName) || name.equals(downloadZip.getName())){
 				continue;
 			}
 			try{

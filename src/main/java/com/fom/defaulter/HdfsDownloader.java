@@ -20,7 +20,7 @@ public class HdfsDownloader<E extends HdfsDownloaderConfig> extends Context<E> {
 	@Override
 	protected final void exec(E config) throws Exception {
 		HdfsDownloaderHelper helper = new HdfsDownloaderHelper(config.getFs(), config.isDelSrc());
-		Executor executor = new Downloader(name, config, helper);
+		Executor executor = new Downloader(name, sourceUri, config, helper);
 		executor.exec();
 	}
 	

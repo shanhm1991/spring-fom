@@ -1,7 +1,5 @@
 package com.fom.defaulter;
 
-import java.io.File;
-
 import org.apache.hadoop.fs.FileSystem;
 
 import com.fom.context.Config;
@@ -70,11 +68,6 @@ public class HdfsDownloaderConfig extends Config implements HdfsConfig, Download
 	}
 
 	@Override
-	public String getDestName() {
-		return new File(getUri()).getName();
-	}
-
-	@Override
 	public boolean isWithTemp() {
 		return isWithTemp;
 	}
@@ -83,4 +76,5 @@ public class HdfsDownloaderConfig extends Config implements HdfsConfig, Download
 	public boolean isDelSrc() {
 		return isDelSrc;
 	}
+
 }

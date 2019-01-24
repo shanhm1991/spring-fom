@@ -34,5 +34,4 @@ public interface DownloaderHelper {
 	 * @throws Exception
 	 */
 	boolean delete(String sourceUri) throws Exception;
-
 }

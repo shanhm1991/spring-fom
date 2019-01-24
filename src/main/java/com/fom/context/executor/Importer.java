@@ -26,8 +26,6 @@ public class Importer implements Executor {
 
 	protected final Logger log;
 
-	protected final String name;
-
 	protected final int batch;
 	
 	protected final String sourceUri;
@@ -43,7 +41,6 @@ public class Importer implements Executor {
 
 	@SuppressWarnings("rawtypes")
 	public Importer(String name, String sourceUri, ImporterConfig config, ImporterHelper helper){
-		this.name = name;
 		this.log = LoggerFactory.getLogger(name);
 
 		this.batch = config.getBatch();

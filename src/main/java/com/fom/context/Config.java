@@ -52,15 +52,15 @@ public abstract class Config implements IConfig {
 
 	String contextClass;
 
-	int threadCore;
+	int core;
 
-	int threadMax;
+	int max;
 
-	int threadAliveTime;
+	int aliveTime;
 
-	int threadOverTime;
+	int overTime;
 
-	boolean threadCancellable;
+	boolean cancellable;
 
 	Element element;
 
@@ -94,11 +94,11 @@ public abstract class Config implements IConfig {
 		cron = new CronExpression(strCron);
 
 		contextClass = load(element, "context", "");
-		threadCore = load(element, "thread.core", 4, 1, 10); 
-		threadMax = load(element, "thread.max", 20, 10, 50);
-		threadAliveTime = load(element, "thread.aliveTime", 30, 3, 300);
-		threadOverTime = load(element, "thread.overTime", 3600, 300, 86400);
-		threadCancellable = load(element, "thread.cancellable", false); 
+		core = load(element, "thread.core", 4, 1, 10); 
+		max = load(element, "thread.max", 20, 10, 50);
+		aliveTime = load(element, "thread.aliveTime", 30, 3, 300);
+		overTime = load(element, "thread.overTime", 3600, 300, 86400);
+		cancellable = load(element, "thread.cancellable", false); 
 
 		loadExtends();
 	}
@@ -117,56 +117,17 @@ public abstract class Config implements IConfig {
 		scanner = (Scanner)constructor.newInstance(name);
 	}
 
-	//	@Override
-	//	public final boolean isRunning(){
-	//		return isRunning;
-	//	}
-	//
-	//	@Override
-	//	public final boolean isDelMatchFailFile() {
-	//		return delMatchFail;
-	//	}
-	//
-	//	@Override
-	//	public final String getUri() {
-	//		return srcUri;
-	//	}
-	//
-	//	@Override
-	//	public final int getExecutorMin() {
-	//		return threadMin;
-	//	}
-	//
-	//	@Override
-	//	public final int getExecutorMax() {
-	//		return threadMax;
-	//	}
-	//
-	//	@Override
-	//	public final int getExecutorAliveTime() {
-	//		return threadAliveTime;
-	//	}
-	//
-	//	@Override
-	//	public final int getExecutorOverTime() {
-	//		return threadOverTime;
-	//	}
-	//
-	//	@Override
-	//	public final boolean getInterruptOnOverTime() {
-	//		return threadCancellable;
-	//	}
-	//
-	//	@Override
-	//	public final String getExecutorClass() {
-	//		return contextClass;
-	//	}
-
-	public final long nextScanTime(){
+	long nextScanTime(){
 		Date nextDate = cron.getTimeAfter(new Date());
 		return nextDate.getTime() - System.currentTimeMillis();
 	}
+	
+	@Override
+	public boolean isDelMatchFailFile() {
+		return delMatchFail;
+	}
 
+	@Override
 	public final boolean matchSrc(String srcName){
 		if(pattern == null){
 			return true;

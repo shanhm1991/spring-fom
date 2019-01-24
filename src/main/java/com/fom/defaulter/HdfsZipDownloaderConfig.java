@@ -1,7 +1,5 @@
 package com.fom.defaulter;
 
-import java.io.File;
-
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.log4j.helpers.OptionConverter;
 
@@ -78,11 +76,6 @@ public class HdfsZipDownloaderConfig extends Config implements HdfsConfig, ZipDo
 	}
 
 	@Override
-	public String getDestName() {
-		return new File(getUri()).getName();
-	}
-
-	@Override
 	public boolean isWithTemp() {
 		return isWithTemp;
 	}
@@ -101,5 +94,6 @@ public class HdfsZipDownloaderConfig extends Config implements HdfsConfig, ZipDo
 	public long getSizeMax() {
 		return sizeMax;
 	}
+
 
 }

@@ -20,5 +20,4 @@ public interface ZipDownloaderConfig extends DownloaderConfig {
 	 * @return
 	 */
 	long getSizeMax();
-
 }

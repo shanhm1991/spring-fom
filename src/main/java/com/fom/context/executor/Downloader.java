@@ -3,6 +3,7 @@ package com.fom.context.executor;
 import java.io.File;
 import java.text.DecimalFormat;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.fom.context.Executor;
@@ -11,6 +12,7 @@ import com.fom.context.executor.helper.DownloaderHelper;
 import com.fom.log.LoggerFactory;
 
 /**
+ * 根据sourceUri下载单个文件的实现
  * 
  * @author shanhm
  * @date 2018年12月23日
@@ -18,73 +20,54 @@ import com.fom.log.LoggerFactory;
  */
 public class Downloader implements Executor {
 
-	protected final Logger log;
+	private Logger log;
 
-	protected final String name;
+	private String sourceUri;
 
-	protected final DownloaderHelper helper;
+	private DownloaderConfig config;
 
-	protected final String uri;
+	private DownloaderHelper helper;
 
-	protected final String fileName;
-
-	protected final String destPath;
-
-	protected final boolean withTemp;
-
-	protected final boolean isDelSrc;
-
-	protected final String tempPath;
+	private String downloadPath;
+	
+	private File downloadFile;
 
 	/**
 	 * 
-	 * @param name
-	 * @param config
-	 * @param helper
+	 * @param name 模块名称
+	 * @param sourceUri 下载资源uri
+	 * @param config DownloaderConfig
+	 * @param helper DownloaderHelper
 	 */
-	public Downloader(String name, DownloaderConfig config, DownloaderHelper helper) {
-		this.name = name;
+	public Downloader(String name, String sourceUri, DownloaderConfig config, DownloaderHelper helper) {
+		if(StringUtils.isBlank(name) || StringUtils.isBlank(sourceUri) || config == null || helper == null) {
+			throw new IllegalArgumentException(); 
+		}
 		this.log = LoggerFactory.getLogger(name);
+		this.sourceUri = sourceUri;
+		this.config = config;
 		this.helper = helper;
-
-		this.uri = config.getUri();
-		this.fileName = config.getDestName();
-		this.destPath = config.getDestPath();
-		this.isDelSrc = config.isDelSrc();
-		this.withTemp = config.isWithTemp();
-		if(withTemp){
-			this.tempPath = System.getProperty("download.temp") + File.separator + name;
-		}else{
-			this.tempPath = destPath;
+		this.downloadPath = config.getDestPath();
+		if(config.isWithTemp()){
+			downloadPath = System.getProperty("download.temp") + File.separator + name;
 		}
-		File path = new File(tempPath);
-		if(!path.exists() && !path.mkdirs()){
-			throw new IllegalArgumentException("无法创建临时目录:" + tempPath); 
-		}
+		this.downloadFile = new File(downloadPath + File.separator + config.getSourceName(sourceUri)); 
 	}
 
 	public final void exec() throws Exception {
+		File file = new File(downloadPath);
+		if(!file.exists() && !file.mkdirs()){
+			throw new IllegalArgumentException("下载目录创建失败:" + downloadPath); 
+		}
+		
 		long sTime = System.currentTimeMillis();
-		String path = destPath;
-		if(withTemp){
-			path = tempPath;
-		}
-		File file = new File(path + File.separator + fileName);
-
-		helper.download(uri, file);
-		long size = file.length();
-		log.info("下载文件结束(" 
-				+ new DecimalFormat("#.##").format(size) + "KB), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
-		move();
-	}
-
-	protected void move() {
-		if(!withTemp){
-			return;
-		}
-		File file = new File(tempPath + File.separator + fileName);
-		if(file.exists() && !file.renameTo(new File(destPath + File.separator + fileName))){
-			throw new WarnException("文件移动失败:" + file.getName()); 
+		helper.download(sourceUri, downloadFile);
+		String size = new DecimalFormat("#.##").format(downloadFile.length());
+		log.info("下载文件结束(" + size + "KB), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+		
+		if(config.isWithTemp() && downloadFile.exists() 
+				&& downloadFile.renameTo(new File(config.getDestPath() + File.separator + downloadFile.getName()))){
+			throw new WarnException("文件移动失败:" + downloadFile.getName()); 
 		}
 	}
 }

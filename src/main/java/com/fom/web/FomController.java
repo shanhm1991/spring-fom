@@ -114,12 +114,6 @@ public class FomController {
 		return map;
 	}
 	
-	@RequestMapping("/srcs")
-	@ResponseBody
-	public Map<String,Object> srcs(String name, boolean match) throws Exception{ 
-		return service.srcs(name, match);
-	}
-	
 	@RequestMapping("/logs")
 	@ResponseBody
 	public Map<String,Object> logs() throws Exception{ 

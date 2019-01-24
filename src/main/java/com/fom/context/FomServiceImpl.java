@@ -37,7 +37,7 @@ public class FomServiceImpl implements FomService {
 			m.put("type", c.getTypeName());
 			m.put("lastLoad", format.format(c.loadTime));
 			m.put("valid", String.valueOf(c.valid));
-			if(c.isRunning()){
+			if(c.isRunning){
 				m.put("state", "Running");
 			}else{
 				m.put("state", "Dead");
@@ -128,7 +128,7 @@ public class FomServiceImpl implements FomService {
 		if(!config.valid){
 			return "failed, " + name + " not valid.";
 		}
-		if(!config.isRunning()){
+		if(!config.isRunning){
 			return "failed, " + name + " was not Running.";
 		}
 		config.isRunning = false;
@@ -146,7 +146,7 @@ public class FomServiceImpl implements FomService {
 				builder.append("failed, " + config.name + " not valid.<br>");
 				continue;
 			}
-			if(!config.isRunning()){
+			if(!config.isRunning){
 				builder.append("failed, " + config.name + " was not Running.<br>");
 				continue;
 			}
@@ -166,7 +166,7 @@ public class FomServiceImpl implements FomService {
 		if(!config.valid){
 			return "failed, " + name + " not valid.";
 		}
-		if(config.isRunning()){
+		if(config.isRunning){
 			return "failed, " + name + " was already Running.";
 		}
 		if(config.scanner.isAlive()){
@@ -189,7 +189,7 @@ public class FomServiceImpl implements FomService {
 				builder.append("failed, " + config.name + " not valid.<br>");
 				continue;
 			}
-			if(config.isRunning()){
+			if(config.isRunning){
 				builder.append("failed, " + config.name + " was already Running.<br>");
 				continue;
 			}
@@ -215,7 +215,7 @@ public class FomServiceImpl implements FomService {
 		if(!config.valid){
 			return "failed, " + name + " not valid.";
 		}
-		if(!config.isRunning()){
+		if(!config.isRunning){
 			return "failed, " + name + " was not Running.";
 		}
 		config.scanner.interrupt();
@@ -233,7 +233,7 @@ public class FomServiceImpl implements FomService {
 				builder.append("failed, " + config.name + " not valid.<br>");
 				continue;
 			}
-			if(!config.isRunning()){
+			if(!config.isRunning){
 				builder.append("failed, " + config.name + " was not Running.<br>");
 				continue;
 			}
@@ -244,20 +244,4 @@ public class FomServiceImpl implements FomService {
 		return builder.toString();
 	}
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public Map<String,Object> srcs(String name, boolean match) throws Exception{
-		Map<String,Object> map = new HashMap<>();
-		Config config = ConfigManager.get(name);
-		if(config == null){
-			return map;
-		}
-		map.put("path", config.srcUri);
-		if(match){
-			map.put("srcs", config.scanner.filter(config));
-		}else{
-			map.put("srcs", config.scanner.scan(config));
-		}
-		return map;
-	}
 }

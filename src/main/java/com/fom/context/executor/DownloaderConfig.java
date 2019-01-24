@@ -9,22 +9,10 @@ package com.fom.context.executor;
 public interface DownloaderConfig {
 	
 	/**
-	 * 获取下载文件的资源uri
-	 * @return
-	 */
-	String getUri();
-	
-	/**
 	 * 下载文件的目的目录
 	 * @return
 	 */
 	String getDestPath();
-	
-	/**
-	 * 下载文件使用的文件名
-	 * @return
-	 */
-	String getDestName();
 	
 	/**
 	 * 是否先下载到临时目录，然后再移到destPath
@@ -37,5 +25,12 @@ public interface DownloaderConfig {
 	 * @return
 	 */
 	boolean isDelSrc();
+	
+	/**
+	 * 根据uri获取下载资源文件的名称
+	 * @param uri
+	 * @return
+	 */
+	String getSourceName(String uri);
 
 }

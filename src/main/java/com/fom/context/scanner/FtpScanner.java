@@ -18,13 +18,7 @@ public class FtpScanner<E extends FtpConfig> extends Scanner<E>{
 	}
 
 	@Override
-	public List<String> scan(E config) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<String> filter(E config) {
+	public List<String> scan(String srcUri, E config) {
 		// TODO Auto-generated method stub
 		return null;
 	}

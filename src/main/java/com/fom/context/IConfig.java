@@ -33,17 +33,11 @@ public interface IConfig {
 	String getTypeName();
 	
 	/**
-	 * 当前模块扫描线程等待下一次执行的时间
+	 * 匹配文件名称
+	 * @param srcName
 	 * @return
 	 */
-	long nextScanTime();
-
-	/**
-	 * 当前模块扫描线程扫描源文件时的名称匹配
-	 * @param name
-	 * @return
-	 */
-	boolean matchSrc(String name);
+	boolean matchSrc(String srcName);
 	
 	/**
 	 * 当前模块扫描线程匹配源文件名称失败时是否删除
@@ -51,10 +45,4 @@ public interface IConfig {
 	 */
 	boolean isDelMatchFailFile();
 	
-	/**
-	 * 扫描源文件的uri
-	 * @return
-	 */
-	String getUri();
-
 }

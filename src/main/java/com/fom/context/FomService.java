@@ -30,5 +30,4 @@ public interface FomService {
 	
 	String restartAll() throws Exception;
 	
-	Map<String,Object> srcs(String name, boolean match) throws Exception;
 }

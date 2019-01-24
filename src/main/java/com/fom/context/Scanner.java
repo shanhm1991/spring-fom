@@ -1,6 +1,5 @@
 package com.fom.context;
 
-import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.Iterator;
 import java.util.List;
@@ -54,39 +53,38 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 				pool.shutdownNow();
 				return;
 			}
-			this.setName("scanner[" + config.getUri() + "]");
-			if(pool.getCorePoolSize() != config.threadCore){
-				pool.setCorePoolSize(config.threadCore);
+			this.setName("scanner[" + config.srcUri + "]");
+			if(pool.getCorePoolSize() != config.core){
+				pool.setCorePoolSize(config.core);
 			}
-			if(pool.getMaximumPoolSize() != config.threadMax){
-				pool.setMaximumPoolSize(config.threadMax);
+			if(pool.getMaximumPoolSize() != config.max){
+				pool.setMaximumPoolSize(config.max);
 			}
-			if(pool.getKeepAliveTime(TimeUnit.SECONDS) != config.threadAliveTime){
-				pool.setKeepAliveTime(config.threadAliveTime, TimeUnit.SECONDS);
+			if(pool.getKeepAliveTime(TimeUnit.SECONDS) != config.aliveTime){
+				pool.setKeepAliveTime(config.aliveTime, TimeUnit.SECONDS);
 			}
 
 			cleanFuture(config);
 
 			E subConfig = (E)config;
-			List<String> fileNameList = filter(subConfig);
-			if(fileNameList != null){
-				for (String fileName : fileNameList){
-					String path = config.getUri() + File.separator + fileName;
-					if(isExecutorAlive(fileName)){
+			List<String> uriList = scan(config.srcUri, subConfig);
+			if(uriList != null){
+				for (String uri : uriList){
+					if(isExecutorAlive(uri)){
 						continue;
 					}
 					try {
 						Class<?> clzz = Class.forName(config.contextClass);
 						Constructor<?> constructor = clzz.getDeclaredConstructor(String.class, String.class);
 						constructor.setAccessible(true);
-						Context context = (Context)constructor.newInstance(name, path);
-						futureMap.put(path, pool.submit(context)); 
-						log.info("新建" + config.getTypeName() + "任务" + config.getType() + "[" + fileName + "]"); 
+						Context context = (Context)constructor.newInstance(name, uri);
+						futureMap.put(uri, pool.submit(context)); 
+						log.info("新建任务" + "[" + uri + "]"); 
 					} catch (RejectedExecutionException e) {
-						log.warn(config.getTypeName() + "任务提交被拒绝,等待下次提交[" + fileName + "].");
+						log.warn("任务提交被拒绝,等待下次提交[" + uri + "].");
 						break;
 					}catch (Exception e) {
-						log.error(config.getTypeName() + "任务新建异常[" + fileName + "]", e); 
+						log.error("任务新建异常[" + uri + "]", e); 
 					}
 				}
 			}
@@ -100,10 +98,14 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 		}
 	}
 
-	public abstract List<String> scan(E config);
+	/**
+	 * 根据srcUri和config返回需要处理的文件路径(绝对路径)列表
+	 * @param srcUri
+	 * @param config
+	 * @return
+	 */
+	public abstract List<String> scan(String srcUri, E config);
 	
-	public abstract List<String> filter(E config);
-
 	private void cleanFuture(Config config){
 		Iterator<Map.Entry<String, TimedFuture<Void>>> it = futureMap.entrySet().iterator();
 		while(it.hasNext()){
@@ -116,8 +118,8 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 				it.remove();
 			}else{
 				long existTime = (System.currentTimeMillis() - future.getCreateTime()) / 1000;
-				if(existTime > config.threadOverTime) {
-					if(config.threadCancellable){
+				if(existTime > config.overTime) {
+					if(config.cancellable){
 						future.cancel(true);
 						log.warn(config.getTypeName() + "任务超时中断[" + entry.getKey() + "]," + existTime + "s"); 
 					}else{
