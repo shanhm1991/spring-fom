@@ -11,7 +11,7 @@ import org.apache.log4j.Logger;
 
 import com.fom.context.Executor;
 import com.fom.context.exception.WarnException;
-import com.fom.context.executor.helper.abstractImporterHelper;
+import com.fom.context.executor.helper.AbstractImporterHelper;
 import com.fom.context.executor.reader.Reader;
 import com.fom.log.LoggerFactory;
 import com.fom.util.IoUtil;
@@ -31,7 +31,7 @@ public class Importer implements Executor {
 	private int batch;
 	
 	@SuppressWarnings("rawtypes")
-	private abstractImporterHelper helper;
+	private AbstractImporterHelper helper;
 
 	private File logFile;
 
@@ -43,7 +43,7 @@ public class Importer implements Executor {
 	 * @param helper ImporterHelper
 	 */
 	@SuppressWarnings("rawtypes")
-	public Importer(String name, String sourceUri, int batch, abstractImporterHelper helper){
+	public Importer(String name, String sourceUri, int batch, AbstractImporterHelper helper){
 		this.log = LoggerFactory.getLogger(name);
 		this.sourceUri = sourceUri;
 		this.batch = batch;

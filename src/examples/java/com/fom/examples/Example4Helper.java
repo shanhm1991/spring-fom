@@ -20,7 +20,7 @@ import com.fom.util.SpringUtil;
  *
  */
 public class Example4Helper extends AbstractLocalZipImporterHelper<ExampleBean> {
-	
+
 	private Pattern pattern;
 
 	public Example4Helper(String name, Pattern pattern) {
@@ -45,10 +45,10 @@ public class Example4Helper extends AbstractLocalZipImporterHelper<ExampleBean> 
 		bean.setImportWay("mybatis");
 		lineDatas.add(bean); 
 	}
-	
+
 	@Override
 	public void batchProcessIfNotInterrupted(List<ExampleBean> lineDatas, long batchTime) throws Exception {
-		ExamplesDao demoDao = SpringUtil.getBean("oracleDemoDao", ExamplesDao.class);
+		ExamplesDao demoDao = SpringUtil.getBean("oracleExampleDao", ExamplesDao.class);
 		demoDao.batchInsert(lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());
 	}
@@ -68,9 +68,6 @@ public class Example4Helper extends AbstractLocalZipImporterHelper<ExampleBean> 
 		if(pattern == null){
 			return true;
 		}
-		//如果helper被共用，需要考虑线程安全
-		synchronized (pattern) {
-			return pattern.matcher(entryName).find();
-		}
+		return pattern.matcher(entryName).find();
 	}
 }

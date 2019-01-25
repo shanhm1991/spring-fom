@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.fom.context.executor.helper.abstractImporterHelper;
+import com.fom.context.executor.helper.AbstractImporterHelper;
 import com.fom.context.executor.reader.Reader;
 import com.fom.context.executor.reader.TextReader;
 import com.fom.examples.bean.ExampleBean;
@@ -18,7 +18,7 @@ import com.fom.util.SpringUtil;
  * @date 2019年1月24日
  *
  */
-public class Example2Helper extends abstractImporterHelper<ExampleBean> {
+public class Example2Helper extends AbstractImporterHelper<ExampleBean> {
 
 	public Example2Helper(String name) {
 		super(name);
@@ -37,14 +37,14 @@ public class Example2Helper extends abstractImporterHelper<ExampleBean> {
 		}
 		ExampleBean bean = new ExampleBean(line);
 		bean.setSource("local");
-		bean.setFileType("txt/orc");
+		bean.setFileType("txt");
 		bean.setImportWay("mybatis");
 		lineDatas.add(bean); 
 	}
 
 	@Override
 	public void batchProcessIfNotInterrupted(List<ExampleBean> lineDatas, long batchTime) throws Exception {
-		ExamplesDao demoDao = SpringUtil.getBean("mysqlDemoDao", ExamplesDao.class);
+		ExamplesDao demoDao = SpringUtil.getBean("mysqlExampleDao", ExamplesDao.class);
 		demoDao.batchInsert(lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());
 	}

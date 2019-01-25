@@ -26,7 +26,7 @@ public class Example5Helper extends AbstractLocalZipImporterHelper<Map<String, O
 	private static final String SQL = 
 			"insert into demo(id,name,source,filetype,importway) "
 					+ "values (#id#,#name#,#source#,#fileType#,#importWay#)";
-	
+
 	private Pattern pattern;
 
 	public Example5Helper(String name, Pattern pattern) {
@@ -76,9 +76,6 @@ public class Example5Helper extends AbstractLocalZipImporterHelper<Map<String, O
 		if(pattern == null){
 			return true;
 		}
-		//如果helper被共用，需要考虑线程安全
-		synchronized (pattern) {
-			return pattern.matcher(entryName).find();
-		}
+		return pattern.matcher(entryName).find();
 	}
 }

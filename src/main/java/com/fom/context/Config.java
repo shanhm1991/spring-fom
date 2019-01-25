@@ -2,8 +2,10 @@ package com.fom.context;
 
 import java.lang.reflect.Constructor;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
@@ -136,9 +138,7 @@ public abstract class Config implements IConfig {
 		if(pattern == null){
 			return true;
 		}
-		synchronized (pattern) {
-			return pattern.matcher(sourceName).find();
-		}
+		return pattern.matcher(sourceName).find();
 	}
 
 	/**
@@ -168,7 +168,7 @@ public abstract class Config implements IConfig {
 	}
 
 	private boolean load(Element e, String key, boolean defaultValue){
-		boolean value = XmlUtil.getBoolean(extendsElement, key, defaultValue);
+		boolean value = XmlUtil.getBoolean(e, key, defaultValue);
 		entryMap.put(key, String.valueOf(value)); 
 		return value;
 	}
@@ -232,7 +232,7 @@ public abstract class Config implements IConfig {
 		return true;
 	}
 
-	private Map<String,String> entryMap = new HashMap<>();
+	private Map<String,String> entryMap = new LinkedHashMap<>();
 
 	@Override
 	public final boolean equals(Object object){
@@ -251,7 +251,11 @@ public abstract class Config implements IConfig {
 		StringBuilder builder = new StringBuilder();
 		builder.append("type=" + getType());
 		builder.append("\nvalid=" + valid);
-		builder.append("\n" + entryMap);
+		Iterator<Entry<String, String>> it = entryMap.entrySet().iterator();
+		while(it.hasNext()){
+			Entry<String, String> entry = it.next();
+			builder.append("\n" + entry.getKey() + "=" + entry.getValue());
+		}
 		return builder.toString();
 	}
 

@@ -7,7 +7,7 @@ package com.fom.context.executor.helper;
  *
  * @param <V>
  */
-public abstract class AbstractLocalZipImporterHelper<V> extends abstractImporterHelper<V> implements LocalZipImporterHelper<V> {
+public abstract class AbstractLocalZipImporterHelper<V> extends AbstractImporterHelper<V> implements LocalZipImporterHelper<V> {
 
 	public AbstractLocalZipImporterHelper(String name) {
 		super(name);
