@@ -2,7 +2,7 @@
 <pools>
 	<pool>
 		<name>example_es</name>
-		<class>com.fom.context.db.pool.EsPool</class>
+		<class>com.fom.db.pool.EsPool</class>
 		<clusterName>selfES</clusterName>
 		<nodes>
 			<node>192.168.141.21:9300</node>
@@ -15,7 +15,7 @@
 		<max>20</max>
 		<waitTimeOut>120000</waitTimeOut>
 		<aliveTimeOut>120000</aliveTimeOut>
-		<class>com.fom.context.db.pool.JdbcPool</class>
+		<class>com.fom.db.pool.JdbcPool</class>
 		<driver>oracle.jdbc.driver.OracleDriver</driver>
 		<url>jdbc:oracle:thin:@192.168.141.21:1521:orcl</url>
 		<user>scott</user>
@@ -28,7 +28,7 @@
 		<max>20</max>
 		<waitTimeOut>120000</waitTimeOut>
 		<aliveTimeOut>120000</aliveTimeOut>
-		<class>com.fom.context.db.pool.JdbcPool</class>
+		<class>com.fom.db.pool.JdbcPool</class>
 		<driver>com.mysql.cj.jdbc.Driver</driver>
 		<url>jdbc:mysql://192.168.141.13:3306/demo</url>
 		<user>shanhm</user>

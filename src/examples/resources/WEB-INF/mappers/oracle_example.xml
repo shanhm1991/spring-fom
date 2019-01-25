@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?> 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="oracle.demo">
-	<select id="selectDemo" resultType="Map">
+<mapper namespace="oracleExample">
+	<select id="select" resultType="Map">
 		select * from demo
 	</select>
 
-	<insert id="insertDemo" parameterType="demo">
+	<insert id="insert" parameterType="exampleBean">
 		insert into demo(id,name,source,filetype,importway) values (#{id},#{name},#{source},#{fileType},#{importWay})
 	</insert>
 
-	<insert id="batchInsertDemo" parameterType="List" useGeneratedKeys="false">
+	<insert id="batchInsert" parameterType="List" useGeneratedKeys="false">
 		insert all 
 		<foreach collection="list" item="item" index="index">
 			into demo(id,name,source,filetype,importway) values 

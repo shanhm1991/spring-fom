@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.mybatis.spring.support.SqlSessionDaoSupport;
 
-import com.fom.examples.bean.ExamplesBean;
+import com.fom.examples.bean.ExampleBean;
 
 /**
  * 
@@ -16,18 +16,18 @@ import com.fom.examples.bean.ExamplesBean;
 public class OracleExamplesDaoImpl extends SqlSessionDaoSupport implements ExamplesDao {
 
 	@Override
-	public List<Map<String,String>> selectDemo() {
-		return getSqlSession().selectList("oracle.demo.selectDemo");
+	public List<Map<String,String>> select() {
+		return getSqlSession().selectList("oracleExample.select");
 	}
 
 	@Override
-	public int inserDemo(ExamplesBean bean) {
-		 return getSqlSession().insert("oracle.demo.insertDemo", bean);
+	public int insert(ExampleBean bean) {
+		 return getSqlSession().insert("oracleExample.insert", bean);
 	}
 
 	@Override
-	public int batchInsertDemo(List<ExamplesBean> list) {
-		 return getSqlSession().insert("oracle.demo.batchInsertDemo", list);
+	public int batchInsert(List<ExampleBean> list) {
+		 return getSqlSession().insert("oracleExample.batchInsert", list);
 	}
 
 }

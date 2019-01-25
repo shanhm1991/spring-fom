@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd" >
 <beans>
-	<!-- 配置oracle的demo库,连接池使用c3p0 -->
-	<bean id="oracleDemoDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+	<!-- 配置oracle库,连接池使用c3p0 -->
+	<bean id="oracleExampleDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
 		<property name="driverClass" value="oracle.jdbc.driver.OracleDriver" />
 		<property name="jdbcUrl" value="jdbc:oracle:thin:@192.168.141.21:1521:orcl" />
 		<property name="user" value="scott" />
@@ -20,13 +20,13 @@
 		<property name="propertyCycle" value="300" />
 	</bean>
 
-	<bean id="oracleDemoSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-		<property name="dataSource" ref="oracleDemoDataSource" />
-		<property name="configLocation" value="WEB-INF/dataSource/oracle_demo_mybatis.xml" />
+	<bean id="oracleExampleSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="oracleExampleDataSource" />
+		<property name="configLocation" value="WEB-INF/dataSource/oracle_example_mybatis.xml" />
 	</bean>
 
-	<bean id="oracleDemoDao" class="com.fom.examples.importer.dao.OracleDemoDaoImpl">
-		<property name="sqlSessionFactory" ref="oracleDemoSqlSessionFactory" />
+	<bean id="oracleExampleDao" class="com.fom.examples.dao.OracleExamplesDaoImpl">
+		<property name="sqlSessionFactory" ref="oracleExampleSqlSessionFactory" />
 	</bean>
 
 

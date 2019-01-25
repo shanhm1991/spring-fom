@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd" >
 <beans>
-	<!-- 配置mysql的demo库,连接池使用commons-pool2 -->
-	<bean id="mysqlDemoDataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+	<!-- 配置mysql库,连接池使用commons-pool2 -->
+	<bean id="mysqlExampleDataSource" class="org.apache.commons.dbcp2.BasicDataSource">
 		<property name="driverClassName" value="com.mysql.cj.jdbc.Driver" />
 		<property name="url" value="jdbc:mysql://192.168.141.13:3306/demo" />
 		<property name="username" value="shanhm" />
@@ -20,12 +20,12 @@
 		<property name="validationQuery" value="select 1 from dual" />
 	</bean>
 	
-	<bean id="mysqlDemoSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-		<property name="dataSource" ref="mysqlDemoDataSource" />
-		<property name="configLocation" value="WEB-INF/dataSource/mysql_demo_mybatis.xml" />
+	<bean id="mysqlExampleSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="mysqlExampleDataSource" />
+		<property name="configLocation" value="WEB-INF/dataSource/mysql_example_mybatis.xml" />
 	</bean>
 
-	<bean id="mysqlDemoDao" class="com.fom.examples.importer.dao.MysqlDemoDaoImpl">
-		<property name="sqlSessionFactory" ref="mysqlDemoSqlSessionFactory" />
+	<bean id="mysqlExampleDao" class="com.fom.examples.dao.MysqlExamplesDaoImpl">
+		<property name="sqlSessionFactory" ref="mysqlExampleSqlSessionFactory" />
 	</bean>
 </beans>

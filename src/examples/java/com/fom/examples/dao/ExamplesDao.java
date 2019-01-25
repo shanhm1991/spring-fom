@@ -3,7 +3,7 @@ package com.fom.examples.dao;
 import java.util.List;
 import java.util.Map;
 
-import com.fom.examples.bean.ExamplesBean;
+import com.fom.examples.bean.ExampleBean;
 
 /**
  * 
@@ -13,10 +13,10 @@ import com.fom.examples.bean.ExamplesBean;
  */
 public interface ExamplesDao {
 	
-	List<Map<String,String>> selectDemo();
+	List<Map<String,String>> select();
 	
-	int inserDemo(ExamplesBean bean);
+	int insert(ExampleBean bean);
 	
-	int batchInsertDemo(List<ExamplesBean> list);
+	int batchInsert(List<ExampleBean> list);
 
 }

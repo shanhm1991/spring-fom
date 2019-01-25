@@ -8,10 +8,10 @@
 	</settings>
 	
 	<typeAliases>
-		<typeAlias alias="demo" type="com.fom.examples.importer.DemoBean" />
+		<typeAlias alias="exampleBean" type="com.fom.examples.bean.ExampleBean" />
 	</typeAliases>
 
 	<mappers>
-		<mapper resource="WEB-INF/mappers/oracle_demo.xml" />
+		<mapper resource="WEB-INF/mappers/mysql_example.xml" />
 	</mappers>
 </configuration> 

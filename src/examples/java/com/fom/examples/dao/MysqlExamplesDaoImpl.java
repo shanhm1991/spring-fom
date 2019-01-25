@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.mybatis.spring.support.SqlSessionDaoSupport;
 
-import com.fom.examples.bean.ExamplesBean;
+import com.fom.examples.bean.ExampleBean;
 
 /**
  * 
@@ -16,18 +16,18 @@ import com.fom.examples.bean.ExamplesBean;
 public class MysqlExamplesDaoImpl extends SqlSessionDaoSupport implements ExamplesDao {
 	
 	@Override
-	public List<Map<String,String>> selectDemo() {
-		return getSqlSession().selectList("mysql.demo.selectDemo");
+	public List<Map<String,String>> select() {
+		return getSqlSession().selectList("mysqlExample.select");
 	}
 
 	@Override
-	public int inserDemo(ExamplesBean bean) {
-		 return getSqlSession().insert("mysql.demo.insertDemo", bean);
+	public int insert(ExampleBean bean) {
+		 return getSqlSession().insert("mysqlExample.insert", bean);
 	}
 
 	@Override
-	public int batchInsertDemo(List<ExamplesBean> list) {
-		 return getSqlSession().insert("mysql.demo.batchInsertDemo", list);
+	public int batchInsert(List<ExampleBean> list) {
+		 return getSqlSession().insert("mysqlExample.batchInsert", list);
 	}
 
 }

@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.fom.context.executor.helper.abstractImporterHelper;
 import com.fom.context.executor.reader.Reader;
 import com.fom.context.executor.reader.TextReader;
-import com.fom.examples.bean.ExamplesBean;
+import com.fom.examples.bean.ExampleBean;
 import com.fom.examples.dao.ExamplesDao;
 import com.fom.util.SpringUtil;
 
@@ -18,7 +18,7 @@ import com.fom.util.SpringUtil;
  * @date 2019年1月24日
  *
  */
-public class Example4Helper extends abstractImporterHelper<ExamplesBean> {
+public class Example4Helper extends abstractImporterHelper<ExampleBean> {
 
 	public Example4Helper(String name) {
 		super(name);
@@ -30,12 +30,12 @@ public class Example4Helper extends abstractImporterHelper<ExamplesBean> {
 	}
 
 	@Override
-	public void praseLineData(List<ExamplesBean> lineDatas, String line, long batchTime) throws Exception {
+	public void praseLineData(List<ExampleBean> lineDatas, String line, long batchTime) throws Exception {
 		log.info("解析行数据:" + line);
 		if(StringUtils.isBlank(line)){
 			return;
 		}
-		ExamplesBean bean = new ExamplesBean(line);
+		ExampleBean bean = new ExampleBean(line);
 		bean.setSource("local");
 		bean.setFileType("zip(txt)");
 		bean.setImportWay("mybatis");
@@ -43,9 +43,9 @@ public class Example4Helper extends abstractImporterHelper<ExamplesBean> {
 	}
 	
 	@Override
-	public void batchProcessIfNotInterrupted(List<ExamplesBean> lineDatas, long batchTime) throws Exception {
+	public void batchProcessIfNotInterrupted(List<ExampleBean> lineDatas, long batchTime) throws Exception {
 		ExamplesDao demoDao = SpringUtil.getBean("oracleDemoDao", ExamplesDao.class);
-		demoDao.batchInsertDemo(lineDatas);
+		demoDao.batchInsert(lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());
 	}
 

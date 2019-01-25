@@ -6,7 +6,7 @@ package com.fom.examples.bean;
  * @date 2018年12月23日
  *
  */
-public class ExamplesBean {
+public class ExampleBean {
 	
 	private String id;
 	
@@ -18,7 +18,7 @@ public class ExamplesBean {
 	
 	private String importWay;
 	
-	public ExamplesBean(String data){
+	public ExampleBean(String data){
 		String[] array = data.split("#"); 
 		this.id = array[0];
 		this.name = array[1];

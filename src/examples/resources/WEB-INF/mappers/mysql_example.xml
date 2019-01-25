@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?> 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="mysql.demo">
-	<select id="selectDemo" resultType="Map">
+<mapper namespace="mysqlExample">
+	<select id="select" resultType="Map">
 		select * from demo
 	</select>
 
-	<insert id="insertDemo" parameterType="demo">
+	<insert id="insert" parameterType="exampleBean">
 		insert into demo(id,name,source,filetype,importway) values (#{id},#{name},#{source},#{fileType},#{importWay})
 	</insert>
 
-	<insert id="batchInsertDemo" parameterType="List">
+	<insert id="batchInsert" parameterType="List">
 		insert into demo(id,name,source,filetype,importway) values
 		<foreach collection="list" item="item" index="index" separator=",">
 			(#{item.id},#{item.name},#{item.source},#{item.fileType},#{item.importWay})
