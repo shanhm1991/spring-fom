@@ -77,7 +77,9 @@ abstract class Pool<E> {
 			aliveCount.decrementAndGet();
 			aliveTotal.decrementAndGet();
 			node.close();
-			LOG.warn("关闭连接[overTime]" + state());
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("关闭连接[overTime]" + state());
+			}
 		}
 	}
 
@@ -88,10 +90,14 @@ abstract class Pool<E> {
 				if(!node.isReset()){ //syn(this)
 					return node;
 				}else{
-					LOG.warn("关闭连接[reseted when acquire]" + state()); 
+					if (LOG.isDebugEnabled()) {
+						LOG.debug("关闭连接[reseted when acquire]" + state()); 
+					}
 				}
 			}else{
-				LOG.warn("关闭连接[invalid when acquire]" + state()); 
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("关闭连接[invalid when acquire]" + state()); 
+				}
 			}
 			node.close();
 			aliveCount.decrementAndGet();
@@ -122,7 +128,9 @@ abstract class Pool<E> {
 		threadLocal.set(node);
 		aliveCount.incrementAndGet();
 		aliveTotal.incrementAndGet();
-		LOG.info("获取连接[create]" + state());
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("获取连接[create]" + state());
+		}
 		return node;
 	}
 
@@ -133,7 +141,9 @@ abstract class Pool<E> {
 		while((node = freeQueue.poll()) != null){
 			synchronized (node) { 
 				if(node.isClosed){
-					LOG.warn("忽略连接[closed when acquire free]" + state()); 
+					if (LOG.isDebugEnabled()) {
+						LOG.debug("忽略连接[closed when acquire free]" + state()); 
+					}
 					continue;
 				}
 				node.isIdel = false;
@@ -144,7 +154,9 @@ abstract class Pool<E> {
 				node.close();
 				aliveCount.decrementAndGet();
 				aliveTotal.decrementAndGet();
-				LOG.warn("关闭连接[invalid when acquire free]" + state()); 
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("关闭连接[invalid when acquire free]" + state()); 
+				}
 				continue;
 			}
 
@@ -152,12 +164,16 @@ abstract class Pool<E> {
 				node.close();
 				aliveCount.decrementAndGet();
 				aliveTotal.decrementAndGet();
-				LOG.warn("关闭连接[reseted when acquire free]" + state()); 
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("关闭连接[reseted when acquire free]" + state()); 
+				}
 				continue;
 			}
 
 			threadLocal.set(node);
-			LOG.info("获取连接[free]" + state()); 
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("获取连接[free]" + state()); 
+			}
 			return node;
 		}
 		return null;
@@ -181,7 +197,9 @@ abstract class Pool<E> {
 			node.close();
 			aliveCount.decrementAndGet();
 			aliveTotal.decrementAndGet();
-			LOG.warn("关闭连接[invalid when release]" + state()); 
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("关闭连接[invalid when release]" + state()); 
+			}
 			return;
 		}
 
@@ -189,7 +207,9 @@ abstract class Pool<E> {
 			node.close();
 			aliveCount.decrementAndGet();
 			aliveTotal.decrementAndGet();
-			LOG.warn("关闭连接[reseted when release]" + state()); 
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("关闭连接[reseted when release]" + state()); 
+			}
 			return;
 		}
 
@@ -199,7 +219,9 @@ abstract class Pool<E> {
 				node.close();
 				aliveCount.decrementAndGet();
 				aliveTotal.decrementAndGet();
-				LOG.warn("关闭连接[free full when release]" + state()); 
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("关闭连接[free full when release]" + state()); 
+				}
 				return;
 			}
 
@@ -207,12 +229,16 @@ abstract class Pool<E> {
 				node.close();
 				aliveCount.decrementAndGet();
 				aliveTotal.decrementAndGet();
-				LOG.warn("关闭连接[release failed]" + state()); 
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("关闭连接[release failed]" + state()); 
+				}
 				return;
 			}
 
 			freeCount.incrementAndGet();
-			LOG.info("释放连接" + state()); 
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("释放连接" + state()); 
+			}
 			condition.signalAll();
 		}finally{
 			lock.unlock();

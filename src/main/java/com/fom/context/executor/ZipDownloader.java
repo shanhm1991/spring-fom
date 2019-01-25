@@ -30,10 +30,12 @@ import com.fom.util.ZipUtil;
  *
  */
 public class ZipDownloader implements Executor {
+	
+	protected final Logger log;
+	
+	protected final DecimalFormat numFormat  = new DecimalFormat("#.##");
 
 	private static AtomicInteger num = new AtomicInteger(0);
-
-	protected final Logger log;
 
 	private List<String> uriList;
 
@@ -47,18 +49,11 @@ public class ZipDownloader implements Executor {
 
 	private File downloadZip; 
 
-
-
-	//已编入的序列的zip文件的最大序号
-	protected int index;
-
-	//tempZip中已压缩的有效数据文件数
-	protected int entryContents; 
+	//downloadZip的命名序号
+	private int index;
 
 	//tempZip中所有entry的名字集合
-	protected Set<String> entrySet;
-
-	protected final DecimalFormat numFormat  = new DecimalFormat("#.##");
+	private Set<String> entrySet;
 
 	/**
 	 * 
@@ -84,7 +79,7 @@ public class ZipDownloader implements Executor {
 	}
 
 	/**
-	 * 1.打开tempZip的输出流(如果tempZip已经存在则直接打开，否则新建);
+	 * 1.打开downloadZip的输出流(如果downloadZip已经存在则直接打开，否则新建);
 	 * 2.挨个写入下载的文件流，如果压缩数或压缩文件大小大于阈值则重新命名，否则继续;
 	 */
 	@Override
@@ -102,44 +97,59 @@ public class ZipDownloader implements Executor {
 		ZipOutputStream zipOutStream = null;
 		boolean isStreamClosed = true;
 
-		renameTempZip(isRetry, false); 
+		indexDownloadZip(isRetry, false); 
 		try{
-			for(String path : uriList){
+			for(String uri : uriList){ 
 				if(isStreamClosed){
 					zipOutStream = new ZipOutputStream(new CheckedOutputStream(new FileOutputStream(downloadZip), new CRC32()));
 					isStreamClosed = false; 
 				}
 				long sTime = System.currentTimeMillis();
-				String name = new File(path).getName();
+				String name = config.getSourceName(uri);
 				if(entrySet.contains(name)){
 					log.warn("忽略重复下载的文件:" + name); 
 					continue;
 				}
-				long size = ZipUtil.zipEntry(name, helper.open(path), zipOutStream);
-				entrySet.add(name); //TODO
-				log.info("下载文件结束:" + name + "(" 
-						+ numFormat.format(size / 1024.0) + "KB), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
-				if(++entryContents >= config.getEntryMax() || downloadZip.length() >= config.getSizeMax()){
+				entrySet.add(name); 
+				
+				String size = numFormat.format(ZipUtil.zipEntry(name, helper.open(uri), zipOutStream) / 1024.0);
+				log.info("下载文件结束:" + name + "(" + size + "KB), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+				if(entrySet.size() >= config.getEntryMax() || downloadZip.length() >= config.getSizeMax()){
 					//流管道关闭，如果继续写文件需要重新打开
 					IoUtil.close(zipOutStream);
 					isStreamClosed = true; 
-					renameTempZip(false, false);
+					indexDownloadZip(false, false);
 				}
 			}
 		}finally{
 			IoUtil.close(zipOutStream);
 		}
-		renameTempZip(false, true);
+		indexDownloadZip(false, true);
+		
+		//move
+		File tempDir = new File(downloadPath);
+		File[] files = tempDir.listFiles();
+		if(ArrayUtils.isEmpty(files)){
+			return;
+		}
+		for(File f : files){
+			if(!f.renameTo(new File(config.getDestPath() + File.separator + f.getName()))){
+				throw new WarnException("文件移动失败:" + f.getName());
+			}
+		}
+		if(!tempDir.delete()){
+			throw new WarnException("删除目录失败:" + downloadPath);
+		}
 	}
 
 	/**
-	 * 将entry个数达到阈值的tempZip编入序列，即重命名成指定名称
+	 * 达到阈值的downloadZip编入序列，即重命名成指定名称
 	 * @param isRetry
 	 * @param isLast
 	 * @return
 	 * @throws Exception
 	 */
-	private void renameTempZip(boolean isRetry, boolean isLast) throws Exception{ 
+	private void indexDownloadZip(boolean isRetry, boolean isLast) throws Exception{ 
 		if(!ZipUtil.valid(downloadZip)){ 
 			if(downloadZip.exists() && !downloadZip.delete()){
 				throw new WarnException(downloadZip.getName() + "已经损坏, 删除失败."); 
@@ -149,22 +159,21 @@ public class ZipDownloader implements Executor {
 		}
 
 		if(isRetry){
-			entrySet = ZipUtil.getEntrySet(downloadZip);
-			entryContents = getTempZipContents(entrySet);
+			entrySet = getZipEntryNames(downloadZip);
 		}
-		if(!isLast && entryContents < config.getEntryMax() && downloadZip.length() < config.getSizeMax()){
+		if(!isLast && entrySet.size() < config.getEntryMax() 
+				&& downloadZip.length() < config.getSizeMax()){
 			return;
 		}
 
 		if(config.isDelSrc()){
-			List<String> pathList = uriList; //TODO pathlist维护
-			for(String name : entrySet){
-				for(String path : pathList){
-					String pathName = new File(path).getName();
-					if(name.equals(pathName)){
-						log.info("删除源文件：" + name);
-						if(!helper.delete(path)){
-							throw new WarnException("删除源文件失败：" + name); 
+			for(String entryName : entrySet){
+				for(String uri : uriList){ 
+					String uriName = config.getSourceName(uri); 
+					if(entryName.equals(uriName)){
+						log.info("删除源文件：" + entryName);
+						if(!helper.delete(uri)){
+							throw new WarnException("删除源文件失败：" + entryName); 
 						}
 						break;
 					}
@@ -174,31 +183,34 @@ public class ZipDownloader implements Executor {
 
 		joinOtherFiles(downloadZip); 
 
-		String name = getNextName();
-		if(!downloadZip.renameTo(new File(tempPath + File.separator + name))){ 
+		String destName = getNextName(getCurrentIndex() + 1, entrySet.size());
+		File destFile = new File(downloadPath + File.separator + destName);
+		if(!downloadZip.renameTo(destFile)){ 
 			if(!isLast){
 				//继续下载下一个文件，然后再次尝试
 				return;
 			}else{
 				//最后一次命名失败则直接结束，交给下次任务补偿
-				throw new WarnException("命名文件失败:" + name); 
+				throw new WarnException("命名文件失败:" + destName); 
 			}
 		}
 		index++;
 		entrySet.clear();
-		entryContents = 0;
-		log.info("命名文件：" + name);
+		
+		String size = numFormat.format(destFile.length() / 1024.0);
+		log.info("命名文件：" + destName + "(" + size + "KB)");
 	}	
 
 	/**
-	 * 获取下一个zip的序列名
-	 * @param config
+	 * 获取下一个命名downloadZip的序列名（默认:zipName_index_entrySize.zip）
+	 * @param index downloadZip命名序号
+	 * @param entrySize downloadZip真实下载的文件数
 	 * @return
 	 */
-	protected String getNextName(){
+	protected String getNextName(int index, int entrySize){
 		StringBuilder builder = new StringBuilder(); 
 		builder.append(zipName).append("_");
-		builder.append(getCurrentIndex() + 1).append("_").append(entryContents).append(".zip");
+		builder.append(index).append("_").append(entrySize).append(".zip");
 		return builder.toString();
 	}
 
@@ -211,7 +223,7 @@ public class ZipDownloader implements Executor {
 			return index;
 		}
 
-		String[] array = new File(tempPath).list();
+		String[] array = new File(downloadPath).list();
 		if(ArrayUtils.isEmpty(array)){
 			return index;
 		}
@@ -234,17 +246,17 @@ public class ZipDownloader implements Executor {
 	} 
 
 	/**
-	 * 获取zip中的有效文件数
-	 * @param entrySet
+	 * 获取下载的downloadZip中的真实下载的文件名称集合
+	 * @param downloadZip
 	 * @return
 	 * @throws Exception
 	 */
-	protected int getTempZipContents(Set<String> entrySet) throws Exception {
-		return entrySet.size();
+	protected Set<String> getZipEntryNames(File downloadZip) throws Exception {
+		return ZipUtil.getEntrySet(downloadZip);
 	}
 
 	/**
-	 * 自定义添加其他文件，由于上下文考虑了失败补偿问题，建议添加文件前先检查删除已有的同名entry
+	 * 自定义添加其他文件，由于上下文中考虑了失败补偿问题，建议添加文件前先检查删除已有的同名entry
 	 * @param tempZipFile
 	 * @throws IOException
 	 */
@@ -252,19 +264,4 @@ public class ZipDownloader implements Executor {
 
 	}
 
-	protected void move() throws WarnException{ 
-		File tempDir = new File(tempPath);
-		File[] files = tempDir.listFiles();
-		if(ArrayUtils.isEmpty(files)){
-			return;
-		}
-		for(File file : files){
-			if(!file.renameTo(new File(destPath + File.separator + file.getName()))){
-				throw new WarnException("文件移动失败:" + file.getName());
-			}
-		}
-		if(!tempDir.delete()){
-			throw new WarnException("删除临时目录失败.");
-		}
-	}
 }

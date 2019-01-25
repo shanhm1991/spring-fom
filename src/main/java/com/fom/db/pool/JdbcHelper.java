@@ -35,7 +35,7 @@ import oracle.sql.StructDescriptor;
  */
 public class JdbcHelper {
 
-	protected static final Logger LOG = LoggerFactory.getLogger("jdbc");
+	protected static final Logger LOG = LoggerFactory.getLogger("pool");
 
 	protected JdbcHelper(){
 
@@ -51,7 +51,9 @@ public class JdbcHelper {
 		node.isInTransaction = true;
 		Connection con = node.v;
 		try{
-			LOG.info("开启事务");
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("开启事务");
+			}
 			con.commit();
 			con.setAutoCommit(false); 
 		}catch(Exception e){
@@ -61,7 +63,7 @@ public class JdbcHelper {
 			LOG.error("开启事务异常", e);
 		}
 	}
-	
+
 	protected final void _endTransaction(String poolName) throws Exception {
 		JdbcPool pool = getPool(poolName);
 		JdbcPool.JdbcNode node = (JdbcPool.JdbcNode)pool.acquire();
@@ -74,7 +76,9 @@ public class JdbcHelper {
 		Connection con = node.v;
 		try{
 			con.commit();
-			LOG.info("提交事务");
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("提交事务");
+			}
 		}catch(Exception e){
 			LOG.error("提交事务异常,数据回滚", e); 
 			con.rollback();
@@ -84,12 +88,12 @@ public class JdbcHelper {
 			pool.release();
 		}
 	}
-	
+
 	private boolean isInTransaction(JdbcPool pool) throws Exception{ 
 		JdbcPool.JdbcNode node = (JdbcPool.JdbcNode)pool.acquire();
 		return node.isInTransaction;
 	}
-	
+
 	/**
 	 * 取消事务，直接回滚,释放连接
 	 * @param poolName
@@ -108,7 +112,9 @@ public class JdbcHelper {
 				return;
 			}
 			Connection con = node.v;
-			LOG.info("取消事务,数据回滚");
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("取消事务,数据回滚");
+			}
 			con.rollback();
 			con.setAutoCommit(true); 
 		}finally{
@@ -135,11 +141,15 @@ public class JdbcHelper {
 			Connection con = pool.acquire().v;
 			ps = con.prepareStatement(sql);
 			setParams(con, ps, paramMap, indexMap);
-			LOG.info("[query]=" + sql);
-			LOG.info("[param]=" + logParam(ps, paramMap, indexMap)); 
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("[query]=" + sql);
+				LOG.debug("[param]=" + logParam(ps, paramMap, indexMap)); 
+			}
 			long eTime = System.currentTimeMillis();
 			List<Map<String, Object>> list = praseResultSet(ps.executeQuery());
-			LOG.info("[affects=" + list.size() + ",cost=" + (System.currentTimeMillis() - eTime) + "ms]");
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("[affects=" + list.size() + ",cost=" + (System.currentTimeMillis() - eTime) + "ms]");
+			}
 			return list;
 		}finally{
 			pool.release();
@@ -156,11 +166,15 @@ public class JdbcHelper {
 			Connection con = pool.acquire().v;
 			ps = con.prepareStatement(sql);
 			setParams(con, ps, paramMap, indexMap);
-			LOG.info("[query]=" + sql);
-			LOG.info("[param]=" + logParam(ps, paramMap, indexMap)); 
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("[query]=" + sql);
+				LOG.debug("[param]=" + logParam(ps, paramMap, indexMap)); 
+			}
 			long eTime = System.currentTimeMillis();
 			List<Map<String, Object>> list = praseResultSet(ps.executeQuery());
-			LOG.info("[affects=" + list.size() + ",cost=" + (System.currentTimeMillis() - eTime) + "ms]");
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("[affects=" + list.size() + ",cost=" + (System.currentTimeMillis() - eTime) + "ms]");
+			}
 			return list;
 		}catch(Exception e){
 			cancelTransaction(poolName);
@@ -189,11 +203,15 @@ public class JdbcHelper {
 			Connection con = pool.acquire().v;
 			ps = con.prepareStatement(sql);
 			setParams(con, ps, paramMap, indexMap);
-			LOG.info("[execute]=" + sql);
-			LOG.info("[param]=" + logParam(ps, paramMap, indexMap)); 
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("[execute]=" + sql);
+				LOG.debug("[param]=" + logParam(ps, paramMap, indexMap)); 
+			}
 			long eTime = System.currentTimeMillis();
 			int num = ps.executeUpdate();
-			LOG.info("[affects=" + num + ",cost=" + (System.currentTimeMillis() - eTime) + "ms]");
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("[affects=" + num + ",cost=" + (System.currentTimeMillis() - eTime) + "ms]");
+			}
 			return num;
 		}finally{
 			IoUtil.close(ps); 
@@ -207,11 +225,15 @@ public class JdbcHelper {
 			Connection con = getPool(poolName).acquire().v;
 			ps = con.prepareStatement(sql);
 			setParams(con, ps, paramMap, indexMap);
-			LOG.info("[execute in transaction]=" + sql);
-			LOG.info("[param] = " + logParam(ps, paramMap, indexMap)); 
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("[execute in transaction]=" + sql);
+				LOG.debug("[param] = " + logParam(ps, paramMap, indexMap)); 
+			}
 			long eTime = System.currentTimeMillis();
 			int num = ps.executeUpdate();
-			LOG.info("[affects=" + num + ",cost=" + (System.currentTimeMillis() - eTime) + "ms]");
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("[affects=" + num + ",cost=" + (System.currentTimeMillis() - eTime) + "ms]");
+			}
 			return num;
 		}catch(Exception e) {
 			cancelTransaction(poolName);
@@ -243,14 +265,18 @@ public class JdbcHelper {
 				setParams(con, ps, map, indexMap);
 				ps.addBatch();
 			}
-			LOG.info("[batch execute]=" + sql);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("[batch execute]=" + sql);
+			}
 			long eTime = System.currentTimeMillis();
 			int[] nums = ps.executeBatch();
 			int num = 0;
 			for(int i : nums){
 				num += i;
 			}
-			LOG.info("[affects=" + num + ",cost=" + (System.currentTimeMillis() - eTime) + "ms]");
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("[affects=" + num + ",cost=" + (System.currentTimeMillis() - eTime) + "ms]");
+			}
 			return nums;
 		}finally{
 			IoUtil.close(ps); 
@@ -267,14 +293,18 @@ public class JdbcHelper {
 				setParams(con, ps, map, indexMap);
 				ps.addBatch();
 			}
-			LOG.info("[batch execute in transaction]=" + sql);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("[batch execute in transaction]=" + sql);
+			}
 			long eTime = System.currentTimeMillis();
 			int[] nums = ps.executeBatch();
 			int num = 0;
 			for(int i : nums){
 				num += i;
 			}
-			LOG.info("[affects=" + num + ",cost=" + (System.currentTimeMillis() - eTime) + "ms]");
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("[affects=" + num + ",cost=" + (System.currentTimeMillis() - eTime) + "ms]");
+			}
 			return nums;
 		}catch(Exception e){
 			cancelTransaction(poolName);
@@ -284,7 +314,7 @@ public class JdbcHelper {
 		}
 	}
 
-	
+
 
 	private JdbcPool getPool(String poolName) { 
 		JdbcPool pool = (JdbcPool)PoolManager.get(poolName);

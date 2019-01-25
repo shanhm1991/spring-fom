@@ -14,7 +14,7 @@ import com.fom.log.LoggerFactory;
  *
  * @param <E>
  */
-public abstract class Context<E extends Config> extends Thread {
+public abstract class Context<E extends Config> implements Runnable {
 
 	protected final Logger log;
 
@@ -55,7 +55,7 @@ public abstract class Context<E extends Config> extends Thread {
 			return;
 		}
 		
-		this.setName(config.getType() + "[" + srcName + "]");
+		Thread.currentThread().setName(config.getType() + "[" + srcName + "]");
 		long sTime = System.currentTimeMillis();
 		try {
 			onStart(config);

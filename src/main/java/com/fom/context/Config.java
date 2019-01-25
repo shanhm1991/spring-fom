@@ -15,17 +15,17 @@ import com.fom.log.LoggerFactory;
 import com.fom.util.XmlUtil;
 
 /**
- * src.path    源文件目录<br>
+ * src.uri    源文件目录<br>
  * src.pattern 源文件正则表达式<br>
- * src.match.fail.del  源文件匹配失败是否删除<br>
+ * src.delMatchFail  源文件匹配失败是否删除<br>
+ * scanner       扫描源目录的实现<br>
  * scanner.cron  扫描源目录的cron表达式<br>
- * scanner       扫描源目录的实现方式<br>
- * executor      处理文件的实现方式<br>
- * executor.min  任务线程最小数<br>
- * executor.max  任务线程最大数<br>
- * executor.aliveTime.seconds  任务线程空闲存活最长时间<br>
- * executor.overTime.seconds   任务线程执行超时时间<br>
- * executor.overTime.cancle    任务线程执行超时是否中断<br>
+ * context      处理文件的实现方式<br>
+ * thread.min  处理线程最小数<br>
+ * thread.max  处理线程最大数<br>
+ * thread.aliveTime  处理线程空闲存活最长时间<br>
+ * thread.overTime   处理线程执行超时时间<br>
+ * thread.cancellable    处理线程执行超时是否中断<br>
  * 
  * @author shanhm
  * @date 2018年12月23日
@@ -100,11 +100,11 @@ public abstract class Config implements IConfig {
 		overTime = load(element, "thread.overTime", 3600, 300, 86400);
 		cancellable = load(element, "thread.cancellable", false); 
 
+		extendsElement = element.element("extends");
 		loadExtends();
 	}
 
 	boolean isValid() throws Exception {
-
 		refreshScanner();
 		return valid();
 	}

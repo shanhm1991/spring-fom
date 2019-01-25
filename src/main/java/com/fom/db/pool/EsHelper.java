@@ -42,7 +42,7 @@ import com.fom.util.IoUtil;
  */
 public class EsHelper {
 
-	protected static final Logger LOG = LoggerFactory.getLogger("es");
+	protected static final Logger LOG = LoggerFactory.getLogger("pool");
 
 	protected EsHelper(){
 

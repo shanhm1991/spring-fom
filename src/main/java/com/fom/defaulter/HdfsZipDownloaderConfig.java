@@ -1,5 +1,7 @@
 package com.fom.defaulter;
 
+import java.io.File;
+
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.log4j.helpers.OptionConverter;
 
@@ -10,6 +12,14 @@ import com.fom.context.scanner.HdfsConfig;
 import com.fom.util.HdfsUtil;
 
 /**
+ * hdfs.master 集群主节点ip:port<br>
+ * hdfs.slave 集群副节点ip:port<br>
+ * hdfs.signalFile 标记文件<br>
+ * downloader.isSrcDel 是否删除源文件<br>
+ * downloader.isWithTemp 是否先下载到临时目录<br>
+ * downloader.desPath 下载目的目录<br>
+ * downloader.zip.entryMax 打包zip的最大文件数<br>
+ * downloader.zip.sizeMax 打包zip的最大字节数<br>
  * 
  * @author shanhm
  * @date 2019年1月23日
@@ -93,6 +103,14 @@ public class HdfsZipDownloaderConfig extends Config implements HdfsConfig, ZipDo
 	@Override
 	public long getSizeMax() {
 		return sizeMax;
+	}
+
+	/**
+	 * new File(uri).getName()
+	 */
+	@Override
+	public String getSourceName(String uri) {
+		return new File(uri).getName();
 	}
 
 

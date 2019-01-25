@@ -30,6 +30,7 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends Contex
 
 	@Override
 	protected final void exec(E config) throws Exception {
+		helper = new HdfsDownloaderHelper(config.getFs(), config.isDelSrc());
 		List<String> pathList = HdfsUtil.listPath(config.getFs(), sourceUri, new PathFilter(){
 			@Override
 			public boolean accept(Path path) {
@@ -39,8 +40,7 @@ public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends Contex
 				return ! config.getSignalFileName().equals(path.getName());
 			}
 		}); 
-		helper = new HdfsDownloaderHelper(config.getFs(), config.isDelSrc());
-		Executor executor = new ZipDownloader(name, pathList, config, helper);
+		Executor executor = new ZipDownloader(name, config.getSourceName(sourceUri), pathList, config, helper);
 		executor.exec();
 	}
 
