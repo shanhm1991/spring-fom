@@ -28,11 +28,6 @@ public class TextImporterConfig extends Config implements ImporterConfig {
 	}
 
 	@Override
-	public String getTypeName() {
-		return TYPENAME_IMPORTER;
-	}
-
-	@Override
 	public int getBatch() {
 		return batch;
 	}

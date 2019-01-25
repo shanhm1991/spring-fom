@@ -48,12 +48,13 @@ public class Importer implements Executor {
 	@Override
 	public final void exec() throws Exception {
 		long sTime = System.currentTimeMillis();
+		File parentFile = logFile.getParentFile();
+		if(!parentFile.exists() && !parentFile.mkdirs()){
+			throw new WarnException("创建目录失败:" + parentFile);
+		}
+		
 		int lineIndex = 0;
 		if(!logFile.exists()){ 
-			File parentFile = logFile.getParentFile();
-			if(!parentFile.exists() && !parentFile.mkdirs()){
-				throw new WarnException("创建日志文件失败.");
-			}
 			if(!logFile.createNewFile()){
 				throw new WarnException("创建日志文件失败.");
 			}

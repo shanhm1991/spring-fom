@@ -50,11 +50,6 @@ public class EsImpoterConfig extends Config implements ImporterConfig {
 	public String getType() {
 		return TYPE_IMPORTER;
 	}
-
-	@Override
-	public String getTypeName() {
-		return TYPENAME_IMPORTER;
-	}
 	
 	@Override
 	public int getBatch() {

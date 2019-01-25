@@ -55,7 +55,7 @@ public abstract class Context<E extends Config> implements Runnable {
 			return;
 		}
 		
-		Thread.currentThread().setName(config.getType() + "[" + srcName + "]");
+		Thread.currentThread().setName("[" + srcName + "]");
 		long sTime = System.currentTimeMillis();
 		try {
 			onStart(config);
@@ -63,13 +63,13 @@ public abstract class Context<E extends Config> implements Runnable {
 			exec(config);
 
 			onComplete(config);
-			log.info(config.getTypeName() + "任务结束, 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+			log.info("任务结束, 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 		} catch(WarnException e){
-			log.warn(config.getTypeName() + "任务错误结束[" + e.getMessage() + "], 耗时=" + (System.currentTimeMillis() - sTime + "ms"));
+			log.warn("任务错误结束[" + e.getMessage() + "], 耗时=" + (System.currentTimeMillis() - sTime + "ms"));
 		} catch (InterruptedException e) {
-			log.warn(config.getTypeName() + "任务中断[" + e.getMessage() + "], 耗时=" + (System.currentTimeMillis() - sTime + "ms"));
+			log.warn("任务中断[" + e.getMessage() + "], 耗时=" + (System.currentTimeMillis() - sTime + "ms"));
 		} catch(Throwable e) {
-			log.error(config.getTypeName() + "任务异常结束, 耗时=" + (System.currentTimeMillis() - sTime + "ms"), e);
+			log.error("任务异常结束, 耗时=" + (System.currentTimeMillis() - sTime + "ms"), e);
 		} finally{
 			onFinally();
 		}

@@ -34,7 +34,7 @@ public class FomServiceImpl implements FomService {
 			Map<String,String> m = new LinkedHashMap<>();
 			map.put(entry.getKey(), m);
 			Config c = entry.getValue();
-			m.put("type", c.getTypeName());
+			m.put("type", c.getType());
 			m.put("lastLoad", format.format(c.loadTime));
 			m.put("valid", String.valueOf(c.valid));
 			if(c.isRunning){

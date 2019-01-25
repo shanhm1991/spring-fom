@@ -13,31 +13,19 @@ public interface IConfig {
 	String TYPE_UPLOADER = "uploader";
 
 	String TYPE_DOWNLOADER = "downloader";
-
-	String TYPENAME_IMPORTER = "导入";
-
-	String TYPENAME_UPLOADER = "上传";
-
-	String TYPENAME_DOWNLOADER = "下载";
 	
 	/**
-	 * 当前模块类型（importer/uploader/downloader）
+	 * 当前模块类型（TYPE_IMPORTER/TYPE_UPLOADER/TYPE_DOWNLOADER）
 	 * @return
 	 */
 	String getType();
 
 	/**
-	 * 当前模块类型名称(导入/上传/下载)
-	 * @return
-	 */
-	String getTypeName();
-	
-	/**
 	 * 匹配文件名称
-	 * @param srcName
+	 * @param sourceName
 	 * @return
 	 */
-	boolean matchSrc(String srcName);
+	boolean matchSourceName(String sourceName);
 	
 	/**
 	 * 当前模块扫描线程匹配源文件名称失败时是否删除

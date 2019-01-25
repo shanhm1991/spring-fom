@@ -66,11 +66,6 @@ public class HdfsZipDownloaderConfig extends Config implements HdfsConfig, ZipDo
 	}
 
 	@Override
-	public String getTypeName() {
-		return TYPENAME_DOWNLOADER;
-	}
-
-	@Override
 	public FileSystem getFs() {
 		return fs;
 	}

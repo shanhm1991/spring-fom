@@ -51,6 +51,8 @@ public abstract class Config implements IConfig {
 	String scannerClass;
 
 	String contextClass;
+	
+	String remark;
 
 	int core;
 
@@ -82,6 +84,8 @@ public abstract class Config implements IConfig {
 	}
 
 	void load() throws Exception {
+		remark = load(element, "remark", "");
+		
 		srcUri = ContextUtil.getEnvStr(load(element, "src.uri", ""));
 		String regex = load(element, "src.pattern", "");
 		if(!StringUtils.isBlank(regex)){
@@ -128,11 +132,11 @@ public abstract class Config implements IConfig {
 	}
 
 	@Override
-	public final boolean matchSrc(String srcName){
+	public final boolean matchSourceName(String sourceName){
 		if(pattern == null){
 			return true;
 		}
-		return pattern.matcher(srcName).find();
+		return pattern.matcher(sourceName).find();
 	}
 
 	/**
@@ -243,7 +247,7 @@ public abstract class Config implements IConfig {
 	@Override
 	public final String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("type=" + getTypeName());
+		builder.append("type=" + getType());
 		builder.append("\nvalid=" + valid);
 		builder.append("\n" + entryMap);
 		return builder.toString();

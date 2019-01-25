@@ -1,7 +1,6 @@
 package com.fom.examples;
 
 import com.fom.context.Context;
-import com.fom.context.Executor;
 import com.fom.context.executor.Importer;
 
 /**
@@ -20,8 +19,8 @@ public class Example2 extends Context<TextImporterConfig> {
 	@Override
 	protected void exec(TextImporterConfig config) throws Exception {
 		Example2Helper helper = new Example2Helper(name);
-		Executor executor = new Importer(name, sourceUri, config, helper);
-		executor.exec();
+		Importer importer = new Importer(name, sourceUri, config, helper);
+		importer.exec();
 	}
 
 }

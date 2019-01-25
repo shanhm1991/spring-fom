@@ -40,7 +40,7 @@ public class HdfsScanner<E extends HdfsConfig> extends Scanner<E>{
 		
 		for(FileStatus status : array) {
 			String name = status.getPath().getName();
-			if(!config.matchSrc(name)){
+			if(!config.matchSourceName(name)){
 				continue;
 			}
 			

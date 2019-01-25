@@ -50,11 +50,6 @@ public class HdfsDownloaderConfig extends Config implements HdfsConfig, Download
 	public String getType() {
 		return TYPE_DOWNLOADER;
 	}
-
-	@Override
-	public String getTypeName() {
-		return TYPENAME_DOWNLOADER;
-	}
 	
 	@Override
 	public final FileSystem getFs() {

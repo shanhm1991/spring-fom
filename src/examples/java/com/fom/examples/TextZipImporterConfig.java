@@ -26,14 +26,14 @@ public class TextZipImporterConfig extends Config implements LocalZipImporterCon
 	@Override
 	protected void loadExtends() throws Exception {
 		batch = loadExtends("importer.batch", 5000, 1, 50000);
-		String reg = loadExtends("zip.subPattern", "");
+		String reg = loadExtends("zip.entryPattern", "");
 		if(!StringUtils.isBlank(reg)){
 			pattern = Pattern.compile(reg);
 		}
 	}
 	
 	@Override
-	public boolean matchSubFile(String fileName) {
+	public boolean matchEntryName(String fileName) {
 		if(pattern == null){
 			return true;
 		}
@@ -43,11 +43,6 @@ public class TextZipImporterConfig extends Config implements LocalZipImporterCon
 	@Override
 	public String getType() {
 		return TYPE_IMPORTER;
-	}
-
-	@Override
-	public String getTypeName() {
-		return TYPENAME_IMPORTER;
 	}
 	
 	@Override

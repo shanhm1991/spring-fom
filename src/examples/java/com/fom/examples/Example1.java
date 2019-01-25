@@ -1,7 +1,6 @@
 package com.fom.examples;
 
 import com.fom.context.Context;
-import com.fom.context.Executor;
 import com.fom.context.executor.Importer;
 import com.fom.db.handler.EsHandler;
 
@@ -30,7 +29,7 @@ public class Example1 extends Context<EsImpoterConfig> {
 	@Override
 	protected void exec(EsImpoterConfig config) throws Exception {
 		Example1Helper helper = new Example1Helper(name, config.getEsIndex(), config.getEsType()); 
-		Executor executor = new Importer(name, sourceUri, config, helper);
-		executor.exec();
+		Importer importer = new Importer(name, sourceUri, config, helper);
+		importer.exec();
 	}
 }

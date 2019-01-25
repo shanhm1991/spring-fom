@@ -1,8 +1,7 @@
 package com.fom.examples;
 
 import com.fom.context.Context;
-import com.fom.context.Executor;
-import com.fom.context.executor.Importer;
+import com.fom.context.executor.LocalZipImporter;
 
 /**
  * 
@@ -17,9 +16,9 @@ public class Example5 extends Context<TextZipImporterConfig>{
 	}
 
 	@Override
-	protected void exec(TextZipImporterConfig config) throws Exception {
+	protected void exec(TextZipImporterConfig config) throws Exception { 
 		Example5Helper helper = new Example5Helper(name);
-		Executor executor = new Importer(name, sourceUri, config, helper);
-		executor.exec();
+		LocalZipImporter importer = new LocalZipImporter(name, sourceUri, config, helper);
+		importer.exec();
 	}
 }

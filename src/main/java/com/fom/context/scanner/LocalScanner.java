@@ -32,7 +32,7 @@ public class LocalScanner<E extends IConfig> extends Scanner<E> {
 		
 		for(File file : array){
 			String name = file.getName();
-			if(config.matchSrc(name)){
+			if(config.matchSourceName(name)){
 				list.add(file.getPath());
 				continue;
 			}

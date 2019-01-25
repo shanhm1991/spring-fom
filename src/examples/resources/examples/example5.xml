@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
-	<fom name="example_importLocalZipToOracleByPool" config="com.fom.examples.importer.local.oracle.LocalZipImporterConfig">
-		<src.path>${webapp.root}/source</src.path>
+	<fom name="example5" config="com.fom.examples.TextZipImporterConfig">
+		<remark>使用自定义pool的方式将本地指定目录下text文本的zip包解析导入Oracle库</remark>
+		<src.uri>${webapp.root}/source</src.uri>
 		<src.pattern>test.zip</src.pattern>
-		<src.match.fail.del>false</src.match.fail.del>
-		<scanner>com.fom.context.LocalScanner</scanner>
+		<src.delMatchFail>false</src.delMatchFail>
+		<scanner>com.fom.context.scanner.LocalScanner</scanner>
 		<scanner.cron>0 0/15 * * * ?</scanner.cron>
-		<executor>com.fom.examples.importer.local.oracle.LocalOraclePoolZipImporter</executor>
-		<executor.min>10</executor.min>
-		<executor.max>10</executor.max>
-		<executor.aliveTime.seconds>30</executor.aliveTime.seconds>
-		<executor.overTime.seconds>86400</executor.overTime.seconds>
-		<executor.overTime.cancle>false</executor.overTime.cancle>
-		<importer.batch>5000</importer.batch>
-		<importer.zip.subPattern>.\.bcp</importer.zip.subPattern>
-		<extended>
-			<demo.conf>myconfig</demo.conf>
-		</extended>
+		<context>com.fom.examples.Example5</context>
+		<thread.min>10</thread.min>
+		<thread.max>10</thread.max>
+		<thread.aliveTime>30</thread.aliveTime>
+		<thread.overTime>86400</thread.overTime>
+		<thread.cancellable>false</thread.cancellable>
+		<extends>
+			<importer.batch>5000</importer.batch>
+			<zip.entryPattern>.\.bcp</zip.entryPattern>
+		</extends>
 	</fom>
 </foms>

@@ -110,7 +110,7 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 		Iterator<Map.Entry<String, TimedFuture<Void>>> it = futureMap.entrySet().iterator();
 		while(it.hasNext()){
 			Entry<String, TimedFuture<Void>> entry = it.next();
-			if(!config.matchSrc(entry.getKey())){
+			if(!config.matchSourceName(entry.getKey())){
 				continue;
 			}
 			TimedFuture<Void> future = entry.getValue();
@@ -119,11 +119,9 @@ public abstract class Scanner<E extends IConfig> extends Thread {
 			}else{
 				long existTime = (System.currentTimeMillis() - future.getCreateTime()) / 1000;
 				if(existTime > config.overTime) {
+					log.warn("任务超时[" + entry.getKey() + "]," + existTime + "s");
 					if(config.cancellable){
 						future.cancel(true);
-						log.warn(config.getTypeName() + "任务超时中断[" + entry.getKey() + "]," + existTime + "s"); 
-					}else{
-						log.warn(config.getTypeName() + "任务超时[" + entry.getKey() + "]," + existTime + "s");
 					}
 				}
 			}

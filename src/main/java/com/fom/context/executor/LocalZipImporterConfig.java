@@ -10,10 +10,10 @@ package com.fom.context.executor;
 public interface LocalZipImporterConfig extends ImporterConfig {
 	
 	/**
-	 * 通过名称匹配zip子文件是否需要处理
-	 * @param fileName
+	 * 匹配zip的entry名称
+	 * @param entryName
 	 * @return
 	 */
-	boolean matchSubFile(String fileName);
+	boolean matchEntryName(String entryName);
 
 }
