@@ -1,5 +1,11 @@
 package com.fom.context.executor.helper;
 
+/**
+ * 
+ * @author shanhm
+ *
+ * @param <V>
+ */
 public interface LocalZipImporterHelper<V> extends ImporterHelper<V> {
 
 	/**

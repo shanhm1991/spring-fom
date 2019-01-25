@@ -10,7 +10,6 @@ import org.elasticsearch.action.bulk.BulkItemResponse;
 /**
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public interface EsHandler {

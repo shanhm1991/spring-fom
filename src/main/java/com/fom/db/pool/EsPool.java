@@ -16,7 +16,6 @@ import com.fom.util.XmlUtil;
  * TransportClient本身提供了连接与通道的复用
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 class EsPool extends Pool<TransportClient>{

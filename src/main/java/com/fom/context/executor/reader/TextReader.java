@@ -12,7 +12,6 @@ import com.fom.util.IoUtil;
 /**
  * 
  * @author shanhm
- * @date 2019年1月23日
  *
  */
 public class TextReader implements Reader {

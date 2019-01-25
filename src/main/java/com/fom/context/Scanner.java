@@ -20,7 +20,6 @@ import com.fom.log.LoggerFactory;
 /**
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  * @param <E>
  */

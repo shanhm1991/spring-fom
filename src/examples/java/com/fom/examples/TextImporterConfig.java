@@ -5,7 +5,6 @@ import com.fom.context.Config;
 /**
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public class TextImporterConfig extends Config {

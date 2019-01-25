@@ -7,7 +7,6 @@ import com.fom.context.executor.Importer;
  * 解析文本文件将数据导入mysql，使用mybatis
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public class Example2 extends Context<TextImporterConfig> {

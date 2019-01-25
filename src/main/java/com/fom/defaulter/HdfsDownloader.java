@@ -8,7 +8,6 @@ import com.fom.context.executor.helper.HdfsDownloaderHelper;
 /**
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public class HdfsDownloader<E extends HdfsDownloaderConfig> extends Context<E> {

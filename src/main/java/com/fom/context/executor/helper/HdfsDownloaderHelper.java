@@ -10,7 +10,6 @@ import com.fom.util.HdfsUtil;
 /**
  * 
  * @author shanhm
- * @date 2019年1月22日
  *
  */
 public class HdfsDownloaderHelper implements DownloaderHelper {

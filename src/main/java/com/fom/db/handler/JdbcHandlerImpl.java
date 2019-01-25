@@ -8,7 +8,6 @@ import com.fom.db.pool.JdbcHelper;
 /**
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public class JdbcHandlerImpl extends JdbcHelper implements JdbcHandler {

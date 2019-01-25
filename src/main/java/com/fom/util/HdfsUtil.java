@@ -15,7 +15,6 @@ import org.apache.hadoop.fs.PathFilter;
 /**
  * 
  * @author shanhm
- * @date 2019年1月10日
  *
  */
 public class HdfsUtil {

@@ -15,7 +15,6 @@ import com.fom.util.SpringUtil;
 /**
  * 
  * @author shanhm
- * @date 2019年1月24日
  *
  */
 public class Example2Helper extends AbstractImporterHelper<ExampleBean> {

@@ -13,7 +13,6 @@ import com.fom.db.pool.EsHelper;
 /**
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public class EsHandlerImpl extends EsHelper implements EsHandler {

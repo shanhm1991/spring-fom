@@ -34,7 +34,6 @@ import org.apache.http.protocol.HttpContext;
 /**
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public class HttpUtil {

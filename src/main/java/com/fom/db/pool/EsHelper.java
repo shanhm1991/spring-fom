@@ -37,7 +37,6 @@ import com.fom.util.IoUtil;
 /**
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public class EsHelper {

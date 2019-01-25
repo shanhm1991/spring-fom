@@ -20,7 +20,6 @@ import com.fh.search.storage.client.StorageEntity;
  * 另外StorageClient在服务地址配置错误时会自己无限重连，导致toomanyfileopens问题，需要注意
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public class StorageUtil {

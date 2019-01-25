@@ -7,7 +7,6 @@ import com.fom.db.handler.EsHandler;
 /**
  * 
  * @author shanhm
- * @date 2019年1月15日
  *
  */
 public class Example1 extends Context<EsImpoterConfig> {

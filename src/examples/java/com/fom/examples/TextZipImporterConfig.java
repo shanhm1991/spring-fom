@@ -1,22 +1,17 @@
 package com.fom.examples;
 
-import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.fom.context.Config;
 
 /**
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public class TextZipImporterConfig extends Config {
 	
 	private int batch;
 	
-	private Pattern pattern;
+	private String pattern;
 
 	protected TextZipImporterConfig(String name) {
 		super(name);
@@ -25,10 +20,7 @@ public class TextZipImporterConfig extends Config {
 	@Override
 	protected void loadExtends() throws Exception {
 		batch = loadExtends("importer.batch", 5000, 1, 50000);
-		String reg = loadExtends("zip.entryPattern", "");
-		if(!StringUtils.isBlank(reg)){
-			pattern = Pattern.compile(reg);
-		}
+		pattern = loadExtends("zip.entryPattern", "");
 	}
 
 	@Override
@@ -40,7 +32,7 @@ public class TextZipImporterConfig extends Config {
 		return batch;
 	}
 	
-	public Pattern getEntryPattern(){
+	public String getEntryPattern(){
 		return pattern;
 	}
 	

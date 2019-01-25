@@ -5,7 +5,6 @@ import java.util.concurrent.FutureTask;
 /**
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  * @param <T>
  */

@@ -8,7 +8,6 @@ import com.fom.examples.bean.ExampleBean;
 /**
  * 
  * @author shanhm
- * @date 2019年1月15日
  *
  */
 public interface ExamplesDao {

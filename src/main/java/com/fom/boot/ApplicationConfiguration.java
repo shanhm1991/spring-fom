@@ -14,7 +14,6 @@ import com.fom.db.pool.PoolListener;
 /**
  * 
  * @author shanhm
- * @date 2019年1月14日
  *
  */
 @Configuration

@@ -4,7 +4,6 @@ package com.fom.context.executor;
 /**
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public interface ZipDownloaderConfig extends DownloaderConfig {

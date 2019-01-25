@@ -8,7 +8,6 @@ import com.fom.context.ContextUtil;
 /**
  * 
  * @author shanhm
- * @date 2019年1月15日
  *
  */
 public class EsImpoterConfig extends Config {

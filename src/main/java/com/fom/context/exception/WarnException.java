@@ -3,7 +3,6 @@ package com.fom.context.exception;
 /**
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public class WarnException extends RuntimeException {

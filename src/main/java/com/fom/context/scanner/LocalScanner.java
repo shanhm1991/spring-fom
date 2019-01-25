@@ -12,7 +12,6 @@ import com.fom.context.Scanner;
 /**
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  * @param <E>
  */

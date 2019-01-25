@@ -5,7 +5,6 @@ import com.fom.context.IConfig;
 /**
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public interface FtpConfig extends IConfig {

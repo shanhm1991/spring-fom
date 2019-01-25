@@ -15,7 +15,6 @@ import com.fom.log.LoggerFactory;
  * 根据sourceUri下载单个文件的实现
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public class Downloader implements Executor {

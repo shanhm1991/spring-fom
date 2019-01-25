@@ -26,7 +26,6 @@ import com.fom.util.ZipUtil;
 /**
  * 
  * @author shanhm1991
- * @date 2019年1月21日
  *
  */
 public class ZipDownloader implements Executor {

@@ -11,7 +11,6 @@ import com.fom.util.XmlUtil;
 /**
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 class JdbcPool extends Pool<Connection>{

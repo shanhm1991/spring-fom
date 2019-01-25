@@ -10,7 +10,6 @@ import com.fom.examples.bean.ExampleBean;
 /**
  * 
  * @author shanhm
- * @date 2019年1月15日
  *
  */
 public class OracleExamplesDaoImpl extends SqlSessionDaoSupport implements ExamplesDao {

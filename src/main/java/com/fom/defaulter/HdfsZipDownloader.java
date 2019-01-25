@@ -17,7 +17,6 @@ import com.fom.util.HdfsUtil;
 /**
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public class HdfsZipDownloader<E extends HdfsZipDownloaderConfig> extends Context<E> {

@@ -18,7 +18,6 @@ import com.fom.util.HdfsUtil;
  * downloader.desPath 下载目的目录<br>
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public class HdfsDownloaderConfig extends Config implements HdfsConfig, DownloaderConfig {

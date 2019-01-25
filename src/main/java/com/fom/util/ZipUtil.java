@@ -26,7 +26,6 @@ import net.lingala.zip4j.util.InternalZipConstants;
 /**
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public class ZipUtil {

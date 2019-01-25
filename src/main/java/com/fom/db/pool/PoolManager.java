@@ -31,7 +31,6 @@ import com.fom.util.XmlUtil;
  * 负责监听配置变化,更新和提高poolMap中的pool
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 final class PoolManager {

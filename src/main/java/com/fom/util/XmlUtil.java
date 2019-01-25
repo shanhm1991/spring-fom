@@ -12,7 +12,6 @@ import org.dom4j.io.XMLWriter;
 /**
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public class XmlUtil {

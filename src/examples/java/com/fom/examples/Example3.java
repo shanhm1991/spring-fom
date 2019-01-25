@@ -6,7 +6,6 @@ import com.fom.context.executor.Importer;
 /**
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public class Example3 extends Context<TextImporterConfig> {

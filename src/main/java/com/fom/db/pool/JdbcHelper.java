@@ -30,7 +30,6 @@ import oracle.sql.StructDescriptor;
 /**
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public class JdbcHelper {

@@ -22,7 +22,6 @@ import com.fom.util.HdfsUtil;
  * downloader.zip.sizeMax 打包zip的最大字节数<br>
  * 
  * @author shanhm
- * @date 2019年1月23日
  *
  */
 public class HdfsZipDownloaderConfig extends Config implements HdfsConfig, ZipDownloaderConfig {

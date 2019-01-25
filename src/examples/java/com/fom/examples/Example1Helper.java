@@ -15,7 +15,6 @@ import com.fom.db.handler.EsHandler;
 /**
  * 
  * @author shanhm
- * @date 2019年1月24日
  *
  */
 public class Example1Helper extends AbstractImporterHelper<Map<String, Object>> {

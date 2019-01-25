@@ -26,7 +26,6 @@ import com.fom.context.ContextUtil;
  * -DpoolConfigLocation="/WEB-INF/pool.xml"<br>
  * 
  * @author shanhm
- * @date 2019年1月14日
  *
  */
 @SpringBootApplication(exclude={DataSourceAutoConfiguration.class,HibernateJpaAutoConfiguration.class})

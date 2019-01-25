@@ -30,7 +30,6 @@ import com.fom.util.XmlUtil;
  * thread.cancellable    处理线程执行超时是否中断<br>
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public abstract class Config implements IConfig {

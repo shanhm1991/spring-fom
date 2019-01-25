@@ -5,7 +5,6 @@ import javax.servlet.ServletContext;
 /**
  * 
  * @author shanhm
- * @date 2019年1月10日
  *
  */
 public class ContextUtil {

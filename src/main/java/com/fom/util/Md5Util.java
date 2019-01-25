@@ -14,7 +14,6 @@ import com.fom.log.LoggerFactory;
  * 引入一个Md5工具类，修正线程安全问题
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public class Md5Util {

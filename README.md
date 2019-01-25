@@ -51,13 +51,13 @@
 * 在tomcat容器中启动：工程中保留了web.xml和applicationContext.xml以及springnvc.xml就是为了兼容以往的web工程部署方式，将它们和需要的依赖文件一起以文件夹或war包形式放到tomcat目录下启动即可
 * java命令启动：打成jar包和需要的依赖以及resource一起部署到目录下，通过java指定classpath启动
 4. examples
-* example_importLocalFileToEsByPool        解析本地txt/orc文件，使用自定义pool方式导入es；
-* example_importLocalFileToMysqlByMybatis  解析本地txt/orc文件，使用mybatis方式导入mysql；
-* example_importLocalFileToMysqlByPool     解析本地txt/orc文件，使用自定义pool方式导入mysql；
-* example_importLocalZipToOracleByMybatis  解析本地zip(txt/orc)文件，使用mybatis方式导入oracle；
-* example_importLocalZipToOracleByPool     解析本地zip(txt/orc)文件，使用自定义pool方式导入oracle；
-* example_downloadHdfsFile     下载HDFS服务指定目录下文件；
-* example_downloadHdfsZip      下载并打包HDFS服务指定目录下文件；
+* example1  解析本地txt文件，使用自定义pool方式导入es
+* example2  解析本地txt文件，使用mybatis方式导入mysql
+* example3  解析本地txt文件，使用自定义pool方式导入mysql
+* example4  解析本地zip(txt)文件，使用mybatis方式导入oracle
+* example5  解析本地zip(txt)文件，使用自定义pool方式导入oracle
+* example6  下载HDFS服务指定目录下的文件
+* example6  下载并打包HDFS服务指定目录下的目录
 
 ##TODO
 * 页面logs,提供日志级别设置功能

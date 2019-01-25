@@ -15,7 +15,6 @@ import com.fom.db.handler.JdbcHandler;
 /**
  * 
  * @author shanhm
- * @date 2019年1月24日
  *
  */
 public class Example3Helper extends AbstractImporterHelper<Map<String, Object>> {

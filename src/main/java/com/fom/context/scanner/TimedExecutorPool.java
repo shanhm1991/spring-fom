@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * 
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public class TimedExecutorPool extends ThreadPoolExecutor {

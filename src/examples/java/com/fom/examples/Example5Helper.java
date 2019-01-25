@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -16,7 +15,6 @@ import com.fom.db.handler.JdbcHandler;
 /**
  * 
  * @author shanhm
- * @date 2019年1月24日
  *
  */
 public class Example5Helper extends AbstractLocalZipImporterHelper<Map<String, Object>> {
@@ -27,11 +25,8 @@ public class Example5Helper extends AbstractLocalZipImporterHelper<Map<String, O
 			"insert into demo(id,name,source,filetype,importway) "
 					+ "values (#id#,#name#,#source#,#fileType#,#importWay#)";
 
-	private Pattern pattern;
-
-	public Example5Helper(String name, Pattern pattern) {
-		super(name);
-		this.pattern = pattern;
+	public Example5Helper(String name, String pattern) {
+		super(name, pattern);
 	}
 
 	@Override
@@ -69,13 +64,5 @@ public class Example5Helper extends AbstractLocalZipImporterHelper<Map<String, O
 	@Override
 	public long getSourceSize(String sourceUri) {
 		return new File(sourceUri).length();
-	}
-
-	@Override
-	public boolean matchEntryName(String entryName) {
-		if(pattern == null){
-			return true;
-		}
-		return pattern.matcher(entryName).find();
 	}
 }

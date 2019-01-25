@@ -6,7 +6,6 @@ import com.fom.context.executor.LocalZipImporter;
 /**
  * 	
  * @author shanhm
- * @date 2018年12月23日
  *
  */
 public class Example4 extends Context<TextZipImporterConfig>{
