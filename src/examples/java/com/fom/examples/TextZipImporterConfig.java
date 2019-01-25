@@ -1,4 +1,4 @@
-package com.fom.examples.importer.local.oracle;
+package com.fom.examples;
 
 import java.util.regex.Pattern;
 
@@ -13,13 +13,13 @@ import com.fom.context.executor.LocalZipImporterConfig;
  * @date 2018年12月23日
  *
  */
-public class LocalTextZipImporterConfig extends Config implements LocalZipImporterConfig {
+public class TextZipImporterConfig extends Config implements LocalZipImporterConfig {
 	
 	private int batch;
 	
 	private Pattern pattern;
 
-	protected LocalTextZipImporterConfig(String name) {
+	protected TextZipImporterConfig(String name) {
 		super(name);
 	}
 	

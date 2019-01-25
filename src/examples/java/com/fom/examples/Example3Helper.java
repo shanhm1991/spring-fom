@@ -1,4 +1,4 @@
-package com.fom.examples.importer.local.oracle;
+package com.fom.examples;
 
 import java.io.File;
 import java.util.HashMap;
@@ -18,15 +18,15 @@ import com.fom.db.handler.JdbcHandler;
  * @date 2019年1月24日
  *
  */
-public class LocalOraclePoolZipImporterHelper extends abstractImporterHelper<Map<String, Object>> {
+public class Example3Helper extends abstractImporterHelper<Map<String, Object>> {
 
-	private static final String POOL = "example_oracle";
+	private static final String POOL = "example_mysql";
 
 	private static final String SQL = 
 			"insert into demo(id,name,source,filetype,importway) "
 					+ "values (#id#,#name#,#source#,#fileType#,#importWay#)";
 
-	public LocalOraclePoolZipImporterHelper(String name) {
+	public Example3Helper(String name) {
 		super(name);
 	}
 
@@ -46,11 +46,11 @@ public class LocalOraclePoolZipImporterHelper extends abstractImporterHelper<Map
 		map.put("id", array[0]);
 		map.put("name", array[1]);
 		map.put("source", "local");
-		map.put("fileType", "zip(txt)");
+		map.put("fileType", "txt/orc");
 		map.put("importWay", "pool");
 		lineDatas.add(map);
 	}
-
+	
 	@Override
 	public void batchProcessIfNotInterrupted(List<Map<String, Object>> lineDatas, long batchTime) throws Exception {
 		JdbcHandler.handler.batchExecute(POOL, SQL, lineDatas);
@@ -63,12 +63,8 @@ public class LocalOraclePoolZipImporterHelper extends abstractImporterHelper<Map
 	}
 
 	@Override
-	public long getFileSize(String sourceUri) {
+	public long getSourceSize(String sourceUri) {
 		return new File(sourceUri).length();
 	}
 
-	@Override
-	public String getFileName(String sourceUri) {
-		return new File(sourceUri).getName();
-	}
 }

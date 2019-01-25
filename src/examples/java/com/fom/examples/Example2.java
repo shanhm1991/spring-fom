@@ -1,4 +1,4 @@
-package com.fom.examples.importer.local.mysql;
+package com.fom.examples;
 
 import com.fom.context.Context;
 import com.fom.context.Executor;
@@ -11,15 +11,15 @@ import com.fom.context.executor.Importer;
  * @date 2018年12月23日
  *
  */
-public class LocalMysqlMybatisImporter extends Context<LocalTextImporterConfig> {
+public class Example2 extends Context<TextImporterConfig> {
 
-	protected LocalMysqlMybatisImporter(String name, String path) {
+	protected Example2(String name, String path) {
 		super(name, path);
 	}
 	
 	@Override
-	protected void exec(LocalTextImporterConfig config) throws Exception {
-		LocalMysqlMybatisImporterHelper helper = new LocalMysqlMybatisImporterHelper(name);
+	protected void exec(TextImporterConfig config) throws Exception {
+		Example2Helper helper = new Example2Helper(name);
 		Executor executor = new Importer(name, sourceUri, config, helper);
 		executor.exec();
 	}

@@ -1,4 +1,4 @@
-package com.fom.examples.importer;
+package com.fom.examples.bean;
 
 /**
  * 
@@ -6,7 +6,7 @@ package com.fom.examples.importer;
  * @date 2018年12月23日
  *
  */
-public class DemoBean {
+public class ExamplesBean {
 	
 	private String id;
 	
@@ -18,7 +18,7 @@ public class DemoBean {
 	
 	private String importWay;
 	
-	public DemoBean(String data){
+	public ExamplesBean(String data){
 		String[] array = data.split("#"); 
 		this.id = array[0];
 		this.name = array[1];

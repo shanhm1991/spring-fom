@@ -46,16 +46,10 @@ public interface ImporterHelper<V> {
 	boolean delete(String sourceUri);
 	
 	/**
-	 * 获取指定sourceUri的文件的大小
+	 * 获取对应sourceUri的资源大小
 	 * @param sourceUri
 	 * @return
 	 */
-	long getFileSize(String sourceUri);
+	long getSourceSize(String sourceUri);
 	
-	/**
-	 * 获取指定sourceUri的文件的名称
-	 * @param sourceUri
-	 * @return
-	 */
-	String getFileName(String sourceUri);
 }

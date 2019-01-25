@@ -24,45 +24,41 @@ import com.fom.util.IoUtil;
  */
 public class Importer implements Executor {
 
-	protected final Logger log;
-
-	protected final int batch;
+	private Logger log;
 	
-	protected final String sourceUri;
+	private String sourceUri;
 
-	protected final String sourceName;
-
-	protected final long sourceSize;
-
-	protected final File logFile;
-
+	private int batch;
+	
 	@SuppressWarnings("rawtypes")
-	protected final ImporterHelper helper;
+	private ImporterHelper helper;
+
+	private File logFile;
 
 	@SuppressWarnings("rawtypes")
 	public Importer(String name, String sourceUri, ImporterConfig config, ImporterHelper helper){
 		this.log = LoggerFactory.getLogger(name);
-
+		this.sourceUri = sourceUri;
 		this.batch = config.getBatch();
 		this.helper = helper;
-
-		this.sourceUri = sourceUri;
-		this.sourceName = helper.getFileName(sourceUri);
-		this.sourceSize = helper.getFileSize(sourceUri);
 		this.logFile = new File(System.getProperty("import.progress") 
-				+ File.separator + name + File.separator + sourceName + ".log");
+				+ File.separator + name + File.separator + new File(sourceUri).getName() + ".log");
 	}
 
 	@Override
 	public final void exec() throws Exception {
 		long sTime = System.currentTimeMillis();
 		int lineIndex = 0;
-		if(!logFile.exists()){ //TODO 创建父目录
+		if(!logFile.exists()){ 
+			File parentFile = logFile.getParentFile();
+			if(!parentFile.exists() && !parentFile.mkdirs()){
+				throw new WarnException("创建日志文件失败.");
+			}
 			if(!logFile.createNewFile()){
 				throw new WarnException("创建日志文件失败.");
 			}
 		}else{
-			log.warn("继续处理任务遗留文件."); 
+			log.warn("继续处理失败任务."); 
 			List<String> lines = FileUtils.readLines(logFile);
 			try{
 				lineIndex = Integer.valueOf(lines.get(0));
@@ -73,8 +69,8 @@ public class Importer implements Executor {
 		}
 
 		read(lineIndex);
-		log.info("处理文件结束(" 
-				+ new DecimalFormat("#.##").format(sourceSize) + "KB),耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+		String size = new DecimalFormat("#.##").format(helper.getSourceSize(sourceUri));
+		log.info("处理文件结束(" + size + "KB),耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 		if(!helper.delete(sourceUri)){ 
 			throw new WarnException("删除文件失败."); 
 		}

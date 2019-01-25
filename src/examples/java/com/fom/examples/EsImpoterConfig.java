@@ -1,4 +1,4 @@
-package com.fom.examples.importer.local.es;
+package com.fom.examples;
 
 import java.io.File;
 
@@ -12,7 +12,7 @@ import com.fom.context.executor.ImporterConfig;
  * @date 2019年1月15日
  *
  */
-public class LocalEsImporterConfig extends Config implements ImporterConfig {
+public class EsImpoterConfig extends Config implements ImporterConfig {
 	
 	private int batch;
 	
@@ -24,7 +24,7 @@ public class LocalEsImporterConfig extends Config implements ImporterConfig {
 	
 	private File esJsonFile;
 	
-	protected LocalEsImporterConfig(String name) {
+	protected EsImpoterConfig(String name) {
 		super(name);
 	}
 	

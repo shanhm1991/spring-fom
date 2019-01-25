@@ -1,4 +1,4 @@
-package com.fom.examples.importer.local.mysql;
+package com.fom.examples;
 
 import com.fom.context.Config;
 import com.fom.context.executor.ImporterConfig;
@@ -9,11 +9,11 @@ import com.fom.context.executor.ImporterConfig;
  * @date 2018年12月23日
  *
  */
-public class LocalTextImporterConfig extends Config implements ImporterConfig {
+public class TextImporterConfig extends Config implements ImporterConfig {
 	
 	private int batch;
 
-	protected LocalTextImporterConfig(String name) {
+	protected TextImporterConfig(String name) {
 		super(name);
 	}
 	

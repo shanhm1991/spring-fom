@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
-	<fom name="example2" config="com.fom.defaulter.HdfsZipDownloaderConfig">
-		<remark>下载并打包hdfs上指定目录下的目录</remark>
+	<fom name="example6" config="com.fom.defaulter.HdfsDownloaderConfig">
+		<remark>下载hdfs上指定目录下的文件</remark>
 		<src.uri>/test</src.uri>
 		<src.pattern></src.pattern>
 		<src.delMatchFail>false</src.delMatchFail>
@@ -16,12 +16,9 @@
 		<extends>
 			<hdfs.master>master.ip:port</hdfs.master>
 			<hdfs.slave>slave.ip:port</hdfs.slave>
-			<hdfs.signalFile>a.orc</hdfs.signalFile>
 			<downloader.isSrcDel>false</downloader.isSrcDel>
 			<downloader.isWithTemp>true</downloader.isWithTemp>
 			<downloader.desPath>${webapp.root}/download</downloader.desPath>
-			<downloader.zip.entryMax>100</downloader.zip.entryMax>
-			<downloader.zip.sizeMax>5M</downloader.zip.sizeMax>
 		</extends>
 	</fom>
 </foms>

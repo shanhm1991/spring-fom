@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <foms>
-	<fom name="example1" config="com.fom.examples.EsImpoterConfig">
-		<remark>使用自定义pool的方式将本地指定目录下text文本解析导入Es库</remark>
+	<fom name="example3" config="com.fom.examples.TextImporterConfig">
+		<remark>使用自定义pool的方式将本地指定目录下text文本解析导入Mysql库</remark>
 		<src.uri>${webapp.root}/source</src.uri>
-		<src.pattern>demo.bcp</src.pattern>
+		<src.pattern>demo.txt</src.pattern>
 		<src.delMatchFail>false</src.delMatchFail>
 		<scanner>com.fom.context.scanner.LocalScanner</scanner>
 		<scanner.cron>0 0/15 * * * ?</scanner.cron>
-		<context>com.fom.examples.Example1</context>
+		<context>com.fom.examples.Example3</context>
 		<thread.min>10</thread.min>
 		<thread.max>10</thread.max>
 		<thread.aliveTime>30</thread.aliveTime>
 		<thread.overTime>86400</thread.overTime>
 		<thread.cancellable>false</thread.cancellable>
 		<extends>
-			<es.index>demo</es.index>
-			<es.type>demo</es.type>
-			<es.json>WEB-INF/index/index_demo.json</es.json>
 			<importer.batch>5000</importer.batch>
 		</extends>
 	</fom>

@@ -36,8 +36,6 @@ public class LocalZipImporter implements Executor {
 	
 	protected final String sourceUri;
 	
-	protected final String srcName;
-
 	protected final long srcSize;
 	
 	protected final File unzipDir;
@@ -61,12 +59,13 @@ public class LocalZipImporter implements Executor {
 		this.helper = helper;
 		
 		this.sourceUri = sourceUri;
-		this.srcName = helper.getFileName(sourceUri);
-		this.srcSize = helper.getFileSize(sourceUri);
+		this.srcSize = helper.getSourceSize(sourceUri);
+		
+		String sourceName = new File(sourceUri).getName();
 		this.logFile = new File(System.getProperty("import.progress") 
-				+ File.separator + name + File.separator + srcName + ".log");
+				+ File.separator + name + File.separator + sourceName + ".log");
 		this.unzipDir = new File(System.getProperty("import.progress")
-				+ File.separator + name + File.separator + srcName);
+				+ File.separator + name + File.separator + sourceName);
 	}
 	
 	/**
@@ -123,7 +122,7 @@ public class LocalZipImporter implements Executor {
 			}
 
 			if(!ZipUtil.valid(sourceUri)){ 
-				log.error(srcName + "校验失败，直接清除."); 
+				log.error("zip校验失败，直接清除."); 
 				removeDirectly = true;
 				return;
 			}

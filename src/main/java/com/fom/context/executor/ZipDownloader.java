@@ -52,7 +52,7 @@ public class ZipDownloader implements Executor {
 	//downloadZip的命名序号
 	private int index;
 
-	//tempZip中所有entry的名字集合
+	//downloadZip中真实下载的文件名称集合
 	private Set<String> entrySet;
 
 	/**

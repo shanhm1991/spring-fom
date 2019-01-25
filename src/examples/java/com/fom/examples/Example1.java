@@ -1,4 +1,4 @@
-package com.fom.examples.importer.local.es;
+package com.fom.examples;
 
 import com.fom.context.Context;
 import com.fom.context.Executor;
@@ -11,16 +11,16 @@ import com.fom.db.handler.EsHandler;
  * @date 2019年1月15日
  *
  */
-public class LocalEsPoolImpoter extends Context<LocalEsImporterConfig> {
+public class Example1 extends Context<EsImpoterConfig> {
 	
 	private static final String POOL = "example_es";
 	
-	protected LocalEsPoolImpoter(String name, String path) {
+	protected Example1(String name, String path) {
 		super(name, path);
 	}
 	
 	@Override
-	protected void onStart(LocalEsImporterConfig config) throws Exception {
+	protected void onStart(EsImpoterConfig config) throws Exception {
 		if(EsHandler.handler.synCreateIndex(
 				POOL, config.getEsIndex(), config.getEsType(), config.getEsJsonFile())){
 			log.info("创建ES索引[index=" + "demo" + ", type=" + "demo" + "]");
@@ -28,8 +28,8 @@ public class LocalEsPoolImpoter extends Context<LocalEsImporterConfig> {
 	}
 	
 	@Override
-	protected void exec(LocalEsImporterConfig config) throws Exception {
-		LocalEsPoolImpoterHelper helper = new LocalEsPoolImpoterHelper(name, config.getEsIndex(), config.getEsType()); 
+	protected void exec(EsImpoterConfig config) throws Exception {
+		Example1Helper helper = new Example1Helper(name, config.getEsIndex(), config.getEsType()); 
 		Executor executor = new Importer(name, sourceUri, config, helper);
 		executor.exec();
 	}
