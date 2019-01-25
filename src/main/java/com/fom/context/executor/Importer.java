@@ -11,7 +11,7 @@ import org.apache.log4j.Logger;
 
 import com.fom.context.Executor;
 import com.fom.context.exception.WarnException;
-import com.fom.context.executor.helper.ImporterHelper;
+import com.fom.context.executor.helper.abstractImporterHelper;
 import com.fom.context.executor.reader.Reader;
 import com.fom.log.LoggerFactory;
 import com.fom.util.IoUtil;
@@ -31,15 +31,22 @@ public class Importer implements Executor {
 	private int batch;
 	
 	@SuppressWarnings("rawtypes")
-	private ImporterHelper helper;
+	private abstractImporterHelper helper;
 
 	private File logFile;
 
+	/**
+	 * 
+	 * @param name 模块名称
+	 * @param sourceUri 资源uri
+	 * @param batch 入库时的批处理数
+	 * @param helper ImporterHelper
+	 */
 	@SuppressWarnings("rawtypes")
-	public Importer(String name, String sourceUri, ImporterConfig config, ImporterHelper helper){
+	public Importer(String name, String sourceUri, int batch, abstractImporterHelper helper){
 		this.log = LoggerFactory.getLogger(name);
 		this.sourceUri = sourceUri;
-		this.batch = config.getBatch();
+		this.batch = batch;
 		this.helper = helper;
 		this.logFile = new File(System.getProperty("import.progress") 
 				+ File.separator + name + File.separator + new File(sourceUri).getName() + ".log");

@@ -2,10 +2,11 @@ package com.fom.examples;
 
 import java.io.File;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.fom.context.executor.helper.abstractImporterHelper;
+import com.fom.context.executor.helper.AbstractLocalZipImporterHelper;
 import com.fom.context.executor.reader.Reader;
 import com.fom.context.executor.reader.TextReader;
 import com.fom.examples.bean.ExampleBean;
@@ -18,10 +19,13 @@ import com.fom.util.SpringUtil;
  * @date 2019年1月24日
  *
  */
-public class Example4Helper extends abstractImporterHelper<ExampleBean> {
+public class Example4Helper extends AbstractLocalZipImporterHelper<ExampleBean> {
+	
+	private Pattern pattern;
 
-	public Example4Helper(String name) {
+	public Example4Helper(String name, Pattern pattern) {
 		super(name);
+		this.pattern = pattern;
 	}
 
 	@Override
@@ -57,5 +61,16 @@ public class Example4Helper extends abstractImporterHelper<ExampleBean> {
 	@Override
 	public long getSourceSize(String sourceUri) {
 		return new File(sourceUri).length();
+	}
+
+	@Override
+	public boolean matchEntryName(String entryName) {
+		if(pattern == null){
+			return true;
+		}
+		//如果helper被共用，需要考虑线程安全
+		synchronized (pattern) {
+			return pattern.matcher(entryName).find();
+		}
 	}
 }

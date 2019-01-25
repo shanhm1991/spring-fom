@@ -51,7 +51,7 @@ public abstract class Config implements IConfig {
 	String scannerClass;
 
 	String contextClass;
-	
+
 	String remark;
 
 	int core;
@@ -85,7 +85,7 @@ public abstract class Config implements IConfig {
 
 	void load() throws Exception {
 		remark = load(element, "remark", "");
-		
+
 		srcUri = ContextUtil.getEnvStr(load(element, "src.uri", ""));
 		String regex = load(element, "src.pattern", "");
 		if(!StringUtils.isBlank(regex)){
@@ -125,7 +125,7 @@ public abstract class Config implements IConfig {
 		Date nextDate = cron.getTimeAfter(new Date());
 		return nextDate.getTime() - System.currentTimeMillis();
 	}
-	
+
 	@Override
 	public boolean isDelMatchFailFile() {
 		return delMatchFail;
@@ -136,7 +136,9 @@ public abstract class Config implements IConfig {
 		if(pattern == null){
 			return true;
 		}
-		return pattern.matcher(sourceName).find();
+		synchronized (pattern) {
+			return pattern.matcher(sourceName).find();
+		}
 	}
 
 	/**

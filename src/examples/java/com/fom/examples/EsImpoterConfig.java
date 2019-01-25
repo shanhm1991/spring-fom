@@ -4,7 +4,6 @@ import java.io.File;
 
 import com.fom.context.Config;
 import com.fom.context.ContextUtil;
-import com.fom.context.executor.ImporterConfig;
 
 /**
  * 
@@ -12,7 +11,7 @@ import com.fom.context.executor.ImporterConfig;
  * @date 2019年1月15日
  *
  */
-public class EsImpoterConfig extends Config implements ImporterConfig {
+public class EsImpoterConfig extends Config {
 	
 	private int batch;
 	
@@ -51,7 +50,6 @@ public class EsImpoterConfig extends Config implements ImporterConfig {
 		return TYPE_IMPORTER;
 	}
 	
-	@Override
 	public int getBatch() {
 		return batch;
 	}

@@ -13,7 +13,7 @@ import org.apache.log4j.Logger;
 
 import com.fom.context.Executor;
 import com.fom.context.exception.WarnException;
-import com.fom.context.executor.helper.ImporterHelper;
+import com.fom.context.executor.helper.LocalZipImporterHelper;
 import com.fom.context.executor.reader.Reader;
 import com.fom.log.LoggerFactory;
 import com.fom.util.IoUtil;
@@ -31,10 +31,10 @@ public class LocalZipImporter implements Executor {
 	
 	private String sourceUri;
 	
-	private LocalZipImporterConfig config;
+	private int batch;
 	
 	@SuppressWarnings("rawtypes")
-	private ImporterHelper helper;
+	private LocalZipImporterHelper helper;
 	
 	private File logFile;
 	
@@ -47,11 +47,10 @@ public class LocalZipImporter implements Executor {
 	private DecimalFormat numFormat  = new DecimalFormat("#.##");
 	
 	@SuppressWarnings("rawtypes")
-	public LocalZipImporter(String name, String sourceUri, LocalZipImporterConfig config, ImporterHelper helper) {
+	public LocalZipImporter(String name, String sourceUri, int batch, LocalZipImporterHelper helper) {
 		this.log = LoggerFactory.getLogger(name);
 		this.sourceUri = sourceUri;
 		this.helper = helper;
-		this.config = config;
 		String sourceName = new File(sourceUri).getName();
 		this.unzipDir = new File(System.getProperty("import.progress")
 				+ File.separator + name + File.separator + sourceName);
@@ -158,7 +157,7 @@ public class LocalZipImporter implements Executor {
 	private List<String> filterEntrys(String[] nameArray){
 		List<String> list = new LinkedList<>();
 		for(String name : nameArray){
-			if(config.matchEntryName(name)){
+			if(helper.matchEntryName(name)){
 				list.add(name);
 			}
 		}
@@ -229,7 +228,7 @@ public class LocalZipImporter implements Executor {
 				if(lineIndex <= StartLine){
 					continue;
 				}
-				if(config.getBatch() > 0 && lineDatas.size() >= config.getBatch()){
+				if(batch > 0 && lineDatas.size() >= batch){
 					helper.batchProcessLineData(lineDatas, batchTime); 
 					logProcess(uri, lineIndex);
 					lineDatas.clear();

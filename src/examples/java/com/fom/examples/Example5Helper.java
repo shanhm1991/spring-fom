@@ -4,10 +4,11 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.fom.context.executor.helper.abstractImporterHelper;
+import com.fom.context.executor.helper.AbstractLocalZipImporterHelper;
 import com.fom.context.executor.reader.Reader;
 import com.fom.context.executor.reader.TextReader;
 import com.fom.db.handler.JdbcHandler;
@@ -18,16 +19,19 @@ import com.fom.db.handler.JdbcHandler;
  * @date 2019年1月24日
  *
  */
-public class Example5Helper extends abstractImporterHelper<Map<String, Object>> {
+public class Example5Helper extends AbstractLocalZipImporterHelper<Map<String, Object>> {
 
 	private static final String POOL = "example_oracle";
 
 	private static final String SQL = 
 			"insert into demo(id,name,source,filetype,importway) "
 					+ "values (#id#,#name#,#source#,#fileType#,#importWay#)";
+	
+	private Pattern pattern;
 
-	public Example5Helper(String name) {
+	public Example5Helper(String name, Pattern pattern) {
 		super(name);
+		this.pattern = pattern;
 	}
 
 	@Override
@@ -65,5 +69,16 @@ public class Example5Helper extends abstractImporterHelper<Map<String, Object>> 
 	@Override
 	public long getSourceSize(String sourceUri) {
 		return new File(sourceUri).length();
+	}
+
+	@Override
+	public boolean matchEntryName(String entryName) {
+		if(pattern == null){
+			return true;
+		}
+		//如果helper被共用，需要考虑线程安全
+		synchronized (pattern) {
+			return pattern.matcher(entryName).find();
+		}
 	}
 }

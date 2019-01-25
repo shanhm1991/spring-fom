@@ -17,8 +17,8 @@ public class Example5 extends Context<TextZipImporterConfig>{
 
 	@Override
 	protected void exec(TextZipImporterConfig config) throws Exception { 
-		Example5Helper helper = new Example5Helper(name);
-		LocalZipImporter importer = new LocalZipImporter(name, sourceUri, config, helper);
+		Example5Helper helper = new Example5Helper(name, config.getEntryPattern());
+		LocalZipImporter importer = new LocalZipImporter(name, sourceUri, config.getBatch(), helper);
 		importer.exec();
 	}
 }

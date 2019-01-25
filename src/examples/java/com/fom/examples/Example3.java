@@ -18,7 +18,7 @@ public class Example3 extends Context<TextImporterConfig> {
 	@Override
 	protected void exec(TextImporterConfig config) throws Exception {
 		Example3Helper helper = new Example3Helper(name);
-		Importer importer = new Importer(name, sourceUri, config, helper);
+		Importer importer = new Importer(name, sourceUri, config.getBatch(), helper);
 		importer.exec();
 	}
 }

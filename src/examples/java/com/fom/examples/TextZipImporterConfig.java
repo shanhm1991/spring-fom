@@ -5,7 +5,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fom.context.Config;
-import com.fom.context.executor.LocalZipImporterConfig;
 
 /**
  * 
@@ -13,7 +12,7 @@ import com.fom.context.executor.LocalZipImporterConfig;
  * @date 2018年12月23日
  *
  */
-public class TextZipImporterConfig extends Config implements LocalZipImporterConfig {
+public class TextZipImporterConfig extends Config {
 	
 	private int batch;
 	
@@ -31,23 +30,18 @@ public class TextZipImporterConfig extends Config implements LocalZipImporterCon
 			pattern = Pattern.compile(reg);
 		}
 	}
-	
-	@Override
-	public boolean matchEntryName(String fileName) {
-		if(pattern == null){
-			return true;
-		}
-		return pattern.matcher(fileName).find();
-	}
 
 	@Override
 	public String getType() {
 		return TYPE_IMPORTER;
 	}
 	
-	@Override
 	public int getBatch() {
 		return batch;
+	}
+	
+	public Pattern getEntryPattern(){
+		return pattern;
 	}
 	
 }
