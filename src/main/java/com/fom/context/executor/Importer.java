@@ -7,13 +7,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
 
 import com.fom.context.Executor;
-import com.fom.context.exception.WarnException;
 import com.fom.context.executor.helper.AbstractImporterHelper;
 import com.fom.context.executor.reader.Reader;
-import com.fom.log.LoggerFactory;
 import com.fom.util.IoUtil;
 
 /**
@@ -21,10 +18,8 @@ import com.fom.util.IoUtil;
  * @author shanhm
  *
  */
-public class Importer implements Executor {
+public final class Importer extends Executor {
 
-	private Logger log;
-	
 	private String sourceUri;
 
 	private int batch;
@@ -37,32 +32,39 @@ public class Importer implements Executor {
 	/**
 	 * 
 	 * @param name 模块名称
+	 * @param sourceName 资源名称
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
 	 * @param helper ImporterHelper
 	 */
 	@SuppressWarnings("rawtypes")
-	public Importer(String name, String sourceUri, int batch, AbstractImporterHelper helper){
-		this.log = LoggerFactory.getLogger(name);
+	public Importer(String name, String sourceName, String sourceUri, int batch, AbstractImporterHelper helper){
+		super(name,sourceName);
 		this.sourceUri = sourceUri;
 		this.batch = batch;
 		this.helper = helper;
 		this.logFile = new File(System.getProperty("import.progress") 
-				+ File.separator + name + File.separator + new File(sourceUri).getName() + ".log");
+				+ File.separator + name + File.separator + sourceName + ".log");
+	}
+	
+	@Override
+	protected boolean onStart() throws Exception {
+		File parentFile = logFile.getParentFile();
+		if(!parentFile.exists() && !parentFile.mkdirs()){
+			log.error("创建目录失败:" + parentFile);
+			return false;
+		}
+		return true;
 	}
 
 	@Override
-	public final void exec() throws Exception {
+	protected boolean exec() throws Exception {
 		long sTime = System.currentTimeMillis();
-		File parentFile = logFile.getParentFile();
-		if(!parentFile.exists() && !parentFile.mkdirs()){
-			throw new WarnException("创建目录失败:" + parentFile);
-		}
-		
 		int lineIndex = 0;
 		if(!logFile.exists()){ 
 			if(!logFile.createNewFile()){
-				throw new WarnException("创建日志文件失败.");
+				log.error("创建日志文件失败.");
+				return false;
 			}
 		}else{
 			log.warn("继续处理失败任务."); 
@@ -74,16 +76,23 @@ public class Importer implements Executor {
 				log.warn("获取文件处理进度失败,将从第0行开始处理.");
 			}
 		}
-
 		read(lineIndex);
 		String size = new DecimalFormat("#.##").format(helper.getSourceSize(sourceUri));
 		log.info("处理文件结束(" + size + "KB),耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+		return true;
+	}
+	
+	@Override
+	protected boolean onComplete() throws Exception {
 		if(!helper.delete(sourceUri)){ 
-			throw new WarnException("删除文件失败."); 
+			log.error("删除源文件失败.");
+			return false;
 		}
 		if(!logFile.delete()){
-			throw new WarnException("删除日志失败."); 
+			log.error("删除日志文件失败.");
+			return false;
 		}
+		return true;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

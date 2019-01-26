@@ -1,12 +1,9 @@
 package com.fom.defaulter;
 
-import java.io.File;
-
 import org.apache.hadoop.fs.FileSystem;
 
 import com.fom.context.Config;
 import com.fom.context.ContextUtil;
-import com.fom.context.executor.DownloaderConfig;
 import com.fom.context.scanner.HdfsConfig;
 import com.fom.util.HdfsUtil;
 
@@ -20,7 +17,7 @@ import com.fom.util.HdfsUtil;
  * @author shanhm
  *
  */
-public class HdfsDownloaderConfig extends Config implements HdfsConfig, DownloaderConfig {
+public class HdfsDownloaderConfig extends Config implements HdfsConfig {
 	
 	private FileSystem fs;
 	
@@ -60,27 +57,16 @@ public class HdfsDownloaderConfig extends Config implements HdfsConfig, Download
 		return "";
 	}
 
-	@Override
 	public String getDestPath() {
 		return destPath;
 	}
 
-	@Override
 	public boolean isWithTemp() {
 		return isWithTemp;
 	}
 
-	@Override
 	public boolean isDelSrc() {
 		return isDelSrc;
-	}
-
-	/**
-	 * new File(uri).getName()
-	 */
-	@Override
-	public String getSourceName(String uri) {
-		return new File(uri).getName();
 	}
 
 }

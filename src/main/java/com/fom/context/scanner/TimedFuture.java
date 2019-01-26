@@ -1,5 +1,6 @@
 package com.fom.context.scanner;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
 /**
@@ -14,6 +15,11 @@ public class TimedFuture<T> extends FutureTask<T> {
 
 	public TimedFuture(Runnable runnable, T result) {
 		super(runnable, result);
+		createTime = System.currentTimeMillis();
+	}
+	
+	public TimedFuture(Callable<T> callable){
+		super(callable);
 		createTime = System.currentTimeMillis();
 	}
 

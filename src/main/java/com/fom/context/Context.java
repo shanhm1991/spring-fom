@@ -4,7 +4,6 @@ import java.io.File;
 
 import org.apache.log4j.Logger;
 
-import com.fom.context.exception.WarnException;
 import com.fom.log.LoggerFactory;
 
 /**
@@ -63,8 +62,6 @@ public abstract class Context<E extends Config> implements Runnable {
 
 			onComplete(config);
 			log.info("任务结束, 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
-		} catch(WarnException e){
-			log.warn("任务错误结束[" + e.getMessage() + "], 耗时=" + (System.currentTimeMillis() - sTime + "ms"));
 		} catch (InterruptedException e) {
 			log.warn("任务中断[" + e.getMessage() + "], 耗时=" + (System.currentTimeMillis() - sTime + "ms"));
 		} catch(Throwable e) {

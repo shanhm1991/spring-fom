@@ -11,7 +11,6 @@ import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.Element;
 
-import com.fom.context.exception.WarnException;
 import com.fom.log.LoggerFactory;
 import com.fom.util.XmlUtil;
 
@@ -83,7 +82,7 @@ public final class ConfigManager {
 		File apply = new File(System.getProperty("config.apply"));
 		for(File file : apply.listFiles()){
 			if(file.getName().startsWith(config.name + ".xml.") && !file.delete()){
-				throw new WarnException("删除文件失败:" + file.getName());
+				throw new RuntimeException("删除文件失败:" + file.getName());
 			}
 		}
 		File xml = new File(apply + File.separator + config.name + ".xml." + config.loadTime);

@@ -1,13 +1,10 @@
 package com.fom.defaulter;
 
-import java.io.File;
-
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.log4j.helpers.OptionConverter;
 
 import com.fom.context.Config;
 import com.fom.context.ContextUtil;
-import com.fom.context.executor.ZipDownloaderConfig;
 import com.fom.context.scanner.HdfsConfig;
 import com.fom.util.HdfsUtil;
 
@@ -24,7 +21,7 @@ import com.fom.util.HdfsUtil;
  * @author shanhm
  *
  */
-public class HdfsZipDownloaderConfig extends Config implements HdfsConfig, ZipDownloaderConfig {
+public class HdfsZipDownloaderConfig extends Config implements HdfsConfig {
 
 	private FileSystem fs;
 
@@ -74,38 +71,24 @@ public class HdfsZipDownloaderConfig extends Config implements HdfsConfig, ZipDo
 		return signalFileName;
 	}
 
-	@Override
 	public String getDestPath() {
 		return destPath;
 	}
 
-	@Override
 	public boolean isWithTemp() {
 		return isWithTemp;
 	}
 
-	@Override
 	public boolean isDelSrc() {
 		return isDelSrc;
 	}
 
-	@Override
 	public int getEntryMax() {
 		return entryMax;
 	}
 
-	@Override
 	public long getSizeMax() {
 		return sizeMax;
 	}
-
-	/**
-	 * new File(uri).getName()
-	 */
-	@Override
-	public String getSourceName(String uri) {
-		return new File(uri).getName();
-	}
-
 
 }

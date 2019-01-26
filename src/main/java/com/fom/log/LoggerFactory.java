@@ -19,7 +19,7 @@ public class LoggerFactory {
 		if(logger != null){
 			return logger;
 		}
-		logger = Logger.getLogger(name);
+		logger = Logger.getLogger(name); 
 		logger.setLevel(Level.INFO);  
 		logger.setAdditivity(false); 
 		logger.removeAllAppenders();

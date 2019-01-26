@@ -9,13 +9,10 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.log4j.Logger;
 
 import com.fom.context.Executor;
-import com.fom.context.exception.WarnException;
 import com.fom.context.executor.helper.LocalZipImporterHelper;
 import com.fom.context.executor.reader.Reader;
-import com.fom.log.LoggerFactory;
 import com.fom.util.IoUtil;
 import com.fom.util.ZipUtil;
 
@@ -24,9 +21,7 @@ import com.fom.util.ZipUtil;
  * @author shanhm
  *
  */
-public class LocalZipImporter implements Executor {
-	
-	private Logger log;
+public final class LocalZipImporter extends Executor {
 	
 	private String sourceUri;
 	
@@ -39,15 +34,20 @@ public class LocalZipImporter implements Executor {
 	
 	private File unzipDir;
 	
-	private boolean removeDirectly;
-
 	private List<String> matchedEntrys;
 	
 	private DecimalFormat numFormat  = new DecimalFormat("#.##");
 	
+	/**
+	 * 
+	 * @param name
+	 * @param sourceUri
+	 * @param batch
+	 * @param helper
+	 */
 	@SuppressWarnings("rawtypes")
 	public LocalZipImporter(String name, String sourceUri, int batch, LocalZipImporterHelper helper) {
-		this.log = LoggerFactory.getLogger(name);
+		super(name, sourceUri);
 		this.sourceUri = sourceUri;
 		this.helper = helper;
 		String sourceName = new File(sourceUri).getName();
@@ -55,6 +55,24 @@ public class LocalZipImporter implements Executor {
 				+ File.separator + name + File.separator + sourceName);
 		this.logFile = new File(System.getProperty("import.progress") 
 				+ File.separator + name + File.separator + sourceName + ".log");
+	}
+	
+	@Override
+	protected boolean onStart() throws Exception {
+		if(!ZipUtil.valid(sourceUri)){ 
+			log.error("zip校验失败."); 
+			if(!new File(sourceUri).delete()){
+				log.error("zip清除失败."); 
+			}
+			return false;
+		}
+		
+		File parentFile = logFile.getParentFile();
+		if(!parentFile.exists() && !parentFile.mkdirs()){
+			log.error("创建目录失败:" + parentFile);
+			return false;
+		}
+		return true;
 	}
 	
 	/**
@@ -67,48 +85,28 @@ public class LocalZipImporter implements Executor {
 	 * 上述任何步骤返回失败或出现异常则结束任务
 	 */
 	@Override
-	public void exec() throws Exception {
-		try{
-			process();
-		}finally{
-			onFinally();
-		}
-	}
-	
-	private void process() throws Exception {
-		if(!ZipUtil.valid(sourceUri)){ 
-			log.error("zip校验失败，直接清除."); 
-			removeDirectly = true;
-			return;
-		}
-		
-		File parentFile = logFile.getParentFile();
-		if(!parentFile.exists() && !parentFile.mkdirs()){
-			throw new WarnException("创建目录失败:" + parentFile);
-		}
-		
+	protected boolean exec() throws Exception {
 		if(logFile.exists()){
 			log.warn("继续处理失败任务."); 
+			//失败在第5步
 			if(!unzipDir.exists()){ 
-				removeDirectly = true;
-				//失败在第5步
-				return;
+				return true;
 			}
 			String[] nameArray = unzipDir.list();
+			//失败在第4步
 			if(ArrayUtils.isEmpty(nameArray)){  
-				removeDirectly = true;
-				//失败在第4步
-				return;
+				return true;
 			}
 			matchedEntrys = filterEntrys(nameArray);
+			//失败在第4步
 			if(matchedEntrys.isEmpty()){
 				log.warn("没有需要处理的文件,直接清除.");
-				removeDirectly = true;
-				//失败在第4步
-				return;
+				return true;
 			}
 			//失败在第3步,继续处理未完成的文件
-			processFailedFile();
+			if(!processFailedFile()){
+				return false;
+			}
 		} else {
 			if(unzipDir.exists()){
 				File[] fileArray = unzipDir.listFiles();
@@ -117,14 +115,16 @@ public class LocalZipImporter implements Executor {
 					log.warn("清空未正确解压的文件目录");
 					for(File file : fileArray){
 						if(!file.delete()){
-							throw new WarnException("清除文件失败:" + file.getName()); 
+							log.error("清除文件失败:" + file.getName()); 
+							return false;
 						}
 					}
 				}
 			}else{
 				//首次任务处理
 				if(!unzipDir.mkdirs()){
-					throw new WarnException("创建目录失败: " + unzipDir.getName());
+					log.error("创建目录失败:" + unzipDir);
+					return false;
 				}
 			}
 
@@ -134,23 +134,50 @@ public class LocalZipImporter implements Executor {
 
 			String[] nameArray = unzipDir.list();
 			if(ArrayUtils.isEmpty(nameArray)){ 
-				removeDirectly = true;
-				return;
+				log.warn("没有需要处理的文件,直接清除.");
+				return true;
 			}
 
 			matchedEntrys = filterEntrys(nameArray);
 			if(matchedEntrys.isEmpty()){
 				log.warn("没有需要处理的文件,直接清除.");
-				removeDirectly = true;
-				return;
+				return true;
 			}
 
 			if(!logFile.createNewFile()){
-				throw new WarnException("创建日志文件失败.");
+				log.warn("创建日志文件失败.");
+				return false;
 			}
 		}
-
-		processFiles();
+		return processFiles();
+	}
+	
+	@Override
+	protected boolean onComplete() throws Exception {
+		if(unzipDir.exists()){ 
+			File[] fileArray = unzipDir.listFiles();
+			if(!ArrayUtils.isEmpty(fileArray)){
+				for(File file : fileArray){
+					if(!file.delete()){
+						log.warn("清除临时文件失败."); 
+						return false;
+					}
+				}
+			}
+			if(!unzipDir.delete()){
+				log.warn("清除临时目录失败."); 
+				return false;
+			}
+		}
+		//srcFile.exist = true
+		if(!helper.delete(sourceUri)){ 
+			log.warn("清除源文件失败."); 
+			return false;
+		}
+		if(logFile.exists() && !logFile.delete()){
+			log.warn("清除日志失败.");
+		}
+		return true;
 	}
 
 	private List<String> filterEntrys(String[] nameArray){
@@ -163,17 +190,17 @@ public class LocalZipImporter implements Executor {
 		return list;
 	}
 
-	private void processFailedFile() throws Exception {  
+	private boolean processFailedFile() throws Exception {  
 		List<String> lines = FileUtils.readLines(logFile);
 		if(lines.isEmpty()){
-			return;
+			return true;
 		}
 
 		String name = lines.get(0); 
 		File file = new File(unzipDir + File.separator + name);
 		if(!file.exists()){
 			log.warn("未找到记录文件:" + name);
-			return;
+			return true;
 		}
 
 		long sTime = System.currentTimeMillis();
@@ -191,11 +218,13 @@ public class LocalZipImporter implements Executor {
 		String size = numFormat.format(file.length() / 1024.0);
 		log.info("处理文件结束[" + name + "(" + size + "KB)], 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 		if(!file.delete()){
-			throw new WarnException("删除文件失败:" + name); 
+			log.error("删除临时文件失败:" + name); 
+			return false;
 		}
+		return true;
 	}
 
-	private void processFiles() throws Exception {
+	private boolean processFiles() throws Exception {
 		Iterator<String> it = matchedEntrys.iterator();
 		while(it.hasNext()){
 			String name = it.next();
@@ -208,9 +237,11 @@ public class LocalZipImporter implements Executor {
 			String size = numFormat.format(file.length() / 1024.0);
 			log.info("处理文件结束[" + name + "(" + size + "KB)], 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 			if(!file.delete()){
-				throw new WarnException("删除文件失败:" + file.getName()); 
+				log.error("删除临时文件失败:" + file.getName()); 
+				return false;
 			}
 		}
+		return true;
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -249,37 +280,5 @@ public class LocalZipImporter implements Executor {
 		log.info("已读取行数:" + lineIndex);
 		FileUtils.writeStringToFile(logFile, data, false);
 	}
-
-	private void onFinally() {
-		if(!removeDirectly && !matchedEntrys.isEmpty()){
-			log.warn("遗留任务文件, 等待下次处理."); 
-			return;
-		}
-
-		if(unzipDir.exists()){ 
-			File[] fileArray = unzipDir.listFiles();
-			if(!ArrayUtils.isEmpty(fileArray)){
-				for(File file : fileArray){
-					if(!file.delete()){
-						log.warn("清除临时文件失败."); 
-						return;
-					}
-				}
-			}
-			if(!unzipDir.delete()){
-				log.warn("清除临时文件失败."); 
-				return;
-			}
-		}
-
-		//srcFile.exist = true
-		if(!helper.delete(sourceUri)){ 
-			log.warn("清除源文件失败."); 
-			return;
-		}
-
-		if(logFile.exists() && !logFile.delete()){
-			log.warn("清除日志失败.");
-		}
-	}
+		
 }

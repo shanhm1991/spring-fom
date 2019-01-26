@@ -14,28 +14,24 @@ import com.fom.util.HdfsUtil;
  */
 public class HdfsDownloaderHelper implements DownloaderHelper {
 	
-	private final FileSystem fs;
+	protected final FileSystem fs;
 	
-	private final boolean isDelSrc;
-	
-	public HdfsDownloaderHelper(FileSystem fs, boolean isDelSrc){
+	public HdfsDownloaderHelper(FileSystem fs){
 		this.fs = fs;
-		this.isDelSrc = isDelSrc;
 	}
 
 	@Override
-	public InputStream open(String url) throws Exception {
+	public final InputStream open(String url) throws Exception {
 		return HdfsUtil.open(fs, url);
 	}
 
 	@Override
-	public void download(String url, File file) throws Exception {
-		HdfsUtil.download(fs, isDelSrc, url, file.getPath());
-		
+	public final void download(String url, File file) throws Exception {
+		HdfsUtil.download(fs, false, url, file.getPath());
 	}
  
 	@Override
-	public boolean delete(String url) throws Exception {
+	public final boolean delete(String url) throws Exception {
 		return HdfsUtil.delete(fs, url);
 	}
 
