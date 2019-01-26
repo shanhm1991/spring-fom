@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.fom.context.executor.helper.AbstractImporterHelper;
-import com.fom.context.executor.reader.Reader;
-import com.fom.context.executor.reader.TextReader;
+import com.fom.context.helper.AbstractImporterHelper;
+import com.fom.context.reader.Reader;
+import com.fom.context.reader.TextReader;
 import com.fom.examples.bean.ExampleBean;
 import com.fom.examples.dao.ExamplesDao;
 import com.fom.util.SpringUtil;

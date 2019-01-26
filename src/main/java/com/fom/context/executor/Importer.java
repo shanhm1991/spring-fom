@@ -9,8 +9,8 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 
 import com.fom.context.Executor;
-import com.fom.context.executor.helper.AbstractImporterHelper;
-import com.fom.context.executor.reader.Reader;
+import com.fom.context.helper.AbstractImporterHelper;
+import com.fom.context.reader.Reader;
 import com.fom.util.IoUtil;
 
 /**

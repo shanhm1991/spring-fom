@@ -20,13 +20,6 @@ public interface IConfig {
 	String getType();
 
 	/**
-	 * 匹配文件名称
-	 * @param sourceName
-	 * @return
-	 */
-	boolean matchSourceName(String sourceName);
-	
-	/**
 	 * 当前模块扫描线程匹配源文件名称失败时是否删除
 	 * @return
 	 */

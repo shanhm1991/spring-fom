@@ -1,8 +1,8 @@
-package com.fom.context.executor.helper;
+package com.fom.context.helper;
 
 import java.util.List;
 
-import com.fom.context.executor.reader.Reader;
+import com.fom.context.reader.Reader;
 
 /**
  * 

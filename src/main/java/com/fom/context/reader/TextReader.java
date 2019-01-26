@@ -1,4 +1,4 @@
-package com.fom.context.executor.reader;
+package com.fom.context.reader;
 
 import java.io.BufferedReader;
 import java.io.File;

@@ -38,7 +38,7 @@ public abstract class Executor implements Callable<Boolean> {
 	}
 
 	@Override
-	public final Boolean call() { 
+	public final Boolean call() throws Exception {  
 		Thread.currentThread().setName("[" + executorName + "]");
 		boolean result = true;
 		long sTime = System.currentTimeMillis();
@@ -51,9 +51,7 @@ public abstract class Executor implements Callable<Boolean> {
 			}
 		} catch(Throwable e) {
 			log.error("任务异常, 耗时=" + (System.currentTimeMillis() - sTime + "ms"), e);
-			result = false;
-		} finally{
-			onFinally();
+			throw e;
 		}
 		return result;
 	}
@@ -84,9 +82,10 @@ public abstract class Executor implements Callable<Boolean> {
 	}
 
 	/**
-	 * 最终结束时执行的动作
+	 * 回调执行
+	 * @param result
 	 */
-	protected void onFinally() {
+	public void callback(boolean result) throws Exception {
 
 	}
 

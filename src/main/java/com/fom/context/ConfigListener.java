@@ -91,7 +91,7 @@ public class ConfigListener implements ServletContextListener {
 
 		for(Config config : ConfigManager.getAll()){
 			if(config.valid){
-				config.scanner.start();
+//				config.scanner.start();
 				config.startTime = System.currentTimeMillis();
 				config.isRunning = true;
 			}

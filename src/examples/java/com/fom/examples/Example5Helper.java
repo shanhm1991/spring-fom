@@ -7,9 +7,9 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.fom.context.executor.helper.AbstractLocalZipImporterHelper;
-import com.fom.context.executor.reader.Reader;
-import com.fom.context.executor.reader.TextReader;
+import com.fom.context.helper.AbstractLocalZipImporterHelper;
+import com.fom.context.reader.Reader;
+import com.fom.context.reader.TextReader;
 import com.fom.db.handler.JdbcHandler;
 
 /**

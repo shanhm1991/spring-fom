@@ -1,6 +1,5 @@
 package com.fom.context;
 
-import java.lang.reflect.Constructor;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -77,9 +76,6 @@ public abstract class Config implements IConfig {
 
 	volatile boolean isRunning = false;
 
-	@SuppressWarnings("rawtypes")
-	Scanner scanner;
-
 	protected Config(String name){
 		this.name = name;
 	}
@@ -110,16 +106,7 @@ public abstract class Config implements IConfig {
 	}
 
 	boolean isValid() throws Exception {
-		refreshScanner();
 		return valid();
-	}
-
-	@SuppressWarnings("rawtypes")
-	void refreshScanner() throws Exception{
-		Class<?> clzz = Class.forName(scannerClass);
-		Constructor<?> constructor = clzz.getDeclaredConstructor(String.class);
-		constructor.setAccessible(true); 
-		scanner = (Scanner)constructor.newInstance(name);
 	}
 
 	long nextScanTime(){
@@ -131,9 +118,12 @@ public abstract class Config implements IConfig {
 	public boolean isDelMatchFailFile() {
 		return delMatchFail;
 	}
+	
+	public Pattern getPattern(){
+		return pattern;
+	}
 
-	@Override
-	public final boolean matchSourceName(String sourceName){
+	public final boolean matchSource(String sourceName){
 		if(pattern == null){
 			return true;
 		}

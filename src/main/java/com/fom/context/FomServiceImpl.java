@@ -107,12 +107,12 @@ public class FomServiceImpl implements FomService {
 		ConfigManager.apply(newConfig, doc);
 		ConfigManager.register(newConfig); 
 		
-		if(oldConfig.scanner != null && (oldConfig.isRunning || oldConfig.scanner.isAlive())){
-			newConfig.scanner = oldConfig.scanner;
-			newConfig.scanner.interrupt();
-		}else{
-			newConfig.scanner.start();
-		}
+//		if(oldConfig.scanner != null && (oldConfig.isRunning || oldConfig.scanner.isAlive())){
+//			newConfig.scanner = oldConfig.scanner;
+//			newConfig.scanner.interrupt();
+//		}else{
+//			newConfig.scanner.start();
+//		}
 		newConfig.startTime = System.currentTimeMillis();
 		newConfig.isRunning = true;
 		return "success, " + name + " update applyed.";
@@ -131,7 +131,7 @@ public class FomServiceImpl implements FomService {
 			return "failed, " + name + " was not Running.";
 		}
 		config.isRunning = false;
-		config.scanner.interrupt();
+//		config.scanner.interrupt();
 		return "success, " + name + " stoped.";
 	}
 	
@@ -150,7 +150,7 @@ public class FomServiceImpl implements FomService {
 				continue;
 			}
 			config.isRunning = false;
-			config.scanner.interrupt();
+//			config.scanner.interrupt();
 			builder.append("success, " + config.name + " stoped.<br>");
 		}
 		return builder.toString();
@@ -168,12 +168,12 @@ public class FomServiceImpl implements FomService {
 		if(config.isRunning){
 			return "failed, " + name + " was already Running.";
 		}
-		if(config.scanner.isAlive()){
-			return "failed, " + name + " was still alive, please try later.";
-		}
-		config.isRunning = true;
-		config.refreshScanner();
-		config.scanner.start();
+//		if(config.scanner.isAlive()){
+//			return "failed, " + name + " was still alive, please try later.";
+//		}
+//		config.isRunning = true;
+//		config.refreshScanner();
+//		config.scanner.start();
 		config.startTime = System.currentTimeMillis();
 		return "success, " + name + " started.";
 	}
@@ -192,13 +192,13 @@ public class FomServiceImpl implements FomService {
 				builder.append("failed, " + config.name + " was already Running.<br>");
 				continue;
 			}
-			if(config.scanner.isAlive()){
-				builder.append("failed, " + config.name + " was still alive, please try later.<br>");
-				continue;
-			}
-			config.isRunning = true;
-			config.refreshScanner();
-			config.scanner.start();
+//			if(config.scanner.isAlive()){
+//				builder.append("failed, " + config.name + " was still alive, please try later.<br>");
+//				continue;
+//			}
+//			config.isRunning = true;
+//			config.refreshScanner();
+//			config.scanner.start();
 			config.startTime = System.currentTimeMillis();
 			builder.append("success, " + config.name + " started.<br>");
 		}
@@ -217,7 +217,7 @@ public class FomServiceImpl implements FomService {
 		if(!config.isRunning){
 			return "failed, " + name + " was not Running.";
 		}
-		config.scanner.interrupt();
+//		config.scanner.interrupt();
 		config.startTime = System.currentTimeMillis();
 		return "success, " + name + " restarted.";
 	}
@@ -236,7 +236,7 @@ public class FomServiceImpl implements FomService {
 				builder.append("failed, " + config.name + " was not Running.<br>");
 				continue;
 			}
-			config.scanner.interrupt();
+//			config.scanner.interrupt();
 			config.startTime = System.currentTimeMillis();
 			builder.append("success, " + config.name + " restarted.<br>");
 		}

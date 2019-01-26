@@ -6,7 +6,7 @@ import java.text.DecimalFormat;
 import org.apache.commons.lang.StringUtils;
 
 import com.fom.context.Executor;
-import com.fom.context.executor.helper.DownloaderHelper;
+import com.fom.context.helper.DownloaderHelper;
 
 /**
  * 根据资源uri下载单个文件的实现

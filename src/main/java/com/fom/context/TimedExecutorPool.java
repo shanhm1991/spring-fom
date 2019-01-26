@@ -1,4 +1,4 @@
-package com.fom.context.scanner;
+package com.fom.context;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -27,10 +27,10 @@ public class TimedExecutorPool extends ThreadPoolExecutor {
 	}
 
 	@Override
-	public TimedFuture<?> submit(Runnable runnable) { 
+	public TimedFuture<Boolean> submit(Runnable runnable) { 
 		if (runnable == null) 
 			throw new NullPointerException(); 
-		TimedFuture<Void> future = newTaskFor(runnable, null);
+		TimedFuture<Boolean> future = newTaskFor(runnable, true);
 		execute(future);
 		return future;
 	}

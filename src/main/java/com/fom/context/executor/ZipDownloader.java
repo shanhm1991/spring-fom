@@ -16,7 +16,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.fom.context.Executor;
-import com.fom.context.executor.helper.ZipDownloaderHelper;
+import com.fom.context.helper.ZipDownloaderHelper;
 import com.fom.util.IoUtil;
 import com.fom.util.ZipUtil;
 
@@ -31,6 +31,8 @@ public class ZipDownloader extends Executor {
 	private static final AtomicInteger num = new AtomicInteger(0);
 	
 	private final DecimalFormat numFormat  = new DecimalFormat("#.##");
+	
+	protected final ZipDownloaderHelper helper;
 
 	private List<String> uriList;
 	
@@ -41,8 +43,6 @@ public class ZipDownloader extends Executor {
 	private final long zipSizeMax;
 	
 	private final boolean isDelSrc;
-
-	private final ZipDownloaderHelper helper;
 
 	private final String downloadPath;
 
