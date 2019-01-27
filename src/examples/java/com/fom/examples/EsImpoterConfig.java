@@ -3,7 +3,7 @@ package com.fom.examples;
 import java.io.File;
 
 import com.fom.context.Config;
-import com.fom.context.ContextUtil;
+import com.fom.context.ContextManager;
 
 /**
  * 
@@ -36,7 +36,7 @@ public class EsImpoterConfig extends Config {
 	
 	@Override
 	protected boolean valid() throws Exception {
-		esJsonFile = new File(ContextUtil.getRealPath(esJson));
+		esJsonFile = new File(ContextManager.getContextPath(esJson));
 		if(!esJsonFile.exists()){
 			LOG.error("文件不存在：" + esJson); 
 			return false;

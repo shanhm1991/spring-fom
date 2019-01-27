@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import com.fom.log.LoggerFactory;
 
 /**
+ * 针对sourceUri的执行器
  * 
  * @author shanhm
  *
@@ -21,6 +22,8 @@ public abstract class Executor implements Callable<Boolean> {
 	
 	private final String executorName;
 	
+	private final String name;
+	
 	/**
 	 * @param name 
 	 * Executor根据name找到对应的logger并打印日志信息，如果name为空，则将日志信息打印到根日志中去
@@ -32,7 +35,9 @@ public abstract class Executor implements Callable<Boolean> {
 		this.executorName = new File(sourceName).getName();
 		if(StringUtils.isBlank(name)){
 			this.log = Logger.getRootLogger();
+			this.name = this.getClass().getSimpleName();
 		}else{
+			this.name = name;
 			this.log = LoggerFactory.getLogger(name);
 		}
 	}
@@ -88,5 +93,12 @@ public abstract class Executor implements Callable<Boolean> {
 	public void callback(boolean result) throws Exception {
 
 	}
+	
+	public final String getName(){
+		return name;
+	}
 
+	public final long getCost(){
+		return 0;
+	}
 }

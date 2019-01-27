@@ -6,7 +6,7 @@ package com.fom.context.helper;
  *
  * @param <V>
  */
-public interface LocalZipImporterHelper<V> extends ImporterHelper<V> {
+public interface LocalZipParserHelper<V> extends ParserHelper<V> {
 
 	/**
 	 * 匹配zip的entry名称

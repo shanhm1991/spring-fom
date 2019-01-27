@@ -12,13 +12,13 @@ import com.fom.log.LoggerFactory;
  *
  * @param <V>
  */
-public abstract class AbstractImporterHelper<V> implements ImporterHelper<V> {
+public abstract class AbstractParserHelper<V> implements ParserHelper<V> {
 	
 	protected final Logger log;
 	
 	protected final String name;
 	
-	public AbstractImporterHelper(String name){
+	public AbstractParserHelper(String name){
 		this.name = name;
 		this.log = LoggerFactory.getLogger(name);
 	}

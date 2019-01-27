@@ -9,6 +9,7 @@ import org.apache.hadoop.fs.PathFilter;
 
 import com.fom.context.Context;
 import com.fom.context.Executor;
+import com.fom.context.FomContext;
 import com.fom.context.executor.ZipDownloader;
 import com.fom.context.helper.HdfsZipDownloaderHelper;
 import com.fom.context.helper.ZipDownloaderHelper;
@@ -16,10 +17,12 @@ import com.fom.util.HdfsUtil;
 import com.fom.util.ScanUtil;
 
 /**
+ * 默认实现：默认实现：定时扫描下载Hdfs服务上指定目录下的目录，并打包成zip
  * 
  * @author shanhm
  *
  */
+@FomContext
 public final class HdfsZipDownload extends Context<HdfsZipDownloadConfig> {
 
 	protected HdfsZipDownload(String name) {
@@ -27,8 +30,8 @@ public final class HdfsZipDownload extends Context<HdfsZipDownloadConfig> {
 	}
 
 	@Override
-	protected List<String> scan(String srcUri, HdfsZipDownloadConfig config) throws Exception {
-		return ScanUtil.scan(config.getFs(), srcUri, config.getPattern(), config.getSignalFileName());
+	protected List<String> getUriList(HdfsZipDownloadConfig config) throws Exception {
+		return ScanUtil.scan(config.getFs(), "srcUri", config.getPattern(), config.getSignalFileName());
 	}
 
 	@Override

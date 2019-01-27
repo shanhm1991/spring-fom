@@ -21,7 +21,7 @@ import com.fom.util.IoUtil;
 import com.fom.util.ZipUtil;
 
 /**
- * 根据资源uri列表下载并打包成zip文件的实现
+ * 根据sourceUri列表下载并打包成zip文件的执行器
  * 
  * @author shanhm1991
  *

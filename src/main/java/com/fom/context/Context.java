@@ -1,5 +1,6 @@
 package com.fom.context;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +12,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.quartz.CronExpression;
 
 import com.fom.log.LoggerFactory;
 
@@ -21,7 +24,9 @@ import com.fom.log.LoggerFactory;
  *
  * @param <E>
  */
-public abstract class Context<E extends Config> extends Thread {
+public abstract class Context<E extends Config> {
+
+	private static final Logger logger = LoggerFactory.getLogger("record");
 
 	//所有的Context共用，防止两个Context创建针对同一个文件的任务
 	private static Map<String,TimedFuture<Boolean>> futureMap = new ConcurrentHashMap<String,TimedFuture<Boolean>>(100);
@@ -29,114 +34,151 @@ public abstract class Context<E extends Config> extends Thread {
 	//Context私有线程池，在Context结束时shutdown(),等待任务线程自行响应中断
 	private TimedExecutorPool pool = new TimedExecutorPool(4,30,new LinkedBlockingQueue<Runnable>(50));
 
+	private Config config;
+
 	protected final Logger log;
 
 	protected final String name;
 
 	protected Context(String name){
+		if(StringUtils.isBlank(name)){
+			throw new IllegalArgumentException(); 
+		}
 		this.name = name;
 		this.log = LoggerFactory.getLogger(name);
 		pool.allowCoreThreadTimeOut(true);
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public final void run(){
-		log.info(name + "启动"); 
-		while(true){
-			Config config = ConfigManager.get(name);
-			if(config == null || !config.isRunning){ 
-				log.info(name + "终止."); 
-				pool.shutdownNow();
-				return;
-			}
-			this.setName("[" + config.srcUri + "]");
-			if(pool.getCorePoolSize() != config.core){
-				pool.setCorePoolSize(config.core);
-			}
-			if(pool.getMaximumPoolSize() != config.max){
-				pool.setMaximumPoolSize(config.max);
-			}
-			if(pool.getKeepAliveTime(TimeUnit.SECONDS) != config.aliveTime){
-				pool.setKeepAliveTime(config.aliveTime, TimeUnit.SECONDS);
-			}
+	protected abstract List<String> getUriList(E config) throws Exception;
 
-			cleanFuture(config);
+	protected abstract Executor createExecutor(String sourceUri, E config) throws Exception;
 
-			E subConfig = (E)config;
-			List<String> uriList = null;
-			try {
-				uriList = scan(config.srcUri, subConfig);
-			} catch (Exception e) {
-				log.error("扫描异常", e); 
-			}
+	final void run(){
+		new InnerThread().run();
+	}
 
-			if(uriList != null){
-				for (String sourceUri : uriList){
-					if(isExecutorAlive(sourceUri)){
-						continue;
-					}
-					try {
-						futureMap.put(sourceUri, pool.submit(createExecutor(sourceUri, subConfig))); 
-						log.info("新建任务" + "[" + sourceUri + "]"); 
-					} catch (RejectedExecutionException e) {
-						log.warn("提交任务被拒绝,等待下次提交[" + sourceUri + "].");
-						break;
-					}catch (Exception e) {
-						log.error("新建任务异常[" + sourceUri + "]", e); 
+	private class InnerThread implements Runnable {
+		@SuppressWarnings("unchecked")
+		@Override
+		public void run() {
+			log.info(name + "启动"); 
+			while(true){
+				config = ConfigManager.get(name);
+				if(config == null){ //TODO 判断interrupt
+					log.info(name + "结束[获取config失败]."); 
+					pool.shutdownNow();
+					return;
+				}
+				if(pool.getCorePoolSize() != config.core){
+					pool.setCorePoolSize(config.core);
+				}
+				if(pool.getMaximumPoolSize() != config.max){
+					pool.setMaximumPoolSize(config.max);
+				}
+				if(pool.getKeepAliveTime(TimeUnit.SECONDS) != config.aliveTime){
+					pool.setKeepAliveTime(config.aliveTime, TimeUnit.SECONDS);
+				}
+
+				cleanFuture(config);
+
+				E subConfig = (E)config;
+				List<String> uriList = null;
+				try {
+					uriList = getUriList(subConfig);
+				} catch (Exception e) {
+					log.error("", e); 
+				}
+
+				if(uriList != null){
+					for (String sourceUri : uriList){
+						if(isExecutorAlive(sourceUri)){
+							continue;
+						}
+						try {
+							futureMap.put(sourceUri, pool.submit(createExecutor(sourceUri, subConfig))); 
+							log.info("新建任务" + "[" + sourceUri + "]"); 
+						} catch (RejectedExecutionException e) {
+							log.warn("提交任务被拒绝,等待下次提交[" + sourceUri + "].");
+							break;
+						}catch (Exception e) {
+							log.error("新建任务异常[" + sourceUri + "]", e); 
+						}
 					}
 				}
-			}
-			synchronized (this) {
-				try {
-					wait(config.nextScanTime());
-				} catch (InterruptedException e) {
-					log.info("wait interrupted."); 
+				synchronized (this) {
+					CronExpression cron = config.getCron();
+					if(cron == null){
+						pool.shutdown();
+						try {
+							pool.awaitTermination(1, TimeUnit.DAYS);
+						} catch (InterruptedException e) {
+							log.warn("wait interrupted."); 
+						}
+						return;
+					}
+					Date nextTime = cron.getTimeAfter(new Date());
+					long waitTime = nextTime.getTime() - System.currentTimeMillis();
+					try {
+						wait(waitTime);
+					} catch (InterruptedException e) {
+						//借助interrupted标记来重启
+						log.info("wait interrupted."); 
+					}
 				}
 			}
 		}
 	}
-
-	protected abstract List<String> scan(String srcUri, E config) throws Exception;
-
-	protected abstract Executor createExecutor(String sourceUri, E config) throws Exception;
-
+	
 	private void cleanFuture(Config config){
 		Iterator<Map.Entry<String, TimedFuture<Boolean>>> it = futureMap.entrySet().iterator();
 		while(it.hasNext()){
 			Entry<String, TimedFuture<Boolean>> entry = it.next();
-			if(!config.matchSource(entry.getKey())){
+			TimedFuture<Boolean> future = entry.getValue();
+			if(!name.equals(future.getName())){   
 				continue;
 			}
-			
-			TimedFuture<Boolean> future = entry.getValue();
-			if(future.isDone()){
-				it.remove();
-				boolean result = true;
-				try {
-					result = future.get();
-				} catch (InterruptedException e) {
-					//never happened
-				} catch (ExecutionException e) {
-					e.printStackTrace(); //TODO
-				}
-				Executor exec = future.getExecutor();
-				if(exec != null){
-					try{
-						exec.callback(result);
-					}catch(Exception e){
-						log.error("callback异常", e); 
-					}
-				}
-			}else{
+
+			String sourceUri = entry.getKey();
+			if(!future.isDone()){
 				long existTime = (System.currentTimeMillis() - future.getCreateTime()) / 1000;
 				if(existTime > config.overTime) {
-					log.warn("任务超时[" + entry.getKey() + "]," + existTime + "s");
+					log.warn("任务超时[" + sourceUri + "]," + existTime + "s");
 					if(config.cancellable){
 						future.cancel(true);
 					}
 				}
+				continue;
 			}
+
+			it.remove();
+			boolean result = true;
+			ExecutionException e1 = null;
+			Exception e2 = null;
+			try {
+				result = future.get();
+				future.callback(result);
+			} catch (InterruptedException e) {
+				log.warn("cleanFuture interrupted, and recover interrupt flag."); 
+				Thread.currentThread().interrupt();
+			} catch (ExecutionException e) {
+				e1 = e;
+			} catch(Exception e){
+				log.error("回调执行异常", e); 
+				e2 = e;
+			}
+			StringBuilder builder = new StringBuilder(name + "\t" + result +"\t" + "ExecutionException=");
+			if(e1 == null){
+				builder.append("null");
+			}else{
+				builder.append(e1.getMessage());
+			}
+			builder.append("\t" + "CallbackException=");
+			if(e2 == null){
+				builder.append("null");
+			}else{
+				builder.append(e2.getMessage());
+			}
+			logger.error(builder.toString()); 
 		}
 	}
 
@@ -149,4 +191,5 @@ public abstract class Context<E extends Config> extends Thread {
 		Future<Boolean> future = futureMap.get(key);
 		return future != null && !future.isDone();
 	}
+
 }

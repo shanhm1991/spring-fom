@@ -4,7 +4,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.log4j.helpers.OptionConverter;
 
 import com.fom.context.Config;
-import com.fom.context.ContextUtil;
+import com.fom.context.ContextManager;
 import com.fom.util.HdfsUtil;
 
 /**
@@ -49,15 +49,10 @@ public class HdfsZipDownloadConfig extends Config {
 		
 		isDelSrc = loadExtends("downloader.isSrcDel", false);
 		isWithTemp = loadExtends("downloader.isWithTemp", false);
-		destPath = ContextUtil.getEnvStr(loadExtends("downloader.desPath", ""));
+		destPath = ContextManager.getEnvStr(loadExtends("downloader.desPath", ""));
 		
 		entryMax = loadExtends("downloader.zip.entryMax", Integer.MAX_VALUE, 1, Integer.MAX_VALUE);
 		sizeMax = OptionConverter.toFileSize(loadExtends("downloader.zip.sizeMax", "1GB"), 1024*1024*1024L);
-	}
-
-	@Override
-	public String getType() {
-		return TYPE_DOWNLOADER;
 	}
 
 	public FileSystem getFs() {

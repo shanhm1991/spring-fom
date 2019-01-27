@@ -9,7 +9,7 @@ import javax.servlet.ServletContextListener;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.fom.context.ContextUtil;
+import com.fom.context.ContextManager;
 import com.fom.log.LoggerFactory;
 
 /**
@@ -34,7 +34,7 @@ public class PoolListener implements ServletContextListener{
 		log = LoggerFactory.getLogger("pool");
 		ServletContext context = event.getServletContext();
 		try{
-			File poolXml = new File(ContextUtil.getRealPath(context.getInitParameter("poolConfigLocation")));
+			File poolXml = new File(ContextManager.getContextPath(context.getInitParameter("poolConfigLocation")));
 			if(!poolXml.exists()){
 				return;
 			}

@@ -11,24 +11,25 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 
 import com.fom.context.Executor;
-import com.fom.context.helper.LocalZipImporterHelper;
+import com.fom.context.helper.LocalZipParserHelper;
 import com.fom.context.reader.Reader;
 import com.fom.util.IoUtil;
 import com.fom.util.ZipUtil;
 
 /**
+ * 根据sourceUri解析处理本地zip文件的执行器
  * 
  * @author shanhm
  *
  */
-public final class LocalZipImporter extends Executor {
+public final class LocalZipParser extends Executor {
 	
 	private String sourceUri;
 	
 	private int batch;
 	
 	@SuppressWarnings("rawtypes")
-	private LocalZipImporterHelper helper;
+	private LocalZipParserHelper helper;
 	
 	private File logFile;
 	
@@ -46,7 +47,7 @@ public final class LocalZipImporter extends Executor {
 	 * @param helper
 	 */
 	@SuppressWarnings("rawtypes")
-	public LocalZipImporter(String name, String sourceUri, int batch, LocalZipImporterHelper helper) {
+	public LocalZipParser(String name, String sourceUri, int batch, LocalZipParserHelper helper) {
 		super(name, sourceUri);
 		this.sourceUri = sourceUri;
 		this.helper = helper;

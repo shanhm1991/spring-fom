@@ -83,20 +83,20 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>  
-                <artifactId>maven-source-plugin</artifactId>  
-                <configuration>  
-                    <attach>true</attach>  
-                </configuration>  
-                <executions>  
-                    <execution>  
-                        <phase>package</phase>  
-                        <goals>  
-                            <goal>jar-no-fork</goal>  
-                        </goals>  
-                    </execution>  
-                </executions>  
-            </plugin> 
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
+				<configuration>
+					<attach>true</attach>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -367,6 +367,11 @@
 			<groupId>com.sun.jna</groupId>
 			<artifactId>jna</artifactId>
 			<version>3.0.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.9.10</version>
 		</dependency>
 		<dependency>
 			<groupId>com.nebula</groupId>

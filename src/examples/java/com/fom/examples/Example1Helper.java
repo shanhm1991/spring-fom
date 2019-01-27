@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.fom.context.helper.AbstractImporterHelper;
+import com.fom.context.helper.AbstractParserHelper;
 import com.fom.context.reader.Reader;
 import com.fom.context.reader.TextReader;
 import com.fom.db.handler.EsHandler;
@@ -17,7 +17,7 @@ import com.fom.db.handler.EsHandler;
  * @author shanhm
  *
  */
-public class Example1Helper extends AbstractImporterHelper<Map<String, Object>> {
+public class Example1Helper extends AbstractParserHelper<Map<String, Object>> {
 	
 	private static final String POOL = "example_es";
 	

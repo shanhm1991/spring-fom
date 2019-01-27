@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.fom.context.helper.AbstractLocalZipImporterHelper;
+import com.fom.context.helper.AbstractLocalZipParserHelper;
 import com.fom.context.reader.Reader;
 import com.fom.context.reader.TextReader;
 import com.fom.db.handler.JdbcHandler;
@@ -17,7 +17,7 @@ import com.fom.db.handler.JdbcHandler;
  * @author shanhm
  *
  */
-public class Example5Helper extends AbstractLocalZipImporterHelper<Map<String, Object>> {
+public class Example5Helper extends AbstractLocalZipParserHelper<Map<String, Object>> {
 
 	private static final String POOL = "example_oracle";
 

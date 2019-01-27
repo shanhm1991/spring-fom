@@ -5,10 +5,18 @@ import java.util.List;
 
 import com.fom.context.Context;
 import com.fom.context.Executor;
+import com.fom.context.FomContext;
 import com.fom.context.executor.Downloader;
 import com.fom.context.helper.HdfsDownloaderHelper;
 import com.fom.util.ScanUtil;
 
+/**
+ * 默认实现：定时扫描下载Hdfs服务上指定目录下的文件
+ * 
+ * @author shanhm1991
+ *
+ */
+@FomContext
 public final class HdfsDownload extends Context<HdfsDownloadConfig> {
 	
 	protected HdfsDownload(String name) {
@@ -16,8 +24,8 @@ public final class HdfsDownload extends Context<HdfsDownloadConfig> {
 	}
 
 	@Override
-	protected List<String> scan(String srcUri, HdfsDownloadConfig config) throws Exception { 
-		return ScanUtil.scan(config.getFs(), srcUri, config.getPattern(), config.getSignalFileName());
+	protected List<String> getUriList(HdfsDownloadConfig config) throws Exception { 
+		return ScanUtil.scan(config.getFs(), "srcUri", config.getPattern(), config.getSignalFileName());
 	}
 
 	@Override

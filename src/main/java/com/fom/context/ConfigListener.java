@@ -76,33 +76,29 @@ public class ConfigListener implements ServletContextListener {
 		System.setProperty("download.temp", path);
 	}
 
+	/**
+	 * 加载cofig到configMap
+	 * @param fomLocation
+	 * @throws Exception
+	 */
 	private void load(String fomLocation) throws Exception {
-		fomXml = new File(ContextUtil.getRealPath(fomLocation));
+		fomXml = new File(ContextManager.getContextPath(fomLocation));
 		SAXReader reader = new SAXReader();
 		reader.setEncoding("UTF-8");
-
 		Document doc = reader.read(new FileInputStream(fomXml));
 		Element root = doc.getRootElement();
 		loadElements(root);
-
 		loadIncludes(root);
-
 		loadApply();
-
-		for(Config config : ConfigManager.getAll()){
-			if(config.valid){
-//				config.scanner.start();
-				config.startTime = System.currentTimeMillis();
-				config.isRunning = true;
-			}
-		}
 	}
 
 	private void loadElements(Element root) throws Exception {
 		Iterator<?> it = root.elementIterator("fom");
 		while(it.hasNext()){
 			Config config = ConfigManager.load((Element)it.next());
-			ConfigManager.register(config);
+			if(config.isValid()){
+				ConfigManager.register(config);
+			}
 		}
 	}
 
@@ -115,12 +111,12 @@ public class ConfigListener implements ServletContextListener {
 		String fomPath = fomXml.getParent();
 		while(it.hasNext()){
 			Element element = (Element)it.next();
-			String location = ContextUtil.getEnvStr(element.getTextTrim());
+			String location = ContextManager.getEnvStr(element.getTextTrim());
 			try{
 				File xml = new File(fomPath + File.separator + location);
 				//尝试读取相对路径，如果不存在再从springContext获取
 				if(!xml.exists()){
-					xml = new File(ContextUtil.getRealPath(location));
+					xml = new File(ContextManager.getContextPath(location));
 				}
 				SAXReader reader = new SAXReader();
 				reader.setEncoding("UTF-8");
@@ -129,14 +125,13 @@ public class ConfigListener implements ServletContextListener {
 			}catch(Exception e){
 				log.error("加载失败:" + location, e); 
 			}
-
 		}
 	}
 
 	private void loadApply() throws Exception{ 
 		File apply = new File(System.getProperty("config.apply"));
 		for(File file : apply.listFiles()){
-			//自己缓存的文件目录不多做校验 
+			//自己缓存的文件目录不需做校验 
 			if(!file.getName().contains(".xml.")){ 
 				continue;
 			}
@@ -148,7 +143,7 @@ public class ConfigListener implements ServletContextListener {
 				Document doc = reader.read(in); 
 				Element element = doc.getRootElement();
 				Config config = ConfigManager.load(element);
-				if(config.valid){
+				if(config.isValid()){
 					ConfigManager.register(config); 
 				}
 			}finally{

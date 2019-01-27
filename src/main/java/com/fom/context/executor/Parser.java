@@ -9,23 +9,24 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 
 import com.fom.context.Executor;
-import com.fom.context.helper.AbstractImporterHelper;
+import com.fom.context.helper.AbstractParserHelper;
 import com.fom.context.reader.Reader;
 import com.fom.util.IoUtil;
 
 /**
+ * 根据sourceUri解析处理文本文件的执行器
  * 
  * @author shanhm
  *
  */
-public final class Importer extends Executor {
+public final class Parser extends Executor {
 
 	private String sourceUri;
 
 	private int batch;
 	
 	@SuppressWarnings("rawtypes")
-	private AbstractImporterHelper helper;
+	private AbstractParserHelper helper;
 
 	private File logFile;
 
@@ -38,7 +39,7 @@ public final class Importer extends Executor {
 	 * @param helper ImporterHelper
 	 */
 	@SuppressWarnings("rawtypes")
-	public Importer(String name, String sourceName, String sourceUri, int batch, AbstractImporterHelper helper){
+	public Parser(String name, String sourceName, String sourceUri, int batch, AbstractParserHelper helper){
 		super(name,sourceName);
 		this.sourceUri = sourceUri;
 		this.batch = batch;

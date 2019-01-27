@@ -1,7 +1,7 @@
 package com.fom.examples;
 
 import com.fom.context.Context;
-import com.fom.context.executor.Importer;
+import com.fom.context.executor.Parser;
 
 /**
  * 
@@ -17,7 +17,7 @@ public class Example3 extends Context<TextImporterConfig> {
 	@Override
 	protected void exec(TextImporterConfig config) throws Exception {
 		Example3Helper helper = new Example3Helper(name);
-		Importer importer = new Importer(name, sourceUri, config.getBatch(), helper);
+		Parser importer = new Parser(name, sourceUri, config.getBatch(), helper);
 		importer.exec();
 	}
 }

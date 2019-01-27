@@ -1,25 +1,21 @@
 package com.fom.context;
 
-import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.dom4j.Document;
 import org.dom4j.Element;
 
 import com.fom.log.LoggerFactory;
-import com.fom.util.XmlUtil;
 
 /**
  * 
  * @author shanhm
  *
  */
-public final class ConfigManager {
+final class ConfigManager {
 
 	private static final Logger LOG = LoggerFactory.getLogger("config");
 
@@ -29,33 +25,28 @@ public final class ConfigManager {
 		return configMap.get(key);
 	}
 
-	static void register(Config config){
-		if(config == null){
-			return;
-		}
-		if(null == configMap.put(config.name, config)){
-			if(config.valid){
-				LOG.info("\n");
-				LOG.info("#加载配置: " + config.name + "\n" + config);
-			}else{
-				LOG.info("\n");
-				LOG.warn("#非法配置: " + config.name + "\n" + config);
-			}
-		}else{
-			LOG.info("\n");
-			LOG.info("#更新配置: " + config.name + "\n" + config);
-		}
-	}
-
-	protected static Collection<Config> getAll(){
+	public static Collection<Config> getAll(){
 		return configMap.values();
 	}
 
-	protected static Map<String,Config> getMap(){
+	public static Map<String,Config> getMap(){
 		return configMap;
 	}
 
-	static Config load(Element element) {
+	public static void register(Config config){
+		if(config == null){
+			return;
+		}
+		if(configMap.put(config.name, config) == null){
+			LOG.info("\n");
+			LOG.info("#加载配置: " + config.name + "\n" + config);
+		}else {
+			LOG.info("\n");
+			LOG.info("#更新配置: " + config.name + "\n" + config); 
+		}
+	}
+
+	public static Config load(Element element) {
 		String name = element.attributeValue("name");
 		String clzz = element.attributeValue("config");
 		Config config = null;
@@ -67,26 +58,15 @@ public final class ConfigManager {
 			config.loadTime = System.currentTimeMillis();
 			config.element = element;
 			config.load();
-			config.valid = config.isValid();
-		}catch(Exception e){
-			if(config != null){
-				config.valid = false;
+			if(!config.isValid()){
+				LOG.info("\n"); 
+				LOG.error(name + "校验失败");
 			}
+		}catch(Exception e){
 			LOG.info("\n"); 
 			LOG.error(name + "加载异常", e);
 		}
 		return config;
 	}
 
-	static void apply(Config config, Document doc) throws Exception { 
-		File apply = new File(System.getProperty("config.apply"));
-		for(File file : apply.listFiles()){
-			if(file.getName().startsWith(config.name + ".xml.") && !file.delete()){
-				throw new RuntimeException("删除文件失败:" + file.getName());
-			}
-		}
-		File xml = new File(apply + File.separator + config.name + ".xml." + config.loadTime);
-		XmlUtil.writeDocToFile(doc, xml);
-		FileUtils.copyFile(xml, new File(apply + File.separator + "history" + File.separator + xml.getName()));
-	}
 }

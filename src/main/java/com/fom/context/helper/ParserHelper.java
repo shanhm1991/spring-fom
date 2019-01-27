@@ -9,7 +9,7 @@ import com.fom.context.reader.Reader;
  * @author shanhm
  *
  */
-public interface ImporterHelper<V> {
+public interface ParserHelper<V> {
 	
 	/**
 	 * 获取对应文件的reader

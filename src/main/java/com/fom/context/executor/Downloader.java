@@ -9,7 +9,7 @@ import com.fom.context.Executor;
 import com.fom.context.helper.DownloaderHelper;
 
 /**
- * 根据资源uri下载单个文件的实现
+ * 根据sourceUri下载单个文件的执行器
  * 
  * @author shanhm
  *

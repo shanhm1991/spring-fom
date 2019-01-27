@@ -1,13 +1,17 @@
 package com.fom.context;
 
+import java.util.Set;
+
 import javax.servlet.ServletContext;
+
+import org.reflections.Reflections;
 
 /**
  * 
  * @author shanhm
  *
  */
-public class ContextUtil {
+public class ContextManager {
 
 	private static volatile ServletContext scontext;
 	
@@ -24,7 +28,7 @@ public class ContextUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static final String getRealPath(String path) {
+	public static final String getContextPath(String path) {
 		return scontext.getRealPath(getEnvStr(path));
 	}
 
@@ -68,6 +72,27 @@ public class ContextUtil {
 					}
 					i = k + DELIM_STOP_LEN;
 				}
+			}
+		}
+	}
+	
+	//默认存在com.fom
+	static void init(String[] packages){
+		for(String pack : packages){
+			Reflections reflections = new Reflections(pack);
+			Set<Class<?>> contextSet = reflections.getTypesAnnotatedWith(FomContext.class);
+			for(Class<?> clazz : contextSet){
+				if(!Context.class.isAssignableFrom(clazz)){
+					//日志
+					continue;
+				}
+				
+				//反射为Context
+				
+				//获取名称并注册到容器
+				
+				//判断是否有对应name的config,有则启动
+				
 			}
 		}
 	}

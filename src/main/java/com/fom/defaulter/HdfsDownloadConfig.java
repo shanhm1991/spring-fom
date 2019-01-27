@@ -3,7 +3,7 @@ package com.fom.defaulter;
 import org.apache.hadoop.fs.FileSystem;
 
 import com.fom.context.Config;
-import com.fom.context.ContextUtil;
+import com.fom.context.ContextManager;
 import com.fom.util.HdfsUtil;
 
 /**
@@ -38,12 +38,7 @@ public class HdfsDownloadConfig extends Config {
 		
 		isDelSrc = loadExtends("downloader.isSrcDel", false);
 		isWithTemp = loadExtends("downloader.isWithTemp", false);
-		destPath = ContextUtil.getEnvStr(loadExtends("downloader.desPath", ""));
-	}
-	
-	@Override
-	public String getType() {
-		return TYPE_DOWNLOADER;
+		destPath = ContextManager.getEnvStr(loadExtends("downloader.desPath", ""));
 	}
 	
 	public final FileSystem getFs() {

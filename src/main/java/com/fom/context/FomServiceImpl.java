@@ -1,5 +1,6 @@
 package com.fom.context;
 
+import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.text.DateFormat;
@@ -9,12 +10,15 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.io.FileUtils;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 import org.springframework.stereotype.Service;
+
+import com.fom.util.XmlUtil;
 
 /**
  * 
@@ -33,19 +37,17 @@ public class FomServiceImpl implements FomService {
 			Map<String,String> m = new LinkedHashMap<>();
 			map.put(entry.getKey(), m);
 			Config c = entry.getValue();
-			m.put("type", c.getType());
 			m.put("lastLoad", format.format(c.loadTime));
-			m.put("valid", String.valueOf(c.valid));
-			if(c.isRunning){
-				m.put("state", "Running");
-			}else{
-				m.put("state", "Dead");
-			}
-			if(c.startTime == 0){
-				m.put("lastStart", "not started");
-			}else{
-				m.put("lastStart", format.format(c.startTime));
-			}
+//			if(c.isRunning){
+//				m.put("state", "Running");
+//			}else{
+//				m.put("state", "Dead");
+//			}
+//			if(c.startTime == 0){
+//				m.put("lastStart", "not started");
+//			}else{
+//				m.put("lastStart", format.format(c.startTime));
+//			}
 		}
 		return map;
 	}
@@ -78,43 +80,34 @@ public class FomServiceImpl implements FomService {
 		StringReader in=new StringReader(data);  
 		Document doc = reader.read(in); 
 		Element element = doc.getRootElement();
-		Config newConfig = ConfigManager.load(element);
-		if(!name.equals(newConfig.name)){ 
-			return "failed, attribute[name] can not be change.";
+		
+		Config config = ConfigManager.load(element);
+		if(!name.equals(config.name)){ 
+			return "failed, [" + name + "]config.name can not be change.";
+		}
+		if(!config.valid){
+			return "failed, [" + name + "]config not valid.";
 		}
 		
 		Config oldConfig = ConfigManager.get(name);
-		if(!newConfig.getClass().getName().equals(oldConfig.getClass().getName())){
-			return "failed, attribute[config] can not be change.";
+		if(!config.getClass().getName().equals(oldConfig.getClass().getName())){
+			return "failed, [" + name + "]config.class can not be change.";
 		}
-		
-		if(!newConfig.scannerClass.equals(oldConfig.scannerClass)){ 
-			return "failed, node[scanner] can not be change.";
+		if(config.equals(oldConfig)){ 
+			return "failed, [" + name + "]config not changed.";
 		}
-		
-		if(!newConfig.contextClass.equals(oldConfig.contextClass)){ 
-			return "failed, node[executor] can not be change.";
+
+		File apply = new File(System.getProperty("config.apply"));
+		for(File file : apply.listFiles()){
+			if(file.getName().startsWith(name + ".xml.") && !file.delete()){
+				throw new RuntimeException("删除文件失败:" + file.getName());
+			}
 		}
+		File xml = new File(apply + File.separator + name + ".xml." + config.loadTime);
+		XmlUtil.writeDocToFile(doc, xml);
+		FileUtils.copyFile(xml, new File(apply + File.separator + "history" + File.separator + xml.getName()));
 		
-		if(!newConfig.valid){
-			return "failed, " + name + " config not valid.";
-		}
-		
-		if(oldConfig.equals(newConfig)){ 
-			return "failed, " + name + " config not changed.";
-		}
-		
-		ConfigManager.apply(newConfig, doc);
-		ConfigManager.register(newConfig); 
-		
-//		if(oldConfig.scanner != null && (oldConfig.isRunning || oldConfig.scanner.isAlive())){
-//			newConfig.scanner = oldConfig.scanner;
-//			newConfig.scanner.interrupt();
-//		}else{
-//			newConfig.scanner.start();
-//		}
-		newConfig.startTime = System.currentTimeMillis();
-		newConfig.isRunning = true;
+		ConfigManager.register(config); 
 		return "success, " + name + " update applyed.";
 	}
 	
@@ -127,10 +120,10 @@ public class FomServiceImpl implements FomService {
 		if(!config.valid){
 			return "failed, " + name + " not valid.";
 		}
-		if(!config.isRunning){
-			return "failed, " + name + " was not Running.";
-		}
-		config.isRunning = false;
+//		if(!config.isRunning){
+//			return "failed, " + name + " was not Running.";
+//		}
+//		config.isRunning = false;
 //		config.scanner.interrupt();
 		return "success, " + name + " stoped.";
 	}
@@ -145,11 +138,11 @@ public class FomServiceImpl implements FomService {
 				builder.append("failed, " + config.name + " not valid.<br>");
 				continue;
 			}
-			if(!config.isRunning){
-				builder.append("failed, " + config.name + " was not Running.<br>");
-				continue;
-			}
-			config.isRunning = false;
+//			if(!config.isRunning){
+//				builder.append("failed, " + config.name + " was not Running.<br>");
+//				continue;
+//			}
+//			config.isRunning = false;
 //			config.scanner.interrupt();
 			builder.append("success, " + config.name + " stoped.<br>");
 		}
@@ -162,19 +155,16 @@ public class FomServiceImpl implements FomService {
 		if(config == null){
 			return "failed, " + name + " not exist.";
 		}
-		if(!config.valid){
-			return "failed, " + name + " not valid.";
-		}
-		if(config.isRunning){
-			return "failed, " + name + " was already Running.";
-		}
+//		if(config.isRunning){
+//			return "failed, " + name + " was already Running.";
+//		}
 //		if(config.scanner.isAlive()){
 //			return "failed, " + name + " was still alive, please try later.";
 //		}
 //		config.isRunning = true;
 //		config.refreshScanner();
 //		config.scanner.start();
-		config.startTime = System.currentTimeMillis();
+//		config.startTime = System.currentTimeMillis();
 		return "success, " + name + " started.";
 	}
 
@@ -184,14 +174,10 @@ public class FomServiceImpl implements FomService {
 		StringBuilder builder = new StringBuilder();
 		for(Entry<String, Config> entry : cmap.entrySet()){
 			Config config = entry.getValue();
-			if(!config.valid){
-				builder.append("failed, " + config.name + " not valid.<br>");
-				continue;
-			}
-			if(config.isRunning){
-				builder.append("failed, " + config.name + " was already Running.<br>");
-				continue;
-			}
+//			if(config.isRunning){
+//				builder.append("failed, " + config.name + " was already Running.<br>");
+//				continue;
+//			}
 //			if(config.scanner.isAlive()){
 //				builder.append("failed, " + config.name + " was still alive, please try later.<br>");
 //				continue;
@@ -199,7 +185,7 @@ public class FomServiceImpl implements FomService {
 //			config.isRunning = true;
 //			config.refreshScanner();
 //			config.scanner.start();
-			config.startTime = System.currentTimeMillis();
+//			config.startTime = System.currentTimeMillis();
 			builder.append("success, " + config.name + " started.<br>");
 		}
 		return builder.toString();
@@ -211,14 +197,11 @@ public class FomServiceImpl implements FomService {
 		if(config == null){
 			return "failed, " + name + " not exist.";
 		}
-		if(!config.valid){
-			return "failed, " + name + " not valid.";
-		}
-		if(!config.isRunning){
-			return "failed, " + name + " was not Running.";
-		}
+//		if(!config.isRunning){
+//			return "failed, " + name + " was not Running.";
+//		}
 //		config.scanner.interrupt();
-		config.startTime = System.currentTimeMillis();
+//		config.startTime = System.currentTimeMillis();
 		return "success, " + name + " restarted.";
 	}
 	
@@ -228,16 +211,12 @@ public class FomServiceImpl implements FomService {
 		StringBuilder builder = new StringBuilder();
 		for(Entry<String, Config> entry : cmap.entrySet()){
 			Config config = entry.getValue();
-			if(!config.valid){
-				builder.append("failed, " + config.name + " not valid.<br>");
-				continue;
-			}
-			if(!config.isRunning){
-				builder.append("failed, " + config.name + " was not Running.<br>");
-				continue;
-			}
+//			if(!config.isRunning){
+//				builder.append("failed, " + config.name + " was not Running.<br>");
+//				continue;
+//			}
 //			config.scanner.interrupt();
-			config.startTime = System.currentTimeMillis();
+//			config.startTime = System.currentTimeMillis();
 			builder.append("success, " + config.name + " restarted.<br>");
 		}
 		return builder.toString();

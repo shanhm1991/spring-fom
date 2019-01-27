@@ -1,6 +1,5 @@
 package com.fom.context;
 
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -16,14 +15,12 @@ import com.fom.log.LoggerFactory;
 import com.fom.util.XmlUtil;
 
 /**
- * src.uri    源文件目录<br>
- * src.pattern 源文件正则表达式<br>
- * src.delMatchFail  源文件匹配失败是否删除<br>
- * scanner       扫描源目录的实现<br>
- * scanner.cron  扫描源目录的cron表达式<br>
- * context      处理文件的实现方式<br>
- * thread.min  处理线程最小数<br>
- * thread.max  处理线程最大数<br>
+ * remark 备注
+ * cron   执行时机的定时表达式<br>
+ * pattern 匹配资源名称的正则表达式<br>
+ * context      处理资源的实现<br>
+ * thread.min   处理线程最小数<br>
+ * thread.max   处理线程最大数<br>
  * thread.aliveTime  处理线程空闲存活最长时间<br>
  * thread.overTime   处理线程执行超时时间<br>
  * thread.cancellable    处理线程执行超时是否中断<br>
@@ -31,28 +28,23 @@ import com.fom.util.XmlUtil;
  * @author shanhm
  *
  */
-public abstract class Config implements IConfig {
+public abstract class Config {
 
 	protected static final Logger LOG = LoggerFactory.getLogger("config");
 
-	/**
-	 * 模块名称
-	 */
 	protected final String name;
 
-	String srcUri;
+	Element element;
 
-	private Pattern pattern;
-
-	private CronExpression cron;
-
-	private boolean delMatchFail;
-
-	String scannerClass;
-
-	String contextClass;
+	Element extendsElement;
 
 	String remark;
+
+	String regex;
+	
+	String cron;
+
+	String context;
 
 	int core;
 
@@ -64,37 +56,15 @@ public abstract class Config implements IConfig {
 
 	boolean cancellable;
 
-	Element element;
-
-	Element extendsElement;
-
-	boolean valid;
-
-	long loadTime;
-
-	long startTime;
-
-	volatile boolean isRunning = false;
-
 	protected Config(String name){
 		this.name = name;
 	}
 
 	void load() throws Exception {
 		remark = load(element, "remark", "");
-
-		srcUri = ContextUtil.getEnvStr(load(element, "src.uri", ""));
-		String regex = load(element, "src.pattern", "");
-		if(!StringUtils.isBlank(regex)){
-			pattern = Pattern.compile(regex);
-		}
-		delMatchFail = load(element, "src.delMatchFail", false);
-
-		scannerClass = load(element, "scanner", ""); 
-		String strCron = load(element, "scanner.cron", "");
-		cron = new CronExpression(strCron);
-
-		contextClass = load(element, "context", "");
+		regex = load(element, "pattern", "");
+		cron = load(element, "cron", "");
+		context = load(element, "context", "");
 		core = load(element, "thread.core", 4, 1, 10); 
 		max = load(element, "thread.max", 20, 10, 50);
 		aliveTime = load(element, "thread.aliveTime", 30, 3, 300);
@@ -104,36 +74,33 @@ public abstract class Config implements IConfig {
 		extendsElement = element.element("extends");
 		loadExtends();
 	}
+	
+	private Pattern pattern;
+
+	private CronExpression cronExpression;
+	
+	boolean valid;
+	
+	long loadTime;
 
 	boolean isValid() throws Exception {
+		if(!StringUtils.isBlank(regex)){
+			pattern = Pattern.compile(regex);
+		}
+		if(!StringUtils.isBlank(cron)){
+			cronExpression = new CronExpression(cron);
+		}
 		return valid();
 	}
 
-	long nextScanTime(){
-		Date nextDate = cron.getTimeAfter(new Date());
-		return nextDate.getTime() - System.currentTimeMillis();
+		public final CronExpression getCron(){
+		return cronExpression;
 	}
 
-	@Override
-	public boolean isDelMatchFailFile() {
-		return delMatchFail;
-	}
-	
-	public Pattern getPattern(){
+	public final Pattern getPattern(){
 		return pattern;
 	}
 
-	public final boolean matchSource(String sourceName){
-		if(pattern == null){
-			return true;
-		}
-		return pattern.matcher(sourceName).find();
-	}
-
-	/**
-	 * 获取config加载的xml
-	 * @return
-	 */
 	public final String getXml(){
 		return element.asXML();
 	}
@@ -238,8 +205,6 @@ public abstract class Config implements IConfig {
 	@Override
 	public final String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("type=" + getType());
-		builder.append("\nvalid=" + valid);
 		Iterator<Entry<String, String>> it = entryMap.entrySet().iterator();
 		while(it.hasNext()){
 			Entry<String, String> entry = it.next();

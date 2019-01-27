@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.fom.context.helper.AbstractLocalZipImporterHelper;
+import com.fom.context.helper.AbstractLocalZipParserHelper;
 import com.fom.context.reader.Reader;
 import com.fom.context.reader.TextReader;
 import com.fom.examples.bean.ExampleBean;
@@ -17,7 +17,7 @@ import com.fom.util.SpringUtil;
  * @author shanhm
  *
  */
-public class Example4Helper extends AbstractLocalZipImporterHelper<ExampleBean> {
+public class Example4Helper extends AbstractLocalZipParserHelper<ExampleBean> {
 
 	public Example4Helper(String name, String pattern) {
 		super(name, pattern);

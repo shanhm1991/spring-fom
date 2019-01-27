@@ -10,16 +10,16 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @param <V>
  */
-public abstract class AbstractLocalZipImporterHelper<V> extends AbstractImporterHelper<V> implements LocalZipImporterHelper<V> {
+public abstract class AbstractLocalZipParserHelper<V> extends AbstractParserHelper<V> implements LocalZipParserHelper<V> {
 
 	private Pattern pattern;
 	
-	public AbstractLocalZipImporterHelper(String name, Pattern pattern) {
+	public AbstractLocalZipParserHelper(String name, Pattern pattern) {
 		super(name);
 		this.pattern = pattern;
 	}
 	
-	public AbstractLocalZipImporterHelper(String name, String pattern) {
+	public AbstractLocalZipParserHelper(String name, String pattern) {
 		super(name); 
 		if(!StringUtils.isBlank(pattern)){
 			this.pattern = Pattern.compile(pattern);
