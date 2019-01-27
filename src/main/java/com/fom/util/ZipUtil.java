@@ -30,7 +30,7 @@ import net.lingala.zip4j.util.InternalZipConstants;
  */
 public class ZipUtil {
 	
-	private static final Logger LOG = LoggerFactory.getLogger("root");
+	private static final Logger LOG = LoggerFactory.getLogger("fom");
 	
 	/**
 	 * 解压指定uri的zip文件到指定目录

@@ -11,21 +11,17 @@ import com.fom.context.helper.HdfsDownloaderHelper;
 import com.fom.util.ScanUtil;
 
 /**
- * 默认实现：定时扫描下载Hdfs服务上指定目录下的文件
  * 
- * @author shanhm1991
+ * @author shanhm
  *
  */
-@FomContext
+@FomContext(name="hdfsDownload", remark="扫描下载Hdfs指定目录下文件的默认实现")
 public final class HdfsDownload extends Context<HdfsDownloadConfig> {
 	
-	protected HdfsDownload(String name) {
-		super(name);
-	}
 
 	@Override
 	protected List<String> getUriList(HdfsDownloadConfig config) throws Exception { 
-		return ScanUtil.scan(config.getFs(), "srcUri", config.getPattern(), config.getSignalFileName());
+		return ScanUtil.scan(config.getFs(), config.getSrcPath(), config.getPattern(), config.getSignalFileName());
 	}
 
 	@Override

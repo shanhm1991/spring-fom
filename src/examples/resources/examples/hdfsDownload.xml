@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<foms>
+	<fom name="hdfsDownload" class="com.fom.defaulter.HdfsDownloadConfig">
+		<cron>0 0/15 * * * ?</cron>
+		<pattern></pattern>
+		<thread.min>10</thread.min>
+		<thread.max>10</thread.max>
+		<thread.aliveTime>30</thread.aliveTime>
+		<thread.overTime>86400</thread.overTime>
+		<thread.cancellable>false</thread.cancellable>
+		<src.path>/test</src.path>
+		<hdfs.master>master.ip:port</hdfs.master>
+		<hdfs.slave>slave.ip:port</hdfs.slave>
+		<downloader.isSrcDel>false</downloader.isSrcDel>
+		<downloader.isWithTemp>true</downloader.isWithTemp>
+		<downloader.desPath>${webapp.root}/download</downloader.desPath>
+	</fom>
+</foms>

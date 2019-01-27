@@ -7,6 +7,7 @@ import com.fom.context.ContextManager;
 import com.fom.util.HdfsUtil;
 
 /**
+ * src.path 源文件目录
  * hdfs.master 集群主节点ip:port<br>
  * hdfs.slave 集群副节点ip:port<br>
  * downloader.isSrcDel 是否删除源文件<br>
@@ -20,6 +21,8 @@ public class HdfsDownloadConfig extends Config {
 	
 	private FileSystem fs;
 	
+	private String srcPath;
+	
 	private String destPath; 
 	
 	private boolean isWithTemp; 
@@ -32,17 +35,21 @@ public class HdfsDownloadConfig extends Config {
 	
 	@Override
 	protected void loadExtends() throws Exception {
-		String hdfsMaster = loadExtends("hdfs.master", "");
-		String hdfsSlave = loadExtends("hdfs.slave", "");
+		String hdfsMaster = load("hdfs.master", "");
+		String hdfsSlave = load("hdfs.slave", "");
 		fs = HdfsUtil.getFileSystem(hdfsMaster, hdfsSlave);
-		
-		isDelSrc = loadExtends("downloader.isSrcDel", false);
-		isWithTemp = loadExtends("downloader.isWithTemp", false);
-		destPath = ContextManager.getEnvStr(loadExtends("downloader.desPath", ""));
+		srcPath = load("src.path", "");
+		isDelSrc = load("downloader.isSrcDel", false);
+		isWithTemp = load("downloader.isWithTemp", false);
+		destPath = ContextManager.getEnvStr(load("downloader.desPath", ""));
 	}
 	
 	public final FileSystem getFs() {
 		return fs;
+	}
+	
+	public String getSrcPath() {
+		return srcPath;
 	}
 
 	public String getSignalFileName() {

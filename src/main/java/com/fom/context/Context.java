@@ -11,8 +11,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.quartz.CronExpression;
 
@@ -36,15 +36,20 @@ public abstract class Context<E extends Config> {
 
 	private Config config;
 
-	protected final Logger log;
+	protected Logger log;
 
 	protected final String name;
+	
+	String remark;
+	
+	private InnerThread innerThread;
+	
+	private AtomicBoolean state = new AtomicBoolean(false);
 
-	protected Context(String name){
-		if(StringUtils.isBlank(name)){
-			throw new IllegalArgumentException(); 
-		}
-		this.name = name;
+	public Context(){
+		FomContext c = this.getClass().getAnnotation(FomContext.class);
+		this.name = c.name();
+		this.remark = c.remark();
 		this.log = LoggerFactory.getLogger(name);
 		pool.allowCoreThreadTimeOut(true);
 	}
@@ -53,34 +58,68 @@ public abstract class Context<E extends Config> {
 
 	protected abstract Executor createExecutor(String sourceUri, E config) throws Exception;
 
-	final void run(){
-		new InnerThread().run();
+	final void start(){
+		if(state.get()){
+			log.warn("[" + name + "]已经在运行"); 
+			return;
+		}
+		innerThread = new InnerThread();
+		state.set(true); 
+		log.info("启动[" + name + "]"); 
+		innerThread.start();
+	}
+	
+	final void stop(){
+		if(!state.get()){
+			log.warn("[" + name + "]已经停止"); 
+			return;
+		}
+		log.info("停止[" + name + "]"); 
+		state.set(false); 
+	}
+	
+	final void restart(){
+		if(state.get()){
+			log.info("重启[" + name + "]"); 
+			innerThread.interrupt();
+		}else{
+			start();
+		}
 	}
 
-	private class InnerThread implements Runnable {
-		@SuppressWarnings("unchecked")
+	private class InnerThread extends Thread {
+		
+		public InnerThread(){
+			this.setName(name); 
+		}
+		
 		@Override
 		public void run() {
-			log.info(name + "启动"); 
+			config = ConfigManager.get(name);
+			if(config == null){ 
+				log.warn("启动失败,获取config失败."); 
+				pool.shutdownNow();
+				state.set(false); 
+				return;
+			}
 			while(true){
+				if(!state.get()){
+					
+				}
 				config = ConfigManager.get(name);
-				if(config == null){ //TODO 判断interrupt
-					log.info(name + "结束[获取config失败]."); 
-					pool.shutdownNow();
-					return;
+				if(pool.getCorePoolSize() != config.threadCore){
+					pool.setCorePoolSize(config.threadCore);
 				}
-				if(pool.getCorePoolSize() != config.core){
-					pool.setCorePoolSize(config.core);
+				if(pool.getMaximumPoolSize() != config.threadMax){
+					pool.setMaximumPoolSize(config.threadMax);
 				}
-				if(pool.getMaximumPoolSize() != config.max){
-					pool.setMaximumPoolSize(config.max);
-				}
-				if(pool.getKeepAliveTime(TimeUnit.SECONDS) != config.aliveTime){
-					pool.setKeepAliveTime(config.aliveTime, TimeUnit.SECONDS);
+				if(pool.getKeepAliveTime(TimeUnit.SECONDS) != config.threadAliveTime){
+					pool.setKeepAliveTime(config.threadAliveTime, TimeUnit.SECONDS);
 				}
 
 				cleanFuture(config);
 
+				@SuppressWarnings("unchecked")
 				E subConfig = (E)config;
 				List<String> uriList = null;
 				try {
@@ -108,12 +147,15 @@ public abstract class Context<E extends Config> {
 				synchronized (this) {
 					CronExpression cron = config.getCron();
 					if(cron == null){
+						//默认只执行一次，执行完便停止，等待提交的线程结束
 						pool.shutdown();
 						try {
 							pool.awaitTermination(1, TimeUnit.DAYS);
 						} catch (InterruptedException e) {
 							log.warn("wait interrupted."); 
 						}
+						cleanFuture(config);
+						state.set(false); 
 						return;
 					}
 					Date nextTime = cron.getTimeAfter(new Date());
@@ -128,7 +170,7 @@ public abstract class Context<E extends Config> {
 			}
 		}
 	}
-	
+
 	private void cleanFuture(Config config){
 		Iterator<Map.Entry<String, TimedFuture<Boolean>>> it = futureMap.entrySet().iterator();
 		while(it.hasNext()){
@@ -141,7 +183,7 @@ public abstract class Context<E extends Config> {
 			String sourceUri = entry.getKey();
 			if(!future.isDone()){
 				long existTime = (System.currentTimeMillis() - future.getCreateTime()) / 1000;
-				if(existTime > config.overTime) {
+				if(existTime > config.threadOverTime) {
 					log.warn("任务超时[" + sourceUri + "]," + existTime + "s");
 					if(config.cancellable){
 						future.cancel(true);

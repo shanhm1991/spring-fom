@@ -18,7 +18,7 @@ import com.fom.log.LoggerFactory;
  */
 public class Md5Util {
 
-	private static final Logger LOG = LoggerFactory.getLogger("root");
+	private static final Logger LOG = LoggerFactory.getLogger("fom");
 	
 	/**
 	 * 默认的密码字符串组合，用来将字节转换成 16 进制表示的字符,

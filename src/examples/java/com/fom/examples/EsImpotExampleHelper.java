@@ -17,7 +17,7 @@ import com.fom.db.handler.EsHandler;
  * @author shanhm
  *
  */
-public class Example1Helper extends AbstractParserHelper<Map<String, Object>> {
+public class EsImpotExampleHelper extends AbstractParserHelper<Map<String, Object>> {
 	
 	private static final String POOL = "example_es";
 	
@@ -25,7 +25,7 @@ public class Example1Helper extends AbstractParserHelper<Map<String, Object>> {
 	
 	private final String esType;
 
-	public Example1Helper(String name, String esIndex, String esType) {
+	public EsImpotExampleHelper(String name, String esIndex, String esType) {
 		super(name);
 		this.esIndex = esIndex;
 		this.esType = esType;

@@ -10,9 +10,13 @@ import com.fom.context.ContextManager;
  * @author shanhm
  *
  */
-public class EsImpoterConfig extends Config {
+public class EsImpotExampleConfig extends Config {
+	
+	private String srcPath;
 	
 	private int batch;
+	
+	private boolean isDelMatchFail;
 	
 	private String esIndex;
 	
@@ -22,16 +26,18 @@ public class EsImpoterConfig extends Config {
 	
 	private File esJsonFile;
 	
-	protected EsImpoterConfig(String name) {
+	protected EsImpotExampleConfig(String name) {
 		super(name);
 	}
 	
 	@Override
 	protected void loadExtends() throws Exception {
-		batch = loadExtends("importer.batch", 5000, 1, 50000);
-		esIndex = loadExtends("es.index", ""); 
-		esType = loadExtends("es.type", ""); 
-		esJson = loadExtends("es.json", ""); 
+		srcPath = load("src.path", "");
+		isDelMatchFail = load("importer.isDelMatchFail", false);
+		batch = load("importer.batch", 5000, 1, 50000);
+		esIndex = load("es.index", ""); 
+		esType = load("es.type", ""); 
+		esJson = load("es.json", ""); 
 	}
 	
 	@Override
@@ -44,11 +50,14 @@ public class EsImpoterConfig extends Config {
 		return true;
 	}
 	
-	@Override
-	public String getType() {
-		return TYPE_IMPORTER;
+	public String getSrcPath() {
+		return srcPath;
 	}
 	
+	public boolean isDelMatchFail() {
+		return isDelMatchFail;
+	}
+
 	public int getBatch() {
 		return batch;
 	}

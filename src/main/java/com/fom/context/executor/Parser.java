@@ -19,7 +19,7 @@ import com.fom.util.IoUtil;
  * @author shanhm
  *
  */
-public final class Parser extends Executor {
+public class Parser extends Executor {
 
 	private String sourceUri;
 

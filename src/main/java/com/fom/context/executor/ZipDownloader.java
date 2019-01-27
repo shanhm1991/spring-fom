@@ -23,7 +23,7 @@ import com.fom.util.ZipUtil;
 /**
  * 根据sourceUri列表下载并打包成zip文件的执行器
  * 
- * @author shanhm1991
+ * @author shanhm
  *
  */
 public class ZipDownloader extends Executor {

@@ -90,6 +90,9 @@ public class ConfigListener implements ServletContextListener {
 		loadElements(root);
 		loadIncludes(root);
 		loadApply();
+		
+		//TODO
+		ContextManager.init(null);
 	}
 
 	private void loadElements(Element root) throws Exception {

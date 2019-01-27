@@ -8,6 +8,7 @@ import com.fom.context.ContextManager;
 import com.fom.util.HdfsUtil;
 
 /**
+ * src.path 源文件目录
  * hdfs.master 集群主节点ip:port<br>
  * hdfs.slave 集群副节点ip:port<br>
  * hdfs.signalFile 标记文件<br>
@@ -23,6 +24,8 @@ import com.fom.util.HdfsUtil;
 public class HdfsZipDownloadConfig extends Config {
 
 	private FileSystem fs;
+	
+	private String srcPath;
 
 	private String signalFileName; 
 
@@ -42,21 +45,25 @@ public class HdfsZipDownloadConfig extends Config {
 	
 	@Override
 	protected void loadExtends() throws Exception {
-		String hdfsMaster = loadExtends("hdfs.master", "");
-		String hdfsSlave = loadExtends("hdfs.slave", "");
+		String hdfsMaster = load("hdfs.master", "");
+		String hdfsSlave = load("hdfs.slave", "");
 		fs = HdfsUtil.getFileSystem(hdfsMaster, hdfsSlave);
-		signalFileName = loadExtends("hdfs.signalFile", "");
 		
-		isDelSrc = loadExtends("downloader.isSrcDel", false);
-		isWithTemp = loadExtends("downloader.isWithTemp", false);
-		destPath = ContextManager.getEnvStr(loadExtends("downloader.desPath", ""));
-		
-		entryMax = loadExtends("downloader.zip.entryMax", Integer.MAX_VALUE, 1, Integer.MAX_VALUE);
-		sizeMax = OptionConverter.toFileSize(loadExtends("downloader.zip.sizeMax", "1GB"), 1024*1024*1024L);
+		srcPath = load("src.path", "");
+		signalFileName = load("hdfs.signalFile", "");
+		isDelSrc = load("downloader.isSrcDel", false);
+		isWithTemp = load("downloader.isWithTemp", false);
+		destPath = ContextManager.getEnvStr(load("downloader.desPath", ""));
+		entryMax = load("downloader.zip.entryMax", Integer.MAX_VALUE, 1, Integer.MAX_VALUE);
+		sizeMax = OptionConverter.toFileSize(load("downloader.zip.sizeMax", "1GB"), 1024*1024*1024L);
 	}
 
 	public FileSystem getFs() {
 		return fs;
+	}
+	
+	public String getSrcPath() {
+		return srcPath;
 	}
 
 	public String getSignalFileName() {

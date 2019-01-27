@@ -17,21 +17,16 @@ import com.fom.util.HdfsUtil;
 import com.fom.util.ScanUtil;
 
 /**
- * 默认实现：默认实现：定时扫描下载Hdfs服务上指定目录下的目录，并打包成zip
  * 
  * @author shanhm
  *
  */
-@FomContext
+@FomContext(name="HdfsZipDownload", remark="扫描下载Hdfs指定目录下的目录并打包成zip")
 public final class HdfsZipDownload extends Context<HdfsZipDownloadConfig> {
-
-	protected HdfsZipDownload(String name) {
-		super(name);
-	}
 
 	@Override
 	protected List<String> getUriList(HdfsZipDownloadConfig config) throws Exception {
-		return ScanUtil.scan(config.getFs(), "srcUri", config.getPattern(), config.getSignalFileName());
+		return ScanUtil.scan(config.getFs(), config.getSrcPath(), config.getPattern(), config.getSignalFileName());
 	}
 
 	@Override

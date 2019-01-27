@@ -15,10 +15,8 @@ import com.fom.log.LoggerFactory;
 import com.fom.util.XmlUtil;
 
 /**
- * remark 备注
  * cron   执行时机的定时表达式<br>
  * pattern 匹配资源名称的正则表达式<br>
- * context      处理资源的实现<br>
  * thread.min   处理线程最小数<br>
  * thread.max   处理线程最大数<br>
  * thread.aliveTime  处理线程空闲存活最长时间<br>
@@ -36,23 +34,17 @@ public abstract class Config {
 
 	Element element;
 
-	Element extendsElement;
-
-	String remark;
-
 	String regex;
-	
+
 	String cron;
 
-	String context;
+	int threadCore;
 
-	int core;
+	int threadMax;
 
-	int max;
+	int threadAliveTime;
 
-	int aliveTime;
-
-	int overTime;
+	int threadOverTime;
 
 	boolean cancellable;
 
@@ -61,26 +53,22 @@ public abstract class Config {
 	}
 
 	void load() throws Exception {
-		remark = load(element, "remark", "");
-		regex = load(element, "pattern", "");
-		cron = load(element, "cron", "");
-		context = load(element, "context", "");
-		core = load(element, "thread.core", 4, 1, 10); 
-		max = load(element, "thread.max", 20, 10, 50);
-		aliveTime = load(element, "thread.aliveTime", 30, 3, 300);
-		overTime = load(element, "thread.overTime", 3600, 300, 86400);
-		cancellable = load(element, "thread.cancellable", false); 
-
-		extendsElement = element.element("extends");
+		cron = load("cron", "");
+		regex = load("pattern", "");
+		threadCore = load("thread.core", 4, 1, 10); 
+		threadMax = load("thread.max", 20, 10, 50);
+		threadAliveTime = load("thread.aliveTime", 30, 3, 300);
+		threadOverTime = load("thread.overTime", 3600, 300, 86400);
+		cancellable = load("thread.cancellable", false); 
 		loadExtends();
 	}
-	
+
 	private Pattern pattern;
 
 	private CronExpression cronExpression;
-	
+
 	boolean valid;
-	
+
 	long loadTime;
 
 	boolean isValid() throws Exception {
@@ -93,7 +81,7 @@ public abstract class Config {
 		return valid();
 	}
 
-		public final CronExpression getCron(){
+	public final CronExpression getCron(){
 		return cronExpression;
 	}
 
@@ -105,72 +93,56 @@ public abstract class Config {
 		return element.asXML();
 	}
 
-	private String load(Element e, String key, String defaultValue) {
-		String value =  XmlUtil.getString(e, key, defaultValue);
+	/**
+	 * 加载String配置
+	 * @param key
+	 * @param defaultValue
+	 * @return
+	 */
+	protected final String load(String key, String defaultValue) {
+		String value =  XmlUtil.getString(element, key, defaultValue);
 		entryMap.put(key, value);
 		return value;
 	}
 
-	private int load(Element e, String key, int defaultValue, int min, int max){
-		int value = XmlUtil.getInt(e, key, defaultValue, min, max);
-		entryMap.put(key, String.valueOf(value)); 
-		return value;
-	}
-
-	private long load(Element e, String key, long defaultValue, long min, long max){
-		long value = XmlUtil.getLong(e, key, defaultValue, min, max);
-		entryMap.put(key, String.valueOf(value)); 
-		return value;
-	}
-
-	private boolean load(Element e, String key, boolean defaultValue){
-		boolean value = XmlUtil.getBoolean(e, key, defaultValue);
-		entryMap.put(key, String.valueOf(value)); 
-		return value;
-	}
-
 	/**
-	 * 加载<extends>中的String配置
-	 * @param key
-	 * @param defaultValue
-	 * @return
-	 */
-	protected final String loadExtends(String key, String defaultValue) {
-		return load(extendsElement, key, defaultValue);
-	}
-
-	/**
-	 * 加载<extends>中的int配置
+	 * 加载int配置
 	 * @param key
 	 * @param defaultValue
 	 * @param min
 	 * @param max
 	 * @return
 	 */
-	protected final int loadExtends(String key, int defaultValue, int min, int max){
-		return load(extendsElement, key, defaultValue, min, max);
+	protected final int load(String key, int defaultValue, int min, int max){
+		int value = XmlUtil.getInt(element, key, defaultValue, min, max);
+		entryMap.put(key, String.valueOf(value)); 
+		return value;
 	}
 
 	/**
-	 * 加载<extends>中的long配置
+	 * 加载long配置
 	 * @param key
 	 * @param defaultValue
 	 * @param min
 	 * @param max
 	 * @return
 	 */
-	protected final long loadExtends(String key, long defaultValue, long min, long max){
-		return load(extendsElement, key, defaultValue, min, max);
+	protected final long load(String key, long defaultValue, long min, long max){
+		long value = XmlUtil.getLong(element, key, defaultValue, min, max);
+		entryMap.put(key, String.valueOf(value)); 
+		return value;
 	}
 
 	/**
-	 * 加载<extends>中的boolean配置
+	 * 加载boolean配置
 	 * @param key
 	 * @param defaultValue
 	 * @return
 	 */
-	protected final boolean loadExtends(String key, boolean defaultValue){
-		return load(extendsElement, key, defaultValue);
+	protected final boolean load(String key, boolean defaultValue){
+		boolean value = XmlUtil.getBoolean(element, key, defaultValue);
+		entryMap.put(key, String.valueOf(value)); 
+		return value;
 	}
 
 	/**

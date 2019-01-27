@@ -2,7 +2,7 @@ package com.fom.context.helper;
 
 /**
  * 
- * @author shanhm1991
+ * @author shanhm
  *
  */
 public interface ZipDownloaderHelper extends DownloaderHelper {

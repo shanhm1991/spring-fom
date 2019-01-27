@@ -15,7 +15,7 @@ import com.fom.log.LoggerFactory;
  * @author shanhm
  *
  */
-final class ConfigManager {
+public final class ConfigManager {
 
 	private static final Logger LOG = LoggerFactory.getLogger("config");
 
@@ -25,15 +25,15 @@ final class ConfigManager {
 		return configMap.get(key);
 	}
 
-	public static Collection<Config> getAll(){
+	static Collection<Config> getAll(){
 		return configMap.values();
 	}
 
-	public static Map<String,Config> getMap(){
+	static Map<String,Config> getMap(){
 		return configMap;
 	}
 
-	public static void register(Config config){
+	static void register(Config config){
 		if(config == null){
 			return;
 		}
@@ -46,9 +46,9 @@ final class ConfigManager {
 		}
 	}
 
-	public static Config load(Element element) {
+	static Config load(Element element) {
 		String name = element.attributeValue("name");
-		String clzz = element.attributeValue("config");
+		String clzz = element.attributeValue("class");
 		Config config = null;
 		try{
 			Class<?> configClass = Class.forName(clzz);
