@@ -153,7 +153,7 @@ public class FomContextListener implements ServletContextListener {
 				reader.setEncoding("UTF-8");
 				Document doc = reader.read(in); 
 				Element element = doc.getRootElement();
-				RuntimeConfig config = ConfigManager.load(element);
+				Config config = ConfigManager.load(element);
 				ConfigManager.register(config); 
 			}catch(Exception e){
 				log.error("", e); 
@@ -175,12 +175,11 @@ public class FomContextListener implements ServletContextListener {
 		}
 		Iterator<?> it = configs.elementIterator("config");
 		while(it.hasNext()){
-			RuntimeConfig config = ConfigManager.load((Element)it.next());
+			Config config = ConfigManager.load((Element)it.next());
 			ConfigManager.register(config); 
 		}
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void loadContextsElement(Element fom) {
 		Element contexts = fom.element("contexts");
 		if(contexts == null){
@@ -203,13 +202,12 @@ public class FomContextListener implements ServletContextListener {
 				}
 				Context context = (Context)contextClass.newInstance();
 				context.name = name;
-				
+
 				String remark = "";
 				Element rm = (Element)element.element("remark");
 				if(rm != null){
 					remark = rm.getTextTrim();
 				}
-				context.remark = remark;
 				ContextManager.register(context);
 			} catch (Exception e) {
 				log.error("[" + name + "]context初始化异常", e);
@@ -269,38 +267,28 @@ public class FomContextListener implements ServletContextListener {
 
 	}
 
-	@SuppressWarnings("unchecked")
 	private void loadAnnotationContexts(String[] pckages){
 		Set<Class<?>> contextSet = new HashSet<>();
 		for(String pack : pckages){
 			Reflections reflections = new Reflections(pack.trim());
 			contextSet.addAll(reflections.getTypesAnnotatedWith(FomContext.class));
 		}
-
 		for(Class<?> clazz : contextSet){
 			if(!Context.class.isAssignableFrom(clazz)){
-				log.warn(clazz + "没有继承com.fom.context.Context, 注解无效"); 
+				log.warn(clazz + "没有继承com.fom.context.Context, 忽略无效"); 
 				continue;
 			}
 			FomContext fc = clazz.getAnnotation(FomContext.class);
 			String[] names = fc.names();
-			if(ArrayUtils.isEmpty(names)){
-				log.error(clazz + "没有指定@FomContext的names属性, 注解无效"); 
-				continue;
-			}
-
-			String remark = fc.remark();
 			for(String name : names){
-				Context<? extends RuntimeConfig> context = null;
 				try {
-					context = (Context<? extends RuntimeConfig>)clazz.newInstance();
+					Context context = (Context)clazz.newInstance();
 					context.name = name;
-					context.remark = remark;
+					ContextManager.register(context);
 				} catch (Exception e) {
 					log.error("[" + clazz + "]context初始化异常", e);
 					break;
 				} 
-				ContextManager.register(context);
 			}
 		}
 	}

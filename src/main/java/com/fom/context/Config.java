@@ -26,7 +26,7 @@ import com.fom.util.XmlUtil;
  * @author shanhm
  *
  */
-public abstract class RuntimeConfig {
+public abstract class Config {
 
 	protected static final Logger LOG = LoggerFactory.getLogger("context"); 
 
@@ -56,7 +56,7 @@ public abstract class RuntimeConfig {
 
 	long loadTime;
 
-	protected RuntimeConfig(String name){
+	protected Config(String name){
 		this.name = name;
 	}
 
@@ -164,13 +164,13 @@ public abstract class RuntimeConfig {
 
 	@Override
 	public final boolean equals(Object object){
-		if(!(object instanceof RuntimeConfig)){
+		if(!(object instanceof Config)){
 			return false;
 		}
 		if(object == this){
 			return true;
 		}
-		RuntimeConfig config = (RuntimeConfig)object;
+		Config config = (Config)object;
 		return entryMap.equals(config.entryMap);
 	}
 

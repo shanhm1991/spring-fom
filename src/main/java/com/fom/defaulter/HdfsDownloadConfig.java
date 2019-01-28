@@ -2,7 +2,7 @@ package com.fom.defaulter;
 
 import org.apache.hadoop.fs.FileSystem;
 
-import com.fom.context.RuntimeConfig;
+import com.fom.context.Config;
 import com.fom.context.ContextManager;
 import com.fom.util.HdfsUtil;
 
@@ -17,7 +17,7 @@ import com.fom.util.HdfsUtil;
  * @author shanhm
  *
  */
-public class HdfsDownloadConfig extends RuntimeConfig {
+public class HdfsDownloadConfig extends Config {
 	
 	private FileSystem fs;
 	

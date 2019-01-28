@@ -34,7 +34,7 @@ public abstract class Executor implements Callable<Boolean> {
 	 * @param name 模块名称
 	 * @param sourceName 资源名称
 	 */
-	public Executor(String name, String sourceName) { 
+	public Executor(String name, String sourceName) { //TODO name不要求
 		this.sourceName = sourceName;
 		this.executorName = new File(sourceName).getName();
 		if(StringUtils.isBlank(name)){

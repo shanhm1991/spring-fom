@@ -14,17 +14,19 @@ import com.fom.util.ScanUtil;
  *
  */
 @FomContext(names="ImportMysqlExample2", remark="使用自定义pool的方式将本地指定目录下text文本解析导入Mysql库")
-public class ImportMysqlExample2 extends Context<TextImporterConfig> {
+public class ImportMysqlExample2 extends Context {
 
 	@Override
-	protected List<String> getUriList(TextImporterConfig config) throws Exception {
-		return ScanUtil.scan(config.getSrcPath(), config.getPattern(), config.isDelMatchFail());
+	protected List<String> getUriList() throws Exception {
+//		return ScanUtil.scan(config.getSrcPath(), config.getPattern(), config.isDelMatchFail());
+		return null;
 	}
 
 	@Override
-	protected Executor createExecutor(String sourceUri, TextImporterConfig config) throws Exception {
-		ImportMysqlExample2Helper helper = new ImportMysqlExample2Helper(getName());
-		Parser parser = new Parser(getName(), sourceUri, sourceUri, config.getBatch(), helper);
-		return parser;
+	protected Executor createExecutor(String sourceUri) throws Exception {
+//		ImportMysqlExample2Helper helper = new ImportMysqlExample2Helper(getName());
+//		Parser parser = new Parser(getName(), sourceUri, sourceUri, config.getBatch(), helper);
+//		return parser;
+		return null;
 	}
 }

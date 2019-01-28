@@ -14,24 +14,10 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface FomContext {
-
-	public String remark() default "";
-
+public @interface FomConfig {
+	
 	public String[] names() default "";
-
-	public String pattern() default "";
-
-	public String cron() default "";
-
-	public int threadCore() default 4;
-
-	public int threadMax() default 10;
-
-	public int threadAliveTime() default 30;
-
-	public int threadOverTime() default 3600;
-
-	public boolean cancellable() default false;
+	
+	
 
 }

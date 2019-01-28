@@ -23,31 +23,35 @@ import com.fom.util.ScanUtil;
  *
  */
 @FomContext(names="HdfsZipDownload", remark="扫描下载Hdfs指定目录下的目录并打包成zip")
-public final class HdfsZipDownload extends Context<HdfsZipDownloadConfig> {
+public final class HdfsZipDownload extends Context {
 
 	@Override
-	protected List<String> getUriList(HdfsZipDownloadConfig config) throws Exception {
-		return ScanUtil.scan(config.getFs(), config.getSrcPath(), config.getPattern(), config.getSignalFileName());
+	protected List<String> getUriList() throws Exception {
+//		return ScanUtil.scan(config.getFs(), config.getSrcPath(), config.getPattern(), config.getSignalFileName());
+	
+		return null;
 	}
 
 	@Override
-	protected Executor createExecutor(String sourceUri, HdfsZipDownloadConfig config) throws Exception {
-		HdfsZipDownloaderHelper helper = new HdfsZipDownloaderHelper(config.getFs());
-		List<String> pathList = HdfsUtil.listPath(config.getFs(), sourceUri, new PathFilter(){
-			@Override
-			public boolean accept(Path path) {
-				if(StringUtils.isBlank(config.getSignalFileName())){
-					return true;
-				}
-				return ! config.getSignalFileName().equals(path.getName());
-			}
-		});  
+	protected Executor createExecutor(String sourceUri) throws Exception {
+//		HdfsZipDownloaderHelper helper = new HdfsZipDownloaderHelper(config.getFs());
+//		List<String> pathList = HdfsUtil.listPath(config.getFs(), sourceUri, new PathFilter(){
+//			@Override
+//			public boolean accept(Path path) {
+//				if(StringUtils.isBlank(config.getSignalFileName())){
+//					return true;
+//				}
+//				return ! config.getSignalFileName().equals(path.getName());
+//			}
+//		});  
+//		
+//		String sourceName = new File(sourceUri).getName();
+//		Handler handler = new Handler(sourceUri, config.isDelSrc(), helper);
+//		ZipDownloader zipDownloader = new ZipDownloader(getName(), sourceName, pathList, config.getDestPath(), 
+//				config.getEntryMax(), config.getSizeMax(), config.isDelSrc(), helper, handler);
+//		return zipDownloader;
+		return null;
 		
-		String sourceName = new File(sourceUri).getName();
-		Handler handler = new Handler(sourceUri, config.isDelSrc(), helper);
-		ZipDownloader zipDownloader = new ZipDownloader(getName(), sourceName, pathList, config.getDestPath(), 
-				config.getEntryMax(), config.getSizeMax(), config.isDelSrc(), helper, handler);
-		return zipDownloader;
 	}
 	
 	private class Handler implements ResultHandler {
