@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.dom4j.Element;
 
@@ -38,15 +39,15 @@ final class ConfigManager {
 			return false;
 		}
 		if(!config.valid){
-			LOG.warn("[" + config.name + "]config非法,取消加载.");
+			LOG.warn("config[" + config.name + "]非法,取消加载.");
 			return false;
 		}
 		if(configMap.containsKey(config.name)){
-			LOG.warn("[" + config.name + "]config已经存在,取消加载.");
+			LOG.warn("config[" + config.name + "]已经存在,取消加载."); 
 			return false;
 		}
 		configMap.put(config.name, config);
-		LOG.info("[" + config.name + "]加载config\n" + config);
+		LOG.info("加载config[" + config.name + "]" + config);
 		return true;
 	}
 
@@ -55,15 +56,15 @@ final class ConfigManager {
 			return false;
 		}
 		if(!config.valid){
-			LOG.warn("[" + config.name + "]config非法,取消更新.");
+			LOG.warn("config[" + config.name + "]非法,取消更新.");
 			return false;
 		}
 		if(!configMap.containsKey(config.name)){
-			LOG.warn("[" + config.name + "]config不存在,取消更新.");
+			LOG.warn("config[" + config.name + "]不存在,取消更新.");
 			return false;
 		}
 		configMap.put(config.name, config);
-		LOG.info("[" + config.name + "]更新config\n" + config);
+		LOG.info("更新config[" + config.name + "]\n" + config);
 		return true;
 	}
 
@@ -73,6 +74,10 @@ final class ConfigManager {
 		try{
 			name = element.attributeValue("name");
 			String clzz = element.attributeValue("class");
+			if(StringUtils.isBlank(name) || StringUtils.isBlank(clzz)){
+				LOG.warn("非法config配置:" + name + "=" + clzz); 
+				return null;
+			}
 			Class<?> configClass = Class.forName(clzz);
 			Constructor<?> constructor = configClass.getDeclaredConstructor(String.class); 
 			constructor.setAccessible(true); 

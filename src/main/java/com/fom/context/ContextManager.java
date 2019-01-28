@@ -88,11 +88,11 @@ public class ContextManager {
 			return false;
 		}
 		if(contextMap.containsKey(context.name)){
-			LOG.warn("[" + context.name + "]context已经存在,取消加载.");
+			LOG.warn("context[" + context.name + "]已经存在,取消加载.");
 			return false;
 		}
 		contextMap.put(context.name, context);
-		LOG.info("[" + context.name + "]加载context");
+		LOG.info("加载context[" + context.name + "]");
 		return true;
 	}
 

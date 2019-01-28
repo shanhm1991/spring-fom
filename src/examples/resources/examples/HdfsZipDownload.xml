@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fom>
 	<configs>
-		<config name="HdfsZipDownload" config="com.fom.defaulter.HdfsZipDownloadConfig">
+		<config name="HdfsZipDownload" class="com.fom.defaulter.HdfsZipDownloadConfig">
 			<cron>0 0/15 * * * ?</cron>
 			<pattern></pattern>
 			<thread.min>10</thread.min>

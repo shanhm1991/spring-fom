@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fom>
 	<configs>
-		<config name="ImportMysqlExample2" config="com.fom.examples.TextImporterConfig">
+		<config name="ImportMysqlExample2" class="com.fom.examples.TextImporterConfig">
 			<cron>0 0/15 * * * ?</cron>
 			<pattern>test.txt</pattern>
 			<thread.min>10</thread.min>

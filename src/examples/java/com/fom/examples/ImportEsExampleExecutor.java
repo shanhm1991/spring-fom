@@ -5,7 +5,7 @@ import java.io.File;
 import com.fom.context.executor.Parser;
 import com.fom.db.handler.EsHandler;
 
-public class ImpotEsExampleExecutor extends Parser {
+public class ImportEsExampleExecutor extends Parser {
 	
 	private static final String POOL = "example_es";
 	
@@ -15,8 +15,8 @@ public class ImpotEsExampleExecutor extends Parser {
 	
 	private File esJson;
 
-	public ImpotEsExampleExecutor(String name, String sourceName, String sourceUri, int batch, 
-			ImpotEsExampleHelper helper, String esIndex, String esType, File esJson) {
+	public ImportEsExampleExecutor(String name, String sourceName, String sourceUri, int batch, 
+			ImportEsExampleHelper helper, String esIndex, String esType, File esJson) {
 		super(name, sourceName, sourceUri, batch, helper); 
 		this.esIndex = esIndex;
 		this.esType = esType;

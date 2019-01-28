@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fom>
 	<configs>
-		<config name="ImportOracleExample2" config="com.fom.examples.TextZipImporterConfig">
+		<config name="ImportOracleExample2" class="com.fom.examples.TextZipImporterConfig">
 			<cron>0 0/15 * * * ?</cron>
 			<pattern>test.zip</pattern>
 			<thread.min>10</thread.min>

@@ -134,11 +134,17 @@ public class FomContextListener implements ServletContextListener {
 
 	private void loadCacheConfigs() { 
 		File cache = new File(System.getProperty("cache.config"));
+		if(!cache.exists()){
+			return;
+		}
 		File[] array = cache.listFiles();
 		if(ArrayUtils.isEmpty(array)){
 			return;
 		}
 		for(File file : cache.listFiles()){
+			if(file.isDirectory()){
+				continue;
+			}
 			log.info("加载缓存:" + file.getPath()); 
 			FileInputStream in = null;
 			try{

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fom>
 	<configs>
-		<config name="ImpotEsExample" class="com.fom.examples.ImpotExample1Config">
+		<config name="ImpotEsExample" class="com.fom.examples.ImportEsExampleConfig">
 			<cron>0 0/15 * * * ?</cron>
 			<pattern>demo.bcp</pattern>
 			<thread.min>10</thread.min>

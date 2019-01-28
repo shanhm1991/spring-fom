@@ -13,17 +13,17 @@ import com.fom.util.ScanUtil;
  *
  */
 @FomContext(names="ImpotEsExample", remark="使用自定义pool的方式将本地指定目录下text文本解析导入Es库")
-public class ImpotEsExample extends Context<ImpotEsExampleConfig> {
+public class ImportEsExample extends Context<ImportEsExampleConfig> {
 	
 	@Override
-	protected List<String> getUriList(ImpotEsExampleConfig config) throws Exception {
+	protected List<String> getUriList(ImportEsExampleConfig config) throws Exception {
 		return ScanUtil.scan(config.getSrcPath(), config.getPattern(), config.isDelMatchFail());
 	}
 
 	@Override
-	protected Executor createExecutor(String sourceUri, ImpotEsExampleConfig config) throws Exception {
-		ImpotEsExampleHelper helper = new ImpotEsExampleHelper(getName(), config.getEsIndex(), config.getEsType()); 
-		ImpotEsExampleExecutor executor = new ImpotEsExampleExecutor(getName(), sourceUri, sourceUri,
+	protected Executor createExecutor(String sourceUri, ImportEsExampleConfig config) throws Exception {
+		ImportEsExampleHelper helper = new ImportEsExampleHelper(getName(), config.getEsIndex(), config.getEsType()); 
+		ImportEsExampleExecutor executor = new ImportEsExampleExecutor(getName(), sourceUri, sourceUri,
 				config.getBatch(), helper, config.getEsIndex(), config.getEsType(),  config.getEsJsonFile());
 		return executor;
 	}
