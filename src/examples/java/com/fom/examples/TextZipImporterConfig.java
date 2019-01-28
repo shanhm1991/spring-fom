@@ -1,13 +1,13 @@
 package com.fom.examples;
 
-import com.fom.context.Config;
+import com.fom.context.RuntimeConfig;
 
 /**
  * 
  * @author shanhm
  *
  */
-public class TextZipImporterConfig extends Config {
+public class TextZipImporterConfig extends RuntimeConfig {
 	
 	private String srcPath;
 

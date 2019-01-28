@@ -81,7 +81,7 @@ public class ContextManager {
 	
 	private static final Logger LOG = LoggerFactory.getLogger("context");
 	
-	private static Map<String,Context<? extends Config>> contextMap = new ConcurrentHashMap<>();
+	private static Map<String,Context<? extends RuntimeConfig>> contextMap = new ConcurrentHashMap<>();
 	
 	public static boolean register(Context<?> context){
 		if(context == null){

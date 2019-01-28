@@ -8,8 +8,10 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
+import com.fom.context.ExceptionHandler;
 import com.fom.context.Executor;
-import com.fom.context.helper.AbstractParserHelper;
+import com.fom.context.ResultHandler;
+import com.fom.context.helper.ParserHelper;
 import com.fom.context.reader.Reader;
 import com.fom.util.IoUtil;
 
@@ -26,26 +28,72 @@ public class Parser extends Executor {
 	private int batch;
 	
 	@SuppressWarnings("rawtypes")
-	private AbstractParserHelper helper;
+	private ParserHelper helper;
 
 	private File logFile;
 
 	/**
-	 * 
 	 * @param name 模块名称
 	 * @param sourceName 资源名称
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
-	 * @param helper ImporterHelper
+	 * @param helper ParserHelper
 	 */
 	@SuppressWarnings("rawtypes")
-	public Parser(String name, String sourceName, String sourceUri, int batch, AbstractParserHelper helper){
+	public Parser(String name, String sourceName, String sourceUri, int batch, ParserHelper helper){
 		super(name,sourceName);
 		this.sourceUri = sourceUri;
 		this.batch = batch;
 		this.helper = helper;
 		this.logFile = new File(System.getProperty("import.progress") 
 				+ File.separator + name + File.separator + sourceName + ".log");
+	}
+	
+	/**
+	 * @param name 模块名称
+	 * @param sourceName 资源名称
+	 * @param sourceUri 资源uri
+	 * @param batch 入库时的批处理数
+	 * @param helper ParserHelper
+	 * @param exceptionHandler ExceptionHandler
+	 */
+	@SuppressWarnings("rawtypes")
+	public Parser(String name, String sourceName, String sourceUri, int batch, 
+			ParserHelper helper, ExceptionHandler exceptionHandler) {
+		this(name, sourceName, sourceUri, batch, helper);
+		this.exceptionHandler = exceptionHandler;
+	}
+	
+	/**
+	 * @param name 模块名称
+	 * @param sourceName 资源名称
+	 * @param sourceUri 资源uri
+	 * @param batch 入库时的批处理数
+	 * @param helper ParserHelper
+	 * @param resultHandler ResultHandler
+	 */
+	@SuppressWarnings("rawtypes")
+	public Parser(String name, String sourceName, String sourceUri, int batch, 
+			ParserHelper helper, ResultHandler resultHandler) {
+		this(name, sourceName, sourceUri, batch, helper);
+		this.resultHandler = resultHandler;
+	}
+	
+	/**
+	 * @param name 模块名称
+	 * @param sourceName 资源名称
+	 * @param sourceUri 资源uri
+	 * @param batch 入库时的批处理数
+	 * @param helper ParserHelper
+	 * @param exceptionHandler ExceptionHandler
+	 * @param resultHandler ResultHandler
+	 */
+	@SuppressWarnings("rawtypes")
+	public Parser(String name, String sourceName, String sourceUri, int batch, 
+			ParserHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+		this(name, sourceName, sourceUri, batch, helper);
+		this.exceptionHandler = exceptionHandler;
+		this.resultHandler = resultHandler;
 	}
 	
 	@Override

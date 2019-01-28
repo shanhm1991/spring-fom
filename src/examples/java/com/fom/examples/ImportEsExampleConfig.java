@@ -2,7 +2,7 @@ package com.fom.examples;
 
 import java.io.File;
 
-import com.fom.context.Config;
+import com.fom.context.RuntimeConfig;
 import com.fom.context.ContextManager;
 
 /**
@@ -10,7 +10,7 @@ import com.fom.context.ContextManager;
  * @author shanhm
  *
  */
-public class ImportEsExampleConfig extends Config {
+public class ImportEsExampleConfig extends RuntimeConfig {
 	
 	private String srcPath;
 	

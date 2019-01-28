@@ -46,10 +46,4 @@ public class TimedFuture<T> extends FutureTask<T> {
 		return executor.getCost();
 	}
 
-	public void callback(boolean result) throws Exception{ 
-		if(executor == null){
-			return;
-		}
-		executor.callback(result);
-	}
 }

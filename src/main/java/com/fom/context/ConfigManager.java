@@ -20,21 +20,21 @@ final class ConfigManager {
 
 	private static final Logger LOG = LoggerFactory.getLogger("context");
 
-	private static Map<String,Config> configMap = new ConcurrentHashMap<String,Config>();
+	private static Map<String,RuntimeConfig> configMap = new ConcurrentHashMap<String,RuntimeConfig>();
 
-	public static Config get(String key) {
+	public static RuntimeConfig get(String key) {
 		return configMap.get(key);
 	}
 
-	public static Collection<Config> getAll(){
+	public static Collection<RuntimeConfig> getAll(){
 		return configMap.values();
 	}
 
-	public static Map<String,Config> getMap(){
+	public static Map<String,RuntimeConfig> getMap(){
 		return configMap;
 	}
 
-	public static boolean register(Config config){
+	public static boolean register(RuntimeConfig config){
 		if(config == null){
 			return false;
 		}
@@ -51,7 +51,7 @@ final class ConfigManager {
 		return true;
 	}
 
-	public static boolean update(Config config){
+	public static boolean update(RuntimeConfig config){
 		if(config == null){
 			return false;
 		}
@@ -68,8 +68,8 @@ final class ConfigManager {
 		return true;
 	}
 
-	public static Config load(Element element) { 
-		Config config = null;
+	public static RuntimeConfig load(Element element) { 
+		RuntimeConfig config = null;
 		String name = "";
 		try{
 			name = element.attributeValue("name");
@@ -81,7 +81,7 @@ final class ConfigManager {
 			Class<?> configClass = Class.forName(clzz);
 			Constructor<?> constructor = configClass.getDeclaredConstructor(String.class); 
 			constructor.setAccessible(true); 
-			config = (Config)constructor.newInstance(name);
+			config = (RuntimeConfig)constructor.newInstance(name);
 			config.loadTime = System.currentTimeMillis();
 			config.element = element;
 			config.load();

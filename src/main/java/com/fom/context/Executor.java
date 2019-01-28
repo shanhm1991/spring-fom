@@ -19,16 +19,20 @@ public abstract class Executor implements Callable<Boolean> {
 	protected final Logger log;
 
 	protected final String sourceName;
-	
+
 	private final String executorName;
-	
+
 	private final String name;
 	
+	protected ExceptionHandler exceptionHandler;
+
+	protected ResultHandler resultHandler;
+
+	private Throwable e;
+
 	/**
-	 * @param name 
-	 * Executor根据name找到对应的logger并打印日志信息，如果name为空，则将日志信息打印到根日志中去
-	 * @param sourceName 
-	 * Executor根据sourceName命名执行线程的名称，Thread.name=new File(sourceName).getName()
+	 * @param name 模块名称
+	 * @param sourceName 资源名称
 	 */
 	public Executor(String name, String sourceName) { 
 		this.sourceName = sourceName;
@@ -40,6 +44,38 @@ public abstract class Executor implements Callable<Boolean> {
 			this.name = name;
 			this.log = LoggerFactory.getLogger(name);
 		}
+	}
+
+	/**
+	 * @param name 模块名称
+	 * @param sourceName 资源名称
+	 * @param exceptionHandler ExceptionHandler
+	 */
+	public Executor(String name, String sourceName, ExceptionHandler exceptionHandler) { 
+		this(name, sourceName);
+		this.exceptionHandler = exceptionHandler;
+	}
+
+	/**
+	 * @param name
+	 * @param sourceName
+	 * @param resultHandler ResultHandler
+	 */
+	public Executor(String name, String sourceName, ResultHandler resultHandler) { 
+		this(name, sourceName);
+		this.resultHandler = resultHandler;
+	}
+	
+	/**
+	 * @param name
+	 * @param sourceName
+	 * @param exceptionHandler ExceptionHandler
+	 * @param resultHandler ResultHandler
+	 */
+	public Executor(String name, String sourceName, ExceptionHandler exceptionHandler, ResultHandler resultHandler) { 
+		this(name, sourceName);
+		this.exceptionHandler = exceptionHandler;
+		this.resultHandler = resultHandler;
 	}
 
 	@Override
@@ -55,8 +91,14 @@ public abstract class Executor implements Callable<Boolean> {
 				log.warn("任务失败, 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 			}
 		} catch(Throwable e) {
+			this.e = e;
 			log.error("任务异常, 耗时=" + (System.currentTimeMillis() - sTime + "ms"), e);
-			throw e;
+			if(exceptionHandler != null){
+				exceptionHandler.handle(e); 
+			}
+		}
+		if(resultHandler != null){
+			resultHandler.handle(result);
 		}
 		return result;
 	}
@@ -86,19 +128,18 @@ public abstract class Executor implements Callable<Boolean> {
 		return true;
 	}
 
-	/**
-	 * 回调执行
-	 * @param result
-	 */
-	public void callback(boolean result) throws Exception {
-
-	}
-	
 	public final String getName(){
 		return name;
 	}
 
 	public final long getCost(){
 		return 0;
+	}
+
+	final String getMsg(){
+		if(e != null){
+			return e.getMessage();
+		}
+		return "";
 	}
 }

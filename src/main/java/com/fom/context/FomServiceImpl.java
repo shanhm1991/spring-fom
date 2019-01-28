@@ -30,13 +30,13 @@ public class FomServiceImpl implements FomService {
 	
 	@Override
 	public Map<String, Map<String,String>> list() {
-		Map<String, Config> cmap = ConfigManager.getMap();
+		Map<String, RuntimeConfig> cmap = ConfigManager.getMap();
 		DateFormat format = new SimpleDateFormat("yyyyMMdd HH:mm:ss SSS");
 		Map<String, Map<String,String>> map = new HashMap<>();
-		for(Entry<String, Config> entry : cmap.entrySet()){
+		for(Entry<String, RuntimeConfig> entry : cmap.entrySet()){
 			Map<String,String> m = new LinkedHashMap<>();
 			map.put(entry.getKey(), m);
-			Config c = entry.getValue();
+			RuntimeConfig c = entry.getValue();
 			m.put("lastLoad", format.format(c.loadTime));
 //			if(c.isRunning){
 //				m.put("state", "Running");
@@ -54,13 +54,13 @@ public class FomServiceImpl implements FomService {
 
 	@Override
 	public String detail(String name){
-		Config config = ConfigManager.get(name);
+		RuntimeConfig config = ConfigManager.get(name);
 		return config.toString();
 	}
 
 	@Override
 	public String xml(String name) throws Exception{
-		Config config = ConfigManager.get(name);
+		RuntimeConfig config = ConfigManager.get(name);
 		SAXReader reader = new SAXReader();
 		StringReader in=new StringReader(config.getXml());  
 		Document doc=reader.read(in); 
@@ -81,7 +81,7 @@ public class FomServiceImpl implements FomService {
 		Document doc = reader.read(in); 
 		Element element = doc.getRootElement();
 		
-		Config config = ConfigManager.load(element);
+		RuntimeConfig config = ConfigManager.load(element);
 		if(!name.equals(config.name)){ 
 			return "failed, [" + name + "]config.name can not be change.";
 		}
@@ -89,7 +89,7 @@ public class FomServiceImpl implements FomService {
 			return "failed, [" + name + "]config not valid.";
 		}
 		
-		Config oldConfig = ConfigManager.get(name);
+		RuntimeConfig oldConfig = ConfigManager.get(name);
 		if(!config.getClass().getName().equals(oldConfig.getClass().getName())){
 			return "failed, [" + name + "]config.class can not be change.";
 		}
@@ -113,7 +113,7 @@ public class FomServiceImpl implements FomService {
 	
 	@Override
 	public String stop(String name){
-		Config config = ConfigManager.get(name);
+		RuntimeConfig config = ConfigManager.get(name);
 		if(config == null){
 			return "failed, " + name + " not exist.";
 		}
@@ -130,10 +130,10 @@ public class FomServiceImpl implements FomService {
 	
 	@Override
 	public String stopAll(){
-		Map<String, Config> cmap = ConfigManager.getMap();
+		Map<String, RuntimeConfig> cmap = ConfigManager.getMap();
 		StringBuilder builder = new StringBuilder();
-		for(Entry<String, Config> entry : cmap.entrySet()){
-			Config config = entry.getValue();
+		for(Entry<String, RuntimeConfig> entry : cmap.entrySet()){
+			RuntimeConfig config = entry.getValue();
 			if(!config.valid){
 				builder.append("failed, " + config.name + " not valid.<br>");
 				continue;
@@ -151,7 +151,7 @@ public class FomServiceImpl implements FomService {
 	
 	@Override
 	public String start(String name) throws Exception {
-		Config config = ConfigManager.get(name);
+		RuntimeConfig config = ConfigManager.get(name);
 		if(config == null){
 			return "failed, " + name + " not exist.";
 		}
@@ -170,10 +170,10 @@ public class FomServiceImpl implements FomService {
 
 	@Override
 	public String startAll() throws Exception {
-		Map<String, Config> cmap = ConfigManager.getMap();
+		Map<String, RuntimeConfig> cmap = ConfigManager.getMap();
 		StringBuilder builder = new StringBuilder();
-		for(Entry<String, Config> entry : cmap.entrySet()){
-			Config config = entry.getValue();
+		for(Entry<String, RuntimeConfig> entry : cmap.entrySet()){
+			RuntimeConfig config = entry.getValue();
 //			if(config.isRunning){
 //				builder.append("failed, " + config.name + " was already Running.<br>");
 //				continue;
@@ -193,7 +193,7 @@ public class FomServiceImpl implements FomService {
 
 	@Override
 	public String restart(String name) throws Exception {
-		Config config = ConfigManager.get(name);
+		RuntimeConfig config = ConfigManager.get(name);
 		if(config == null){
 			return "failed, " + name + " not exist.";
 		}
@@ -207,10 +207,10 @@ public class FomServiceImpl implements FomService {
 	
 	@Override
 	public String restartAll() {
-		Map<String, Config> cmap = ConfigManager.getMap();
+		Map<String, RuntimeConfig> cmap = ConfigManager.getMap();
 		StringBuilder builder = new StringBuilder();
-		for(Entry<String, Config> entry : cmap.entrySet()){
-			Config config = entry.getValue();
+		for(Entry<String, RuntimeConfig> entry : cmap.entrySet()){
+			RuntimeConfig config = entry.getValue();
 //			if(!config.isRunning){
 //				builder.append("failed, " + config.name + " was not Running.<br>");
 //				continue;

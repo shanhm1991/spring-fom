@@ -24,7 +24,7 @@ import com.fom.log.LoggerFactory;
  *
  * @param <E>
  */
-public abstract class Context<E extends Config> {
+public abstract class Context<E extends RuntimeConfig> {
 	
 	//所有的Context共用，防止两个Context创建针对同一个文件的任务
 	private static Map<String,TimedFuture<Boolean>> futureMap = new ConcurrentHashMap<String,TimedFuture<Boolean>>(100);
@@ -32,7 +32,7 @@ public abstract class Context<E extends Config> {
 	//Context私有线程池，在Context结束时shutdown(),等待任务线程自行响应中断
 	private TimedExecutorPool pool;
 
-	private Config config;
+	private RuntimeConfig config;
 
 	protected Logger log = Logger.getRootLogger();
 
@@ -89,7 +89,7 @@ public abstract class Context<E extends Config> {
 		}
 	}
 	
-	final Config getConfig(){
+	final RuntimeConfig getConfig(){
 		return config;
 	}
 
@@ -179,7 +179,7 @@ public abstract class Context<E extends Config> {
 	
 	private static final Logger logger = LoggerFactory.getLogger("record");
 
-	private void cleanFuture(Config config){
+	private void cleanFuture(RuntimeConfig config){
 		Iterator<Map.Entry<String, TimedFuture<Boolean>>> it = futureMap.entrySet().iterator();
 		while(it.hasNext()){
 			Entry<String, TimedFuture<Boolean>> entry = it.next();
@@ -203,30 +203,19 @@ public abstract class Context<E extends Config> {
 			it.remove();
 			boolean result = true;
 			ExecutionException e1 = null;
-			Exception e2 = null;
 			try {
 				result = future.get();
-				future.callback(result);
 			} catch (InterruptedException e) {
 				log.warn("cleanFuture interrupted, and recover interrupt flag."); 
 				Thread.currentThread().interrupt();
 			} catch (ExecutionException e) {
 				e1 = e;
-			} catch(Exception e){
-				log.error("回调执行异常", e); 
-				e2 = e;
-			}
-			StringBuilder builder = new StringBuilder(name + "\t" + result +"\t" + "ExecutionException=");
+			} 
+			StringBuilder builder = new StringBuilder(name + "\t" + result +"\t" + "Exception=");
 			if(e1 == null){
 				builder.append("null");
 			}else{
 				builder.append(e1.getMessage());
-			}
-			builder.append("\t" + "CallbackException=");
-			if(e2 == null){
-				builder.append("null");
-			}else{
-				builder.append(e2.getMessage());
 			}
 			logger.error(builder.toString()); 
 		}

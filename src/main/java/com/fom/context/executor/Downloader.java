@@ -5,7 +5,9 @@ import java.text.DecimalFormat;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.fom.context.ExceptionHandler;
 import com.fom.context.Executor;
+import com.fom.context.ResultHandler;
 import com.fom.context.helper.DownloaderHelper;
 
 /**
@@ -56,6 +58,57 @@ public final class Downloader extends Executor {
 			this.downloadPath = System.getProperty("download.temp") + File.separator + name;
 		}
 		this.downloadFile = new File(downloadPath + File.separator + sourceName); 
+	}
+	
+	/**
+	 * @param name 模块名称
+	 * @param sourceName 资源名称
+	 * @param sourceUri 资源uri
+	 * @param destPath 下载目的路径
+	 * @param isDelSrc 下载结束是否删除资源文件
+	 * @param isWithTemp 是否使用临时目录
+	 * @param helper DownloaderHelper
+	 * @param exceptionHandler ExceptionHandler
+	 */
+	public Downloader(String name, String sourceName, String sourceUri, String destPath, 
+			boolean isDelSrc, boolean isWithTemp, DownloaderHelper helper, ExceptionHandler exceptionHandler) {
+		this(name, sourceName, sourceUri, destPath, isDelSrc, isWithTemp, helper);
+		this.exceptionHandler = exceptionHandler;
+	}
+	
+	/**
+	 * @param name 模块名称
+	 * @param sourceName 资源名称
+	 * @param sourceUri 资源uri
+	 * @param destPath 下载目的路径
+	 * @param isDelSrc 下载结束是否删除资源文件
+	 * @param isWithTemp 是否使用临时目录
+	 * @param helper DownloaderHelper
+	 * @param resultHandler ResultHandler
+	 */
+	public Downloader(String name, String sourceName, String sourceUri, String destPath, 
+			boolean isDelSrc, boolean isWithTemp, DownloaderHelper helper, ResultHandler resultHandler) {
+		this(name, sourceName, sourceUri, destPath, isDelSrc, isWithTemp, helper);
+		this.resultHandler = resultHandler;
+	}
+	
+	/**
+	 * @param name 模块名称
+	 * @param sourceName 资源名称
+	 * @param sourceUri 资源uri
+	 * @param destPath 下载目的路径
+	 * @param isDelSrc 下载结束是否删除资源文件
+	 * @param isWithTemp 是否使用临时目录
+	 * @param helper DownloaderHelper
+	 * @param exceptionHandler ExceptionHandler
+	 * @param resultHandler ResultHandler
+	 */
+	public Downloader(String name, String sourceName, String sourceUri, String destPath, 
+			boolean isDelSrc, boolean isWithTemp, DownloaderHelper helper, 
+			ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+		this(name, sourceName, sourceUri, destPath, isDelSrc, isWithTemp, helper);
+		this.exceptionHandler = exceptionHandler;
+		this.resultHandler = resultHandler;
 	}
 	
 	@Override

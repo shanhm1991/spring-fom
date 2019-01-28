@@ -15,7 +15,9 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
+import com.fom.context.ExceptionHandler;
 import com.fom.context.Executor;
+import com.fom.context.ResultHandler;
 import com.fom.context.helper.ZipDownloaderHelper;
 import com.fom.util.IoUtil;
 import com.fom.util.ZipUtil;
@@ -80,6 +82,62 @@ public class ZipDownloader extends Executor {
 		this.downloadPath = System.getProperty("download.temp")
 				+ File.separator + name + File.separator + zipName + (num.incrementAndGet() / 1000000);
 		this.downloadZip = new File(downloadPath + File.separator + zipName + ".zip");
+	}
+	
+	/**
+	 * @param name 模块名称
+	 * @param zipName 打包zip的名称(不带后缀)
+	 * @param uriList 资源uri列表
+	 * @param destPath 下载目的路径
+	 * @param zipEntryMax 打包zip的最大文件数(真实下载的文件)
+	 * @param zipSizeMax 打包zip的最大字节数
+	 * @param isDelSrc 下载结束是否删除资源文件
+	 * @param helper ZipDownloaderHelper
+	 * @param exceptionHandler ExceptionHandler
+	 */
+	public ZipDownloader(String name, String zipName, List<String> uriList, String destPath, 
+			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
+			ZipDownloaderHelper helper, ExceptionHandler exceptionHandler) {
+		this(name, zipName, uriList, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
+		this.exceptionHandler = exceptionHandler;
+	}
+	
+	/**
+	 * @param name 模块名称
+	 * @param zipName 打包zip的名称(不带后缀)
+	 * @param uriList 资源uri列表
+	 * @param destPath 下载目的路径
+	 * @param zipEntryMax 打包zip的最大文件数(真实下载的文件)
+	 * @param zipSizeMax 打包zip的最大字节数
+	 * @param isDelSrc 下载结束是否删除资源文件
+	 * @param helper ZipDownloaderHelper
+	 * @param resultHandler ResultHandler
+	 */
+	public ZipDownloader(String name, String zipName, List<String> uriList, String destPath, 
+			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
+			ZipDownloaderHelper helper, ResultHandler resultHandler) {
+		this(name, zipName, uriList, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
+		this.resultHandler = resultHandler;
+	}
+	
+	/**
+	 * @param name 模块名称
+	 * @param zipName 打包zip的名称(不带后缀)
+	 * @param uriList 资源uri列表
+	 * @param destPath 下载目的路径
+	 * @param zipEntryMax 打包zip的最大文件数(真实下载的文件)
+	 * @param zipSizeMax 打包zip的最大字节数
+	 * @param isDelSrc 下载结束是否删除资源文件
+	 * @param helper ZipDownloaderHelper
+	 * @param exceptionHandler ExceptionHandler
+	 * @param resultHandler ResultHandler
+	 */
+	public ZipDownloader(String name, String zipName, List<String> uriList, String destPath, 
+			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
+			ZipDownloaderHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+		this(name, zipName, uriList, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
+		this.exceptionHandler = exceptionHandler;
+		this.resultHandler = resultHandler;
 	}
 	
 	@Override

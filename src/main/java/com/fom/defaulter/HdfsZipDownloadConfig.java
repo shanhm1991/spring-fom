@@ -3,7 +3,7 @@ package com.fom.defaulter;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.log4j.helpers.OptionConverter;
 
-import com.fom.context.Config;
+import com.fom.context.RuntimeConfig;
 import com.fom.context.ContextManager;
 import com.fom.util.HdfsUtil;
 
@@ -21,7 +21,7 @@ import com.fom.util.HdfsUtil;
  * @author shanhm
  *
  */
-public class HdfsZipDownloadConfig extends Config {
+public class HdfsZipDownloadConfig extends RuntimeConfig {
 
 	private FileSystem fs;
 	

@@ -153,7 +153,7 @@ public class FomContextListener implements ServletContextListener {
 				reader.setEncoding("UTF-8");
 				Document doc = reader.read(in); 
 				Element element = doc.getRootElement();
-				Config config = ConfigManager.load(element);
+				RuntimeConfig config = ConfigManager.load(element);
 				ConfigManager.register(config); 
 			}catch(Exception e){
 				log.error("", e); 
@@ -175,7 +175,7 @@ public class FomContextListener implements ServletContextListener {
 		}
 		Iterator<?> it = configs.elementIterator("config");
 		while(it.hasNext()){
-			Config config = ConfigManager.load((Element)it.next());
+			RuntimeConfig config = ConfigManager.load((Element)it.next());
 			ConfigManager.register(config); 
 		}
 	}
@@ -291,9 +291,9 @@ public class FomContextListener implements ServletContextListener {
 
 			String remark = fc.remark();
 			for(String name : names){
-				Context<? extends Config> context = null;
+				Context<? extends RuntimeConfig> context = null;
 				try {
-					context = (Context<? extends Config>)clazz.newInstance();
+					context = (Context<? extends RuntimeConfig>)clazz.newInstance();
 					context.name = name;
 					context.remark = remark;
 				} catch (Exception e) {

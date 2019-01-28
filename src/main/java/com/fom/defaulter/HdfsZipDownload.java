@@ -10,6 +10,7 @@ import org.apache.hadoop.fs.PathFilter;
 import com.fom.context.Context;
 import com.fom.context.Executor;
 import com.fom.context.FomContext;
+import com.fom.context.ResultHandler;
 import com.fom.context.executor.ZipDownloader;
 import com.fom.context.helper.HdfsZipDownloaderHelper;
 import com.fom.context.helper.ZipDownloaderHelper;
@@ -43,30 +44,32 @@ public final class HdfsZipDownload extends Context<HdfsZipDownloadConfig> {
 		});  
 		
 		String sourceName = new File(sourceUri).getName();
-		HdfsZipDownloader zipDownloader = new HdfsZipDownloader(getName(), sourceName, pathList, config.getDestPath(), 
-				config.getEntryMax(), config.getSizeMax(), config.isDelSrc(), helper, sourceUri);
+		Handler handler = new Handler(sourceUri, config.isDelSrc(), helper);
+		ZipDownloader zipDownloader = new ZipDownloader(getName(), sourceName, pathList, config.getDestPath(), 
+				config.getEntryMax(), config.getSizeMax(), config.isDelSrc(), helper, handler);
 		return zipDownloader;
 	}
 	
-	private static class HdfsZipDownloader extends ZipDownloader { 
+	private class Handler implements ResultHandler {
 		
-		private final boolean isDelSrc;
+		private String sourceUri;
 		
-		private final String sourceUri;
-
-		public HdfsZipDownloader(String name, String zipName, List<String> uriList, String destPath, 
-				int zipEntryMax, long zipSizeMax, boolean isDelSrc, ZipDownloaderHelper helper, String sourceUri) {
-			super(name, zipName, uriList, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
-			this.isDelSrc = isDelSrc;
+		private boolean isDelSrc;
+		
+		private ZipDownloaderHelper helper;
+		
+		public Handler(String sourceUri, boolean isDelSrc, ZipDownloaderHelper helper){
 			this.sourceUri = sourceUri;
+			this.isDelSrc = isDelSrc;
+			this.helper = helper;
 		}
-		
+
 		@Override
-		public void callback(boolean result) throws Exception {
-			if(result && isDelSrc && !helper.delete(sourceUri)){
-				log.error("删除源目录失败."); 
+		public void handle(boolean result) throws Exception { 
+			if(result && isDelSrc && !helper.delete(sourceUri)) {
+				HdfsZipDownload.this.log.error("删除源目录失败."); 
 			}
-		}
+		} 
 	}
 	
 }

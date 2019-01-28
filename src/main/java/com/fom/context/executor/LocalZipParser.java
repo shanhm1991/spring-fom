@@ -10,7 +10,9 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 
+import com.fom.context.ExceptionHandler;
 import com.fom.context.Executor;
+import com.fom.context.ResultHandler;
 import com.fom.context.helper.LocalZipParserHelper;
 import com.fom.context.reader.Reader;
 import com.fom.util.IoUtil;
@@ -40,11 +42,10 @@ public final class LocalZipParser extends Executor {
 	private DecimalFormat numFormat  = new DecimalFormat("#.##");
 	
 	/**
-	 * 
-	 * @param name
-	 * @param sourceUri
-	 * @param batch
-	 * @param helper
+	 * @param name 模块名称
+	 * @param sourceUri 资源uri
+	 * @param batch 批处理数
+	 * @param helper LocalZipParserHelper
 	 */
 	@SuppressWarnings("rawtypes")
 	public LocalZipParser(String name, String sourceUri, int batch, LocalZipParserHelper helper) {
@@ -56,6 +57,50 @@ public final class LocalZipParser extends Executor {
 				+ File.separator + name + File.separator + sourceName);
 		this.logFile = new File(System.getProperty("import.progress") 
 				+ File.separator + name + File.separator + sourceName + ".log");
+	}
+	
+	/**
+	 * @param name 模块名称
+	 * @param sourceUri 资源uri
+	 * @param batch 批处理数
+	 * @param helper LocalZipParserHelper
+	 * @param exceptionHandler ExceptionHandler
+	 */
+	@SuppressWarnings("rawtypes")
+	public LocalZipParser(String name, String sourceUri, int batch, 
+			LocalZipParserHelper helper, ExceptionHandler exceptionHandler) { 
+		this(name, sourceUri, batch, helper);
+		this.exceptionHandler = exceptionHandler;
+	}
+	
+	/**
+	 * @param name 模块名称
+	 * @param sourceUri 资源uri
+	 * @param batch 批处理数
+	 * @param helper LocalZipParserHelper
+	 * @param resultHandler ResultHandler
+	 */
+	@SuppressWarnings("rawtypes")
+	public LocalZipParser(String name, String sourceUri, int batch, 
+			LocalZipParserHelper helper, ResultHandler resultHandler) {
+		this(name, sourceUri, batch, helper);
+		this.resultHandler = resultHandler;
+	}
+	
+	/**
+	 * @param name 模块名称
+	 * @param sourceUri 资源uri
+	 * @param batch 批处理数
+	 * @param helper LocalZipParserHelper
+	 * @param exceptionHandler ExceptionHandler
+	 * @param resultHandler ResultHandler
+	 */
+	@SuppressWarnings("rawtypes")
+	public LocalZipParser(String name, String sourceUri, int batch, 
+			LocalZipParserHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+		this(name, sourceUri, batch, helper);
+		this.exceptionHandler = exceptionHandler;
+		this.resultHandler = resultHandler;
 	}
 	
 	@Override
