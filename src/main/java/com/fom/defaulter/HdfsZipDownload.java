@@ -21,7 +21,7 @@ import com.fom.util.ScanUtil;
  * @author shanhm
  *
  */
-@FomContext(name="HdfsZipDownload", remark="扫描下载Hdfs指定目录下的目录并打包成zip")
+@FomContext(names="HdfsZipDownload", remark="扫描下载Hdfs指定目录下的目录并打包成zip")
 public final class HdfsZipDownload extends Context<HdfsZipDownloadConfig> {
 
 	@Override
@@ -43,7 +43,7 @@ public final class HdfsZipDownload extends Context<HdfsZipDownloadConfig> {
 		});  
 		
 		String sourceName = new File(sourceUri).getName();
-		HdfsZipDownloader zipDownloader = new HdfsZipDownloader(name, sourceName, pathList, config.getDestPath(), 
+		HdfsZipDownloader zipDownloader = new HdfsZipDownloader(getName(), sourceName, pathList, config.getDestPath(), 
 				config.getEntryMax(), config.getSizeMax(), config.isDelSrc(), helper, sourceUri);
 		return zipDownloader;
 	}

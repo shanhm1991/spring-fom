@@ -18,6 +18,6 @@ public @interface FomContext {
 	
 	public String remark() default "";
 	
-	public String name() default "";
+	public String[] names() default "";
 
 }

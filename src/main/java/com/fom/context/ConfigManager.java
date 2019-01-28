@@ -15,9 +15,9 @@ import com.fom.log.LoggerFactory;
  * @author shanhm
  *
  */
-public final class ConfigManager {
+final class ConfigManager {
 
-	private static final Logger LOG = LoggerFactory.getLogger("config");
+	private static final Logger LOG = LoggerFactory.getLogger("context");
 
 	private static Map<String,Config> configMap = new ConcurrentHashMap<String,Config>();
 
@@ -25,32 +25,54 @@ public final class ConfigManager {
 		return configMap.get(key);
 	}
 
-	static Collection<Config> getAll(){
+	public static Collection<Config> getAll(){
 		return configMap.values();
 	}
 
-	static Map<String,Config> getMap(){
+	public static Map<String,Config> getMap(){
 		return configMap;
 	}
 
-	static void register(Config config){
+	public static boolean register(Config config){
 		if(config == null){
-			return;
+			return false;
 		}
-		if(configMap.put(config.name, config) == null){
-			LOG.info("\n");
-			LOG.info("#加载配置: " + config.name + "\n" + config);
-		}else {
-			LOG.info("\n");
-			LOG.info("#更新配置: " + config.name + "\n" + config); 
+		if(!config.valid){
+			LOG.warn("[" + config.name + "]config非法,取消加载.");
+			return false;
 		}
+		if(configMap.containsKey(config.name)){
+			LOG.warn("[" + config.name + "]config已经存在,取消加载.");
+			return false;
+		}
+		configMap.put(config.name, config);
+		LOG.info("[" + config.name + "]加载config\n" + config);
+		return true;
 	}
 
-	static Config load(Element element) {
-		String name = element.attributeValue("name");
-		String clzz = element.attributeValue("class");
+	public static boolean update(Config config){
+		if(config == null){
+			return false;
+		}
+		if(!config.valid){
+			LOG.warn("[" + config.name + "]config非法,取消更新.");
+			return false;
+		}
+		if(!configMap.containsKey(config.name)){
+			LOG.warn("[" + config.name + "]config不存在,取消更新.");
+			return false;
+		}
+		configMap.put(config.name, config);
+		LOG.info("[" + config.name + "]更新config\n" + config);
+		return true;
+	}
+
+	public static Config load(Element element) { 
 		Config config = null;
+		String name = "";
 		try{
+			name = element.attributeValue("name");
+			String clzz = element.attributeValue("class");
 			Class<?> configClass = Class.forName(clzz);
 			Constructor<?> constructor = configClass.getDeclaredConstructor(String.class); 
 			constructor.setAccessible(true); 
@@ -58,13 +80,8 @@ public final class ConfigManager {
 			config.loadTime = System.currentTimeMillis();
 			config.element = element;
 			config.load();
-			if(!config.isValid()){
-				LOG.info("\n"); 
-				LOG.error(name + "校验失败");
-			}
 		}catch(Exception e){
-			LOG.info("\n"); 
-			LOG.error(name + "加载异常", e);
+			LOG.warn("[" + name + "]config初始化异常", e);
 		}
 		return config;
 	}

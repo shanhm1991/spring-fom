@@ -17,7 +17,7 @@ import com.fom.db.handler.JdbcHandler;
  * @author shanhm
  *
  */
-public class Example5Helper extends AbstractLocalZipParserHelper<Map<String, Object>> {
+public class ImportOracleExample2Helper extends AbstractLocalZipParserHelper<Map<String, Object>> {
 
 	private static final String POOL = "example_oracle";
 
@@ -25,7 +25,7 @@ public class Example5Helper extends AbstractLocalZipParserHelper<Map<String, Obj
 			"insert into demo(id,name,source,filetype,importway) "
 					+ "values (#id#,#name#,#source#,#fileType#,#importWay#)";
 
-	public Example5Helper(String name, String pattern) {
+	public ImportOracleExample2Helper(String name, String pattern) {
 		super(name, pattern);
 	}
 

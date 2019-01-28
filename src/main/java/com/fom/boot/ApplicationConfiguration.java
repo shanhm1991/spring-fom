@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 
-import com.fom.context.ConfigListener;
+import com.fom.context.FomContextListener;
 import com.fom.db.pool.PoolListener;
 
 /**
@@ -28,9 +28,9 @@ public class ApplicationConfiguration {
 	}
 	
 	@Bean
-	public ServletListenerRegistrationBean<ConfigListener> listenConfig(){
-		ServletListenerRegistrationBean<ConfigListener> listener = new ServletListenerRegistrationBean<>();
-		listener.setListener(new ConfigListener());
+	public ServletListenerRegistrationBean<FomContextListener> listenConfig(){
+		ServletListenerRegistrationBean<FomContextListener> listener = new ServletListenerRegistrationBean<>();
+		listener.setListener(new FomContextListener());
 		listener.setOrder(5);
 		return listener;
 	}

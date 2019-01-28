@@ -10,7 +10,7 @@ import com.fom.context.ContextManager;
  * @author shanhm
  *
  */
-public class EsImpotExampleConfig extends Config {
+public class ImpotEsExampleConfig extends Config {
 	
 	private String srcPath;
 	
@@ -26,7 +26,7 @@ public class EsImpotExampleConfig extends Config {
 	
 	private File esJsonFile;
 	
-	protected EsImpotExampleConfig(String name) {
+	protected ImpotEsExampleConfig(String name) {
 		super(name);
 	}
 	

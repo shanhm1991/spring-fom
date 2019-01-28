@@ -15,7 +15,7 @@ import com.fom.util.ScanUtil;
  * @author shanhm
  *
  */
-@FomContext(name="hdfsDownload", remark="扫描下载Hdfs指定目录下文件的默认实现")
+@FomContext(names="hdfsDownload", remark="扫描下载Hdfs指定目录下文件的默认实现")
 public final class HdfsDownload extends Context<HdfsDownloadConfig> {
 	
 
@@ -28,7 +28,7 @@ public final class HdfsDownload extends Context<HdfsDownloadConfig> {
 	protected Executor createExecutor(String sourceUri, HdfsDownloadConfig config) {
 		HdfsDownloaderHelper helper = new HdfsDownloaderHelper(config.getFs());
 		String sourceName = new File(sourceUri).getName();
-		Downloader downloader = new Downloader(name, sourceName, sourceUri, config.getDestPath(), 
+		Downloader downloader = new Downloader(getName(), sourceName, sourceUri, config.getDestPath(), 
 				config.isDelSrc(), config.isWithTemp(), helper);
 		return downloader;
 	}

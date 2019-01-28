@@ -9,7 +9,11 @@ import com.fom.context.Config;
  */
 public class TextZipImporterConfig extends Config {
 	
+	private String srcPath;
+
 	private int batch;
+
+	private boolean isDelMatchFail;
 	
 	private String pattern;
 
@@ -19,17 +23,22 @@ public class TextZipImporterConfig extends Config {
 	
 	@Override
 	protected void loadExtends() throws Exception {
-		batch = loadExtends("importer.batch", 5000, 1, 50000);
-		pattern = loadExtends("zip.entryPattern", "");
+		batch = load("importer.batch", 5000, 1, 50000);
+		srcPath = load("src.path", "");
+		isDelMatchFail = load("importer.isDelMatchFail", false);
+		pattern = load("zip.entryPattern", "");
 	}
 
-	@Override
-	public String getType() {
-		return TYPE_IMPORTER;
-	}
-	
 	public int getBatch() {
 		return batch;
+	}
+
+	public String getSrcPath() {
+		return srcPath;
+	}
+
+	public boolean isDelMatchFail() {
+		return isDelMatchFail;
 	}
 	
 	public String getEntryPattern(){

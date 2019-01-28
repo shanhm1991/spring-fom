@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<foms>
+<fom>
+	<fom-scan>com.fom</fom-scan>
+
 	<includes>
-		<include>examples/example1.xml</include>
-		<include>examples/example2.xml</include>
-		<include>examples/example3.xml</include>
-		<include>examples/example4.xml</include>
-		<include>examples/example5.xml</include>
-		<!-- <include>examples/example6.xml</include> -->
-		<!-- <include>examples/example7.xml</include> -->
+		<include>examples/ImpotEsExample.xml</include>
+		<include>examples/ImportMysqlExample1.xml</include>
+		<include>examples/ImportMysqlExample2.xml</include>
+		<include>examples/ImportOracleExample1.xml</include>
+		<include>examples/ImportOracleExample2.xml</include>
+		<!-- <include>examples/hdfsDownload.xml</include> -->
+		<!-- <include>examples/HdfsZipDownload.xml</include> -->
 	</includes>
-</foms>
+</fom>
 

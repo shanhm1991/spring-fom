@@ -31,10 +31,10 @@
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 	<listener>
-		<listener-class>com.fom.context.db.pool.PoolListener</listener-class>
+		<listener-class>com.fom.db.pool.PoolListener</listener-class>
 	</listener>
 	<listener>
-		<listener-class>com.fom.context.config.ConfigListener</listener-class>
+		<listener-class>com.fom.context.FomContextListener</listener-class>
 	</listener>
 	
 	<filter>

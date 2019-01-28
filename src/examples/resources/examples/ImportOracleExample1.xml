@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fom>
+	<configs>
+		<config name="ImportOracleExample1" config="com.fom.examples.TextZipImporterConfig">
+			<cron>0 0/15 * * * ?</cron>
+			<pattern>demo.zip</pattern>
+			<thread.min>10</thread.min>
+			<thread.max>10</thread.max>
+			<thread.aliveTime>30</thread.aliveTime>
+			<thread.overTime>86400</thread.overTime>
+			<thread.cancellable>false</thread.cancellable>
+			<src.path>${webapp.root}/source</src.path>
+			<importer.batch>5000</importer.batch>
+			<importer.isDelMatchFail>false</importer.isDelMatchFail>
+			<zip.entryPattern>.\.bcp</zip.entryPattern>
+		</config>
+	</configs>
+</fom>

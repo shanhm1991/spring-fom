@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.fom.context.helper.AbstractLocalZipParserHelper;
+import com.fom.context.helper.AbstractParserHelper;
 import com.fom.context.reader.Reader;
 import com.fom.context.reader.TextReader;
 import com.fom.examples.bean.ExampleBean;
@@ -17,10 +17,10 @@ import com.fom.util.SpringUtil;
  * @author shanhm
  *
  */
-public class Example4Helper extends AbstractLocalZipParserHelper<ExampleBean> {
+public class ImportMysqlExample1Helper extends AbstractParserHelper<ExampleBean> {
 
-	public Example4Helper(String name, String pattern) {
-		super(name, pattern);
+	public ImportMysqlExample1Helper(String name) {
+		super(name);
 	}
 
 	@Override
@@ -36,18 +36,18 @@ public class Example4Helper extends AbstractLocalZipParserHelper<ExampleBean> {
 		}
 		ExampleBean bean = new ExampleBean(line);
 		bean.setSource("local");
-		bean.setFileType("zip(txt)");
+		bean.setFileType("txt");
 		bean.setImportWay("mybatis");
 		lineDatas.add(bean); 
 	}
 
 	@Override
 	public void batchProcessIfNotInterrupted(List<ExampleBean> lineDatas, long batchTime) throws Exception {
-		ExamplesDao demoDao = SpringUtil.getBean("oracleExampleDao", ExamplesDao.class);
+		ExamplesDao demoDao = SpringUtil.getBean("mysqlExampleDao", ExamplesDao.class);
 		demoDao.batchInsert(lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());
 	}
-
+	
 	@Override
 	public boolean delete(String sourceUri) {
 		return new File(sourceUri).delete();
@@ -57,5 +57,5 @@ public class Example4Helper extends AbstractLocalZipParserHelper<ExampleBean> {
 	public long getSourceSize(String sourceUri) {
 		return new File(sourceUri).length();
 	}
-	
+
 }

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fom>
+	<configs>
+		<config name="ImportMysqlExample2" config="com.fom.examples.TextImporterConfig">
+			<cron>0 0/15 * * * ?</cron>
+			<pattern>test.txt</pattern>
+			<thread.min>10</thread.min>
+			<thread.max>10</thread.max>
+			<thread.aliveTime>30</thread.aliveTime>
+			<thread.overTime>86400</thread.overTime>
+			<thread.cancellable>false</thread.cancellable>
+			<src.path>${webapp.root}/source</src.path>
+			<importer.batch>5000</importer.batch>
+			<importer.isDelMatchFail>false</importer.isDelMatchFail>
+		</config>
+	</configs>
+</fom>

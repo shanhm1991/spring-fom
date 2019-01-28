@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<foms>
-	<includes>
-		<include></include>
-	</includes>
-	
-	<fom></fom>
-</foms>
+<fom>
+</fom> 
 

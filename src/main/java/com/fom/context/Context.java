@@ -25,38 +25,40 @@ import com.fom.log.LoggerFactory;
  * @param <E>
  */
 public abstract class Context<E extends Config> {
-
-	private static final Logger logger = LoggerFactory.getLogger("record");
-
+	
 	//所有的Context共用，防止两个Context创建针对同一个文件的任务
 	private static Map<String,TimedFuture<Boolean>> futureMap = new ConcurrentHashMap<String,TimedFuture<Boolean>>(100);
 
 	//Context私有线程池，在Context结束时shutdown(),等待任务线程自行响应中断
-	private TimedExecutorPool pool = new TimedExecutorPool(4,30,new LinkedBlockingQueue<Runnable>(50));
+	private TimedExecutorPool pool;
 
 	private Config config;
 
-	protected Logger log;
+	protected Logger log = Logger.getRootLogger();
 
-	protected final String name;
-	
+	String name;
+
 	String remark;
-	
+
 	private InnerThread innerThread;
-	
+
 	private AtomicBoolean state = new AtomicBoolean(false);
 
-	public Context(){
-		FomContext c = this.getClass().getAnnotation(FomContext.class);
-		this.name = c.name();
-		this.remark = c.remark();
-		this.log = LoggerFactory.getLogger(name);
-		pool.allowCoreThreadTimeOut(true);
+	public final String getName(){
+		return name;
 	}
 
 	protected abstract List<String> getUriList(E config) throws Exception;
 
 	protected abstract Executor createExecutor(String sourceUri, E config) throws Exception;
+	
+	final void init(String name, String remark){
+		this.name = name;
+		this.remark = remark;
+		this.log = LoggerFactory.getLogger(name);
+		pool = new TimedExecutorPool(4,30,new LinkedBlockingQueue<Runnable>(50));
+		pool.allowCoreThreadTimeOut(true);
+	}
 
 	final void start(){
 		if(state.get()){
@@ -68,7 +70,7 @@ public abstract class Context<E extends Config> {
 		log.info("启动[" + name + "]"); 
 		innerThread.start();
 	}
-	
+
 	final void stop(){
 		if(!state.get()){
 			log.warn("[" + name + "]已经停止"); 
@@ -77,7 +79,7 @@ public abstract class Context<E extends Config> {
 		log.info("停止[" + name + "]"); 
 		state.set(false); 
 	}
-	
+
 	final void restart(){
 		if(state.get()){
 			log.info("重启[" + name + "]"); 
@@ -86,13 +88,17 @@ public abstract class Context<E extends Config> {
 			start();
 		}
 	}
+	
+	final Config getConfig(){
+		return config;
+	}
 
 	private class InnerThread extends Thread {
-		
+
 		public InnerThread(){
 			this.setName(name); 
 		}
-		
+
 		@Override
 		public void run() {
 			config = ConfigManager.get(name);
@@ -104,7 +110,7 @@ public abstract class Context<E extends Config> {
 			}
 			while(true){
 				if(!state.get()){
-					
+
 				}
 				config = ConfigManager.get(name);
 				if(pool.getCorePoolSize() != config.threadCore){
@@ -170,6 +176,8 @@ public abstract class Context<E extends Config> {
 			}
 		}
 	}
+	
+	private static final Logger logger = LoggerFactory.getLogger("record");
 
 	private void cleanFuture(Config config){
 		Iterator<Map.Entry<String, TimedFuture<Boolean>>> it = futureMap.entrySet().iterator();
@@ -233,5 +241,4 @@ public abstract class Context<E extends Config> {
 		Future<Boolean> future = futureMap.get(key);
 		return future != null && !future.isDone();
 	}
-
 }

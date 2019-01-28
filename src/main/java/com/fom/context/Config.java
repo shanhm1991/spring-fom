@@ -28,7 +28,7 @@ import com.fom.util.XmlUtil;
  */
 public abstract class Config {
 
-	protected static final Logger LOG = LoggerFactory.getLogger("config");
+	protected static final Logger LOG = LoggerFactory.getLogger("context"); 
 
 	protected final String name;
 
@@ -47,6 +47,14 @@ public abstract class Config {
 	int threadOverTime;
 
 	boolean cancellable;
+	
+	private Pattern pattern;
+
+	private CronExpression cronExpression;
+
+	boolean valid;
+
+	long loadTime;
 
 	protected Config(String name){
 		this.name = name;
@@ -60,25 +68,32 @@ public abstract class Config {
 		threadAliveTime = load("thread.aliveTime", 30, 3, 300);
 		threadOverTime = load("thread.overTime", 3600, 300, 86400);
 		cancellable = load("thread.cancellable", false); 
-		loadExtends();
-	}
-
-	private Pattern pattern;
-
-	private CronExpression cronExpression;
-
-	boolean valid;
-
-	long loadTime;
-
-	boolean isValid() throws Exception {
+		
 		if(!StringUtils.isBlank(regex)){
 			pattern = Pattern.compile(regex);
 		}
 		if(!StringUtils.isBlank(cron)){
 			cronExpression = new CronExpression(cron);
 		}
-		return valid();
+		
+		loadExtends();
+		
+		valid = valid();
+	}
+	
+	/**
+	 * 子类自定义配置加载
+	 * @throws Exception
+	 */
+	protected abstract void loadExtends() throws Exception;
+
+	/**
+	 * 子类自定义配置校验，默认返回true
+	 * @return
+	 * @throws Exception
+	 */
+	protected boolean valid() throws Exception {
+		return true;
 	}
 
 	public final CronExpression getCron(){
@@ -143,21 +158,6 @@ public abstract class Config {
 		boolean value = XmlUtil.getBoolean(element, key, defaultValue);
 		entryMap.put(key, String.valueOf(value)); 
 		return value;
-	}
-
-	/**
-	 * 子类自定义加载<extends>中的配置
-	 * @throws Exception
-	 */
-	protected abstract void loadExtends() throws Exception;
-
-	/**
-	 * 子类自定义校验<extends>中的配置加载结果，默认返回true
-	 * @return
-	 * @throws Exception
-	 */
-	protected boolean valid() throws Exception {
-		return true;
 	}
 
 	private Map<String,String> entryMap = new LinkedHashMap<>();

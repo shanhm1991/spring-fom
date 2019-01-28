@@ -1,21 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<foms>
-	<fom name="HdfsZipDownload" config="com.fom.defaulter.HdfsZipDownloadConfig">
-		<cron>0 0/15 * * * ?</cron>
-		<pattern></pattern>
-		<thread.min>10</thread.min>
-		<thread.max>10</thread.max>
-		<thread.aliveTime>30</thread.aliveTime>
-		<thread.overTime>86400</thread.overTime>
-		<thread.cancellable>false</thread.cancellable>
-		<src.path>/test</src.path>
-		<hdfs.master>master.ip:port</hdfs.master>
-		<hdfs.slave>slave.ip:port</hdfs.slave>
-		<hdfs.signalFile>a.orc</hdfs.signalFile>
-		<downloader.isSrcDel>false</downloader.isSrcDel>
-		<downloader.isWithTemp>true</downloader.isWithTemp>
-		<downloader.desPath>${webapp.root}/download</downloader.desPath>
-		<downloader.zip.entryMax>100</downloader.zip.entryMax>
-		<downloader.zip.sizeMax>5M</downloader.zip.sizeMax>
-	</fom>
-</foms>
+<fom>
+	<configs>
+		<config name="HdfsZipDownload" config="com.fom.defaulter.HdfsZipDownloadConfig">
+			<cron>0 0/15 * * * ?</cron>
+			<pattern></pattern>
+			<thread.min>10</thread.min>
+			<thread.max>10</thread.max>
+			<thread.aliveTime>30</thread.aliveTime>
+			<thread.overTime>86400</thread.overTime>
+			<thread.cancellable>false</thread.cancellable>
+			<src.path>/test</src.path>
+			<hdfs.master>master.ip:port</hdfs.master>
+			<hdfs.slave>slave.ip:port</hdfs.slave>
+			<hdfs.signalFile>a.orc</hdfs.signalFile>
+			<downloader.isSrcDel>false</downloader.isSrcDel>
+			<downloader.isWithTemp>true</downloader.isWithTemp>
+			<downloader.desPath>${webapp.root}/download</downloader.desPath>
+			<downloader.zip.entryMax>100</downloader.zip.entryMax>
+			<downloader.zip.sizeMax>5M</downloader.zip.sizeMax>
+		</config>
+	</configs>
+</fom>

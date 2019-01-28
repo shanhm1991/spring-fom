@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fom>
+	<configs>
+		<config name="ImpotEsExample" class="com.fom.examples.ImpotExample1Config">
+			<cron>0 0/15 * * * ?</cron>
+			<pattern>demo.bcp</pattern>
+			<thread.min>10</thread.min>
+			<thread.max>10</thread.max>
+			<thread.aliveTime>30</thread.aliveTime>
+			<thread.overTime>86400</thread.overTime>
+			<thread.cancellable>false</thread.cancellable>
+			<src.path>${webapp.root}/source</src.path>
+			<importer.batch>5000</importer.batch>
+			<importer.isDelMatchFail>false</importer.isDelMatchFail>
+			<es.index>demo</es.index>
+			<es.type>demo</es.type>
+			<es.json>WEB-INF/index/index_example.json</es.json>
+		</config>
+	</configs>
+</fom>
