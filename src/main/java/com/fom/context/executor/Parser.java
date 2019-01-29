@@ -23,8 +23,6 @@ import com.fom.util.IoUtil;
  */
 public class Parser extends Executor {
 
-	private String sourceUri;
-
 	private int batch;
 	
 	@SuppressWarnings("rawtypes")
@@ -33,55 +31,42 @@ public class Parser extends Executor {
 	private File logFile;
 
 	/**
-	 * @param name 模块名称
-	 * @param sourceName 资源名称
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
 	 * @param helper ParserHelper
 	 */
 	@SuppressWarnings("rawtypes")
-	public Parser(String name, String sourceName, String sourceUri, int batch, ParserHelper helper){
-		super(name,sourceName);
-		this.sourceUri = sourceUri;
+	public Parser(String sourceUri, int batch, ParserHelper helper){
+		super(sourceUri);
 		this.batch = batch;
 		this.helper = helper;
-		this.logFile = new File(System.getProperty("import.progress") 
-				+ File.separator + name + File.separator + sourceName + ".log");
 	}
 	
 	/**
-	 * @param name 模块名称
-	 * @param sourceName 资源名称
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
 	 * @param helper ParserHelper
 	 * @param exceptionHandler ExceptionHandler
 	 */
 	@SuppressWarnings("rawtypes")
-	public Parser(String name, String sourceName, String sourceUri, int batch, 
-			ParserHelper helper, ExceptionHandler exceptionHandler) {
-		this(name, sourceName, sourceUri, batch, helper);
+	public Parser(String sourceUri, int batch, ParserHelper helper, ExceptionHandler exceptionHandler) {
+		this(sourceUri, batch, helper);
 		this.exceptionHandler = exceptionHandler;
 	}
 	
 	/**
-	 * @param name 模块名称
-	 * @param sourceName 资源名称
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
 	 * @param helper ParserHelper
 	 * @param resultHandler ResultHandler
 	 */
 	@SuppressWarnings("rawtypes")
-	public Parser(String name, String sourceName, String sourceUri, int batch, 
-			ParserHelper helper, ResultHandler resultHandler) {
-		this(name, sourceName, sourceUri, batch, helper);
+	public Parser(String sourceUri, int batch, ParserHelper helper, ResultHandler resultHandler) {
+		this(sourceUri, batch, helper);
 		this.resultHandler = resultHandler;
 	}
 	
 	/**
-	 * @param name 模块名称
-	 * @param sourceName 资源名称
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
 	 * @param helper ParserHelper
@@ -89,15 +74,18 @@ public class Parser extends Executor {
 	 * @param resultHandler ResultHandler
 	 */
 	@SuppressWarnings("rawtypes")
-	public Parser(String name, String sourceName, String sourceUri, int batch, 
+	public Parser(String sourceUri, int batch, 
 			ParserHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
-		this(name, sourceName, sourceUri, batch, helper);
+		this(sourceUri, batch, helper);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
 	}
 	
 	@Override
-	protected boolean onStart() throws Exception {
+	protected boolean onStart() throws Exception { 
+		String logName = new File(sourceUri).getName();
+		this.logFile = new File(System.getProperty("import.progress") 
+				+ File.separator + name + File.separator + logName + ".log");
 		File parentFile = logFile.getParentFile();
 		if(!parentFile.exists() && !parentFile.mkdirs()){
 			log.error("创建目录失败:" + parentFile);

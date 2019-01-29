@@ -160,6 +160,10 @@ public abstract class Context {
 	private Map<String, Object> valueMap = new ConcurrentHashMap<>();
 
 	private volatile CronExpression cronExpression;
+	
+	public final String getName(){
+		return name;
+	}
 
 	public final String getRemark(){
 		return (String)valueMap.get(REMARK);
@@ -336,7 +340,9 @@ public abstract class Context {
 							continue;
 						}
 						try {
-							futureMap.put(sourceUri, pool.submit(createExecutor(sourceUri))); 
+							Executor executor = createExecutor(sourceUri);
+							executor.setName(name); 
+							futureMap.put(sourceUri, pool.submit(executor)); 
 							log.info("新建任务" + "[" + sourceUri + "]"); 
 						} catch (RejectedExecutionException e) {
 							log.warn("提交任务被拒绝,等待下次提交[" + sourceUri + "].");

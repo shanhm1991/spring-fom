@@ -7,7 +7,6 @@ import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedOutputStream;
 import java.util.zip.ZipOutputStream;
@@ -30,13 +29,11 @@ import com.fom.util.ZipUtil;
  */
 public class ZipDownloader extends Executor {
 	
-	private static final AtomicInteger num = new AtomicInteger(0);
-	
 	private final DecimalFormat numFormat  = new DecimalFormat("#.##");
 	
 	protected final ZipDownloaderHelper helper;
 
-	private List<String> uriList;
+	private final List<String> uriList;
 	
 	private final String destPath;
 	
@@ -45,10 +42,12 @@ public class ZipDownloader extends Executor {
 	private final long zipSizeMax;
 	
 	private final boolean isDelSrc;
+	
+	private final String zipName;
 
-	private final String downloadPath;
+	private String downloadPath;
 
-	private final File downloadZip; 
+	private File downloadZip; 
 
 	//downloadZip的命名序号
 	private int index;
@@ -57,7 +56,6 @@ public class ZipDownloader extends Executor {
 	private Set<String> entrySet;
 
 	/**
-	 * @param name 模块名称
 	 * @param zipName 打包zip的名称(不带后缀)
 	 * @param uriList 资源uri列表
 	 * @param destPath 下载目的路径
@@ -66,26 +64,23 @@ public class ZipDownloader extends Executor {
 	 * @param isDelSrc 下载结束是否删除资源文件
 	 * @param helper ZipDownloaderHelper
 	 */
-	public ZipDownloader(String name, String zipName, List<String> uriList, String destPath, 
+	public ZipDownloader(String zipName, List<String> uriList, String destPath, 
 			int zipEntryMax, long zipSizeMax, boolean isDelSrc, ZipDownloaderHelper helper) {
-		super(name, zipName);
-		if(StringUtils.isBlank(name) || StringUtils.isBlank(zipName) 
-				 || helper == null || uriList == null) {
+		super(zipName);
+		if(StringUtils.isBlank(zipName) || helper == null || uriList == null) {
 			throw new IllegalArgumentException();
 		}
+		
+		this.zipName = zipName;
 		this.helper = helper;
 		this.uriList = uriList;
 		this.destPath = destPath;
 		this.zipEntryMax = zipEntryMax;
 		this.zipSizeMax = zipSizeMax;
 		this.isDelSrc = isDelSrc;
-		this.downloadPath = System.getProperty("download.temp")
-				+ File.separator + name + File.separator + zipName + (num.incrementAndGet() / 1000000);
-		this.downloadZip = new File(downloadPath + File.separator + zipName + ".zip");
 	}
 	
 	/**
-	 * @param name 模块名称
 	 * @param zipName 打包zip的名称(不带后缀)
 	 * @param uriList 资源uri列表
 	 * @param destPath 下载目的路径
@@ -95,15 +90,14 @@ public class ZipDownloader extends Executor {
 	 * @param helper ZipDownloaderHelper
 	 * @param exceptionHandler ExceptionHandler
 	 */
-	public ZipDownloader(String name, String zipName, List<String> uriList, String destPath, 
+	public ZipDownloader(String zipName, List<String> uriList, String destPath, 
 			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
 			ZipDownloaderHelper helper, ExceptionHandler exceptionHandler) {
-		this(name, zipName, uriList, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
+		this(zipName, uriList, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
 		this.exceptionHandler = exceptionHandler;
 	}
 	
 	/**
-	 * @param name 模块名称
 	 * @param zipName 打包zip的名称(不带后缀)
 	 * @param uriList 资源uri列表
 	 * @param destPath 下载目的路径
@@ -113,15 +107,14 @@ public class ZipDownloader extends Executor {
 	 * @param helper ZipDownloaderHelper
 	 * @param resultHandler ResultHandler
 	 */
-	public ZipDownloader(String name, String zipName, List<String> uriList, String destPath, 
+	public ZipDownloader(String zipName, List<String> uriList, String destPath, 
 			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
 			ZipDownloaderHelper helper, ResultHandler resultHandler) {
-		this(name, zipName, uriList, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
+		this(zipName, uriList, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
 		this.resultHandler = resultHandler;
 	}
 	
 	/**
-	 * @param name 模块名称
 	 * @param zipName 打包zip的名称(不带后缀)
 	 * @param uriList 资源uri列表
 	 * @param destPath 下载目的路径
@@ -132,10 +125,10 @@ public class ZipDownloader extends Executor {
 	 * @param exceptionHandler ExceptionHandler
 	 * @param resultHandler ResultHandler
 	 */
-	public ZipDownloader(String name, String zipName, List<String> uriList, String destPath, 
+	public ZipDownloader(String zipName, List<String> uriList, String destPath, 
 			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
 			ZipDownloaderHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
-		this(name, zipName, uriList, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
+		this(zipName, uriList, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
 	}
@@ -146,6 +139,10 @@ public class ZipDownloader extends Executor {
 			log.warn("资源uri列表为空"); 
 			return false;
 		}
+		
+		this.downloadPath = System.getProperty("download.temp")
+				+ File.separator + name + File.separator + zipName;
+		this.downloadZip = new File(downloadPath + File.separator + zipName + ".zip");
 		File file = new File(downloadPath);
 		if(!file.exists() && !file.mkdirs()){
 			log.error("下载目录创建失败:" + downloadPath); 
@@ -287,7 +284,7 @@ public class ZipDownloader extends Executor {
 	 */
 	protected String getNextName(int index, int entrySize){
 		StringBuilder builder = new StringBuilder(); 
-		builder.append(sourceName).append("_");
+		builder.append(sourceUri).append("_");
 		builder.append(index).append("_").append(entrySize).append(".zip");
 		return builder.toString();
 	}
@@ -306,7 +303,7 @@ public class ZipDownloader extends Executor {
 			return index;
 		}
 		for(String name : array){
-			if(!name.startsWith(sourceName) || name.equals(downloadZip.getName())){
+			if(!name.startsWith(sourceUri) || name.equals(downloadZip.getName())){
 				continue;
 			}
 			try{

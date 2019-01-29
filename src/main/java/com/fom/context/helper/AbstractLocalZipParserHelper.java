@@ -14,9 +14,10 @@ public abstract class AbstractLocalZipParserHelper<V> extends AbstractParserHelp
 
 	private Pattern pattern;
 	
-	public AbstractLocalZipParserHelper(String name, Pattern pattern) {
-		super(name);
-		this.pattern = pattern;
+	public AbstractLocalZipParserHelper(String pattern) {
+		if(!StringUtils.isBlank(pattern)){
+			this.pattern = Pattern.compile(pattern);
+		}
 	}
 	
 	public AbstractLocalZipParserHelper(String name, String pattern) {

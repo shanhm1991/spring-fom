@@ -26,8 +26,6 @@ import com.fom.util.ZipUtil;
  */
 public final class LocalZipParser extends Executor {
 	
-	private String sourceUri;
-	
 	private int batch;
 	
 	@SuppressWarnings("rawtypes")
@@ -42,15 +40,13 @@ public final class LocalZipParser extends Executor {
 	private DecimalFormat numFormat  = new DecimalFormat("#.##");
 	
 	/**
-	 * @param name 模块名称
 	 * @param sourceUri 资源uri
 	 * @param batch 批处理数
 	 * @param helper LocalZipParserHelper
 	 */
 	@SuppressWarnings("rawtypes")
-	public LocalZipParser(String name, String sourceUri, int batch, LocalZipParserHelper helper) {
-		super(name, sourceUri);
-		this.sourceUri = sourceUri;
+	public LocalZipParser(String sourceUri, int batch, LocalZipParserHelper helper) {
+		super(sourceUri);
 		this.helper = helper;
 		String sourceName = new File(sourceUri).getName();
 		this.unzipDir = new File(System.getProperty("import.progress")
@@ -60,35 +56,32 @@ public final class LocalZipParser extends Executor {
 	}
 	
 	/**
-	 * @param name 模块名称
 	 * @param sourceUri 资源uri
 	 * @param batch 批处理数
 	 * @param helper LocalZipParserHelper
 	 * @param exceptionHandler ExceptionHandler
 	 */
 	@SuppressWarnings("rawtypes")
-	public LocalZipParser(String name, String sourceUri, int batch, 
+	public LocalZipParser(String sourceUri, int batch, 
 			LocalZipParserHelper helper, ExceptionHandler exceptionHandler) { 
-		this(name, sourceUri, batch, helper);
+		this(sourceUri, batch, helper);
 		this.exceptionHandler = exceptionHandler;
 	}
 	
 	/**
-	 * @param name 模块名称
 	 * @param sourceUri 资源uri
 	 * @param batch 批处理数
 	 * @param helper LocalZipParserHelper
 	 * @param resultHandler ResultHandler
 	 */
 	@SuppressWarnings("rawtypes")
-	public LocalZipParser(String name, String sourceUri, int batch, 
+	public LocalZipParser(String sourceUri, int batch, 
 			LocalZipParserHelper helper, ResultHandler resultHandler) {
-		this(name, sourceUri, batch, helper);
+		this(sourceUri, batch, helper);
 		this.resultHandler = resultHandler;
 	}
 	
 	/**
-	 * @param name 模块名称
 	 * @param sourceUri 资源uri
 	 * @param batch 批处理数
 	 * @param helper LocalZipParserHelper
@@ -96,9 +89,9 @@ public final class LocalZipParser extends Executor {
 	 * @param resultHandler ResultHandler
 	 */
 	@SuppressWarnings("rawtypes")
-	public LocalZipParser(String name, String sourceUri, int batch, 
+	public LocalZipParser(String sourceUri, int batch, 
 			LocalZipParserHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
-		this(name, sourceUri, batch, helper);
+		this(sourceUri, batch, helper);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
 	}

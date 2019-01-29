@@ -1,6 +1,5 @@
 package com.fom.context;
 
-import java.io.File;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang.StringUtils;
@@ -9,78 +8,61 @@ import org.apache.log4j.Logger;
 import com.fom.log.LoggerFactory;
 
 /**
- * 针对sourceUri的执行器
+ * 针对资源uri的执行器
  * 
  * @author shanhm
  *
  */
 public abstract class Executor implements Callable<Boolean> {
 
-	protected final Logger log;
+	protected volatile Logger log = Logger.getRootLogger();
 
-	protected final String sourceName;
+	protected volatile String name;
 
-	private final String executorName;
+	protected final String sourceUri;
 
-	private final String name;
-	
 	protected ExceptionHandler exceptionHandler;
 
 	protected ResultHandler resultHandler;
 
 	private Throwable e;
 
-	/**
-	 * @param name 模块名称
-	 * @param sourceName 资源名称
-	 */
-	public Executor(String name, String sourceName) { //TODO name不要求
-		this.sourceName = sourceName;
-		this.executorName = new File(sourceName).getName();
-		if(StringUtils.isBlank(name)){
-			this.log = Logger.getRootLogger();
-			this.name = this.getClass().getSimpleName();
-		}else{
-			this.name = name;
-			this.log = LoggerFactory.getLogger(name);
-		}
+	public Executor(String sourceUri) { 
+		this.sourceUri = sourceUri;
 	}
 
 	/**
-	 * @param name 模块名称
-	 * @param sourceName 资源名称
+	 * @param sourceUri 资源uri
 	 * @param exceptionHandler ExceptionHandler
 	 */
-	public Executor(String name, String sourceName, ExceptionHandler exceptionHandler) { 
-		this(name, sourceName);
+	public Executor(String sourceUri, ExceptionHandler exceptionHandler) { 
+		this(sourceUri);
 		this.exceptionHandler = exceptionHandler;
 	}
 
 	/**
-	 * @param name
-	 * @param sourceName
+	 * @param sourceUri 资源uri
 	 * @param resultHandler ResultHandler
 	 */
-	public Executor(String name, String sourceName, ResultHandler resultHandler) { 
-		this(name, sourceName);
+	public Executor(String sourceUri, ResultHandler resultHandler) { 
+		this(sourceUri);
 		this.resultHandler = resultHandler;
 	}
-	
+
 	/**
-	 * @param name
-	 * @param sourceName
+	 * @param sourceUri 资源uri
 	 * @param exceptionHandler ExceptionHandler
 	 * @param resultHandler ResultHandler
 	 */
-	public Executor(String name, String sourceName, ExceptionHandler exceptionHandler, ResultHandler resultHandler) { 
-		this(name, sourceName);
+	public Executor(String sourceUri, ExceptionHandler exceptionHandler, ResultHandler resultHandler) { 
+		this(sourceUri);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
 	}
 
 	@Override
 	public final Boolean call() throws Exception {  
-		Thread.currentThread().setName("[" + executorName + "]");
+		Thread.currentThread().setName("[" + sourceUri + "]");
 		boolean result = true;
 		long sTime = System.currentTimeMillis();
 		try {
@@ -128,18 +110,23 @@ public abstract class Executor implements Callable<Boolean> {
 		return true;
 	}
 
+	final Throwable getThrowable(){
+		return e;
+	}
+
+	final void setName(String name){
+		if(StringUtils.isBlank(name)){
+			return;
+		}
+		this.name = name;
+		this.log = LoggerFactory.getLogger(name);
+	}
+	
 	public final String getName(){
 		return name;
 	}
 
 	public final long getCost(){
 		return 0;
-	}
-
-	final String getMsg(){
-		if(e != null){
-			return e.getMessage();
-		}
-		return "";
 	}
 }

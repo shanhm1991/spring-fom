@@ -17,9 +17,9 @@ import com.fom.context.helper.DownloaderHelper;
  *
  */
 public final class Downloader extends Executor {
-
-	private final String sourceUri;
 	
+	private final String sourceName;
+
 	private final String destPath;
 	
 	private final boolean isDelSrc;
@@ -28,12 +28,11 @@ public final class Downloader extends Executor {
 	
 	private final DownloaderHelper helper;
 
-	private final String downloadPath;
+	private String downloadPath;
 	
-	private final File downloadFile;
+	private File downloadFile;
 
 	/**
-	 * @param name 模块名称
 	 * @param sourceName 资源名称
 	 * @param sourceUri 资源uri
 	 * @param destPath 下载目的路径
@@ -41,27 +40,20 @@ public final class Downloader extends Executor {
 	 * @param isWithTemp 是否使用临时目录
 	 * @param helper DownloaderHelper
 	 */
-	public Downloader(String name, String sourceName, String sourceUri, String destPath, 
+	public Downloader(String sourceName, String sourceUri, String destPath, 
 			boolean isDelSrc, boolean isWithTemp, DownloaderHelper helper) {
-		super(name, sourceName);
+		super(sourceUri);
 		if(StringUtils.isBlank(sourceUri) || StringUtils.isBlank(destPath) || helper == null) {
 			throw new IllegalArgumentException(); 
 		}
-		this.helper = helper;
-		this.sourceUri = sourceUri;
+		this.sourceName = sourceName;
 		this.destPath = destPath;
 		this.isDelSrc = isDelSrc;
 		this.isWithTemp = isWithTemp;
-		if(!isWithTemp){
-			this.downloadPath = destPath;
-		}else{
-			this.downloadPath = System.getProperty("download.temp") + File.separator + name;
-		}
-		this.downloadFile = new File(downloadPath + File.separator + sourceName); 
+		this.helper = helper;
 	}
 	
 	/**
-	 * @param name 模块名称
 	 * @param sourceName 资源名称
 	 * @param sourceUri 资源uri
 	 * @param destPath 下载目的路径
@@ -70,14 +62,13 @@ public final class Downloader extends Executor {
 	 * @param helper DownloaderHelper
 	 * @param exceptionHandler ExceptionHandler
 	 */
-	public Downloader(String name, String sourceName, String sourceUri, String destPath, 
+	public Downloader(String sourceName, String sourceUri, String destPath, 
 			boolean isDelSrc, boolean isWithTemp, DownloaderHelper helper, ExceptionHandler exceptionHandler) {
-		this(name, sourceName, sourceUri, destPath, isDelSrc, isWithTemp, helper);
+		this(sourceName, sourceUri, destPath, isDelSrc, isWithTemp, helper);
 		this.exceptionHandler = exceptionHandler;
 	}
 	
 	/**
-	 * @param name 模块名称
 	 * @param sourceName 资源名称
 	 * @param sourceUri 资源uri
 	 * @param destPath 下载目的路径
@@ -86,14 +77,13 @@ public final class Downloader extends Executor {
 	 * @param helper DownloaderHelper
 	 * @param resultHandler ResultHandler
 	 */
-	public Downloader(String name, String sourceName, String sourceUri, String destPath, 
+	public Downloader(String sourceName, String sourceUri, String destPath, 
 			boolean isDelSrc, boolean isWithTemp, DownloaderHelper helper, ResultHandler resultHandler) {
-		this(name, sourceName, sourceUri, destPath, isDelSrc, isWithTemp, helper);
+		this(sourceName, sourceUri, destPath, isDelSrc, isWithTemp, helper);
 		this.resultHandler = resultHandler;
 	}
 	
 	/**
-	 * @param name 模块名称
 	 * @param sourceName 资源名称
 	 * @param sourceUri 资源uri
 	 * @param destPath 下载目的路径
@@ -103,21 +93,35 @@ public final class Downloader extends Executor {
 	 * @param exceptionHandler ExceptionHandler
 	 * @param resultHandler ResultHandler
 	 */
-	public Downloader(String name, String sourceName, String sourceUri, String destPath, 
+	public Downloader(String sourceName, String sourceUri, String destPath, 
 			boolean isDelSrc, boolean isWithTemp, DownloaderHelper helper, 
 			ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
-		this(name, sourceName, sourceUri, destPath, isDelSrc, isWithTemp, helper);
+		this(sourceName, sourceUri, destPath, isDelSrc, isWithTemp, helper);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
 	}
 	
 	@Override
 	protected boolean onStart() throws Exception {
+		if(!isWithTemp){
+			this.downloadPath = destPath;
+		}else{
+			this.downloadPath = System.getProperty("download.temp") + File.separator + getName();
+		}
 		File file = new File(downloadPath);
 		if(!file.exists() && !file.mkdirs()){
 			log.error("下载目录创建失败:" + downloadPath); 
 			return false;
 		}
+		if(downloadFile.exists()){
+			if(downloadFile.delete()){
+				log.info("删除已经存在的文件:" + downloadFile.getPath()); 
+			}else{
+				log.error("删除已经存在的文件失败:" + downloadFile.getPath()); 
+				return false;
+			}
+		}
+		this.downloadFile = new File(downloadPath + File.separator + sourceName); 
 		return true;
 	}
 

@@ -1,10 +1,13 @@
 package com.fom.examples;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.fom.context.Context;
 import com.fom.context.Executor;
 import com.fom.context.FomContext;
+import com.fom.context.executor.Parser;
+import com.fom.util.ScanUtil;
 
 /**
  * 
@@ -13,18 +16,24 @@ import com.fom.context.FomContext;
  */
 @FomContext(remark="使用自定义pool的方式将本地指定目录下text文本解析导入Mysql库")
 public class ImportMysqlExample2 extends Context {
+	
+	private String srcPath = "${webapp.root}/source";
+
+	private int batch = 5000;
+
+	private boolean isDelMatchFail = false;
+	
+	private Pattern pattern;
 
 	@Override
 	protected List<String> getUriList() throws Exception {
-//		return ScanUtil.scan(config.getSrcPath(), config.getPattern(), config.isDelMatchFail());
-		return null;
+		return ScanUtil.scan(srcPath, pattern, isDelMatchFail);
 	}
 
 	@Override
 	protected Executor createExecutor(String sourceUri) throws Exception {
-//		ImportMysqlExample2Helper helper = new ImportMysqlExample2Helper(getName());
-//		Parser parser = new Parser(getName(), sourceUri, sourceUri, config.getBatch(), helper);
-//		return parser;
-		return null;
+		ImportMysqlExample2Helper helper = new ImportMysqlExample2Helper(getName());
+		Parser parser = new Parser(sourceUri, batch, helper);
+		return parser;
 	}
 }

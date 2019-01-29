@@ -14,15 +14,16 @@ import com.fom.log.LoggerFactory;
  */
 public abstract class AbstractParserHelper<V> implements ParserHelper<V> {
 	
-	protected final Logger log;
+	protected Logger log = Logger.getRootLogger();
 	
-	protected final String name;
+	public AbstractParserHelper(){
+		
+	}
 	
 	public AbstractParserHelper(String name){
-		this.name = name;
-		this.log = LoggerFactory.getLogger(name);
+		log = LoggerFactory.getLogger(name);
 	}
-
+	
 	@Override
 	public final void batchProcessLineData(List<V> lineDatas, long batchTime) throws Exception {
 		if(Thread.interrupted()){

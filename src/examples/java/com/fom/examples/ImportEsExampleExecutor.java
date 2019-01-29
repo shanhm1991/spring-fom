@@ -15,9 +15,9 @@ public class ImportEsExampleExecutor extends Parser {
 	
 	private File esJson;
 
-	public ImportEsExampleExecutor(String name, String sourceName, String sourceUri, int batch, 
+	public ImportEsExampleExecutor(String sourceUri, int batch, 
 			ImportEsExampleHelper helper, String esIndex, String esType, File esJson) {
-		super(name, sourceName, sourceUri, batch, helper); 
+		super(sourceUri, batch, helper); 
 		this.esIndex = esIndex;
 		this.esType = esType;
 		this.esJson = esJson;
