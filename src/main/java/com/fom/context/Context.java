@@ -48,69 +48,202 @@ public abstract class Context {
 
 	static final String CANCELLABLE = "cancellable";
 
-	Map<String, Object> valueMap = new ConcurrentHashMap<>();
+	protected final Logger log;
 
-	protected Logger log = Logger.getRootLogger();
+	protected final String name;
 
-	final void initContext(){
-
+	public Context(){
+		Class<?> clazz = this.getClass();
+		FomContext fc = clazz.getAnnotation(FomContext.class);
+		if(fc == null){
+			this.name = clazz.getSimpleName();
+			this.log = LoggerFactory.getLogger(name);
+			setThreadCore(4);
+			setThreadMax(10);
+			setAliveTime(30);
+			setOverTime(3600);
+			setCancellable(false);
+		}else{
+			if(StringUtils.isBlank(fc.name())){
+				this.name = clazz.getSimpleName();
+				this.log = LoggerFactory.getLogger(name);
+			}else{
+				this.name = fc.name();
+				this.log = LoggerFactory.getLogger(name);
+			}
+			setCron(fc.cron());
+			setRemark(fc.remark());
+			setThreadCore(fc.threadCore());
+			setThreadMax(fc.threadMax());
+			setAliveTime(fc.threadAliveTime());
+			setOverTime(fc.threadOverTime());
+			setCancellable(fc.cancellable());
+		}
+		pool.allowCoreThreadTimeOut(true);
+		//在构造器中发布this引用不安全，从ContextManager获取时需要注意
+		ContextManager.register(this);
 	}
 
-	final void initContext(String name) throws Exception{ 
+	public Context(String name){
+		if(StringUtils.isBlank(name)){
+			throw new IllegalArgumentException("param name cann't be empty.");
+		}
 		this.name = name;
 		this.log = LoggerFactory.getLogger(name);
+		Class<?> clazz = this.getClass();
+		FomContext fc = clazz.getAnnotation(FomContext.class);
+		if(fc == null){
+			setThreadCore(4);
+			setThreadMax(10);
+			setAliveTime(30);
+			setOverTime(3600);
+			setCancellable(false);
+		}else{
+			setCron(fc.cron());
+			setRemark(fc.remark());
+			setThreadCore(fc.threadCore());
+			setThreadMax(fc.threadMax());
+			setAliveTime(fc.threadAliveTime());
+			setOverTime(fc.threadOverTime());
+			setCancellable(fc.cancellable());
+		}
 		pool.allowCoreThreadTimeOut(true);
-		
-		FomContext fc = this.getClass().getAnnotation(FomContext.class);
-		setCron(fc.cron());
-		setRemark(fc.remark());
-		setThreadCore(fc.threadCore());
-		setThreadMax(fc.threadMax());
-		setAliveTime(fc.threadAliveTime());
-		setOverTime(fc.threadOverTime());
+		ContextManager.register(this);
 	}
 
-	String name; //初始化后不再修改
+	public Context(String remark, String cron, int threadCore, int threadMax, 
+			int threadAliveTime, int threadOverTime, boolean cancellable){
+		Class<?> clazz = this.getClass();
+		FomContext fc = clazz.getAnnotation(FomContext.class);
+		if(fc == null){
+			this.name = clazz.getSimpleName();
+			this.log = LoggerFactory.getLogger(name);
+		}else{
+			if(StringUtils.isBlank(fc.name())){
+				this.name = clazz.getSimpleName();
+				this.log = LoggerFactory.getLogger(name);
+			}else{
+				this.name = fc.name();
+				this.log = LoggerFactory.getLogger(name);
+			}
+		}
+		setRemark(remark);
+		setCron(cron);
+		setThreadCore(threadCore);
+		setThreadMax(threadMax);
+		setAliveTime(threadAliveTime);
+		setOverTime(threadOverTime);
+		setCancellable(cancellable);
+		ContextManager.register(this);
+	}
+
+	public Context(String name, String remark, String cron, int threadCore, int threadMax, 
+			int threadAliveTime, int threadOverTime, boolean cancellable){
+		if(StringUtils.isBlank(name)){
+			throw new IllegalArgumentException("param name cann't be empty.");
+		}
+		this.name = name;
+		this.log = LoggerFactory.getLogger(name);
+		setRemark(remark);
+		setCron(cron);
+		setThreadCore(threadCore);
+		setThreadMax(threadMax);
+		setAliveTime(threadAliveTime);
+		setOverTime(threadOverTime);
+		setCancellable(cancellable);
+		ContextManager.register(this);
+	}
+
+	/**
+	 * valueMap只允许put动作，在put时先判断key是否存在，再判断value是否相等，可以很好的避免线程安全问题
+	 */
+	private Map<String, Object> valueMap = new ConcurrentHashMap<>();
 
 	private volatile CronExpression cronExpression;
 
-	public final String getName(){
-		return name; 
+	public final String getRemark(){
+		return (String)valueMap.get(REMARK);
 	}
-	
-	void setRemark(String remark){
-		valueMap.put(REMARK, remark);
+
+	public final void setRemark(String remark){
+		if(null == valueMap.get(REMARK) 
+				|| remark.equals(valueMap.get(REMARK))){ 
+			valueMap.put(REMARK, remark);
+		}
 	}
-	
-	void setThreadCore(int threadCore){
+
+	public final int getThreadCore(){
+		return (int)valueMap.get(THREADCORE);
+	}
+
+	public final void setThreadCore(int threadCore){
 		if(threadCore < 1 || threadCore > 10){
 			threadCore = 4;
 		}
-		valueMap.put(THREADCORE, threadCore);
-	}
-	
-	void setThreadMax(int threadMax){
-		if(threadMax < 10 || threadMax > 100){
-			threadMax = 20;
+		if(null == valueMap.get(THREADCORE) 
+				|| threadCore != (int)valueMap.get(THREADCORE)){
+			valueMap.put(THREADCORE, threadCore);
 		}
-		valueMap.put(THREADMAX, threadMax);
 	}
-	
-	void setAliveTime(int aliveTime){
+
+	public final int getThreadMax(){
+		return (int)valueMap.get(THREADMAX);
+	}
+
+	public final void setThreadMax(int threadMax){
+		if(threadMax < 10 || threadMax > 100){
+			threadMax = 10;
+		}
+		if(null == valueMap.get(THREADMAX) 
+				|| threadMax != (int)valueMap.get(THREADMAX)){
+			valueMap.put(THREADMAX, threadMax);
+		}
+	}
+
+	public final int getAliveTime(){
+		return (int)valueMap.get(ALIVETIME);
+	}
+
+	public final void setAliveTime(int aliveTime){
 		if(aliveTime < 3 || aliveTime > 600){
 			aliveTime = 30;
 		}
-		valueMap.put(ALIVETIME, aliveTime);
+		if(null == valueMap.get(ALIVETIME) 
+				|| aliveTime != (int)valueMap.get(ALIVETIME)){
+			valueMap.put(ALIVETIME, aliveTime);
+		}
 	}
-	
-	void setOverTime(int overTime){
+
+	public final int getOverTime(){
+		return (int)valueMap.get(OVERTIME);
+	}
+
+	public final void setOverTime(int overTime){
 		if(overTime < 60 || overTime > 86400){
 			overTime = 3600;
 		}
-		valueMap.put(OVERTIME, overTime);
+		if(null == valueMap.get(OVERTIME) 
+				|| overTime != (int)valueMap.get(OVERTIME)){
+			valueMap.put(OVERTIME, overTime);
+		}
 	}
 
-	void setCron(String cron){
+	public final boolean getCancellable(){
+		return (boolean)valueMap.get(CANCELLABLE);
+	}
+
+	public final void setCancellable(boolean cancellable){
+		if(null == valueMap.get(CANCELLABLE) 
+				|| cancellable != (boolean)valueMap.get(CANCELLABLE)){
+			valueMap.put(CANCELLABLE, cancellable);
+		}
+	}
+
+	public final String getCron(){
+		return (String)valueMap.get(CRON);
+	}
+
+	public final void setCron(String cron){
 		if(StringUtils.isBlank(cron)){
 			return;
 		}
@@ -120,45 +253,45 @@ public abstract class Context {
 		} catch (ParseException e) {
 			throw new IllegalArgumentException(e);
 		}
-		
-		String exist = (String)valueMap.put(CRON, cron);
-		if(!cron.equals(exist)){
+		if(null == valueMap.get(CRON) 
+				|| !cron.equals((String)valueMap.get(CRON))){
+			valueMap.put(CRON, cron);
 			cronExpression = c;
+		}
+	}
+
+	public final void start(){
+		if(state.get()){
+			log.warn("context[" + name + "]已经在运行"); 
+			return;
+		}
+		innerThread = new InnerThread();
+		state.set(true); 
+		log.info("context[" + name + "]启动"); 
+		innerThread.start();
+	}
+
+	public final void stop(){
+		if(!state.get()){
+			log.warn("context[" + name + "]已经停止"); 
+			return;
+		}
+		log.info("context[" + name + "]停止"); 
+		state.set(false); 
+	}
+
+	public final void interrupt(){
+		if(state.get()){
+			log.info("context[" + name + "]重启"); 
+			innerThread.interrupt();
+		}else{
+			start();
 		}
 	}
 
 	private InnerThread innerThread;
 
 	private AtomicBoolean state = new AtomicBoolean(false);
-
-	final void start(){
-		if(state.get()){
-			log.warn("[" + name + "]已经在运行"); 
-			return;
-		}
-		innerThread = new InnerThread();
-		state.set(true); 
-		log.info("启动[" + name + "]"); 
-		innerThread.start();
-	}
-
-	final void stop(){
-		if(!state.get()){
-			log.warn("[" + name + "]已经停止"); 
-			return;
-		}
-		log.info("停止[" + name + "]"); 
-		state.set(false); 
-	}
-
-	final void restart(){
-		if(state.get()){
-			log.info("重启[" + name + "]"); 
-			innerThread.interrupt();
-		}else{
-			start();
-		}
-	}
 
 	private class InnerThread extends Thread {
 
@@ -177,12 +310,12 @@ public abstract class Context {
 				if(pool.getCorePoolSize() != threadCore){
 					pool.setCorePoolSize(threadCore);
 				}
-				
+
 				int threadMax = (int)(valueMap.get(THREADMAX)); 
 				if(pool.getMaximumPoolSize() != threadMax){
 					pool.setMaximumPoolSize(threadMax);
 				}
-				
+
 				int threadAliveTime = (int)(valueMap.get(ALIVETIME)); 
 				if(pool.getKeepAliveTime(TimeUnit.SECONDS) != threadAliveTime){
 					pool.setKeepAliveTime(threadAliveTime, TimeUnit.SECONDS);
@@ -213,21 +346,22 @@ public abstract class Context {
 						}
 					}
 				}
-				synchronized (this) {
-					if(cronExpression == null){
-						//默认只执行一次，执行完便停止，等待提交的线程结束
-						pool.shutdown();
-						try {
-							pool.awaitTermination(1, TimeUnit.DAYS);
-						} catch (InterruptedException e) {
-							log.warn("wait interrupted."); 
-						}
-						cleanFuture();
-						state.set(false); 
-						return;
+				if(cronExpression == null){
+					//默认只执行一次，执行完便停止，等待提交的线程结束
+					pool.shutdown();
+					try {
+						pool.awaitTermination(1, TimeUnit.DAYS);
+					} catch (InterruptedException e) {
+						log.warn("wait interrupted."); 
 					}
-					Date nextTime = cronExpression.getTimeAfter(new Date());
-					long waitTime = nextTime.getTime() - System.currentTimeMillis();
+					cleanFuture();
+					state.set(false); 
+					log.info("context[" + name + "]结束");
+					return;
+				}
+				Date nextTime = cronExpression.getTimeAfter(new Date());
+				long waitTime = nextTime.getTime() - System.currentTimeMillis();
+				synchronized (this) {
 					try {
 						wait(waitTime);
 					} catch (InterruptedException e) {

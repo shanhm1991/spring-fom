@@ -16,11 +16,9 @@ import java.lang.annotation.Target;
 @Documented
 public @interface FomContext {
 
+	public String name() default "";
+	
 	public String remark() default "";
-
-	public String[] names() default "";
-
-	public String pattern() default "";
 
 	public String cron() default "";
 

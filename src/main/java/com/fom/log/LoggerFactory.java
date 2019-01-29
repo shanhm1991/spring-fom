@@ -2,6 +2,7 @@ package com.fom.log;
 
 import java.io.File;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -29,7 +30,11 @@ public class LoggerFactory {
 		appender.setLayout(layout); 
 		appender.setEncoding("UTF-8");
 		appender.setAppend(true);
-		appender.setFile(System.getProperty("log.root") + File.separator + name + ".log");
+		if(StringUtils.isBlank(System.getProperty("log.root"))){
+			appender.setFile("log" + File.separator + name + ".log");
+		}else{
+			appender.setFile(System.getProperty("log.root") + File.separator + name + ".log");
+		}
 		appender.setRolling("false"); 
 		appender.activateOptions();
 		logger.addAppender(appender);  

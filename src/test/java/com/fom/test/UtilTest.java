@@ -6,8 +6,6 @@ import java.io.StringWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.hadoop.conf.Configuration;
@@ -36,9 +34,9 @@ import com.fom.util.IoUtil;
  * 
  * @author shanhm
  *
- */
+ */ 
 public class UtilTest {
-
+	
 	@Test
 	public void cron() throws ParseException{
 		CronExpression cron = new CronExpression("0 0 0/1 * * ?");
@@ -127,26 +125,4 @@ public class UtilTest {
 		}
 	}
 	
-	/**
-	 * 
-	 * 1.用字符串构造对象，异常返回
-	 * 2.字符串放入map, 比较失败则替换当前对象
-	 * 
-	 * @param args
-	 * @throws ParseException
-	 */
-	public static void main(String[] args) throws ParseException {
-		
-		Map<String,Object> map = new HashMap<>();
-		
-//		map.put("a", 1);
-		
-		int a = 1;
-		
-		String s = "asd";
-		
-		System.out.println(s.equals((String)map.get("a")));
-		
-		
-	}
 }

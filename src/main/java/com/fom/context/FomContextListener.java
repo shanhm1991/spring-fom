@@ -2,6 +2,7 @@ package com.fom.context;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.lang.reflect.Constructor;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -180,6 +181,7 @@ public class FomContextListener implements ServletContextListener {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	private void loadContextsElement(Element fom) {
 		Element contexts = fom.element("contexts");
 		if(contexts == null){
@@ -189,28 +191,25 @@ public class FomContextListener implements ServletContextListener {
 		while(it.hasNext()){
 			Element element = (Element)it.next();
 			String name = element.attributeValue("name");
-			String clzz = element.attributeValue("class");
-			if(StringUtils.isBlank(name) || StringUtils.isBlank(clzz)){
-				log.warn("非法context配置:" + name + "=" + clzz); 
+			String clazz = element.attributeValue("class");
+			if(StringUtils.isBlank(clazz)){
+				log.warn("非法context配置:class=" + clazz); 
 				continue;
 			}
 			try {
-				Class<?> contextClass = Class.forName(clzz);
+				Class<?> contextClass = Class.forName(clazz);
 				if(!Context.class.isAssignableFrom(contextClass)){
-					log.warn("非法context配置[没有继承com.fom.context.Context]:" + name + "=" + clzz); 
+					log.warn(clazz + "没有继承com.fom.context.Context, 忽略配置");
 					continue;
 				}
-				Context context = (Context)contextClass.newInstance();
-				context.name = name;
-
-				String remark = "";
-				Element rm = (Element)element.element("remark");
-				if(rm != null){
-					remark = rm.getTextTrim();
+				if(StringUtils.isBlank(name)){ 
+					contextClass.newInstance();
+				}else{
+					Constructor constructor = contextClass.getConstructor(String.class);
+					constructor.newInstance(name);
 				}
-				ContextManager.register(context);
 			} catch (Exception e) {
-				log.error("[" + name + "]context初始化异常", e);
+				log.error("context[" + name + ",class=" + clazz + "]初始化异常", e);
 			}
 		}
 	}
@@ -275,21 +274,19 @@ public class FomContextListener implements ServletContextListener {
 		}
 		for(Class<?> clazz : contextSet){
 			if(!Context.class.isAssignableFrom(clazz)){
-				log.warn(clazz + "没有继承com.fom.context.Context, 忽略无效"); 
+				log.warn(clazz + "没有继承com.fom.context.Context, 忽略@FomContext"); 
 				continue;
 			}
 			FomContext fc = clazz.getAnnotation(FomContext.class);
-			String[] names = fc.names();
-			for(String name : names){
-				try {
-					Context context = (Context)clazz.newInstance();
-					context.name = name;
-					ContextManager.register(context);
-				} catch (Exception e) {
-					log.error("[" + clazz + "]context初始化异常", e);
-					break;
-				} 
+			String name = fc.name();
+			if(StringUtils.isBlank(name)){
+				name = clazz.getSimpleName();
 			}
+			try {
+				clazz.newInstance();
+			} catch (Exception e) {
+				log.error("context[" + name + "]初始化异常", e);
+			} 
 		}
 	}
 
