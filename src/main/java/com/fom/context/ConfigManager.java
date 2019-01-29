@@ -9,8 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.dom4j.Element;
 
-import com.fom.log.LoggerFactory;
-
 /**
  * 
  * @author shanhm
@@ -18,7 +16,7 @@ import com.fom.log.LoggerFactory;
  */
 final class ConfigManager {
 
-	private static final Logger LOG = LoggerFactory.getLogger("context");
+	private static final Logger LOG = Logger.getRootLogger();
 
 	private static Map<String,Config> configMap = new ConcurrentHashMap<String,Config>();
 

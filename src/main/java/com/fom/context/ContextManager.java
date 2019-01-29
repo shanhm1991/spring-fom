@@ -7,8 +7,6 @@ import javax.servlet.ServletContext;
 
 import org.apache.log4j.Logger;
 
-import com.fom.log.LoggerFactory;
-
 /**
  * 
  * @author shanhm
@@ -79,7 +77,7 @@ public class ContextManager {
 		}
 	}
 	
-	private static final Logger LOG = LoggerFactory.getLogger("context");
+	private static final Logger LOG = Logger.getRootLogger();
 	
 	private static Map<String,Context> contextMap = new ConcurrentHashMap<>();
 	

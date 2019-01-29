@@ -19,7 +19,6 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.reflections.Reflections;
 
-import com.fom.log.LoggerFactory;
 import com.fom.util.IoUtil;
 
 /**
@@ -50,7 +49,7 @@ import com.fom.util.IoUtil;
  */
 public class FomContextListener implements ServletContextListener {
 
-	private static Logger log;
+	private static Logger log = Logger.getRootLogger();
 
 	public FomContextListener(){
 
@@ -58,7 +57,6 @@ public class FomContextListener implements ServletContextListener {
 
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
-		log = LoggerFactory.getLogger("context");
 		ServletContext servlet = event.getServletContext(); 
 		setSystem(servlet);
 

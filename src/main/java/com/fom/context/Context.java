@@ -383,8 +383,6 @@ public abstract class Context {
 
 	protected abstract Executor createExecutor(String sourceUri) throws Exception;
 
-	private static final Logger logger = LoggerFactory.getLogger("record");
-
 	private void cleanFuture(){
 		Iterator<Map.Entry<String, TimedFuture<Boolean>>> it = futureMap.entrySet().iterator();
 		while(it.hasNext()){
@@ -410,21 +408,25 @@ public abstract class Context {
 
 			it.remove();
 			boolean result = true;
-			ExecutionException e1 = null;
+			ExecutionException te = null;
 			try {
 				result = future.get();
 			} catch (InterruptedException e) {
 				log.warn("cleanFuture interrupted, and recover interrupt flag."); 
 				Thread.currentThread().interrupt();
 			} catch (ExecutionException e) {
-				e1 = e;
+				te = e;
 			} 
-			StringBuilder builder = new StringBuilder(name + "\t" + result +"\t" + "Exception=");
-			if(e1 == null){
-				builder.append("null");
+			StringBuilder builder = new StringBuilder("sourceUri=" +name 
+					+ ",result=" + result 
+					+ ",creatTime=" + future.getCreateTime()
+					+ ",costTime=" + future.getCost());
+			if(te == null){
+				builder.append(",Exception=null");
 			}else{
-				builder.append(e1.getMessage());
+				builder.append(",Exception=" + te.getMessage());
 			}
+			Logger logger = LoggerFactory.getLogger(name + ".statistic.log");
 			logger.error(builder.toString()); 
 		}
 	}

@@ -26,6 +26,8 @@ public abstract class Executor implements Callable<Boolean> {
 	protected ResultHandler resultHandler;
 
 	private Throwable e;
+	
+	private long cost;
 
 	public Executor(String sourceUri) { 
 		this.sourceUri = sourceUri;
@@ -67,14 +69,16 @@ public abstract class Executor implements Callable<Boolean> {
 		long sTime = System.currentTimeMillis();
 		try {
 			result = onStart() && exec() && onComplete();
+			this.cost = System.currentTimeMillis() - sTime;
 			if(result){
-				log.info("任务完成, 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+				log.info("任务完成, 耗时=" + cost + "ms");
 			}else{
-				log.warn("任务失败, 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+				log.warn("任务失败, 耗时=" + cost + "ms");
 			}
 		} catch(Throwable e) {
 			this.e = e;
-			log.error("任务异常, 耗时=" + (System.currentTimeMillis() - sTime + "ms"), e);
+			this.cost = System.currentTimeMillis() - sTime;
+			log.error("任务异常, 耗时=" + cost, e);
 			if(exceptionHandler != null){
 				exceptionHandler.handle(e); 
 			}
@@ -110,10 +114,10 @@ public abstract class Executor implements Callable<Boolean> {
 		return true;
 	}
 
-	final Throwable getThrowable(){
-		return e;
+	public final String getName(){
+		return name;
 	}
-
+	
 	final void setName(String name){
 		if(StringUtils.isBlank(name)){
 			return;
@@ -122,11 +126,11 @@ public abstract class Executor implements Callable<Boolean> {
 		this.log = LoggerFactory.getLogger(name);
 	}
 	
-	public final String getName(){
-		return name;
+	final Throwable getThrowable(){
+		return e;
 	}
 
-	public final long getCost(){
-		return 0;
+	 final long getCost(){
+		return cost;
 	}
 }

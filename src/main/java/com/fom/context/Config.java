@@ -11,7 +11,6 @@ import org.apache.log4j.Logger;
 import org.dom4j.Element;
 import org.quartz.CronExpression;
 
-import com.fom.log.LoggerFactory;
 import com.fom.util.XmlUtil;
 
 /**
@@ -28,7 +27,7 @@ import com.fom.util.XmlUtil;
  */
 public abstract class Config {
 
-	protected static final Logger LOG = LoggerFactory.getLogger("context"); 
+	protected static final Logger LOG = Logger.getRootLogger();
 
 	protected final String name;
 

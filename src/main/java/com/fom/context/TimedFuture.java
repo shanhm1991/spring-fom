@@ -45,5 +45,12 @@ public class TimedFuture<T> extends FutureTask<T> {
 		}
 		return executor.getCost();
 	}
+	
+	public Throwable getThrowable(){
+		if(executor == null){
+			return null;
+		}
+		return executor.getThrowable();
+	}
 
 }
