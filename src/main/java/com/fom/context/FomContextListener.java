@@ -60,7 +60,7 @@ public class FomContextListener implements ServletContextListener {
 		ServletContext servlet = event.getServletContext(); 
 		setSystem(servlet);
 
-		loadCacheConfigs();
+		//		loadCacheConfigs();
 
 		loadCacheContexts(); 
 
@@ -83,7 +83,7 @@ public class FomContextListener implements ServletContextListener {
 			return;
 		}
 
-		loadConfigsElement(fom);
+		//		loadConfigsElement(fom);
 
 		loadContextsElement(fom);
 
@@ -191,13 +191,15 @@ public class FomContextListener implements ServletContextListener {
 			String name = element.attributeValue("name");
 			String clazz = element.attributeValue("class");
 			if(StringUtils.isBlank(clazz)){
-				log.warn("非法context配置:class=" + clazz); 
+				log.warn("非法配置:[name=" + name + ",class=" + clazz + "]"); 
 				continue;
 			}
+
 			try {
 				Class<?> contextClass = Class.forName(clazz);
 				if(!Context.class.isAssignableFrom(contextClass)){
-					log.warn(clazz + "没有继承com.fom.context.Context, 忽略配置");
+					log.warn("忽略配置,没有继承com.fom.context.Context, [name=" 
+							+ name + ",class=" + clazz + "]");
 					continue;
 				}
 				if(StringUtils.isBlank(name)){ 
@@ -232,7 +234,7 @@ public class FomContextListener implements ServletContextListener {
 				reader.setEncoding("UTF-8");
 				Document doc = reader.read(new FileInputStream(xml));
 				Element root = doc.getRootElement();
-				loadConfigsElement(root);
+				//				loadConfigsElement(root);
 				loadContextsElement(root);
 			}catch(Exception e){
 				log.error("", e); 

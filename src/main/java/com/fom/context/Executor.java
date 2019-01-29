@@ -25,10 +25,13 @@ public abstract class Executor implements Callable<Boolean> {
 
 	protected ResultHandler resultHandler;
 
-	private Throwable e;
+	private volatile Throwable e;
 	
-	private long cost;
+	private volatile long cost;
 
+	/**
+	 * @param sourceUri 资源uri
+	 */
 	public Executor(String sourceUri) { 
 		this.sourceUri = sourceUri;
 	}
@@ -93,8 +96,6 @@ public abstract class Executor implements Callable<Boolean> {
 	 * 在文件处理前时执行的动作
 	 */
 	protected boolean onStart() throws Exception {
-		log.info("ready to process the file,if you want to do something before it,"
-				+ "you could override the method:[boolean onStart(E config) throws Exception]");
 		return true;
 	}
 
@@ -109,8 +110,6 @@ public abstract class Executor implements Callable<Boolean> {
 	 * 在文件处理完成时执行的动作
 	 */
 	protected boolean onComplete() throws Exception {
-		log.info("the file process completed,if you want to do something after it,"
-				+ "you could override the method:[boolean onComplete(E config) throws Exception]");
 		return true;
 	}
 

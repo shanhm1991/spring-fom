@@ -32,7 +32,7 @@ public abstract class Context {
 	private static Map<String,TimedFuture<Boolean>> futureMap = new ConcurrentHashMap<String,TimedFuture<Boolean>>(100);
 
 	//Context私有线程池，在Context结束时shutdown(),等待任务线程自行响应中断
-	private TimedExecutorPool pool = new TimedExecutorPool(4,30,new LinkedBlockingQueue<Runnable>(50));
+	private TimedExecutorPool pool;
 
 	static final String CRON = "cron";
 
@@ -63,6 +63,7 @@ public abstract class Context {
 			setAliveTime(30);
 			setOverTime(3600);
 			setCancellable(false);
+			pool = new TimedExecutorPool(4,30,new LinkedBlockingQueue<Runnable>(200));
 		}else{
 			if(StringUtils.isBlank(fc.name())){
 				this.name = clazz.getSimpleName();
@@ -78,6 +79,7 @@ public abstract class Context {
 			setAliveTime(fc.threadAliveTime());
 			setOverTime(fc.threadOverTime());
 			setCancellable(fc.cancellable());
+			pool = new TimedExecutorPool(4,30,new LinkedBlockingQueue<Runnable>(200));
 		}
 		pool.allowCoreThreadTimeOut(true);
 		//在构造器中发布this引用不安全，从ContextManager获取时需要注意
@@ -98,6 +100,7 @@ public abstract class Context {
 			setAliveTime(30);
 			setOverTime(3600);
 			setCancellable(false);
+			pool = new TimedExecutorPool(4,30,new LinkedBlockingQueue<Runnable>(200));
 		}else{
 			setCron(fc.cron());
 			setRemark(fc.remark());
@@ -106,6 +109,7 @@ public abstract class Context {
 			setAliveTime(fc.threadAliveTime());
 			setOverTime(fc.threadOverTime());
 			setCancellable(fc.cancellable());
+			pool = new TimedExecutorPool(4,30,new LinkedBlockingQueue<Runnable>(200));
 		}
 		pool.allowCoreThreadTimeOut(true);
 		ContextManager.register(this);
@@ -134,6 +138,8 @@ public abstract class Context {
 		setAliveTime(threadAliveTime);
 		setOverTime(threadOverTime);
 		setCancellable(cancellable);
+		pool = new TimedExecutorPool(threadCore,threadAliveTime,new LinkedBlockingQueue<Runnable>(200));
+		pool.allowCoreThreadTimeOut(true);
 		ContextManager.register(this);
 	}
 
@@ -151,6 +157,8 @@ public abstract class Context {
 		setAliveTime(threadAliveTime);
 		setOverTime(threadOverTime);
 		setCancellable(cancellable);
+		pool = new TimedExecutorPool(threadCore,threadAliveTime,new LinkedBlockingQueue<Runnable>(200));
+		pool.allowCoreThreadTimeOut(true);
 		ContextManager.register(this);
 	}
 
