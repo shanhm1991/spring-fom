@@ -45,7 +45,7 @@ public abstract class Context {
 	static final String CRON = "cron";
 
 	static final String REMARK = "remark";
-	
+
 	static final String QUEUESIZE = "queueSize";
 
 	static final String THREADCORE = "threadCore";
@@ -57,10 +57,14 @@ public abstract class Context {
 	static final String OVERTIME = "threadOverTime";
 
 	static final String CANCELLABLE = "cancellable";
-	
+
 	protected final Logger log;
 
 	protected final String name;
+
+	volatile long createTime;
+
+	volatile long startTime;
 
 	//Context私有线程池，在Context结束时shutdown(),等待任务线程自行响应中断
 	private TimedExecutorPool pool;
@@ -93,7 +97,7 @@ public abstract class Context {
 		FomContext fc = clazz.getAnnotation(FomContext.class);
 		initValue(name, fc);
 	}
-	
+
 	/**
 	 * xml > 注解  > 默认
 	 * @param name
@@ -135,8 +139,9 @@ public abstract class Context {
 		}
 		pool = new TimedExecutorPool(core,max,aliveTime,new LinkedBlockingQueue<Runnable>(queueSize));
 		pool.allowCoreThreadTimeOut(true);
+		createTime = System.currentTimeMillis();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void loadconfigs(Element element){
 		List<Element> list = element.elements();
@@ -148,7 +153,7 @@ public abstract class Context {
 			valueMap.put(name, e.getTextTrim());
 		}
 	}
-	
+
 	private int setQueueSize(int queueSize){
 		if(queueSize < 1 || queueSize > 10000000){
 			queueSize = 200;
@@ -159,14 +164,14 @@ public abstract class Context {
 		}
 		return queueSize;
 	}
-	
+
 	private boolean validKey(String key){
 		boolean valid = THREADCORE.equals(key) || THREADMAX.equals(key) 
 				|| ALIVETIME.equals(key) || OVERTIME.equals(key) || QUEUESIZE.equals(key)
 				|| CANCELLABLE.equals(key) || CRON.equals(key) || REMARK.equals(key);
 		return !valid;
 	}
-	
+
 	/**
 	 * 将key-value保存到valueMap中,可以在getValue或其他get中获取
 	 * @param key key
@@ -179,7 +184,7 @@ public abstract class Context {
 		}
 		valueMap.put(key, value);
 	}
-	
+
 	/**
 	 * 通过key获取valueMap中的值
 	 * @param Object
@@ -188,7 +193,7 @@ public abstract class Context {
 	public final Object getValue(String key){
 		return valueMap.get(key);
 	}
-	
+
 	/**
 	 * 获取valueMap中int值
 	 * @param key key
@@ -202,7 +207,7 @@ public abstract class Context {
 			return defaultValue;
 		}
 	}
-	
+
 	/**
 	 * 获取valueMap中long值
 	 * @param key key
@@ -216,7 +221,7 @@ public abstract class Context {
 			return defaultValue;
 		}
 	}
-	
+
 	/**
 	 * 获取valueMap中boolean值
 	 * @param key key
@@ -230,7 +235,7 @@ public abstract class Context {
 			return defaultValue;
 		}
 	}
-	
+
 	/**
 	 * 获取valueMap中string值
 	 * @param key key
@@ -248,7 +253,7 @@ public abstract class Context {
 	/**
 	 * valueMap只允许put动作，在put时先判断key是否存在，再判断value是否相等，可以很好的避免线程安全问题
 	 */
-	private Map<String, Object> valueMap = new ConcurrentHashMap<>();
+	Map<String, Object> valueMap = new ConcurrentHashMap<>();
 
 	private volatile CronExpression cronExpression;
 
@@ -434,6 +439,7 @@ public abstract class Context {
 		state.set(true); 
 		log.info("context[" + name + "]启动"); 
 		innerThread.start();
+		startTime = System.currentTimeMillis();
 	}
 
 	/**
@@ -619,7 +625,7 @@ public abstract class Context {
 		Future<Boolean> future = futureMap.get(key);
 		return future != null && !future.isDone();
 	}
-	
+
 	private static Logger getRecoder(String name){
 		Logger logger = LogManager.exists(name);
 		if(logger != null){
@@ -640,5 +646,9 @@ public abstract class Context {
 		appender.activateOptions();
 		logger.addAppender(appender);  
 		return logger;
+	}
+
+	boolean state(){
+		return state.get();
 	}
 }

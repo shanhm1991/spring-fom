@@ -6,7 +6,6 @@ import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -30,32 +29,30 @@ public class FomServiceImpl implements FomService {
 	
 	@Override
 	public Map<String, Map<String,String>> list() {
-		Map<String, Config> cmap = ConfigManager.getMap();
-		DateFormat format = new SimpleDateFormat("yyyyMMdd HH:mm:ss SSS");
+		DateFormat format = new SimpleDateFormat("yyyyMM ddHHmmss SSS");
 		Map<String, Map<String,String>> map = new HashMap<>();
-		for(Entry<String, Config> entry : cmap.entrySet()){
-			Map<String,String> m = new LinkedHashMap<>();
+		for(Entry<String, Context> entry : ContextManager.contextMap.entrySet()){
+			Map<String,String> m = new HashMap<>();
+			Context c = entry.getValue();
+			m.put("creat", format.format(c.createTime));
+			m.put("isRunning", String.valueOf(c.state()));
+			if(c.startTime == 0){
+				m.put("lastStart", "not started");
+			}else{
+				m.put("lastStart", format.format(c.startTime));
+			}
 			map.put(entry.getKey(), m);
-			Config c = entry.getValue();
-			m.put("lastLoad", format.format(c.loadTime));
-//			if(c.isRunning){
-//				m.put("state", "Running");
-//			}else{
-//				m.put("state", "Dead");
-//			}
-//			if(c.startTime == 0){
-//				m.put("lastStart", "not started");
-//			}else{
-//				m.put("lastStart", format.format(c.startTime));
-//			}
 		}
 		return map;
 	}
 
 	@Override
 	public String detail(String name){
-		Config config = ConfigManager.get(name);
-		return config.toString();
+		Context c = ContextManager.contextMap.get(name);
+		Map<String,Object> map = c.valueMap;
+		map.put("name", c.name);
+		map.put("class", c.getClass().getName());
+		return map.toString();
 	}
 
 	@Override
