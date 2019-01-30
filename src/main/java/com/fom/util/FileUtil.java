@@ -11,7 +11,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-public class ScanUtil {
+public class FileUtil {
 
 	/**
 	 * 

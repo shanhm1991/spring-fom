@@ -29,6 +29,8 @@ public @interface FomContext {
 	public int threadAliveTime() default 30;
 
 	public int threadOverTime() default 3600;
+	
+	public int queueSize() default 200;
 
 	public boolean cancellable() default false;
 

@@ -15,10 +15,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.hdfs.server.namenode.UnsupportedActionException;
 import org.apache.log4j.Logger;
+import org.dom4j.Element;
 import org.quartz.CronExpression;
 
 import com.fom.log.LoggerFactory;
+import com.fom.util.XmlUtil;
 
 /**
  * 
@@ -31,12 +34,14 @@ public abstract class Context {
 	//所有的Context共用，防止两个Context创建针对同一个文件的任务
 	private static Map<String,TimedFuture<Boolean>> futureMap = new ConcurrentHashMap<String,TimedFuture<Boolean>>(100);
 
-	//Context私有线程池，在Context结束时shutdown(),等待任务线程自行响应中断
-	private TimedExecutorPool pool;
+	//容器启动时会给elementMap赋值，Context构造时尝试从中获取配置
+	static final Map<String, Element> elementMap = new ConcurrentHashMap<>();
 
 	static final String CRON = "cron";
 
 	static final String REMARK = "remark";
+	
+	static final String QUEUESIZE = "queueSize";
 
 	static final String THREADCORE = "threadCore";
 
@@ -47,10 +52,13 @@ public abstract class Context {
 	static final String OVERTIME = "threadOverTime";
 
 	static final String CANCELLABLE = "cancellable";
-
+	
 	protected final Logger log;
 
 	protected final String name;
+
+	//Context私有线程池，在Context结束时shutdown(),等待任务线程自行响应中断
+	private TimedExecutorPool pool;
 
 	public Context(){
 		Class<?> clazz = this.getClass();
@@ -58,12 +66,6 @@ public abstract class Context {
 		if(fc == null){
 			this.name = clazz.getSimpleName();
 			this.log = LoggerFactory.getLogger(name);
-			setThreadCore(4);
-			setThreadMax(10);
-			setAliveTime(30);
-			setOverTime(3600);
-			setCancellable(false);
-			pool = new TimedExecutorPool(4,30,new LinkedBlockingQueue<Runnable>(200));
 		}else{
 			if(StringUtils.isBlank(fc.name())){
 				this.name = clazz.getSimpleName();
@@ -72,18 +74,8 @@ public abstract class Context {
 				this.name = fc.name();
 				this.log = LoggerFactory.getLogger(name);
 			}
-			setCron(fc.cron());
-			setRemark(fc.remark());
-			setThreadCore(fc.threadCore());
-			setThreadMax(fc.threadMax());
-			setAliveTime(fc.threadAliveTime());
-			setOverTime(fc.threadOverTime());
-			setCancellable(fc.cancellable());
-			pool = new TimedExecutorPool(4,30,new LinkedBlockingQueue<Runnable>(200));
 		}
-		pool.allowCoreThreadTimeOut(true);
-		//在构造器中发布this引用不安全，从ContextManager获取时需要注意
-		ContextManager.register(this);
+		initValue(name, fc);
 	}
 
 	public Context(String name){
@@ -94,72 +86,149 @@ public abstract class Context {
 		this.log = LoggerFactory.getLogger(name);
 		Class<?> clazz = this.getClass();
 		FomContext fc = clazz.getAnnotation(FomContext.class);
-		if(fc == null){
-			setThreadCore(4);
-			setThreadMax(10);
-			setAliveTime(30);
-			setOverTime(3600);
-			setCancellable(false);
-			pool = new TimedExecutorPool(4,30,new LinkedBlockingQueue<Runnable>(200));
-		}else{
+		initValue(name, fc);
+	}
+	
+	/**
+	 * xml > 注解  > 默认
+	 * @param name
+	 * @param fc
+	 */
+	private void initValue(String name,FomContext fc){
+		int core = 4; 
+		int max = 20;
+		int aliveTime = 30;
+		int overTime = 3600; 
+		int queueSize = 200;
+		Element element = elementMap.get(name); 
+		if(element != null){
+			loadconfigs(element);
+			core = setThreadCore(XmlUtil.getInt(element, THREADCORE, 4, 1, 10));
+			max = setThreadMax(XmlUtil.getInt(element, THREADMAX, 20, 10, 100));
+			aliveTime = setAliveTime(XmlUtil.getInt(element, ALIVETIME, 30, 5, 300));
+			overTime = setOverTime(XmlUtil.getInt(element, OVERTIME, 3600, 60, 86400));
+			queueSize = setQueueSize(XmlUtil.getInt(element, QUEUESIZE, 200, 1, 10000000));
+			setCancellable(XmlUtil.getBoolean(element, CANCELLABLE, false));
+			setCron(XmlUtil.getString(element, CRON, ""));
+			setRemark(XmlUtil.getString(element, REMARK, ""));
+		}else if(fc != null){
+			core = setThreadCore(fc.threadCore());
+			max = setThreadMax(fc.threadMax());
+			aliveTime = setAliveTime(fc.threadAliveTime());
+			overTime = setOverTime(fc.threadOverTime());
+			queueSize = setQueueSize(fc.queueSize());
+			setCancellable(fc.cancellable());
 			setCron(fc.cron());
 			setRemark(fc.remark());
-			setThreadCore(fc.threadCore());
-			setThreadMax(fc.threadMax());
-			setAliveTime(fc.threadAliveTime());
-			setOverTime(fc.threadOverTime());
-			setCancellable(fc.cancellable());
-			pool = new TimedExecutorPool(4,30,new LinkedBlockingQueue<Runnable>(200));
-		}
-		pool.allowCoreThreadTimeOut(true);
-		ContextManager.register(this);
-	}
-
-	public Context(String remark, String cron, int threadCore, int threadMax, 
-			int threadAliveTime, int threadOverTime, boolean cancellable){
-		Class<?> clazz = this.getClass();
-		FomContext fc = clazz.getAnnotation(FomContext.class);
-		if(fc == null){
-			this.name = clazz.getSimpleName();
-			this.log = LoggerFactory.getLogger(name);
 		}else{
-			if(StringUtils.isBlank(fc.name())){
-				this.name = clazz.getSimpleName();
-				this.log = LoggerFactory.getLogger(name);
-			}else{
-				this.name = fc.name();
-				this.log = LoggerFactory.getLogger(name);
-			}
+			setThreadCore(core);
+			setThreadMax(max);
+			setAliveTime(aliveTime);
+			setOverTime(overTime);
+			setQueueSize(queueSize);
+			setCancellable(false);
 		}
-		setRemark(remark);
-		setCron(cron);
-		setThreadCore(threadCore);
-		setThreadMax(threadMax);
-		setAliveTime(threadAliveTime);
-		setOverTime(threadOverTime);
-		setCancellable(cancellable);
-		pool = new TimedExecutorPool(threadCore,threadAliveTime,new LinkedBlockingQueue<Runnable>(200));
+		pool = new TimedExecutorPool(core,max,aliveTime,new LinkedBlockingQueue<Runnable>(queueSize));
 		pool.allowCoreThreadTimeOut(true);
-		ContextManager.register(this);
 	}
-
-	public Context(String name, String remark, String cron, int threadCore, int threadMax, 
-			int threadAliveTime, int threadOverTime, boolean cancellable){
-		if(StringUtils.isBlank(name)){
-			throw new IllegalArgumentException("param name cann't be empty.");
+	
+	@SuppressWarnings("unchecked")
+	private void loadconfigs(Element element){
+		List<Element> list = element.elements();
+		for(Element e : list){
+			valueMap.put(e.getName(), e.getTextTrim());
 		}
-		this.name = name;
-		this.log = LoggerFactory.getLogger(name);
-		setRemark(remark);
-		setCron(cron);
-		setThreadCore(threadCore);
-		setThreadMax(threadMax);
-		setAliveTime(threadAliveTime);
-		setOverTime(threadOverTime);
-		setCancellable(cancellable);
-		pool = new TimedExecutorPool(threadCore,threadAliveTime,new LinkedBlockingQueue<Runnable>(200));
-		pool.allowCoreThreadTimeOut(true);
-		ContextManager.register(this);
+	}
+	
+	private int setQueueSize(int queueSize){
+		if(queueSize < 1 || queueSize > 10000000){
+			queueSize = 200;
+		}
+		if(null == valueMap.get(QUEUESIZE) 
+				|| queueSize != (int)valueMap.get(QUEUESIZE)){
+			valueMap.put(QUEUESIZE, queueSize);
+		}
+		return queueSize;
+	}
+	
+	/**
+	 * 将key-value保存到valueMap中,可以在getValue或其他get中获取
+	 * @param key key
+	 * @param value value
+	 * @throws UnsupportedActionException
+	 */
+	public final void setValue(String key, Object value) throws UnsupportedActionException{
+		if(THREADCORE.equals(key) || THREADMAX.equals(key) 
+				|| ALIVETIME.equals(key) || OVERTIME.equals(key) || QUEUESIZE.equals(key)
+				|| CANCELLABLE.equals(key) || CRON.equals(key) || REMARK.equals(key)){
+			throw new UnsupportedActionException("不支持设置的key:" + key);
+		}
+		valueMap.put(key, value);
+	}
+	
+	/**
+	 * 通过key获取valueMap中的值
+	 * @param Object
+	 * @return
+	 */
+	public final Object getValue(String key){
+		return valueMap.get(key);
+	}
+	
+	/**
+	 * 获取valueMap中int值
+	 * @param key key
+	 * @param defaultValue defaultValue
+	 * @return
+	 */
+	public final int getInt(String key, int defaultValue){
+		try{
+			return Integer.parseInt(String.valueOf(valueMap.get(key)));
+		}catch(Exception e){
+			return defaultValue;
+		}
+	}
+	
+	/**
+	 * 获取valueMap中long值
+	 * @param key key
+	 * @param defaultValue defaultValue
+	 * @return
+	 */
+	public final long getLong(String key, long defaultValue){
+		try{
+			return Long.parseLong(String.valueOf(valueMap.get(key)));
+		}catch(Exception e){
+			return defaultValue;
+		}
+	}
+	
+	/**
+	 * 获取valueMap中boolean值
+	 * @param key key
+	 * @param defaultValue defaultValue
+	 * @return
+	 */
+	public final boolean getBoolean(String key, boolean defaultValue){
+		try{
+			return Boolean.parseBoolean(String.valueOf(valueMap.get(key)));
+		}catch(Exception e){
+			return defaultValue;
+		}
+	}
+	
+	/**
+	 * 获取valueMap中string值
+	 * @param key key
+	 * @param defaultValue defaultValue
+	 * @return
+	 */
+	public final String getString(String key, String defaultValue){
+		String value = String.valueOf(valueMap.get(key));
+		if(StringUtils.isBlank(value)){
+			return defaultValue;
+		}
+		return value;
 	}
 
 	/**
@@ -168,15 +237,27 @@ public abstract class Context {
 	private Map<String, Object> valueMap = new ConcurrentHashMap<>();
 
 	private volatile CronExpression cronExpression;
-	
+
+	/**
+	 * 获取当前Context对象的name
+	 * @return
+	 */
 	public final String getName(){
 		return name;
 	}
 
+	/**
+	 * 获取remark备注信息
+	 * @return
+	 */
 	public final String getRemark(){
 		return (String)valueMap.get(REMARK);
 	}
 
+	/**
+	 * 设置remark备注信息
+	 * @return
+	 */
 	public final void setRemark(String remark){
 		if(null == valueMap.get(REMARK) 
 				|| remark.equals(valueMap.get(REMARK))){ 
@@ -184,11 +265,20 @@ public abstract class Context {
 		}
 	}
 
+	/**
+	 * 获取本地线程池的核心线程数
+	 * @return
+	 */
 	public final int getThreadCore(){
 		return (int)valueMap.get(THREADCORE);
 	}
 
-	public final void setThreadCore(int threadCore){
+	/**
+	 * 设置本地线程池的核心线程数，将在下一个周期生效
+	 * @param threadCore
+	 * @return
+	 */
+	public final int setThreadCore(int threadCore){
 		if(threadCore < 1 || threadCore > 10){
 			threadCore = 4;
 		}
@@ -196,27 +286,46 @@ public abstract class Context {
 				|| threadCore != (int)valueMap.get(THREADCORE)){
 			valueMap.put(THREADCORE, threadCore);
 		}
+		return threadCore;
 	}
 
+	/**
+	 * 获取本地线程池的最大线程数
+	 * @return
+	 */
 	public final int getThreadMax(){
 		return (int)valueMap.get(THREADMAX);
 	}
 
-	public final void setThreadMax(int threadMax){
+	/**
+	 * 设置本地线程池的最大线程数，将在下一个周期生效
+	 * @param threadCore
+	 * @return
+	 */
+	public final int setThreadMax(int threadMax){
 		if(threadMax < 10 || threadMax > 100){
-			threadMax = 10;
+			threadMax = 20;
 		}
 		if(null == valueMap.get(THREADMAX) 
 				|| threadMax != (int)valueMap.get(THREADMAX)){
 			valueMap.put(THREADMAX, threadMax);
 		}
+		return threadMax;
 	}
 
+	/**
+	 * 获取本地线程池的线程存活时间
+	 * @return
+	 */
 	public final int getAliveTime(){
 		return (int)valueMap.get(ALIVETIME);
 	}
 
-	public final void setAliveTime(int aliveTime){
+	/**
+	 * 设置本地线程池的线程存活时间，将在下一个周期生效
+	 * @return
+	 */
+	public final int setAliveTime(int aliveTime){
 		if(aliveTime < 3 || aliveTime > 600){
 			aliveTime = 30;
 		}
@@ -224,13 +333,22 @@ public abstract class Context {
 				|| aliveTime != (int)valueMap.get(ALIVETIME)){
 			valueMap.put(ALIVETIME, aliveTime);
 		}
+		return aliveTime;
 	}
 
+	/**
+	 * 获取任务线程的超时时间
+	 * @return
+	 */
 	public final int getOverTime(){
 		return (int)valueMap.get(OVERTIME);
 	}
 
-	public final void setOverTime(int overTime){
+	/**
+	 * 设置任务线程的超时时间，将在下一个周期生效
+	 * @return
+	 */
+	public final int setOverTime(int overTime){
 		if(overTime < 60 || overTime > 86400){
 			overTime = 3600;
 		}
@@ -238,23 +356,41 @@ public abstract class Context {
 				|| overTime != (int)valueMap.get(OVERTIME)){
 			valueMap.put(OVERTIME, overTime);
 		}
+		return overTime;
 	}
 
+	/**
+	 * 获取cancellable：决定任务线程在执行时间超过overTime时是否中断
+	 * @return
+	 */
 	public final boolean getCancellable(){
 		return (boolean)valueMap.get(CANCELLABLE);
 	}
 
-	public final void setCancellable(boolean cancellable){
+	/**
+	 * 设置cancellable：决定任务线程在执行时间超过overTime时是否中断
+	 * @return
+	 */
+	public final boolean setCancellable(boolean cancellable){
 		if(null == valueMap.get(CANCELLABLE) 
 				|| cancellable != (boolean)valueMap.get(CANCELLABLE)){
 			valueMap.put(CANCELLABLE, cancellable);
 		}
+		return cancellable;
 	}
 
+	/**
+	 * 获取context定时表达式
+	 * @return
+	 */
 	public final String getCron(){
 		return (String)valueMap.get(CRON);
 	}
 
+	/**
+	 * 设置context定时表达式，将在下一个周期生效
+	 * @return
+	 */
 	public final void setCron(String cron){
 		if(StringUtils.isBlank(cron)){
 			return;
@@ -272,6 +408,9 @@ public abstract class Context {
 		}
 	}
 
+	/**
+	 * 启动context
+	 */
 	public final void start(){
 		if(state.get()){
 			log.warn("context[" + name + "]已经在运行"); 
@@ -283,6 +422,9 @@ public abstract class Context {
 		innerThread.start();
 	}
 
+	/**
+	 * 停止context
+	 */
 	public final void stop(){
 		if(!state.get()){
 			log.warn("context[" + name + "]已经停止"); 
@@ -292,6 +434,9 @@ public abstract class Context {
 		state.set(false); 
 	}
 
+	/**
+	 * 中断context
+	 */
 	public final void interrupt(){
 		if(state.get()){
 			log.info("context[" + name + "]重启"); 
@@ -387,8 +532,19 @@ public abstract class Context {
 		}
 	}
 
+	/**
+	 * 返回资源uri列表，context将根据每个uri创建一个Executor执行器提交到线程池
+	 * @return List<String>
+	 * @throws Exception
+	 */
 	protected abstract List<String> getUriList() throws Exception;
 
+	/**
+	 * 根据uri创建一个Executor的具体实例
+	 * @param sourceUri 资源uri
+	 * @return
+	 * @throws Exception
+	 */
 	protected abstract Executor createExecutor(String sourceUri) throws Exception;
 
 	private void cleanFuture(){

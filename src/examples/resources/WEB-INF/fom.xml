@@ -1,15 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 加载优先级 xml > 注解 > 默认值 -->
 <fom>
+
+	<!-- 配置包名，多值逗号分隔，启动时加载所有包下面有@FomContext的context -->
 	<fom-scan>com.fom</fom-scan>
 
+	<!-- 包含配置文件，路径为相对于servletContext根路径的相对路径 -->
 	<includes>
-		<include>examples/ImpotEsExample.xml</include>
-		<include>examples/ImportMysqlExample1.xml</include>
-		<include>examples/ImportMysqlExample2.xml</include>
-		<include>examples/ImportOracleExample1.xml</include>
-		<include>examples/ImportOracleExample2.xml</include>
-		<!-- <include>examples/hdfsDownload.xml</include> -->
-		<!-- <include>examples/HdfsZipDownload.xml</include> -->
+		<!-- <include>examples/mysqlExample.xml</include> <include>examples/oracleExample.xml</include> -->
 	</includes>
+
+	<contexts>
+		<context class="com.fom.examples.DownloadHdfsZipExample">
+			<remark>扫描下载Hdfs指定目录下的目录并打包成zip</remark>
+			<cron>0 0/2 * * * ?</cron>
+			<threadCore>4</threadCore>
+			<threadMax>20</threadMax>
+			<threadAliveTime>3600</threadAliveTime>
+			<threadOverTime>3600</threadOverTime>
+			<queueSize>200</queueSize>
+			<cancellable>false</cancellable>
+			<!-- 以上为默认配置,可以在xml中覆盖默认值，以下为自定义配置 -->
+			<srPath>/test</srPath>
+			<hdfMaster>master.ip:port</hdfMaster>
+			<hdfSlave>slave.ip:port</hdfSlave>
+			<signalFile>a.orc</signalFile>
+			<isSrcDel>false</isSrcDel>
+			<isWithTemp>true</isWithTemp>
+			<desPath>${webapp.root}/download</desPath>
+			<zipEntryMax>100</zipEntryMax>
+			<zipSizeMax>5M</zipSizeMax>
+		</context>
+
+		<!-- context可以不配置name属性，则调用无参构造器，以类名作为name -->
+		<!-- 注意：如果配置name，则调用有参构造器（String），并需要在构造器中指明调用父类super(name) -->
+		<context name="ImpotEsExample" class="com.fom.examples.ImportEsExample">
+			<remark>使用自定义pool的方式将本地指定目录下text文本解析导入Es库</remark>
+			<pattern>demo.bcp</pattern>
+			<srcPath>${webapp.root}/source</srcPath>
+			<batch>5000</batch>
+			<isDelMatchFail>false</isDelMatchFail>
+			<esIndex>demo</esIndex>
+			<esType>demo</esType>
+			<esJson>WEB-INF/index/index_example.json</esJson>
+		</context>
+	</contexts>
 </fom>
 

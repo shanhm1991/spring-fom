@@ -1,7 +1,6 @@
 package com.fom.examples;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,25 +10,20 @@ import org.apache.hadoop.fs.PathFilter;
 
 import com.fom.context.Context;
 import com.fom.context.Executor;
-import com.fom.context.FomContext;
 import com.fom.context.ResultHandler;
 import com.fom.context.executor.ZipDownloader;
 import com.fom.context.helper.HdfsZipDownloaderHelper;
 import com.fom.context.helper.ZipDownloaderHelper;
 import com.fom.util.HdfsUtil;
-import com.fom.util.ScanUtil;
 
 /**
  * 
  * @author shanhm
  *
  */
-@FomContext(remark="扫描下载Hdfs指定目录下的目录并打包成zip")
 public class DownloadHdfsZipExample extends Context {
 
 	private FileSystem fs;
-
-	private String srcPath = "/test";
 
 	private String destPath = "${webapp.root}/download"; 
 
@@ -41,18 +35,18 @@ public class DownloadHdfsZipExample extends Context {
 	
 	private String signalName;
 	
-	public DownloadHdfsZipExample() throws IOException{ 
-		String hdfsMaster = "";
-		String hdfsSlave = "";
-		fs = HdfsUtil.getFileSystem(hdfsMaster, hdfsSlave);
+	public DownloadHdfsZipExample(){
+		
 	}
-
+	
+	public DownloadHdfsZipExample(String name){
+		super(name);
+	}
+	
 	@Override
 	protected List<String> getUriList() throws Exception {
-		String hdfsMaster = "";
-		String hdfsSlave = "";
-		fs = HdfsUtil.getFileSystem(hdfsMaster, hdfsSlave);
-		return ScanUtil.scan(fs, srcPath, null, null);
+		log.info("没有初始化hdfs环境,不创建下载任务");
+		return null;
 	}
 
 	@Override

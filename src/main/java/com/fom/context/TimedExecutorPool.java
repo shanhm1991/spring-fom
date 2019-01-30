@@ -10,10 +10,10 @@ import java.util.concurrent.TimeUnit;
  * @author shanhm
  *
  */
-public class TimedExecutorPool extends ThreadPoolExecutor {
+public class TimedExecutorPool extends ThreadPoolExecutor { 
 
-	public TimedExecutorPool(int minSize, long keepAliveTime, BlockingQueue<Runnable> workQueue) {
-		super(minSize, 20, keepAliveTime, TimeUnit.SECONDS, workQueue);
+	public TimedExecutorPool(int core, int max, long aliveTime, BlockingQueue<Runnable> workQueue) {
+		super(core, max, aliveTime, TimeUnit.SECONDS, workQueue);
 	}
 
 	@Override

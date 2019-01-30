@@ -4,43 +4,57 @@ import java.io.File;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fom.context.Context;
 import com.fom.context.Executor;
-import com.fom.context.FomContext;
-import com.fom.util.ScanUtil;
+import com.fom.util.FileUtil;
 
 /**
  * 
  * @author shanhm
  *
  */
-@FomContext(remark="使用自定义pool的方式将本地指定目录下text文本解析导入Es库")
 public class ImportEsExample extends Context {
 
-	private String srcPath = "${webapp.root}/source";
+	private String srcPath;
 
-	private int batch = 5000;
+	private int batch;
 
-	private boolean isDelMatchFail = false;
+	private boolean isDelMatchFail;
 	
 	private Pattern pattern;
 
-	private String esIndex = "demo";
+	private String esIndex;
 
-	private String esType = "demo";
+	private String esType;
 
-	private File esJsonFile = new File("WEB-INF/index/index_example.json"); 
+	private File esJson;
+	
+	public ImportEsExample(String name){
+		super(name);
+		srcPath = getString("srcPath", "");
+		String str = getString("pattern", "");
+		if(StringUtils.isBlank(str)){
+			pattern = Pattern.compile(str);
+		}
+		batch = getInt("batch", 5000);
+		isDelMatchFail = getBoolean("isDelMatchFail", false);
+		esIndex = getString("esIndex", "");
+		esType = getString("esType", "");
+		esJson = new File(getString("esJson", "")); 
+	}
 
 	@Override
 	protected List<String> getUriList() throws Exception {
-		return ScanUtil.scan(srcPath, pattern, isDelMatchFail);
+		return FileUtil.scan(srcPath, pattern, isDelMatchFail);
 	}
 
 	@Override
 	protected Executor createExecutor(String sourceUri) throws Exception {
 		ImportEsExampleHelper helper = new ImportEsExampleHelper(getName(), esIndex, esType); 
 		ImportEsExampleExecutor executor = 
-				new ImportEsExampleExecutor(sourceUri, batch, helper, esIndex, esType,  esJsonFile);
+				new ImportEsExampleExecutor(sourceUri, batch, helper, esIndex, esType,  esJson);
 		return executor;
 	}
 }

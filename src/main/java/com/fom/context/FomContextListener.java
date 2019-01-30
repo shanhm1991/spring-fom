@@ -19,8 +19,6 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.reflections.Reflections;
 
-import com.fom.util.IoUtil;
-
 /**
  * 初始化容器，加载配置文件fom.xml
  * <br>&lt;fom&gt;
@@ -49,7 +47,7 @@ import com.fom.util.IoUtil;
  */
 public class FomContextListener implements ServletContextListener {
 
-	private static Logger log = Logger.getRootLogger();
+	private static final Logger LOG = Logger.getRootLogger();
 
 	public FomContextListener(){
 
@@ -60,18 +58,15 @@ public class FomContextListener implements ServletContextListener {
 		ServletContext servlet = event.getServletContext(); 
 		setSystem(servlet);
 
-		//		loadCacheConfigs();
-
 		loadCacheContexts(); 
 
-		String file = ContextManager.getContextPath(servlet.getInitParameter("fomConfigLocation"));
+		String file = ContextUtil.getContextPath(servlet.getInitParameter("fomConfigLocation"));
 		File xml = new File(file);
 		if(!xml.exists()){
-			log.error("没有找到fom配置:" + file); 
+			LOG.error("没有找到fom配置:" + file); 
 			return;
 		}
-
-		log.info("加载:" + file); 
+		LOG.info("加载:" + file); 
 		Element fom = null;
 		try{
 			SAXReader reader = new SAXReader();
@@ -79,17 +74,12 @@ public class FomContextListener implements ServletContextListener {
 			Document doc = reader.read(new FileInputStream(xml));
 			fom = doc.getRootElement();
 		}catch(Exception e){
-			log.error("", e); 
+			LOG.error("", e); 
 			return;
 		}
-
-		//		loadConfigsElement(fom);
-
-		loadContextsElement(fom);
-
-		loadIncludesElement(fom);
-
-		loadFomScanElement(fom);
+		loadXmlContexts(fom);
+		loadIncludeContexts(fom);
+		loadAnnotationContexts(fom);
 	} 
 
 	private void setSystem(ServletContext servlet){
@@ -131,56 +121,12 @@ public class FomContextListener implements ServletContextListener {
 		}
 	}
 
-	private void loadCacheConfigs() { 
-		File cache = new File(System.getProperty("cache.config"));
-		if(!cache.exists()){
-			return;
-		}
-		File[] array = cache.listFiles();
-		if(ArrayUtils.isEmpty(array)){
-			return;
-		}
-		for(File file : cache.listFiles()){
-			if(file.isDirectory()){
-				continue;
-			}
-			log.info("加载缓存:" + file.getPath()); 
-			FileInputStream in = null;
-			try{
-				in = new FileInputStream(file);
-				SAXReader reader = new SAXReader(); 
-				reader.setEncoding("UTF-8");
-				Document doc = reader.read(in); 
-				Element element = doc.getRootElement();
-				Config config = ConfigManager.load(element);
-				ConfigManager.register(config); 
-			}catch(Exception e){
-				log.error("", e); 
-			}finally{
-				IoUtil.close(in); 
-			}
-		}
-	}
-
-	//TODO
 	private void loadCacheContexts() {
 
 	}
 
-	private void loadConfigsElement(Element fom){
-		Element configs = fom.element("configs");
-		if(configs == null){
-			return;
-		}
-		Iterator<?> it = configs.elementIterator("config");
-		while(it.hasNext()){
-			Config config = ConfigManager.load((Element)it.next());
-			ConfigManager.register(config); 
-		}
-	}
-
 	@SuppressWarnings("rawtypes")
-	private void loadContextsElement(Element fom) {
+	private void loadXmlContexts(Element fom) {
 		Element contexts = fom.element("contexts");
 		if(contexts == null){
 			return;
@@ -191,30 +137,47 @@ public class FomContextListener implements ServletContextListener {
 			String name = element.attributeValue("name");
 			String clazz = element.attributeValue("class");
 			if(StringUtils.isBlank(clazz)){
-				log.warn("非法配置:[name=" + name + ",class=" + clazz + "]"); 
+				LOG.warn("非法配置:[name=" + name + ",class=" + clazz + "]"); 
 				continue;
 			}
-
 			try {
 				Class<?> contextClass = Class.forName(clazz);
 				if(!Context.class.isAssignableFrom(contextClass)){
-					log.warn("忽略配置,没有继承com.fom.context.Context, [name=" 
+					LOG.warn("忽略配置,没有继承com.fom.context.Context, [name=" 
 							+ name + ",class=" + clazz + "]");
 					continue;
 				}
+				boolean isNameEmpty = false; 
 				if(StringUtils.isBlank(name)){ 
-					contextClass.newInstance();
+					isNameEmpty = true;
+					FomContext fc = contextClass.getAnnotation(FomContext.class);
+					if(fc != null && !StringUtils.isBlank(fc.name())){
+						name = fc.name();
+					}else{
+						name = contextClass.getSimpleName();
+					}
+				}
+				if(ContextManager.exist(name)){
+					LOG.warn("context[" + name + "]已经存在,取消加载.");
+					continue;
+				}
+				
+				Context.elementMap.put(name, element);
+				Context context = null;
+				if(isNameEmpty){ 
+					context = (Context)contextClass.newInstance();
 				}else{
 					Constructor constructor = contextClass.getConstructor(String.class);
-					constructor.newInstance(name);
+					context = (Context)constructor.newInstance(name);
 				}
+				ContextManager.register(context); 
 			} catch (Exception e) {
-				log.error("context[" + name + ",class=" + clazz + "]初始化异常", e);
+				LOG.error("context[" + name + ",class=" + clazz + "]初始化异常", e);
 			}
 		}
 	}
 
-	private void loadIncludesElement(Element fom) {
+	private void loadIncludeContexts(Element fom) {
 		Element includes = fom.element("includes");
 		if(includes == null){
 			return;
@@ -222,27 +185,26 @@ public class FomContextListener implements ServletContextListener {
 		Iterator<?> it = includes.elementIterator("include");
 		while(it.hasNext()){
 			Element element = (Element)it.next();
-			String location = ContextManager.getContextPath(element.getTextTrim());
+			String location = ContextUtil.getContextPath(element.getTextTrim());
 			File xml = new File(location);
 			if(!xml.exists()){
-				log.warn("没有找到配置:" + location);  
+				LOG.warn("没有找到配置:" + location);  
 				continue;
 			}
-			log.info("加载配置:" + location);
+			LOG.info("加载配置:" + location);
 			try{
 				SAXReader reader = new SAXReader();
 				reader.setEncoding("UTF-8");
 				Document doc = reader.read(new FileInputStream(xml));
 				Element root = doc.getRootElement();
-				//				loadConfigsElement(root);
-				loadContextsElement(root);
+				loadXmlContexts(root);
 			}catch(Exception e){
-				log.error("", e); 
+				LOG.error("", e); 
 			}
 		}
 	}
 
-	private void loadFomScanElement(Element fom) {
+	private void loadAnnotationContexts(Element fom){
 		Element scan = fom.element("fom-scan");
 		if(scan == null){
 			return;
@@ -255,18 +217,7 @@ public class FomContextListener implements ServletContextListener {
 		if(ArrayUtils.isEmpty(pckages)){
 			return;
 		}
-
-		loadAnnotationConfigs(pckages);
-
-		loadAnnotationContexts(pckages);
-	}
-
-	//TODO
-	private void loadAnnotationConfigs(String[] pckages){
-
-	}
-
-	private void loadAnnotationContexts(String[] pckages){
+		
 		Set<Class<?>> contextSet = new HashSet<>();
 		for(String pack : pckages){
 			Reflections reflections = new Reflections(pack.trim());
@@ -274,18 +225,14 @@ public class FomContextListener implements ServletContextListener {
 		}
 		for(Class<?> clazz : contextSet){
 			if(!Context.class.isAssignableFrom(clazz)){
-				log.warn(clazz + "没有继承com.fom.context.Context, 忽略@FomContext"); 
+				LOG.warn(clazz + "没有继承com.fom.context.Context, 忽略@FomContext"); 
 				continue;
 			}
-			FomContext fc = clazz.getAnnotation(FomContext.class);
-			String name = fc.name();
-			if(StringUtils.isBlank(name)){
-				name = clazz.getSimpleName();
-			}
 			try {
-				clazz.newInstance();
+				Context context = (Context)clazz.newInstance();
+				ContextManager.register(context); 
 			} catch (Exception e) {
-				log.error("context[" + name + "]初始化异常", e);
+				LOG.error("context[" + clazz.getName() + "]初始化异常", e);
 			} 
 		}
 	}

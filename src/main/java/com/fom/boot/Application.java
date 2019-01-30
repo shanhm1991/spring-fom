@@ -14,7 +14,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.context.annotation.ComponentScan;
 
-import com.fom.context.ContextManager;
+import com.fom.context.ContextUtil;
 
 /**
  * 启动参数:<br>
@@ -64,6 +64,6 @@ public class Application implements ServletContextInitializer {
 		}
 		context.setInitParameter("fomConfigLocation", fomPath);
 		context.setInitParameter("poolConfigLocation", poolpath);	
-		ContextManager.setContext(context);
+		ContextUtil.setContext(context);
 	}
 }
