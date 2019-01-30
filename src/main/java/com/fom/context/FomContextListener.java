@@ -80,6 +80,7 @@ public class FomContextListener implements ServletContextListener {
 		loadXmlContexts(fom);
 		loadIncludeContexts(fom);
 		loadAnnotationContexts(fom);
+		ContextManager.startAll();
 	} 
 
 	private void setSystem(ServletContext servlet){

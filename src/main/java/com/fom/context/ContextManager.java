@@ -1,6 +1,7 @@
 package com.fom.context;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.log4j.Logger;
@@ -26,5 +27,13 @@ public class ContextManager {
 		}
 		contextMap.put(context.name, context);
 		LOG.info("加载context[" + context.name + "]");
+	}
+	
+	static void startAll(){
+		for(Entry<String, Context> entry : contextMap.entrySet()){
+			LOG.info("启动context[" + entry.getKey() + "]");
+			entry.getValue().start();
+		}
+		
 	}
 }

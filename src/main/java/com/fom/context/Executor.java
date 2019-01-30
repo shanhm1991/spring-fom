@@ -26,7 +26,7 @@ public abstract class Executor implements Callable<Boolean> {
 	protected ResultHandler resultHandler;
 
 	private volatile Throwable e;
-	
+
 	private volatile long cost;
 
 	/**
@@ -79,6 +79,7 @@ public abstract class Executor implements Callable<Boolean> {
 				log.warn("任务失败, 耗时=" + cost + "ms");
 			}
 		} catch(Throwable e) {
+			result = false;
 			this.e = e;
 			this.cost = System.currentTimeMillis() - sTime;
 			log.error("任务异常, 耗时=" + cost, e);
@@ -116,7 +117,7 @@ public abstract class Executor implements Callable<Boolean> {
 	public final String getName(){
 		return name;
 	}
-	
+
 	final void setName(String name){
 		if(StringUtils.isBlank(name)){
 			return;
@@ -124,12 +125,12 @@ public abstract class Executor implements Callable<Boolean> {
 		this.name = name;
 		this.log = LoggerFactory.getLogger(name);
 	}
-	
+
 	final Throwable getThrowable(){
 		return e;
 	}
 
-	 final long getCost(){
+	final long getCost(){
 		return cost;
 	}
 }

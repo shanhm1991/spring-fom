@@ -47,7 +47,7 @@ public class ImportEsExampleHelper extends AbstractParserHelper<Map<String, Obje
 		map.put("ID", array[0]);
 		map.put("NAME", array[1]);
 		map.put("SOURCE", "local");
-		map.put("FILETYPE", "txt/orc");
+		map.put("FILETYPE", "txt");
 		map.put("IMPORTWAY", "pool");
 		lineDatas.add(map);
 	}

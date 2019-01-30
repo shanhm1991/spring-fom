@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fom>
+	<contexts>
+		<context class="com.fom.examples.ImportMysqlExample1">
+			<remark>使用Mybatis的方式将本地指定目录下text文本解析导入Mysql库</remark>
+			<cron>0/5 * * * * ?</cron>
+			<pattern>demo.txt</pattern>
+			<srcPath>/source</srcPath>
+			<batch>5000</batch>
+			<isDelMatchFail>false</isDelMatchFail>
+		</context>
+
+		<context name="ImportMysqlExample2" class="com.fom.examples.ImportMysqlExample2">
+			<remark>使用自定义pool的方式将本地指定目录下text文本解析导入Mysql库</remark>
+			<cron>0/10 * * * * ?</cron>
+			<pattern>test.txt</pattern>
+			<srcPath>/source</srcPath>
+			<batch>5000</batch>
+			<isDelMatchFail>false</isDelMatchFail>
+		</context>
+	</contexts>
+</fom>

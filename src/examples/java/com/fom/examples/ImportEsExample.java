@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fom.context.Context;
+import com.fom.context.ContextUtil;
 import com.fom.context.Executor;
 import com.fom.util.FileUtil;
 
@@ -33,21 +34,22 @@ public class ImportEsExample extends Context {
 	
 	public ImportEsExample(String name){
 		super(name);
-		srcPath = getString("srcPath", "");
+		srcPath = ContextUtil.getContextPath(getString("srcPath", ""));
 		String str = getString("pattern", "");
-		if(StringUtils.isBlank(str)){
+		if(!StringUtils.isBlank(str)){
 			pattern = Pattern.compile(str);
 		}
 		batch = getInt("batch", 5000);
 		isDelMatchFail = getBoolean("isDelMatchFail", false);
 		esIndex = getString("esIndex", "");
 		esType = getString("esType", "");
-		esJson = new File(getString("esJson", "")); 
+		esJson = new File(ContextUtil.getContextPath((getString("esJson", "")))); 
 	}
 
 	@Override
 	protected List<String> getUriList() throws Exception {
-		return FileUtil.scan(srcPath, pattern, isDelMatchFail);
+		List<String> list = FileUtil.scan(srcPath, pattern, isDelMatchFail);
+		return list;
 	}
 
 	@Override

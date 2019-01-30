@@ -8,13 +8,14 @@
 
 	<!-- 包含配置文件，路径为相对于servletContext根路径的相对路径 -->
 	<includes>
-		<!-- <include>examples/mysqlExample.xml</include> <include>examples/oracleExample.xml</include> -->
+		<include>examples/mysqlTextExamples.xml</include>
+		<include>examples/oracleZipExamples.xml</include>
 	</includes>
 
 	<contexts>
 		<context class="com.fom.examples.DownloadHdfsZipExample">
 			<remark>扫描下载Hdfs指定目录下的目录并打包成zip</remark>
-			<cron>0 0/2 * * * ?</cron>
+			<cron></cron>
 			<threadCore>4</threadCore>
 			<threadMax>20</threadMax>
 			<threadAliveTime>3600</threadAliveTime>
@@ -35,14 +36,28 @@
 
 		<!-- context可以不配置name属性，则调用无参构造器，以类名作为name -->
 		<!-- 注意：如果配置name，则调用有参构造器（String），并需要在构造器中指明调用父类super(name) -->
+		<!-- 同一个context类可以配置多个不同名称的context实例，分别配置，但在使用注解时只能一个类给定一个name -->
 		<context name="ImpotEsExample" class="com.fom.examples.ImportEsExample">
 			<remark>使用自定义pool的方式将本地指定目录下text文本解析导入Es库</remark>
+			<cron>0/5 0 * * * ?</cron>
 			<pattern>demo.bcp</pattern>
-			<srcPath>${webapp.root}/source</srcPath>
+			<srcPath>/source</srcPath>
 			<batch>5000</batch>
 			<isDelMatchFail>false</isDelMatchFail>
 			<esIndex>demo</esIndex>
 			<esType>demo</esType>
+			<esJson>WEB-INF/index/index_example.json</esJson>
+		</context>
+
+		<context name="ImpotEsExample2" class="com.fom.examples.ImportEsExample">
+			<remark>使用自定义pool的方式将本地指定目录下text文本解析导入Es库</remark>
+			<cron>0/10 * * * * ?</cron>
+			<pattern>demo2.bcp</pattern>
+			<srcPath>/source</srcPath>
+			<batch>3000</batch>
+			<isDelMatchFail>false</isDelMatchFail>
+			<esIndex>demo2</esIndex>
+			<esType>demo2</esType>
 			<esJson>WEB-INF/index/index_example.json</esJson>
 		</context>
 	</contexts>

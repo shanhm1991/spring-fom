@@ -3,7 +3,10 @@ package com.fom.examples;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fom.context.Context;
+import com.fom.context.ContextUtil;
 import com.fom.context.Executor;
 import com.fom.context.executor.Parser;
 import com.fom.util.FileUtil;
@@ -15,13 +18,24 @@ import com.fom.util.FileUtil;
  */
 public class ImportMysqlExample2 extends Context {
 	
-	private String srcPath = "${webapp.root}/source";
+	private String srcPath;
 
-	private int batch = 5000;
+	private int batch;
 
-	private boolean isDelMatchFail = false;
+	private boolean isDelMatchFail;
 	
 	private Pattern pattern;
+	
+	public ImportMysqlExample2(String name){
+		super(name);
+		srcPath = ContextUtil.getContextPath(getString("srcPath", ""));
+		batch = getInt("batch", 5000);
+		isDelMatchFail = getBoolean("isDelMatchFail", false);
+		String str = getString("pattern", "");
+		if(!StringUtils.isBlank(str)){
+			pattern = Pattern.compile(str);
+		}
+	}
 
 	@Override
 	protected List<String> getUriList() throws Exception {

@@ -16,7 +16,7 @@ import com.fom.context.helper.HdfsDownloaderHelper;
  * @author shanhm
  *
  */
-@FomContext(remark="扫描下载Hdfs指定目录下文件的默认实现", cron="0 0/1 * * * ?")
+@FomContext(remark="扫描下载Hdfs指定目录下文件的默认实现", cron="0/15 * * * * ?")
 public class DownloadHdfsExample extends Context {
 
 	private FileSystem fs;

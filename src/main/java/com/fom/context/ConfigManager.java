@@ -88,5 +88,4 @@ final class ConfigManager {
 		}
 		return config;
 	}
-
 }

@@ -59,14 +59,17 @@ public class FileUtil {
 
 	public static final List<String> scan(String srcUri, Pattern pattern, boolean isDelMatchFail) throws Exception {
 		List<String> list = new LinkedList<>();
+		if(srcUri == null){
+			return list;
+		}
+		
 		File[] array = new File(srcUri).listFiles();
 		if(ArrayUtils.isEmpty(array)){
 			return list;
 		}
-
 		for(File file : array){
 			String name = file.getName();
-			if(pattern.matcher(name).find()){
+			if(pattern != null && pattern.matcher(name).find()){
 				list.add(file.getPath());
 				continue;
 			}

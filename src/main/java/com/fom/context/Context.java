@@ -1,5 +1,6 @@
 package com.fom.context;
 
+import java.io.File;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Iterator;
@@ -16,10 +17,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.hdfs.server.namenode.UnsupportedActionException;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
 import org.dom4j.Element;
 import org.quartz.CronExpression;
 
+import com.fom.log.LoggerAppender;
 import com.fom.log.LoggerFactory;
 import com.fom.util.XmlUtil;
 
@@ -102,7 +107,6 @@ public abstract class Context {
 		int queueSize = 200;
 		Element element = elementMap.get(name); 
 		if(element != null){
-			loadconfigs(element);
 			core = setThreadCore(XmlUtil.getInt(element, THREADCORE, 4, 1, 10));
 			max = setThreadMax(XmlUtil.getInt(element, THREADMAX, 20, 10, 100));
 			aliveTime = setAliveTime(XmlUtil.getInt(element, ALIVETIME, 30, 5, 300));
@@ -111,6 +115,7 @@ public abstract class Context {
 			setCancellable(XmlUtil.getBoolean(element, CANCELLABLE, false));
 			setCron(XmlUtil.getString(element, CRON, ""));
 			setRemark(XmlUtil.getString(element, REMARK, ""));
+			loadconfigs(element);
 		}else if(fc != null){
 			core = setThreadCore(fc.threadCore());
 			max = setThreadMax(fc.threadMax());
@@ -136,7 +141,11 @@ public abstract class Context {
 	private void loadconfigs(Element element){
 		List<Element> list = element.elements();
 		for(Element e : list){
-			valueMap.put(e.getName(), e.getTextTrim());
+			String name = e.getName();
+			if(!validKey(name)){
+				continue;
+			}
+			valueMap.put(name, e.getTextTrim());
 		}
 	}
 	
@@ -151,6 +160,13 @@ public abstract class Context {
 		return queueSize;
 	}
 	
+	private boolean validKey(String key){
+		boolean valid = THREADCORE.equals(key) || THREADMAX.equals(key) 
+				|| ALIVETIME.equals(key) || OVERTIME.equals(key) || QUEUESIZE.equals(key)
+				|| CANCELLABLE.equals(key) || CRON.equals(key) || REMARK.equals(key);
+		return !valid;
+	}
+	
 	/**
 	 * 将key-value保存到valueMap中,可以在getValue或其他get中获取
 	 * @param key key
@@ -158,9 +174,7 @@ public abstract class Context {
 	 * @throws UnsupportedActionException
 	 */
 	public final void setValue(String key, Object value) throws UnsupportedActionException{
-		if(THREADCORE.equals(key) || THREADMAX.equals(key) 
-				|| ALIVETIME.equals(key) || OVERTIME.equals(key) || QUEUESIZE.equals(key)
-				|| CANCELLABLE.equals(key) || CRON.equals(key) || REMARK.equals(key)){
+		if(!validKey(key)){
 			throw new UnsupportedActionException("不支持设置的key:" + key);
 		}
 		valueMap.put(key, value);
@@ -572,25 +586,26 @@ public abstract class Context {
 
 			it.remove();
 			boolean result = true;
-			ExecutionException te = null;
+			Throwable te = null;
 			try {
 				result = future.get();
 			} catch (InterruptedException e) {
 				log.warn("cleanFuture interrupted, and recover interrupt flag."); 
 				Thread.currentThread().interrupt();
 			} catch (ExecutionException e) {
-				te = e;
+				log.error("", e); 
 			} 
-			StringBuilder builder = new StringBuilder("sourceUri=" +name 
-					+ ",result=" + result 
-					+ ",creatTime=" + future.getCreateTime()
-					+ ",costTime=" + future.getCost());
+			te = future.getThrowable();
+			StringBuilder builder = new StringBuilder("sourceUri=" +sourceUri 
+					+ ", result=" + result 
+					+ ", creatTime=" + future.getCreateTime()
+					+ ", costTime=" + future.getCost());
 			if(te == null){
-				builder.append(",Exception=null");
+				builder.append(", Exception=null");
 			}else{
-				builder.append(",Exception=" + te.getMessage());
+				builder.append(", Exception=" + te.getMessage());
 			}
-			Logger logger = LoggerFactory.getLogger(name + ".statistic.log");
+			Logger logger = getRecoder(name + ".statistic");
 			logger.error(builder.toString()); 
 		}
 	}
@@ -603,5 +618,27 @@ public abstract class Context {
 	private boolean isExecutorAlive(String key){
 		Future<Boolean> future = futureMap.get(key);
 		return future != null && !future.isDone();
+	}
+	
+	private static Logger getRecoder(String name){
+		Logger logger = LogManager.exists(name);
+		if(logger != null){
+			return logger;
+		}
+		logger = Logger.getLogger(name); 
+		logger.setLevel(Level.INFO);  
+		logger.setAdditivity(false); 
+		logger.removeAllAppenders();
+		LoggerAppender appender = new LoggerAppender();
+		PatternLayout layout = new PatternLayout();  
+		layout.setConversionPattern("%m%n");  
+		appender.setLayout(layout); 
+		appender.setEncoding("UTF-8");
+		appender.setAppend(true);
+		appender.setFile(System.getProperty("log.root") + File.separator + name);
+		appender.setRolling("false"); 
+		appender.activateOptions();
+		logger.addAppender(appender);  
+		return logger;
 	}
 }
