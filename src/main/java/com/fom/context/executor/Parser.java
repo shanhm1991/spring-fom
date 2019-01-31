@@ -84,7 +84,7 @@ public class Parser extends Executor {
 	@Override
 	protected boolean onStart() throws Exception { 
 		String logName = new File(sourceUri).getName();
-		this.logFile = new File(System.getProperty("import.progress") 
+		this.logFile = new File(System.getProperty("cache.parse") 
 				+ File.separator + name + File.separator + logName + ".log");
 		File parentFile = logFile.getParentFile();
 		if(!parentFile.exists() && !parentFile.mkdirs()){

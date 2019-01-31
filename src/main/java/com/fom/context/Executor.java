@@ -1,10 +1,15 @@
 package com.fom.context;
 
+import java.io.File;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
 
+import com.fom.log.LoggerAppender;
 import com.fom.log.LoggerFactory;
 
 /**
@@ -13,7 +18,7 @@ import com.fom.log.LoggerFactory;
  * @author shanhm
  *
  */
-public abstract class Executor implements Callable<Boolean> {
+public abstract class Executor implements Callable<Result> {
 
 	protected volatile Logger log = Logger.getRootLogger();
 
@@ -24,10 +29,6 @@ public abstract class Executor implements Callable<Boolean> {
 	protected ExceptionHandler exceptionHandler;
 
 	protected ResultHandler resultHandler;
-
-	private volatile Throwable e;
-
-	private volatile long cost;
 
 	/**
 	 * @param sourceUri 资源uri
@@ -66,27 +67,32 @@ public abstract class Executor implements Callable<Boolean> {
 	}
 
 	@Override
-	public final Boolean call() throws Exception {  
+	public final Result call() throws Exception {  
 		Thread.currentThread().setName("[" + sourceUri + "]");
-		boolean result = true;
+		Result result = new Result(sourceUri); 
 		long sTime = System.currentTimeMillis();
+		result.startTime = sTime;
 		try {
-			result = onStart() && exec() && onComplete();
-			this.cost = System.currentTimeMillis() - sTime;
-			if(result){
+			boolean res = onStart() && exec() && onComplete();
+			long cost = System.currentTimeMillis() - sTime;
+			if(res){
 				log.info("任务完成, 耗时=" + cost + "ms");
 			}else{
 				log.warn("任务失败, 耗时=" + cost + "ms");
 			}
+			result.result = res;
+			result.costTime = cost;
 		} catch(Throwable e) {
-			result = false;
-			this.e = e;
-			this.cost = System.currentTimeMillis() - sTime;
+			long cost = System.currentTimeMillis() - sTime;
 			log.error("任务异常, 耗时=" + cost, e);
+			result.result = false;
+			result.throwable = e;
 			if(exceptionHandler != null){
 				exceptionHandler.handle(e); 
 			}
 		}
+		
+		record(name, result);
 		if(resultHandler != null){
 			resultHandler.handle(result);
 		}
@@ -113,6 +119,41 @@ public abstract class Executor implements Callable<Boolean> {
 	protected boolean onComplete() throws Exception {
 		return true;
 	}
+	
+	private static void record(String name, Result result){
+		String logName = name + ".record";
+		Logger logger = LogManager.exists(logName);
+		if(logger == null){
+			logger = Logger.getLogger(logName); 
+			logger.setLevel(Level.INFO);  
+			logger.setAdditivity(false); 
+			logger.removeAllAppenders();
+			LoggerAppender appender = new LoggerAppender();
+			PatternLayout layout = new PatternLayout();  
+			layout.setConversionPattern("%m%n");  
+			appender.setLayout(layout); 
+			appender.setEncoding("UTF-8");
+			appender.setAppend(true);
+			if(StringUtils.isBlank(System.getProperty("log.root"))){
+				appender.setFile("log" + File.separator + logName);
+			}else{
+				appender.setFile(System.getProperty("log.root") + File.separator + logName);
+			}
+			appender.setRolling("false"); 
+			appender.activateOptions();
+			logger.addAppender(appender); 
+		}
+		StringBuilder builder = new StringBuilder("sourceUri=" + result.sourceUri
+				+ ", result=" + result.result
+				+ ", startTime=" + result.startTime
+				+ ", costTime=" + result.costTime);
+		if(result.throwable == null){
+			builder.append(", Throwable=null");
+		}else{
+			builder.append(", Throwable=" + result.throwable.getMessage());
+		}
+		logger.error(builder.toString()); 
+	}
 
 	public final String getName(){
 		return name;
@@ -125,12 +166,5 @@ public abstract class Executor implements Callable<Boolean> {
 		this.name = name;
 		this.log = LoggerFactory.getLogger(name);
 	}
-
-	final Throwable getThrowable(){
-		return e;
-	}
-
-	final long getCost(){
-		return cost;
-	}
+	
 }

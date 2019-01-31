@@ -39,7 +39,7 @@
 		<!-- 同一个context类可以配置多个不同名称的context实例，分别配置，但在使用注解时只能一个类给定一个name -->
 		<context name="ImpotEsExample" class="com.fom.examples.ImportEsExample">
 			<remark>使用自定义pool的方式将本地指定目录下text文本解析导入Es库</remark>
-			<cron>0/5 0 * * * ?</cron>
+			<cron>0/5 * * * * ?</cron>
 			<pattern>demo.bcp</pattern>
 			<srcPath>/source</srcPath>
 			<batch>5000</batch>

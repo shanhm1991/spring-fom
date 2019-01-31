@@ -8,8 +8,6 @@ import java.security.MessageDigest;
 
 import org.apache.log4j.Logger;
 
-import com.fom.log.LoggerFactory;
-
 /**
  * 引入一个Md5工具类，修正线程安全问题
  * 
@@ -18,7 +16,7 @@ import com.fom.log.LoggerFactory;
  */
 public class Md5Util {
 
-	private static final Logger LOG = LoggerFactory.getLogger("fom");
+	private static final Logger LOG = Logger.getRootLogger();
 	
 	/**
 	 * 默认的密码字符串组合，用来将字节转换成 16 进制表示的字符,

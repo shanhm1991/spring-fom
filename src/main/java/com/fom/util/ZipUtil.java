@@ -16,8 +16,6 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.log4j.Logger;
 
-import com.fom.log.LoggerFactory;
-
 import net.lingala.zip4j.core.HeaderReader;
 import net.lingala.zip4j.model.FileHeader;
 import net.lingala.zip4j.model.ZipModel;
@@ -30,7 +28,7 @@ import net.lingala.zip4j.util.InternalZipConstants;
  */
 public class ZipUtil {
 	
-	private static final Logger LOG = LoggerFactory.getLogger("fom");
+	private static final Logger LOG = Logger.getRootLogger();
 	
 	/**
 	 * 解压指定uri的zip文件到指定目录

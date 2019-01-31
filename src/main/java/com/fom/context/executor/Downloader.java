@@ -106,7 +106,7 @@ public final class Downloader extends Executor {
 		if(!isWithTemp){
 			this.downloadPath = destPath;
 		}else{
-			this.downloadPath = System.getProperty("download.temp") + File.separator + getName();
+			this.downloadPath = System.getProperty("cache.download") + File.separator + getName();
 		}
 		File file = new File(downloadPath);
 		if(!file.exists() && !file.mkdirs()){

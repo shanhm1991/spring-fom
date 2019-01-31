@@ -1,6 +1,5 @@
 package com.fom.context;
 
-import java.io.File;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Iterator;
@@ -8,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
@@ -17,14 +15,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.hdfs.server.namenode.UnsupportedActionException;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
 import org.dom4j.Element;
 import org.quartz.CronExpression;
 
-import com.fom.log.LoggerAppender;
 import com.fom.log.LoggerFactory;
 import com.fom.util.XmlUtil;
 
@@ -37,7 +31,7 @@ import com.fom.util.XmlUtil;
 public abstract class Context {
 
 	//所有的Context共用，防止两个Context创建针对同一个文件的任务
-	private static Map<String,TimedFuture<Boolean>> futureMap = new ConcurrentHashMap<String,TimedFuture<Boolean>>(100);
+	private static Map<String,TimedFuture<Result>> futureMap = new ConcurrentHashMap<>(500);
 
 	//容器启动时会给elementMap赋值，Context构造时尝试从中获取配置
 	static final Map<String, Element> elementMap = new ConcurrentHashMap<>();
@@ -61,7 +55,7 @@ public abstract class Context {
 	protected final Logger log;
 
 	protected final String name;
-
+	
 	volatile long createTime;
 
 	volatile long startTime;
@@ -256,6 +250,10 @@ public abstract class Context {
 	Map<String, Object> valueMap = new ConcurrentHashMap<>();
 
 	private volatile CronExpression cronExpression;
+	
+	boolean state(){
+		return state.get();
+	}
 
 	/**
 	 * 获取当前Context对象的name
@@ -568,18 +566,16 @@ public abstract class Context {
 	protected abstract Executor createExecutor(String sourceUri) throws Exception;
 
 	private void cleanFuture(){
-		Iterator<Map.Entry<String, TimedFuture<Boolean>>> it = futureMap.entrySet().iterator();
+		Iterator<Map.Entry<String, TimedFuture<Result>>> it = futureMap.entrySet().iterator();
 		while(it.hasNext()){
-			Entry<String, TimedFuture<Boolean>> entry = it.next();
-			TimedFuture<Boolean> future = entry.getValue();
+			Entry<String, TimedFuture<Result>> entry = it.next();
+			TimedFuture<Result> future = entry.getValue();
 			if(!name.equals(future.getName())){   
 				continue;
 			}
-
 			String sourceUri = entry.getKey();
 			if(!future.isDone()){
 				long existTime = (System.currentTimeMillis() - future.getCreateTime()) / 1000;
-
 				int threadOverTime = (int)(valueMap.get(OVERTIME)); 
 				if(existTime > threadOverTime) {
 					log.warn("任务超时[" + sourceUri + "]," + existTime + "s");
@@ -589,30 +585,7 @@ public abstract class Context {
 				}
 				continue;
 			}
-
 			it.remove();
-			boolean result = true;
-			Throwable te = null;
-			try {
-				result = future.get();
-			} catch (InterruptedException e) {
-				log.warn("cleanFuture interrupted, and recover interrupt flag."); 
-				Thread.currentThread().interrupt();
-			} catch (ExecutionException e) {
-				log.error("", e); 
-			} 
-			te = future.getThrowable();
-			StringBuilder builder = new StringBuilder("sourceUri=" +sourceUri 
-					+ ", result=" + result 
-					+ ", creatTime=" + future.getCreateTime()
-					+ ", costTime=" + future.getCost());
-			if(te == null){
-				builder.append(", Exception=null");
-			}else{
-				builder.append(", Exception=" + te.getMessage());
-			}
-			Logger logger = getRecoder(name + ".statistic");
-			logger.error(builder.toString()); 
 		}
 	}
 
@@ -622,33 +595,7 @@ public abstract class Context {
 	 * else 任务还没结束
 	 */
 	private boolean isExecutorAlive(String key){
-		Future<Boolean> future = futureMap.get(key);
+		Future<Result> future = futureMap.get(key);
 		return future != null && !future.isDone();
-	}
-
-	private static Logger getRecoder(String name){
-		Logger logger = LogManager.exists(name);
-		if(logger != null){
-			return logger;
-		}
-		logger = Logger.getLogger(name); 
-		logger.setLevel(Level.INFO);  
-		logger.setAdditivity(false); 
-		logger.removeAllAppenders();
-		LoggerAppender appender = new LoggerAppender();
-		PatternLayout layout = new PatternLayout();  
-		layout.setConversionPattern("%m%n");  
-		appender.setLayout(layout); 
-		appender.setEncoding("UTF-8");
-		appender.setAppend(true);
-		appender.setFile(System.getProperty("log.root") + File.separator + name);
-		appender.setRolling("false"); 
-		appender.activateOptions();
-		logger.addAppender(appender);  
-		return logger;
-	}
-
-	boolean state(){
-		return state.get();
 	}
 }

@@ -13,7 +13,7 @@ public class TimedFuture<T> extends FutureTask<T> {
 
 	private long createTime;
 
-	private Executor executor;
+	private String executorName;
 
 	public TimedFuture(Runnable runnable, T result) {
 		super(runnable, result);
@@ -24,7 +24,7 @@ public class TimedFuture<T> extends FutureTask<T> {
 		super(callable);
 		createTime = System.currentTimeMillis();
 		if(callable instanceof Executor){
-			executor = (Executor)callable;
+			executorName = ((Executor)callable).name;
 		}
 	}
 
@@ -33,24 +33,7 @@ public class TimedFuture<T> extends FutureTask<T> {
 	}
 
 	public String getName(){
-		if(executor == null){
-			return "";
-		}
-		return executor.getName();
-	}
-
-	public long getCost(){
-		if(executor == null){
-			return 0;
-		}
-		return executor.getCost();
-	}
-	
-	public Throwable getThrowable(){
-		if(executor == null){
-			return null;
-		}
-		return executor.getThrowable();
+		return executorName;
 	}
 
 }

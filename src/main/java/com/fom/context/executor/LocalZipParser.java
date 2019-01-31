@@ -49,9 +49,9 @@ public final class LocalZipParser extends Executor {
 		super(sourceUri);
 		this.helper = helper;
 		String sourceName = new File(sourceUri).getName();
-		this.unzipDir = new File(System.getProperty("import.progress")
+		this.unzipDir = new File(System.getProperty("cache.parse")
 				+ File.separator + name + File.separator + sourceName);
-		this.logFile = new File(System.getProperty("import.progress") 
+		this.logFile = new File(System.getProperty("cache.parse") 
 				+ File.separator + name + File.separator + sourceName + ".log");
 	}
 	

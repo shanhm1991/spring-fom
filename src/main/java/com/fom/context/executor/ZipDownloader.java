@@ -33,17 +33,17 @@ public class ZipDownloader extends Executor {
 	
 	protected final ZipDownloaderHelper helper;
 
-	private final List<String> uriList;
+	protected final List<String> uriList;
 	
-	private final String destPath;
+	protected final String destPath;
 	
-	private final int zipEntryMax;
+	protected final int zipEntryMax;
 	
-	private final long zipSizeMax;
+	protected final long zipSizeMax;
 	
-	private final boolean isDelSrc;
+	protected final boolean isDelSrc;
 	
-	private final String zipName;
+	protected final String zipName;
 
 	private String downloadPath;
 
@@ -134,13 +134,13 @@ public class ZipDownloader extends Executor {
 	}
 	
 	@Override
-	protected final boolean onStart() throws Exception {
+	protected boolean onStart() throws Exception {
 		if(uriList.isEmpty()){
 			log.warn("资源uri列表为空"); 
 			return false;
 		}
 		
-		this.downloadPath = System.getProperty("download.temp")
+		this.downloadPath = System.getProperty("cache.download")
 				+ File.separator + name + File.separator + zipName;
 		this.downloadZip = new File(downloadPath + File.separator + zipName + ".zip");
 		File file = new File(downloadPath);
@@ -161,7 +161,7 @@ public class ZipDownloader extends Executor {
 	}
 	
 	@Override
-	protected final boolean onComplete() throws Exception {
+	protected boolean onComplete() throws Exception {
 		File tempDir = new File(downloadPath);
 		File[] files = tempDir.listFiles();
 		if(ArrayUtils.isEmpty(files)){
