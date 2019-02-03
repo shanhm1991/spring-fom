@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.log4j.Logger;
+import org.dom4j.Element;
 
 /**
  * 
@@ -14,6 +15,9 @@ import org.apache.log4j.Logger;
 public class ContextManager {
 
 	private static final Logger LOG = Logger.getRootLogger();
+
+	//容器启动时会给elementMap赋值，Context构造时尝试从中获取配置
+	static final Map<String, Element> elementMap = new ConcurrentHashMap<>();
 
 	static Map<String,Context> contextMap = new ConcurrentHashMap<>();
 

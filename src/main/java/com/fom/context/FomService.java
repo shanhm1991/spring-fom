@@ -9,7 +9,7 @@ import java.util.Map;
  */
 public interface FomService {
 
-	Map<String, Map<String,String>> list() throws Exception;
+	Map<String, Object> list() throws Exception;
 	
 	String detail(String name) throws Exception;
 	

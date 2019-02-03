@@ -37,7 +37,7 @@ public class FomController {
 	
 	@RequestMapping("/list")
 	@ResponseBody
-	public Map<String,Map<String,String>> list() throws Exception{
+	public Map<String, Object> list() throws Exception{
 		return service.list();
 	}
 	

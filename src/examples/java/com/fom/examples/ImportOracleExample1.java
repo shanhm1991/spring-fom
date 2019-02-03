@@ -18,6 +18,8 @@ import com.fom.util.FileUtil;
  */
 public class ImportOracleExample1 extends Context {
 
+	private static final long serialVersionUID = 9068696410626792009L;
+
 	private String srcPath;
 
 	private int batch;

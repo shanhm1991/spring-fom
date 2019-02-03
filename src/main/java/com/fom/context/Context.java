@@ -1,5 +1,6 @@
 package com.fom.context;
 
+import java.io.Serializable;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Iterator;
@@ -11,7 +12,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.hdfs.server.namenode.UnsupportedActionException;
@@ -28,13 +28,12 @@ import com.fom.util.XmlUtil;
  *
  * @param <E>
  */
-public abstract class Context {
+public abstract class Context implements Serializable {
+
+	private static final long serialVersionUID = 9154119563307298882L;
 
 	//所有的Context共用，防止两个Context创建针对同一个文件的任务
-	private static Map<String,TimedFuture<Result>> futureMap = new ConcurrentHashMap<>(500);
-
-	//容器启动时会给elementMap赋值，Context构造时尝试从中获取配置
-	static final Map<String, Element> elementMap = new ConcurrentHashMap<>();
+	private static final Map<String,TimedFuture<Result>> FUTUREMAP = new ConcurrentHashMap<>(500);
 
 	static final String CRON = "cron";
 
@@ -55,13 +54,14 @@ public abstract class Context {
 	protected final Logger log;
 
 	protected final String name;
-	
+
 	volatile long createTime;
 
 	volatile long startTime;
 
-	//Context私有线程池，在Context结束时shutdown(),等待任务线程自行响应中断
-	private TimedExecutorPool pool;
+	private Element element;
+
+	private transient TimedExecutorPool pool;
 
 	public Context(){
 		Class<?> clazz = this.getClass();
@@ -98,41 +98,35 @@ public abstract class Context {
 	 * @param fc
 	 */
 	private void initValue(String name,FomContext fc){
-		int core = 4; 
-		int max = 20;
-		int aliveTime = 30;
-		int overTime = 3600; 
-		int queueSize = 200;
-		Element element = elementMap.get(name); 
+		element = ContextManager.elementMap.get(name); 
 		if(element != null){
-			core = setThreadCore(XmlUtil.getInt(element, THREADCORE, 4, 1, 10));
-			max = setThreadMax(XmlUtil.getInt(element, THREADMAX, 20, 10, 100));
-			aliveTime = setAliveTime(XmlUtil.getInt(element, ALIVETIME, 30, 5, 300));
-			overTime = setOverTime(XmlUtil.getInt(element, OVERTIME, 3600, 60, 86400));
-			queueSize = setQueueSize(XmlUtil.getInt(element, QUEUESIZE, 200, 1, 10000000));
+			setThreadCore(XmlUtil.getInt(element, THREADCORE, 4, 1, 10));
+			setThreadMax(XmlUtil.getInt(element, THREADMAX, 20, 10, 100));
+			setAliveTime(XmlUtil.getInt(element, ALIVETIME, 30, 5, 300));
+			setOverTime(XmlUtil.getInt(element, OVERTIME, 3600, 60, 86400));
+			setQueueSize(XmlUtil.getInt(element, QUEUESIZE, 200, 1, 10000000));
 			setCancellable(XmlUtil.getBoolean(element, CANCELLABLE, false));
 			setCron(XmlUtil.getString(element, CRON, ""));
 			setRemark(XmlUtil.getString(element, REMARK, ""));
 			loadconfigs(element);
 		}else if(fc != null){
-			core = setThreadCore(fc.threadCore());
-			max = setThreadMax(fc.threadMax());
-			aliveTime = setAliveTime(fc.threadAliveTime());
-			overTime = setOverTime(fc.threadOverTime());
-			queueSize = setQueueSize(fc.queueSize());
+			setThreadCore(fc.threadCore());
+			setThreadMax(fc.threadMax());
+			setAliveTime(fc.threadAliveTime());
+			setOverTime(fc.threadOverTime());
+			setQueueSize(fc.queueSize());
 			setCancellable(fc.cancellable());
 			setCron(fc.cron());
 			setRemark(fc.remark());
 		}else{
-			setThreadCore(core);
-			setThreadMax(max);
-			setAliveTime(aliveTime);
-			setOverTime(overTime);
-			setQueueSize(queueSize);
+			setThreadCore(4);
+			setThreadMax(20);
+			setAliveTime(30);
+			setOverTime(3600);
+			setQueueSize(200);
 			setCancellable(false);
 		}
-		pool = new TimedExecutorPool(core,max,aliveTime,new LinkedBlockingQueue<Runnable>(queueSize));
-		pool.allowCoreThreadTimeOut(true);
+		initPool();
 		createTime = System.currentTimeMillis();
 	}
 
@@ -146,6 +140,16 @@ public abstract class Context {
 			}
 			valueMap.put(name, e.getTextTrim());
 		}
+	}
+
+	//序列化时排除了pool，在反序列化时需要初始化
+	void initPool(){
+		int core = (int)valueMap.get(THREADCORE); 
+		int max = (int)valueMap.get(THREADMAX);
+		int aliveTime = (int)valueMap.get(ALIVETIME);   
+		int queueSize = (int)valueMap.get(QUEUESIZE);  
+		pool = new TimedExecutorPool(core,max,aliveTime,new LinkedBlockingQueue<Runnable>(queueSize));
+		pool.allowCoreThreadTimeOut(true);
 	}
 
 	private int setQueueSize(int queueSize){
@@ -244,16 +248,10 @@ public abstract class Context {
 		return value;
 	}
 
-	/**
-	 * valueMap只允许put动作，在put时先判断key是否存在，再判断value是否相等，可以很好的避免线程安全问题
-	 */
+	//valueMap只允许put动作，在put时先判断key是否存在，再判断value是否相等，可以很好的避免线程安全问题
 	Map<String, Object> valueMap = new ConcurrentHashMap<>();
 
 	private volatile CronExpression cronExpression;
-	
-	boolean state(){
-		return state.get();
-	}
 
 	/**
 	 * 获取当前Context对象的name
@@ -426,60 +424,117 @@ public abstract class Context {
 	}
 
 	/**
+	 * 0:初始化
+	 * 1:启动 started
+	 * 2:请求停止  waitting stop
+	 * 3:已停止: stoped
+	 */
+	private int state = 0;
+
+	private Object lock_state = new Object();
+
+	/**
+	 * 获取context状态
+	 * @return
+	 */
+	public final int state(){
+		synchronized (lock_state) {
+			return state;
+		}
+	}
+
+	/**
+	 * 获取context状态
+	 * @return
+	 */
+	public final String stateString(){
+		synchronized (lock_state) {
+			switch(state){
+			case 0: return "inited";
+			case 1: return "started";
+			case 2: return "waitting stop";
+			case 3: return "stoped";
+			}
+			return "";
+		}
+	}
+
+	/**
 	 * 启动context
 	 */
 	public final void start(){
-		if(state.get()){
-			log.warn("context[" + name + "]已经在运行"); 
-			return;
+		synchronized (lock_state) {
+			if(state == 1){
+				log.warn("context[" + name + "]已经在运行"); 
+				return;
+			}
+			if(state == 2){
+				log.warn("context[" + name + "] is waitting stop, cann't start."); 
+				return;
+			}
+			innerThread = new InnerThread();
+			log.info("context[" + name + "]启动"); 
+			innerThread.start();
+			state = 1;
 		}
-		innerThread = new InnerThread();
-		state.set(true); 
-		log.info("context[" + name + "]启动"); 
-		innerThread.start();
-		startTime = System.currentTimeMillis();
 	}
 
 	/**
 	 * 停止context
 	 */
 	public final void stop(){
-		if(!state.get()){
-			log.warn("context[" + name + "]已经停止"); 
-			return;
+		synchronized (lock_state) {
+			if(state == 3){
+				log.warn("context[" + name + "]已经停止"); 
+				return;
+			}
+			if(state == 2){
+				log.warn("context[" + name + "] is waitting stop, cann't stop."); 
+				return;
+			}
+			state = 2;
 		}
-		log.info("context[" + name + "]停止"); 
-		state.set(false); 
 	}
 
 	/**
 	 * 中断context
 	 */
 	public final void interrupt(){
-		if(state.get()){
-			log.info("context[" + name + "]重启"); 
+		synchronized (lock_state) {
+			if(state != 1){
+				log.warn("context[" + name + "] is not running, cann't exec now."); 
+				return;
+			}
+			log.info("context[" + name + "]立即执行"); 
 			innerThread.interrupt();
-		}else{
-			start();
 		}
 	}
 
 	private InnerThread innerThread;
 
-	private AtomicBoolean state = new AtomicBoolean(false);
-
 	private class InnerThread extends Thread {
 
 		public InnerThread(){
-			this.setName(name); 
+			this.setName("context-" + name); 
 		}
 
 		@Override
 		public void run() {
+			startTime = System.currentTimeMillis();
 			while(true){
-				if(!state.get()){
-					pool.shutdownNow(); //TODO
-					return;
+				synchronized (lock_state) {
+					if(state == 2){
+						pool.shutdownNow();
+						try {
+							pool.awaitTermination(1, TimeUnit.DAYS);
+						} catch (InterruptedException e) {
+							log.warn("interrupted when waiting stop."); 
+						}
+						cleanFutures();
+						state = 3;
+						log.info("context[" + name + "]结束");
+						return;
+					}
 				}
 				int threadCore = (int)(valueMap.get(THREADCORE)); 
 				if(pool.getCorePoolSize() != threadCore){
@@ -496,7 +551,7 @@ public abstract class Context {
 					pool.setKeepAliveTime(threadAliveTime, TimeUnit.SECONDS);
 				}
 
-				cleanFuture();
+				cleanFutures();
 
 				List<String> uriList = null;
 				try {
@@ -513,7 +568,7 @@ public abstract class Context {
 						try {
 							Executor executor = createExecutor(sourceUri);
 							executor.setName(name); 
-							futureMap.put(sourceUri, pool.submit(executor)); 
+							FUTUREMAP.put(sourceUri, pool.submit(executor)); 
 							log.info("新建任务" + "[" + sourceUri + "]"); 
 						} catch (RejectedExecutionException e) {
 							log.warn("提交任务被拒绝,等待下次提交[" + sourceUri + "].");
@@ -524,17 +579,19 @@ public abstract class Context {
 					}
 				}
 				if(cronExpression == null){
-					//默认只执行一次，执行完便停止，等待提交的线程结束
-					pool.shutdown();
-					try {
-						pool.awaitTermination(1, TimeUnit.DAYS);
-					} catch (InterruptedException e) {
-						log.warn("wait interrupted."); 
+					synchronized (lock_state) {
+						//默认只执行一次，执行完便停止，等待提交的线程结束
+						pool.shutdown();
+						try {
+							pool.awaitTermination(1, TimeUnit.DAYS);
+						} catch (InterruptedException e) {
+							log.warn("interrupted when waiting stop."); 
+						}
+						cleanFutures();
+						state = 3;
+						log.info("context[" + name + "]结束");
+						return;
 					}
-					cleanFuture();
-					state.set(false); 
-					log.info("context[" + name + "]结束");
-					return;
 				}
 				Date nextTime = cronExpression.getTimeAfter(new Date());
 				long waitTime = nextTime.getTime() - System.currentTimeMillis();
@@ -565,8 +622,8 @@ public abstract class Context {
 	 */
 	protected abstract Executor createExecutor(String sourceUri) throws Exception;
 
-	private void cleanFuture(){
-		Iterator<Map.Entry<String, TimedFuture<Result>>> it = futureMap.entrySet().iterator();
+	private void cleanFutures(){
+		Iterator<Map.Entry<String, TimedFuture<Result>>> it = FUTUREMAP.entrySet().iterator();
 		while(it.hasNext()){
 			Entry<String, TimedFuture<Result>> entry = it.next();
 			TimedFuture<Result> future = entry.getValue();
@@ -595,7 +652,7 @@ public abstract class Context {
 	 * else 任务还没结束
 	 */
 	private boolean isExecutorAlive(String key){
-		Future<Result> future = futureMap.get(key);
+		Future<Result> future = FUTUREMAP.get(key);
 		return future != null && !future.isDone();
 	}
 }

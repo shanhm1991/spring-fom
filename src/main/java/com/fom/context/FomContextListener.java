@@ -163,7 +163,7 @@ public class FomContextListener implements ServletContextListener {
 					continue;
 				}
 				
-				Context.elementMap.put(name, element);
+				ContextManager.elementMap.put(name, element);
 				Context context = null;
 				if(isNameEmpty){ 
 					context = (Context)contextClass.newInstance();

@@ -21,6 +21,8 @@ import com.fom.util.HdfsUtil;
  */
 public class DownloadHdfsZipExample extends Context {
 
+	private static final long serialVersionUID = -6055805119506513553L;
+
 	private FileSystem fs;
 
 	private String destPath = "${webapp.root}/download"; 

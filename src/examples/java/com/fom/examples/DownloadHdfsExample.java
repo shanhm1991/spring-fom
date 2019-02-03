@@ -19,6 +19,8 @@ import com.fom.context.helper.HdfsDownloaderHelper;
 @FomContext(remark="扫描下载Hdfs指定目录下文件的默认实现", cron="0/15 * * * * ?")
 public class DownloadHdfsExample extends Context {
 
+	private static final long serialVersionUID = -8950649337670940490L;
+	
 	private FileSystem fs;
 	
 	@Override

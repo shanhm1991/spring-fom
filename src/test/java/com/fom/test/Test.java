@@ -12,6 +12,7 @@ import com.fom.context.FomContext;
 @FomContext(cron="0/10 * * * * ?")
 public class Test extends Context {
 	
+	private static final long serialVersionUID = -4648914163608513224L;
 	private Logger log = Logger.getRootLogger();
 	
 	public Test(String name){

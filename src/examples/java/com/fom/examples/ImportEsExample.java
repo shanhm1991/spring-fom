@@ -18,6 +18,8 @@ import com.fom.util.FileUtil;
  */
 public class ImportEsExample extends Context {
 
+	private static final long serialVersionUID = 4614661907354806328L;
+
 	private String srcPath;
 
 	private int batch;

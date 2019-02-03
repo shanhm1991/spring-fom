@@ -18,6 +18,8 @@ import com.fom.util.FileUtil;
  */
 public class ImportMysqlExample2 extends Context {
 	
+	private static final long serialVersionUID = 3141790485417453373L;
+
 	private String srcPath;
 
 	private int batch;
