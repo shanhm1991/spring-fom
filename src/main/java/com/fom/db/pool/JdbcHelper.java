@@ -44,22 +44,22 @@ public class JdbcHelper {
 		JdbcPool pool = getPool(poolName);
 		JdbcPool.JdbcNode node = (JdbcPool.JdbcNode)pool.acquire();
 		if(node.isInTransaction){
-			LOG.warn("事务开启失败[Connection is already in Transaction]");
+			LOG.warn("transaction started[Connection was already in Transaction]");
 			return;
 		}
 		node.isInTransaction = true;
 		Connection con = node.v;
 		try{
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("开启事务");
-			}
 			con.commit();
 			con.setAutoCommit(false); 
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("transaction started");
+			}
 		}catch(Exception e){
 			node.isInTransaction = false;
 			con.setAutoCommit(true); 
 			pool.release();
-			LOG.error("开启事务异常", e);
+			LOG.error("transaction start failed", e);
 		}
 	}
 
@@ -68,7 +68,7 @@ public class JdbcHelper {
 		JdbcPool.JdbcNode node = (JdbcPool.JdbcNode)pool.acquire();
 		if(!node.isInTransaction){
 			pool.release();
-			LOG.warn("提交事务失败[Connection is not in Transaction]");
+			LOG.warn("transaction commit failed[Connection is not in Transaction]");
 			return;
 		}
 
@@ -76,10 +76,10 @@ public class JdbcHelper {
 		try{
 			con.commit();
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("提交事务");
+				LOG.debug("transaction commited");
 			}
 		}catch(Exception e){
-			LOG.error("提交事务异常,数据回滚", e); 
+			LOG.error("transaction commit failed, rollback now", e); 
 			con.rollback();
 		}finally{
 			node.isInTransaction = false;
@@ -107,12 +107,12 @@ public class JdbcHelper {
 		try{
 			JdbcPool.JdbcNode node = (JdbcPool.JdbcNode)pool.acquire();
 			if(!isInTransaction(getPool(poolName))){
-				LOG.warn("取消事务失败[Connection is not in Transaction]");
+				LOG.warn("transaction canceled[Connection was not in Transaction]");
 				return;
 			}
 			Connection con = node.v;
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("取消事务,数据回滚");
+				LOG.debug("transaction canceled and rollback");
 			}
 			con.rollback();
 			con.setAutoCommit(true); 
@@ -177,7 +177,7 @@ public class JdbcHelper {
 			return list;
 		}catch(Exception e){
 			cancelTransaction(poolName);
-			throw new Exception("回滚数据,事务执行异常", e);
+			throw new Exception("transaction faile, data rollbacked", e);
 		}finally{
 			IoUtil.close(resultSet); 
 			IoUtil.close(ps); 
@@ -236,7 +236,7 @@ public class JdbcHelper {
 			return num;
 		}catch(Exception e) {
 			cancelTransaction(poolName);
-			throw new Exception("回滚数据,事务执行异常", e);
+			throw new Exception("transaction faile, data rollbacked", e);
 		}finally{
 			IoUtil.close(ps); 
 		}
@@ -307,7 +307,7 @@ public class JdbcHelper {
 			return nums;
 		}catch(Exception e){
 			cancelTransaction(poolName);
-			throw new Exception("事务执行异常", e);
+			throw new Exception("transaction faile, data rollbacked", e);
 		}finally{
 			IoUtil.close(ps); 
 		}
@@ -318,7 +318,7 @@ public class JdbcHelper {
 	private JdbcPool getPool(String poolName) { 
 		JdbcPool pool = (JdbcPool)PoolManager.get(poolName);
 		if(pool == null){
-			throw new RuntimeException(poolName + "连接池不存在");
+			throw new RuntimeException("pool[" + poolName + "] not exist.");
 		}
 		return pool;
 	}
@@ -350,7 +350,7 @@ public class JdbcHelper {
 			Integer index = entry.getValue();
 			Object value = paramMap.get(key);
 			if(value == null){
-				throw new IllegalArgumentException("参数未赋值param[" + key + "]");
+				throw new IllegalArgumentException("param[" + key + "] not valued.");
 			}
 			ps.setObject(index, value);
 		}

@@ -63,10 +63,10 @@ public class FomContextListener implements ServletContextListener {
 		String file = ContextUtil.getContextPath(servlet.getInitParameter("fomConfigLocation"));
 		File xml = new File(file);
 		if(!xml.exists()){
-			LOG.error("没有找到fom配置:" + file); 
+			LOG.error("cann't find file: " + file); 
 			return;
 		}
-		LOG.info("加载:" + file); 
+		LOG.info("load file: " + file); 
 		Element fom = null;
 		try{
 			SAXReader reader = new SAXReader();
@@ -138,13 +138,13 @@ public class FomContextListener implements ServletContextListener {
 			String name = element.attributeValue("name");
 			String clazz = element.attributeValue("class");
 			if(StringUtils.isBlank(clazz)){
-				LOG.warn("非法配置:[name=" + name + ",class=" + clazz + "]"); 
+				LOG.warn("invalid config[name=" + name + ",class=" + clazz + "]"); 
 				continue;
 			}
 			try {
 				Class<?> contextClass = Class.forName(clazz);
 				if(!Context.class.isAssignableFrom(contextClass)){
-					LOG.warn("忽略配置,没有继承com.fom.context.Context, [name=" 
+					LOG.warn("ignore config, not subclass of com.fom.context.Context, [name=" 
 							+ name + ",class=" + clazz + "]");
 					continue;
 				}
@@ -159,7 +159,7 @@ public class FomContextListener implements ServletContextListener {
 					}
 				}
 				if(ContextManager.exist(name)){
-					LOG.warn("context[" + name + "]已经存在,取消加载.");
+					LOG.warn("context[" + name + "] already exist, init canceled.");
 					continue;
 				}
 				
@@ -173,7 +173,7 @@ public class FomContextListener implements ServletContextListener {
 				}
 				ContextManager.register(context); 
 			} catch (Exception e) {
-				LOG.error("context[" + name + ",class=" + clazz + "]初始化异常", e);
+				LOG.error("context[" + name + ",class=" + clazz + "] init failed", e);
 			}
 		}
 	}
@@ -189,10 +189,10 @@ public class FomContextListener implements ServletContextListener {
 			String location = ContextUtil.getContextPath(element.getTextTrim());
 			File xml = new File(location);
 			if(!xml.exists()){
-				LOG.warn("没有找到配置:" + location);  
+				LOG.warn("cann't find file: " + location);  
 				continue;
 			}
-			LOG.info("加载配置:" + location);
+			LOG.info("load file: " + location);
 			try{
 				SAXReader reader = new SAXReader();
 				reader.setEncoding("UTF-8");

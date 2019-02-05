@@ -69,7 +69,7 @@ class EsPool extends Pool<TransportClient>{
 			}
 			client = newClient;
 			clientNode.v = client;
-			LOG.info("#加载完成, " + this.name + this);
+			LOG.info("init pool[" + this.name + "]" + this);
 		}
 	}
 
@@ -103,7 +103,7 @@ class EsPool extends Pool<TransportClient>{
 	public static TransportClient getClient(String poolName) {
 		EsPool pool = (EsPool)PoolManager.get(poolName);
 		if(pool == null){
-			throw new RuntimeException(poolName + "连接池不存在"); 
+			throw new RuntimeException("pool[" + poolName + "] not exist."); 
 		}
 		return pool.clientNode.v;
 	}

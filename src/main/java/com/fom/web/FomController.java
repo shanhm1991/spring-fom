@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.SpringApplication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -41,76 +40,31 @@ public class FomController {
 		return service.list();
 	}
 	
-	@RequestMapping("/detail")
+	@RequestMapping("/save")
 	@ResponseBody
-	public Map<String,String> detail(String name) throws Exception{
-		Map<String,String> map = new HashMap<>();
-		map.put(name, service.detail(name));
-		return map;
+	public Map<String,Object> save(String name, String data) throws Exception{ 
+		return service.save(name, data);
 	}
 	
-	@RequestMapping("/xml")
+	@RequestMapping("/operation")
 	@ResponseBody
-	public Map<String,String> viewXml(String name) throws Exception{ 
-		Map<String,String> map = new HashMap<>();
-		map.put(name, service.xml(name));
-		return map;
+	public Map<String,Object> operation(String name, int opid) throws Exception{ 
+		switch(opid){
+		case 1: return service.start(name);
+		case 2: return service.stop(name);
+		case 3: return service.interrupt(name);
+		default : 
+			Map<String,Object> map = new HashMap<>();
+			map.put("result", false);
+			map.put("msg", "unsupported operation.");
+			return map;
+		}
 	}
 	
-	@RequestMapping("/apply")
+	@RequestMapping("/state")
 	@ResponseBody
-	public Map<String,String> apply(String name, String data) throws Exception{ 
-		Map<String,String> map = new HashMap<>();
-		map.put("msg", service.apply(name, data));
-		return map;
-	}
-	
-	@RequestMapping("/stop")
-	@ResponseBody
-	public Map<String,String> stop(String name) throws Exception{ 
-		Map<String,String> map = new HashMap<>();
-		map.put("msg", service.stop(name));
-		return map;
-	}
-	
-	@RequestMapping("/stopAll")
-	@ResponseBody
-	public Map<String,Object> stopAll() throws Exception{ 
-		Map<String,Object> map = new HashMap<>();
-		map.put("msg", service.stopAll());
-		return map;
-	}
-	
-	@RequestMapping("/start")
-	@ResponseBody
-	public Map<String,String> start(String name) throws Exception{ 
-		Map<String,String> map = new HashMap<>();
-		map.put("msg", service.start(name));
-		return map;
-	}
-	
-	@RequestMapping("/startAll")
-	@ResponseBody
-	public Map<String,Object> startAll() throws Exception{ 
-		Map<String,Object> map = new HashMap<>();
-		map.put("msg", service.startAll());
-		return map;
-	}
-	
-	@RequestMapping("/restart")
-	@ResponseBody
-	public Map<String,String> restart(String name) throws Exception{ 
-		Map<String,String> map = new HashMap<>();
-		map.put("msg", service.restart(name));
-		return map;
-	}
-	
-	@RequestMapping("/restartAll")
-	@ResponseBody
-	public Map<String,Object> restartAll() throws Exception{ 
-		Map<String,Object> map = new HashMap<>();
-		map.put("msg", service.restartAll());
-		return map;
+	public Map<String,Object> state(String name) throws Exception{ 
+		return service.state(name);
 	}
 	
 	@RequestMapping("/logs")
@@ -147,7 +101,4 @@ public class FomController {
 		return null;
 	}
 	
-	public static void main(String[] args) {
-        SpringApplication.run(FomController.class, args); 
-    }
 }

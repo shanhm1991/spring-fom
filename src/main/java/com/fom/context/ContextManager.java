@@ -30,12 +30,12 @@ public class ContextManager {
 			return;
 		}
 		contextMap.put(context.name, context);
-		LOG.info("加载context[" + context.name + "]");
+		LOG.info("init context[" + context.name + "]");
 	}
 
 	static void startAll(){
 		for(Entry<String, Context> entry : contextMap.entrySet()){
-			LOG.info("启动context[" + entry.getKey() + "]");
+			LOG.info("start context[" + entry.getKey() + "]");
 			entry.getValue().start();
 		}
 

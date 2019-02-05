@@ -59,7 +59,7 @@ final class PoolManager {
 		Pool<?> pool = poolMap.remove(name);
 		if(pool != null){
 			pool.name = "removed-" + removeCount.incrementAndGet() + "-" + name;
-			LOG.warn("卸载:" + name + ",重命名为:" + pool.name); 
+			LOG.warn("rename pool[" + name + "] -> pool[" + pool.name + "]"); 
 			poolRemoved.add(pool);
 		}
 	}
@@ -80,14 +80,13 @@ final class PoolManager {
 	private static void load(File file){
 		SAXReader reader = new SAXReader();
 		reader.setEncoding("UTF-8");
-		LOG.info("------------------------------加载连接池------------------------------"); 
+		LOG.info("load file: " + file); 
 		Document doc = null;
 		try{
 			doc = reader.read(new FileInputStream(file));
 		}catch(Exception e){
-			LOG.error("加载失败", e); 
+			LOG.error("", e); 
 			remveAll();
-			LOG.info("------------------------------加载结束------------------------------"); 
 			return;
 		}
 
@@ -100,18 +99,18 @@ final class PoolManager {
 
 			String name = XmlUtil.getString(ePool, "name", null);
 			if(name == null){
-				LOG.warn("忽略没有name的pool"); 
+				LOG.warn("no name, pool[" + name + "] init failed."); 
 				continue;
 			}
 
 			if(nameSet.contains(name)){
-				LOG.warn("忽略重名的pool[" + name + "]"); 
+				LOG.warn("pool[" + name + "] already exist, init canceled."); 
 				continue;
 			}
 
 			String className = XmlUtil.getString(ePool, "class", null);
 			if(className == null){
-				LOG.warn(name + "加载失败,缺少配置class"); 
+				LOG.warn("no class, pool[" + name + "] init failed.");
 				remve(name);
 				continue;
 			}
@@ -123,7 +122,7 @@ final class PoolManager {
 						pool.load(ePool);
 						nameSet.add(name);
 					} catch (Exception e) {
-						LOG.error(name + "加载失败", e); 
+						LOG.error("pool[" + name + "] init failed.", e); 
 						remve(name);
 					}
 					continue;
@@ -141,11 +140,10 @@ final class PoolManager {
 				nameSet.add(name);
 				poolMap.put(name, pool);
 			} catch (Exception e) {
-				LOG.error(name + "加载失败", e); 
+				LOG.error("pool[" + name + "] init failed.", e); 
 			}
 		}
-		LOG.info("连接池列表=" + poolMap.keySet());
-		LOG.info("------------------------------加载结束------------------------------"); 
+		LOG.info("all pools=" + poolMap.keySet());
 	}
 
 	private static class Listener extends Thread {
@@ -168,7 +166,7 @@ final class PoolManager {
 				watch = FileSystems.getDefault().newWatchService();
 				Paths.get(parentPath).register(watch, StandardWatchEventKinds.ENTRY_MODIFY); 
 			} catch (IOException e) {
-				LOG.error("配置监听启动失败", e); 
+				LOG.error("pool listen failed", e); 
 			}
 
 			WatchKey key = null;
@@ -232,7 +230,7 @@ final class PoolManager {
 				}
 				String detail = builder.append("]").toString();
 				if(cleanTimes++ % 10 == 0){
-					LOG.info("[统计]当前所有连接数：" + Pool.getAlives() + detail); 
+					LOG.info("[statistics]total connections：" + Pool.getAlives() + detail); 
 				}
 			}
 		}

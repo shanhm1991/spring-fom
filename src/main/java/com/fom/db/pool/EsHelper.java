@@ -102,7 +102,7 @@ public class EsHelper {
 		}
 		BulkResponse bulkResp = bulkRequest.execute().actionGet();
 		if(bulkResp.hasFailures()){
-			LOG.warn("删除失败数据：" + bulkResp.buildFailureMessage());
+			LOG.warn("date delete failed：" + bulkResp.buildFailureMessage());
 		}
 	}
 
@@ -125,7 +125,7 @@ public class EsHelper {
 				if(item.getFailure().getCause() instanceof VersionConflictEngineException){
 					conflictSet.add(item);
 				}
-				LOG.warn("更新失败数据：" + item.getFailureMessage());
+				LOG.warn("data update failed：" + item.getFailureMessage());
 			}
 		}
 		return conflictSet;
@@ -141,7 +141,7 @@ public class EsHelper {
 
 		BulkResponse bulkResp = bulkRequest.execute().actionGet();
 		if(bulkResp.hasFailures()){
-			LOG.warn("新增失败数据：" + bulkResp.buildFailureMessage());
+			LOG.warn("data insert failed：" + bulkResp.buildFailureMessage());
 		}
 	} 
 }

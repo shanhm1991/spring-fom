@@ -5,6 +5,7 @@
 <title>fom</title>
 <script src="js/jquery-3.3.1.js"></script> 
 <script src="js/dataTables.js"></script>
+<script src="js/tinybox.js"></script>
 <link href="js/dataTables.css" rel="stylesheet" />
 <style type="text/css">
 td.details-control {
@@ -14,6 +15,20 @@ td.details-control {
 img{
    background: no-repeat center center;
     cursor: pointer;
+}
+#tinybox{
+   position:absolute; 
+   display:none; padding:10px; 
+   background:#ffffff url(images/load.gif) no-repeat 50% 50%; 
+   border:10px solid #e3e3e3; z-index:2000;
+}
+#tinymask{
+   position:absolute; 
+   display:none; top:0; left:0; 
+   height:100%; width:100%; background:#000000; z-index:1500;
+   }
+#tinycontent{
+   background:#ffffff; font-size:1.1em;
 }
 </style>
 </head>
@@ -31,10 +46,12 @@ img{
             </tr>
         </thead>
     </table>
+    <div id="content"/>
 </body>
 <script type="text/javascript">
+var table;
 $(document).ready(function() {
-    var table = $('#fom').DataTable( {
+	table = $('#fom').DataTable( {
     	"ajax": "/fom/list",
         "columns": [
             {
@@ -48,9 +65,9 @@ $(document).ready(function() {
             { "data": "state"},
             { "data": "creatTime"},
             { "data": "startTime"},
-            { "defaultContent": "<img title='start' src='images/start.png' onclick='start(this)'/>" 
-            	 + "<img title='stop' src='images/stop.png' onclick='stop(this)'/>"
-            	 + "<img title='execute immediately' src='images/exec.png' onclick='exec(this)'/>"
+            { "defaultContent": "<img title='start' src='images/start.png' onclick='operation(this, 1)'/>" 
+            	 + "<img title='stop' src='images/stop.png' onclick='operation(this, 2)'/>"
+            	 + "<img title='execute immediately' src='images/exec.png' onclick='operation(this, 3)'/>"
             	 , "orderable": false},
         ],
         "createdRow": function ( row, data, index ) {
@@ -76,30 +93,106 @@ $(document).ready(function() {
 } );
 
 function format ( data ) {
-	var html = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">';
+	var html = ' cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'
+	+ '<tr><td><img title="save" src="images/save.png" onclick="save(this)"/></td>' 
+	+ '<td><img title="edit" src="images/edit.png" onclick="edit(this)"/><label id="msg"/></td></tr>';
+	var name = "";
 	for(var key in data){
-		if(key == "name" || key == "startTime"
-				|| key == "creatTime" || key == "state"){
+		if(key == "name"){
+			name = data[key];
 			continue;
-		}
-		html =  html + '<tr><td>' + key + ':</td><td>' + data[key] + '</td></tr>';
+		}else if(key == "startTime" || key == "creatTime" || key == "state"){
+			continue;
+		}		
+		html = html + '<tr><td>' + key + '</td>' 
+		        + '<td><span>' + data[key] + '</span><input hidden=true value="' + data[key] + '" /></td></tr>';
 	}
-    return html + '</table>';
+	html = '<table id="' + name + '"' + html + '</table>';
+	return html;
 }
 
-function start(e){
-	var v = $(e).parent().parent().find('td').eq(1).html();
-	alert(v);
+function operation(e, opid){
+	var Tr = $(e).parent().parent();
+	var name = Tr.find('td').eq(1).html();
+	if(opid == null || name == ""){
+		return;
+	}
+	$.ajax({
+        url: "/fom/operation",
+        type: "POST",
+        dataType: "json",
+        data: { "name" : name, "opid" : opid },
+        success: function(data){
+        	if(data.result){
+        		TINY.box.show("success, " + data.msg,0,0,0,0,4,function(){
+        			$.ajax({
+        		        url: "/fom/state",
+        		        type: "POST",
+        		        dataType: "json",
+        		        data: { "name" : name},
+        		        success: function(data){
+        		        	Tr.find('td').eq(3).html(data.state);
+        		        }
+        			}); 
+        		});
+        	}else{
+        		TINY.box.show("failed, " + data.msg,0,0,0,0,4,false);
+        	}
+        },error:function(data,type, err){
+        	TINY.box.show(err,0,0,0,0,4,false);
+	    }
+	}); 
 }
 
-function stop(e){
-	var v = $(e).parent().parent().find('td').eq(1).html();
-	alert(v);
+function edit(e){
+	var Tb = $(e).parent().parent().parent();
+	Tb.find("input").attr("hidden",false);
+	Tb.find("span").attr("hidden",true);
 }
 
-function exec(e){
-	var v = $(e).parent().parent().find('td').eq(1).html();
-	alert(v);
+function save(e){
+	var Tb = $(e).parent().parent().parent();
+	var hidden = Tb.find("input").attr("hidden");
+	if(hidden == true || hidden == "hidden"){
+		return;
+	}
+	
+	Tb.find("span").attr("hidden",false);
+	Tb.find("input").attr("hidden",true);
+	var json = '{'; 
+	Tb.find("tr").each(function(i){                   
+	       if(i == 0){
+	          return;
+	       }
+	       var key = $(this).find("td").eq(0).html();
+	       var value = $(this).find("td").eq(1).find("input").val();
+	       json = json + '"' + key + '":"' +  value + '",';
+	});
+	json = json.substr(0, json.length-1) + '}';
+	//Tb = tbody
+	var name = Tb.parent().attr("id");
+	
+	Tb.parent().parent().parent().prev().data("{'data':{'name':'sdfsf'}}");
+	
+	var dat = Tb.parent().parent().parent().prev().data();
+	alert(dat.name);
+	
+	$.ajax({
+        url: "/fom/save",
+        type: "POST",
+        dataType: "json",
+        data: { "name" : "xsde", "data" : json },
+        success: function(data){
+        	if(data.result){
+        		TINY.box.show("success, " + data.msg,0,0,0,0,4,true);
+        		//location.reload();
+        	}else{
+        		TINY.box.show("failed, " + data.msg,0,0,0,0,4,false);
+        	}
+        },error:function(data,type, err){
+        	TINY.box.show(err,0,0,0,0,4,false);
+	    }
+	}); 
 }
 </script>
 </html>

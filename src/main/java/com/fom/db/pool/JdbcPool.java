@@ -55,7 +55,7 @@ class JdbcPool extends Pool<Connection>{
 				acquire();
 				release();
 			}
-			LOG.info("#加载完成, " + name + this);
+			LOG.info("init pool[" + name + "] " + this);
 		}
 	}
 	
