@@ -89,10 +89,10 @@ public class HttpUtil {
 
 	/**
 	 * 建议传入回调handler,避免遗忘关闭response
-	 * @param request
-	 * @param handler
-	 * @return
-	 * @throws Exception
+	 * @param request request
+	 * @param handler handler
+	 * @return T
+	 * @throws Exception Exception
 	 */
 	public static final <T> T request(HttpUriRequest request, ResponseHandler<? extends T> handler) 
 			throws Exception{
@@ -107,9 +107,9 @@ public class HttpUtil {
 
 	/**
 	 * 需要自行关闭response
-	 * @param request
-	 * @return
-	 * @throws Exception
+	 * @param request request
+	 * @return CloseableHttpResponse
+	 * @throws Exception Exception
 	 */
 	public static final CloseableHttpResponse request(HttpUriRequest request) throws Exception{
 		return httpClient.execute(request);
@@ -117,9 +117,9 @@ public class HttpUtil {
 
 	/**
 	 * 下载http服务文件到本地
-	 * @param url
-	 * @param file
-	 * @throws Exception
+	 * @param url url
+	 * @param file file
+	 * @throws Exception Exception
 	 */
 	public static final void download(String url, File file) throws Exception {
 		download(new HttpGet(url), file);
@@ -127,9 +127,9 @@ public class HttpUtil {
 	
 	/**
 	 * 下载http服务文件到本地
-	 * @param httpGet
-	 * @param file
-	 * @throws Exception
+	 * @param httpGet httpGet
+	 * @param file file
+	 * @throws Exception Exception
 	 */
 	public static final void download(HttpGet httpGet, File file) throws Exception {
 		CloseableHttpResponse resp = request(httpGet);
@@ -152,10 +152,10 @@ public class HttpUtil {
 	
 	/**
 	 * 获取http服务文件流
-	 * @param url
-	 * @param file
-	 * @return
-	 * @throws Exception
+	 * @param url url
+	 * @param file file
+	 * @return InputStream
+	 * @throws Exception Exception
 	 */
 	public static final InputStream open(String url, File file) throws Exception {
 		return request(new HttpGet(url)).getEntity().getContent();
@@ -163,10 +163,10 @@ public class HttpUtil {
 	
 	/**
 	 * 获取http服务文件流
-	 * @param httpGet
-	 * @param file
-	 * @return
-	 * @throws Exception
+	 * @param httpGet httpGet
+	 * @param file file
+	 * @return InputStream
+	 * @throws Exception Exception
 	 */
 	public static final InputStream open(HttpGet httpGet, File file) throws Exception {
 		return request(httpGet).getEntity().getContent();

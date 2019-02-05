@@ -25,9 +25,9 @@ public class OrcReader implements Reader {
 	
 	/**
 	 * 
-	 * @param sourceUri
-	 * @param configuration
-	 * @throws Exception
+	 * @param sourceUri sourceUri
+	 * @param configuration configuration
+	 * @throws Exception Exception
 	 */
 	public OrcReader(String sourceUri, Configuration configuration) throws Exception{   
 		org.apache.orc.Reader reader = 
@@ -39,9 +39,9 @@ public class OrcReader implements Reader {
 	
 	/**
 	 * 
-	 * @param path
-	 * @param configuration
-	 * @throws Exception
+	 * @param path path
+	 * @param configuration configuration
+	 * @throws Exception Exception
 	 */
 	public OrcReader(Path path, Configuration configuration) throws Exception{  
 		org.apache.orc.Reader reader = 

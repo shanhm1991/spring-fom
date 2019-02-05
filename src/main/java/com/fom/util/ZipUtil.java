@@ -32,10 +32,10 @@ public class ZipUtil {
 	
 	/**
 	 * 解压指定uri的zip文件到指定目录
-	 * @param uri
-	 * @param destDir
-	 * @return
-	 * @throws Exception
+	 * @param uri String
+	 * @param destDir File
+	 * @return zip length
+	 * @throws Exception Exception
 	 */
 	public static final long unZip(String uri, File destDir) throws Exception {
 		return unZip(new File(uri), destDir);
@@ -43,10 +43,10 @@ public class ZipUtil {
 
 	/**
 	 * 解压zip文件到指定目录
-	 * @param file
-	 * @param destDir
-	 * @return
-	 * @throws Exception
+	 * @param file File
+	 * @param destDir File
+	 * @return zip length
+	 * @throws Exception Exception
 	 */
 	public static final long unZip(File file, File destDir) throws Exception{ 
 		long sTime = System.currentTimeMillis();
@@ -79,8 +79,8 @@ public class ZipUtil {
 
 	/**
 	 * 校验指定uri的zip文件是否合法
-	 * @param uri
-	 * @return
+	 * @param uri String
+	 * @return boolean
 	 */
 	public static final boolean valid(String uri){
 		return valid(new File(uri));
@@ -88,8 +88,8 @@ public class ZipUtil {
 	
 	/**
 	 * 校验zip文件是否合法
-	 * @param zip
-	 * @return
+	 * @param zip File
+	 * @return boolean
 	 */
 	public static final boolean valid(File zip){
 		if(zip == null || !zip.exists() || !zip.canRead()){
@@ -115,11 +115,11 @@ public class ZipUtil {
 	
 	/**
 	 * 将给定的InputStream写入给定的zipOutStream，并返回写入前InputStream的字节数
-	 * @param entryName
-	 * @param in
-	 * @param zipOutStream
-	 * @return
-	 * @throws Exception
+	 * @param entryName entryName
+	 * @param in InputStream
+	 * @param zipOutStream ZipOutputStream
+	 * @return InputStream length
+	 * @throws Exception Exception
 	 */
 	public static final long zipEntry(String entryName, 
 			InputStream in, ZipOutputStream zipOutStream) throws Exception{
@@ -141,10 +141,10 @@ public class ZipUtil {
 	}
 	
 	/**
-	 * 
-	 * @param file
-	 * @return
-	 * @throws Exception
+	 * 获取zip压缩包中的文件名称集合
+	 * @param file File
+	 * @return name set
+	 * @throws Exception Exception
 	 */
 	@SuppressWarnings("unchecked")
 	public static final Set<String> getEntrySet(File file) throws Exception{

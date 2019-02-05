@@ -14,9 +14,8 @@ public class ContextUtil {
 
 	/**
 	 * Return the real path for a given virtual path, if possible; otherwise return <code>null</code>.
-	 * @param location
-	 * @return
-	 * @throws Exception
+	 * @param path path
+	 * @return context location
 	 */
 	public static final String getContextPath(String path) {
 		return scontext.getRealPath(getEnvStr(path));
@@ -24,9 +23,9 @@ public class ContextUtil {
 
 	/**
 	 * 获取带环境变量的字符串值，如${webapp.root}/test
-	 * @param val
-	 * @return
-	 * @throws IllegalArgumentException
+	 * @param val string
+	 * @return string
+	 * @throws IllegalArgumentException IllegalArgumentException
 	 */
 	public static final String getEnvStr(String val) throws IllegalArgumentException {
 		String DELIM_START = "${";

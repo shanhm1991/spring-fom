@@ -20,8 +20,8 @@ public class TextReader implements Reader {
 	
 	/**
 	 * 
-	 * @param sourceUri
-	 * @throws Exception
+	 * @param sourceUri sourceUri
+	 * @throws Exception Exception
 	 */
 	public TextReader(String sourceUri) throws Exception {
 		reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sourceUri)),"UTF-8"));
@@ -29,8 +29,8 @@ public class TextReader implements Reader {
 	
 	/**
 	 * 
-	 * @param file
-	 * @throws Exception
+	 * @param file file
+	 * @throws Exception Exception
 	 */
 	public TextReader(File file) throws Exception {
 		reader = new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8"));
@@ -38,8 +38,8 @@ public class TextReader implements Reader {
 	
 	/**
 	 * 
-	 * @param inputStream
-	 * @throws Exception
+	 * @param inputStream inputStream
+	 * @throws Exception Exception
 	 */
 	public TextReader(InputStream inputStream) throws Exception {
 		reader = new BufferedReader(new InputStreamReader(inputStream,"UTF-8"));

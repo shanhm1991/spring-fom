@@ -10,7 +10,7 @@ import com.fom.log.LoggerFactory;
  * 
  * @author shanhm
  *
- * @param <V>
+ * @param <V> 行数据解析结果类型
  */
 public abstract class AbstractParserHelper<V> implements ParserHelper<V> {
 	

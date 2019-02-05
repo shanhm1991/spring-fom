@@ -5,12 +5,12 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fom.context.SpringContext;
 import com.fom.context.helper.AbstractParserHelper;
 import com.fom.context.reader.Reader;
 import com.fom.context.reader.TextReader;
 import com.fom.examples.bean.ExampleBean;
 import com.fom.examples.dao.ExamplesDao;
-import com.fom.util.SpringUtil;
 
 /**
  * 
@@ -43,7 +43,7 @@ public class ImportMysqlExample1Helper extends AbstractParserHelper<ExampleBean>
 
 	@Override
 	public void batchProcessIfNotInterrupted(List<ExampleBean> lineDatas, long batchTime) throws Exception {
-		ExamplesDao demoDao = SpringUtil.getBean("mysqlExampleDao", ExamplesDao.class);
+		ExamplesDao demoDao = SpringContext.getBean("mysqlExampleDao", ExamplesDao.class);
 		demoDao.batchInsert(lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());
 	}

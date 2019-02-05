@@ -280,7 +280,7 @@ public class ZipDownloader extends Executor {
 	 * 获取下一个命名downloadZip的序列名（默认:zipName_index_entrySize.zip）
 	 * @param index downloadZip命名序号
 	 * @param entrySize downloadZip真实下载的文件数
-	 * @return
+	 * @return next name
 	 */
 	protected String getNextName(int index, int entrySize){
 		StringBuilder builder = new StringBuilder(); 
@@ -291,7 +291,7 @@ public class ZipDownloader extends Executor {
 
 	/**
 	 * 获取当前已有zip的最大序号
-	 * @return
+	 * @return max index of exist zip
 	 */
 	protected int getCurrentIndex(){
 		if(index > 0){
@@ -322,9 +322,9 @@ public class ZipDownloader extends Executor {
 
 	/**
 	 * 获取下载的downloadZip中的真实下载的文件名称集合
-	 * @param downloadZip
-	 * @return
-	 * @throws Exception
+	 * @param downloadZip zip
+	 * @return list of real download file name
+	 * @throws Exception Exception
 	 */
 	protected Set<String> getZipEntryNames(File downloadZip) throws Exception {
 		return ZipUtil.getEntrySet(downloadZip);
@@ -332,8 +332,8 @@ public class ZipDownloader extends Executor {
 
 	/**
 	 * 自定义添加其他文件，由于上下文中考虑了失败补偿问题，建议添加文件前先检查删除已有的同名entry
-	 * @param tempZipFile
-	 * @throws IOException
+	 * @param tempZipFile tempZipFile
+	 * @throws IOException IOException
 	 */
 	protected void joinOtherFiles(File tempZipFile) throws IOException{
 

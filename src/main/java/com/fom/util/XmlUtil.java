@@ -17,11 +17,11 @@ import org.dom4j.io.XMLWriter;
 public class XmlUtil {
 
 	/**
-	 * 
-	 * @param el
-	 * @param key
-	 * @param defaultValue
-	 * @return
+	 * 获取节点值
+	 * @param el Element
+	 * @param key key
+	 * @param defaultValue defaultValue
+	 * @return value
 	 */
 	public static final String getString(Element el, String key, String defaultValue){
 		Element e = el.element(key);
@@ -36,13 +36,13 @@ public class XmlUtil {
 	}
 
 	/**
-	 * 
-	 * @param el
-	 * @param key
-	 * @param defaultValue
-	 * @param min
-	 * @param max
-	 * @return
+	 * 获取节点值
+	 * @param el Element
+	 * @param key key
+	 * @param defaultValue defaultValue
+	 * @param min min
+	 * @param max max
+	 * @return value
 	 */
 	public static final int getInt(Element el, String key, int defaultValue, int min, int max){
 		Element e = el.element(key);
@@ -63,13 +63,13 @@ public class XmlUtil {
 	}
 
 	/**
-	 * 
-	 * @param el
-	 * @param key
-	 * @param defaultValue
-	 * @param min
-	 * @param max
-	 * @return
+	 * 获取节点值
+	 * @param el Element
+	 * @param key key
+	 * @param defaultValue defaultValue
+	 * @param min min
+	 * @param max max
+	 * @return value
 	 */
 	public static final long getLong(Element el, String key, long defaultValue, long min, long max){
 		Element e = el.element(key);
@@ -90,11 +90,11 @@ public class XmlUtil {
 	}
 
 	/**
-	 * 
-	 * @param el
-	 * @param key
-	 * @param defaultValue
-	 * @return
+	 * 获取节点值
+	 * @param el Element
+	 * @param key key
+	 * @param defaultValue defaultValue
+	 * @return value
 	 */
 	public static final boolean getBoolean(Element el, String key, boolean defaultValue){
 		Element e = el.element(key);
@@ -112,10 +112,10 @@ public class XmlUtil {
 	}
 
 	/**
-	 * 
-	 * @param doc
-	 * @param xml
-	 * @throws Exception
+	 * 将Document格式化写入file
+	 * @param doc Document
+	 * @param xml File
+	 * @throws Exception Exception
 	 */
 	public static final void writeDocToFile(Document doc, File xml) throws Exception { 
 		OutputFormat formater=OutputFormat.createPrettyPrint();  

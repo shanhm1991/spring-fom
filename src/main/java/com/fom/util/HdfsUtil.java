@@ -23,8 +23,8 @@ public class HdfsUtil {
 	 * 根据集群主副节点的url获取FileSystem
 	 * @param masterUrl 主节点的ip:port
 	 * @param slaveUrl  副节点的ip:port
-	 * @return
-	 * @throws IOException
+	 * @return FileSystem
+	 * @throws IOException IOException
 	 */
 	public static final FileSystem getFileSystem(String masterUrl, String slaveUrl) throws IOException{
 		Configuration conf = new Configuration();
@@ -40,11 +40,11 @@ public class HdfsUtil {
 
 	/**
 	 * 下载hdfs服务文件到本地
-	 * @param fs
-	 * @param isDelSrc
-	 * @param src
-	 * @param dest
-	 * @throws Exception
+	 * @param fs FileSystem
+	 * @param isDelSrc isDelSrc
+	 * @param src src
+	 * @param dest dest
+	 * @throws Exception Exception
 	 */
 	public static final void download(FileSystem fs, boolean isDelSrc, String src, String dest) throws Exception{
 		download(fs, isDelSrc, new Path(src), new Path(dest)); 
@@ -52,11 +52,11 @@ public class HdfsUtil {
 	
 	/**
 	 * 下载hdfs服务文件到本地
-	 * @param fs
-	 * @param isDelSrc
-	 * @param src
-	 * @param dest
-	 * @throws Exception
+	 * @param fs FileSystem
+	 * @param isDelSrc isDelSrc
+	 * @param src srcPath
+	 * @param dest destPath
+	 * @throws Exception Exception
 	 */
 	public static final void download(FileSystem fs, boolean isDelSrc, Path src, Path dest) throws Exception{
 		fs.copyToLocalFile(isDelSrc, src, dest, true); 
@@ -64,11 +64,10 @@ public class HdfsUtil {
 	
 	/**
 	 * 获取hdfs服务文件流
-	 * @param fs
-	 * @param path
-	 * @return
-	 * @throws IOException 
-	 * @throws IllegalArgumentException 
+	 * @param fs FileSystem
+	 * @param path path
+	 * @return InputStream
+	 * @throws Exception Exception
 	 */
 	public static final InputStream open(FileSystem fs, String path) throws Exception {
 		return open(fs, new Path(path));
@@ -76,11 +75,10 @@ public class HdfsUtil {
 	
 	/**
 	 * 获取hdfs服务文件流
-	 * @param fs
-	 * @param path
-	 * @return
-	 * @throws IOException 
-	 * @throws IllegalArgumentException 
+	 * @param fs FileSystem
+	 * @param path path
+	 * @return InputStream
+	 * @throws Exception Exception 
 	 */
 	public static final InputStream open(FileSystem fs, Path path) throws Exception {
 		return fs.open(path);
@@ -88,11 +86,11 @@ public class HdfsUtil {
 	
 	/**
 	 * 列举目录下文件路径
-	 * @param fs
-	 * @param path
-	 * @param filter
-	 * @return
-	 * @throws Exception
+	 * @param fs FileSystem
+	 * @param path path
+	 * @param filter PathFilter
+	 * @return List
+	 * @throws Exception Exception
 	 */
 	public static final List<String> listPath(FileSystem fs, String path, PathFilter filter) throws Exception {
 		return listPath(fs, new Path(path), filter);
@@ -100,11 +98,11 @@ public class HdfsUtil {
 	
 	/**
 	 * 列举目录下文件路径
-	 * @param fs
-	 * @param path
-	 * @param filter
-	 * @return
-	 * @throws Exception
+	 * @param fs FileSystem
+	 * @param path path
+	 * @param filter PathFilter
+	 * @return List
+	 * @throws Exception Exception
 	 */
 	public static final List<String> listPath(FileSystem fs, Path path, PathFilter filter) throws Exception {
 		List<String> list = new LinkedList<>();
@@ -126,11 +124,11 @@ public class HdfsUtil {
 	
 	/**
 	 * 列举目录下文件路径
-	 * @param fs
-	 * @param path
-	 * @param filter
-	 * @return
-	 * @throws Exception
+	 * @param fs FileSystem
+	 * @param path path
+	 * @param filter PathFilter
+	 * @return List
+	 * @throws Exception Exception
 	 */
 	public static final List<String> listName(FileSystem fs, String path, PathFilter filter) throws Exception {
 		return listName(fs, new Path(path), filter);
@@ -138,11 +136,11 @@ public class HdfsUtil {
 	
 	/**
 	 * 列举目录下文件路径
-	 * @param fs
-	 * @param path
-	 * @param filter
-	 * @return
-	 * @throws Exception
+	 * @param fs FileSystem
+	 * @param path path
+	 * @param filter PathFilter
+	 * @return List
+	 * @throws Exception Exception
 	 */
 	public static final List<String> listName(FileSystem fs, Path path, PathFilter filter) throws Exception {
 		List<String> list = new LinkedList<>();
@@ -164,10 +162,10 @@ public class HdfsUtil {
 	
 	/**
 	 * 删除指定文件
-	 * @param fs
-	 * @param path
-	 * @return
-	 * @throws Exception
+	 * @param fs Exception
+	 * @param path path
+	 * @return boolean
+	 * @throws Exception Exception
 	 */
 	public static final boolean delete(FileSystem fs, String path) throws Exception {
 		return delete(fs, new Path(path));
@@ -175,10 +173,10 @@ public class HdfsUtil {
 	
 	/**
 	 * 删除指定文件
-	 * @param fs
-	 * @param path
-	 * @return
-	 * @throws Exception
+	 * @param fs FileSystem
+	 * @param path path
+	 * @return boolean
+	 * @throws Exception Exception
 	 */
 	public static final boolean delete(FileSystem fs, Path path) throws Exception {
 		return fs.delete(path, true);

@@ -101,6 +101,8 @@ public abstract class Executor implements Callable<Result> {
 
 	/**
 	 * 在文件处理前时执行的动作
+	 * @return isSuccess
+	 * @throws Exception Exception
 	 */
 	protected boolean onStart() throws Exception {
 		return true;
@@ -108,13 +110,15 @@ public abstract class Executor implements Callable<Result> {
 
 	/**
 	 * 文件处理
-	 * @param config
-	 * @throws Exception
+	 * @return isSuccess
+	 * @throws Exception Exception
 	 */
 	protected abstract boolean exec() throws Exception;
 
 	/**
 	 * 在文件处理完成时执行的动作
+	 * @return isSuccess
+	 * @throws Exception Exception
 	 */
 	protected boolean onComplete() throws Exception {
 		return true;

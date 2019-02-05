@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author shanhm
  *
- * @param <V>
+ * @param <V> 行数据解析结果类型
  */
 public abstract class AbstractLocalZipParserHelper<V> extends AbstractParserHelper<V> implements LocalZipParserHelper<V> {
 

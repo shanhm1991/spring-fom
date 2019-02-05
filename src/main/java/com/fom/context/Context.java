@@ -27,7 +27,6 @@ import com.fom.util.XmlUtil;
  * 
  * @author shanhm
  *
- * @param <E>
  */
 public abstract class Context implements Serializable {
 
@@ -173,7 +172,7 @@ public abstract class Context implements Serializable {
 	 * 将key-value保存到valueMap中,可以在getValue或其他get中获取
 	 * @param key key
 	 * @param value value
-	 * @throws UnsupportedActionException
+	 * @throws UnsupportedActionException UnsupportedActionException
 	 */
 	public final void setValue(String key, String value) throws UnsupportedActionException{
 		if(!validKey(key)){
@@ -184,8 +183,8 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 通过key获取valueMap中的值
-	 * @param Object
-	 * @return
+	 * @param key key
+	 * @return value
 	 */
 	public final Object getValue(String key){
 		return valueMap.get(key);
@@ -195,7 +194,7 @@ public abstract class Context implements Serializable {
 	 * 获取valueMap中int值
 	 * @param key key
 	 * @param defaultValue defaultValue
-	 * @return
+	 * @return value
 	 */
 	public final int getInt(String key, int defaultValue){
 		try{
@@ -209,7 +208,7 @@ public abstract class Context implements Serializable {
 	 * 获取valueMap中long值
 	 * @param key key
 	 * @param defaultValue defaultValue
-	 * @return
+	 * @return value
 	 */
 	public final long getLong(String key, long defaultValue){
 		try{
@@ -223,7 +222,7 @@ public abstract class Context implements Serializable {
 	 * 获取valueMap中boolean值
 	 * @param key key
 	 * @param defaultValue defaultValue
-	 * @return
+	 * @return value
 	 */
 	public final boolean getBoolean(String key, boolean defaultValue){
 		try{
@@ -237,7 +236,7 @@ public abstract class Context implements Serializable {
 	 * 获取valueMap中string值
 	 * @param key key
 	 * @param defaultValue defaultValue
-	 * @return
+	 * @return value
 	 */
 	public final String getString(String key, String defaultValue){
 		String value = String.valueOf(valueMap.get(key));
@@ -254,7 +253,7 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 获取当前Context对象的name
-	 * @return
+	 * @return name name
 	 */
 	public final String getName(){
 		return name;
@@ -262,7 +261,7 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 获取remark备注信息
-	 * @return
+	 * @return remark
 	 */
 	public final String getRemark(){
 		return valueMap.get(REMARK);
@@ -270,7 +269,7 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 设置remark备注信息
-	 * @return
+	 * @param remark remark
 	 */
 	public final void setRemark(String remark){
 		if(null == valueMap.get(REMARK) 
@@ -281,7 +280,7 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 获取本地线程池的核心线程数
-	 * @return
+	 * @return threadCore
 	 */
 	public final int getThreadCore(){
 		return Integer.parseInt(valueMap.get(THREADCORE));
@@ -289,8 +288,8 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 设置本地线程池的核心线程数，将在下一个周期生效
-	 * @param threadCore
-	 * @return
+	 * @param threadCore threadCore
+	 * @return threadCore
 	 */
 	public final int setThreadCore(int threadCore){
 		if(threadCore < 1 || threadCore > 10){
@@ -305,7 +304,7 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 获取本地线程池的最大线程数
-	 * @return
+	 * @return threadMax
 	 */
 	public final int getThreadMax(){
 		return Integer.parseInt(valueMap.get(THREADMAX));
@@ -313,8 +312,8 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 设置本地线程池的最大线程数，将在下一个周期生效
-	 * @param threadCore
-	 * @return
+	 * @param threadMax threadMax
+	 * @return threadMax
 	 */
 	public final int setThreadMax(int threadMax){
 		if(threadMax < 10 || threadMax > 100){
@@ -329,7 +328,7 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 获取本地线程池的线程存活时间
-	 * @return
+	 * @return aliveTime
 	 */
 	public final int getAliveTime(){
 		return Integer.parseInt(valueMap.get(ALIVETIME));
@@ -337,7 +336,8 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 设置本地线程池的线程存活时间，将在下一个周期生效
-	 * @return
+	 * @param aliveTime aliveTime
+	 * @return aliveTime
 	 */
 	public final int setAliveTime(int aliveTime){
 		if(aliveTime < 3 || aliveTime > 600){
@@ -352,7 +352,7 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 获取任务线程的超时时间
-	 * @return
+	 * @return overTime
 	 */
 	public final int getOverTime(){
 		return Integer.parseInt(valueMap.get(OVERTIME));
@@ -360,7 +360,8 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 设置任务线程的超时时间，将在下一个周期生效
-	 * @return
+	 * @param overTime overTime
+	 * @return overTime
 	 */
 	public final int setOverTime(int overTime){
 		if(overTime < 60 || overTime > 86400){
@@ -375,7 +376,7 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 获取cancellable：决定任务线程在执行时间超过overTime时是否中断
-	 * @return
+	 * @return cancellable
 	 */
 	public final boolean getCancellable(){
 		return Boolean.parseBoolean(valueMap.get(CANCELLABLE));
@@ -383,7 +384,8 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 设置cancellable：决定任务线程在执行时间超过overTime时是否中断
-	 * @return
+	 * @param cancellable cancellable
+	 * @return cancellable
 	 */
 	public final boolean setCancellable(boolean cancellable){
 		if(null == valueMap.get(CANCELLABLE) 
@@ -395,7 +397,7 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 获取context定时表达式
-	 * @return
+	 * @return cron
 	 */
 	public final String getCron(){
 		return (String)valueMap.get(CRON);
@@ -403,7 +405,7 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 设置context定时表达式，将在下一个周期生效
-	 * @return
+	 * @param cron cron
 	 */
 	public final void setCron(String cron){
 		if(StringUtils.isBlank(cron)){
@@ -432,7 +434,7 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 获取context状态
-	 * @return
+	 * @return state
 	 */
 	public final int state(){
 		synchronized (name.intern()) {
@@ -442,7 +444,7 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 获取context状态
-	 * @return
+	 * @return state
 	 */
 	public final String stateString(){
 		synchronized (name.intern()) {
@@ -458,6 +460,7 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 启动context
+	 * @return map(result/mag)
 	 */
 	public final Map<String,Object> start(){
 		Map<String,Object> map = new HashMap<>();
@@ -486,6 +489,7 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 停止context
+	 * @return map(result/mag)
 	 */
 	public final Map<String,Object> stop(){
 		Map<String,Object> map = new HashMap<>();
@@ -519,6 +523,7 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 中断context
+	 * @return map(result/mag)
 	 */
 	public final Map<String,Object> interrupt(){
 		Map<String,Object> map = new HashMap<>();
@@ -638,16 +643,16 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 返回资源uri列表，context将根据每个uri创建一个Executor执行器提交到线程池
-	 * @return List<String>
-	 * @throws Exception
+	 * @return List sourceUri list
+	 * @throws Exception Exception
 	 */
 	protected abstract List<String> getUriList() throws Exception;
 
 	/**
 	 * 根据uri创建一个Executor的具体实例
 	 * @param sourceUri 资源uri
-	 * @return
-	 * @throws Exception
+	 * @return Executor
+	 * @throws Exception Exception
 	 */
 	protected abstract Executor createExecutor(String sourceUri) throws Exception;
 

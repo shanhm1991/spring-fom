@@ -17,8 +17,8 @@ public interface JdbcHandler {
 	 * @param poolName 连接池名称
 	 * @param sql sql语句，其中参数变量以#修饰开头和结尾 
 	 * @param paramMap 对应sql语句中的参数变量的值
-	 * @return 
-	 * @throws Exception
+	 * @return List
+	 * @throws Exception Exception
 	 */
 	List<Map<String, Object>> queryForList(String poolName, String sql, Map<String, Object> paramMap) throws Exception;
 	
@@ -27,8 +27,8 @@ public interface JdbcHandler {
 	 * @param poolName 连接池名称
 	 * @param sql sql语句，其中参数变量以#修饰开头和结尾 
 	 * @param paramMap 对应sql语句中的参数变量的值
-	 * @return
-	 * @throws Exception
+	 * @return rows affects
+	 * @throws Exception Exception
 	 */
 	int execute(String poolName, String sql,Map<String, Object> paramMap) throws Exception;
 
@@ -37,22 +37,22 @@ public interface JdbcHandler {
 	 * @param poolName poolName 连接池名称
 	 * @param sql sql语句，其中参数变量以#修饰开头和结尾 
 	 * @param paramMaps 对应sql语句中的参数变量的值
-	 * @return
-	 * @throws Exception
+	 * @return rows affects
+	 * @throws Exception Exception
 	 */
 	int[] batchExecute(String poolName, String sql, List<Map<String, Object>> paramMaps) throws Exception;
 	
 	/**
 	 * 开始事务
-	 * @param poolName
-	 * @throws Exception
+	 * @param poolName poolName
+	 * @throws Exception Exception
 	 */
 	void startTransaction(String poolName) throws Exception;
 	
 	/**
 	 * 结束事务
-	 * @param poolName
-	 * @throws Exception
+	 * @param poolName poolName
+	 * @throws Exception Exception
 	 */
 	void endTransaction(String poolName) throws Exception;
 }
