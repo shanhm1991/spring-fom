@@ -7,7 +7,7 @@
 > 模块配置支持xml和注解扫描，结合springboot，提供了web页面维护，可以查看或者实时修改模块状态以及配置，可以参考examples的实现。
 > 也可以将fom当成一个工具jar，可以参考test中的例子，实现一个Context实例，使用executor包下面的策略，直接在main函数中启动即可。
 
-##api支持
+##api支持 [doc](../apidocs/index.html)
 > fom提供了一些常用的操作策略，如常见的文件上传下载以及解析(考虑了失败恢复断点续传等问题)
 1. 解析
 * 文件来源：Local/HDFS/HTTP/FTP
