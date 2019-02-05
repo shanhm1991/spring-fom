@@ -2,6 +2,7 @@ package com.fom.context;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.lang.reflect.Constructor;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -19,6 +20,8 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.reflections.Reflections;
 
+import com.fom.util.IoUtil;
+
 /**
  * 初始化容器，加载配置文件fom.xml
  * <br>&lt;fom&gt;
@@ -29,18 +32,13 @@ import org.reflections.Reflections;
  * <br>&nbsp;&nbsp;&lt;contexts&gt;
  * <br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;context/&gt;
  * <br>&nbsp;&nbsp;&lt;/contexts&gt;
- * <br>&nbsp;&nbsp;&lt;configs&gt;
- * <br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;config/&gt;
- * <br>&nbsp;&nbsp;&lt;/configs&gt;
  * <br>&lt;/fom&gt;
  * <br>加载策略:
- * <br>1.加载cache中所有缓存的所有config
- * <br>2.加载cache中所有缓存的所有context
- * <br>3.加载主配置文件中的configs节点
- * <br>4.加载主配置文件中的contexts节点
- * <br>5.依次加载includes节点下包含的配置文件中的configs和contexts节点
- * <br>6.扫描fom-scan节点配置所有包package下面的注解类
- * <br>当出现name同名时，只取第一个加载成功的，丢弃后续的，当加载完毕后启动容器中所有的context
+ * <br>1.加载cache中所有缓存的所有context
+ * <br>2.加载主配置文件中的contexts节点
+ * <br>3.依次加载主配置文件中的includes节点下包含的配置文件中的contexts节点
+ * <br>4.扫描fom-scan节点配置所有包package下面的注解类
+ * <br>如果出现同名name，以第一个加载成功的为准，当所有context加载完毕后依次启动
  * 
  * @author shanhm
  *
@@ -63,7 +61,7 @@ public class FomContextListener implements ServletContextListener {
 		String file = ContextUtil.getContextPath(servlet.getInitParameter("fomConfigLocation"));
 		File xml = new File(file);
 		if(!xml.exists()){
-			LOG.error("cann't find file: " + file); 
+			LOG.error("cann't find fom config file: " + file); 
 			return;
 		}
 		LOG.info("load file: " + file); 
@@ -93,14 +91,14 @@ public class FomContextListener implements ServletContextListener {
 			}  
 			System.setProperty("cache.root", cacheRoot);
 		}
-		String configCache = System.getProperty("cache.config");
+		String configCache = System.getProperty("cache.context");
 		if(StringUtils.isBlank(configCache)){
-			configCache = cacheRoot + File.separator + "config";
+			configCache = cacheRoot + File.separator + "context";
 			File history = new File(configCache + File.separator + "history");
 			if(!history.exists()){
 				history.mkdirs();
 			}
-			System.setProperty("cache.config", configCache);
+			System.setProperty("cache.context", configCache);
 		}
 		String parseCache = System.getProperty("cache.parse");
 		if(StringUtils.isBlank(parseCache)){
@@ -123,6 +121,30 @@ public class FomContextListener implements ServletContextListener {
 	}
 
 	private void loadCacheContexts() {
+		String cache = System.getProperty("cache.context");
+		File[] array = new File(cache).listFiles();
+		if(ArrayUtils.isEmpty(array)){
+			return;
+		}
+
+		for(File file : array){
+			if(file.isDirectory()){
+				continue;
+			}
+			LOG.info("load cache:" + file.getName()); 
+			String name = file.getName().split("\\.")[0];
+			ObjectInputStream input = null;
+			try{
+				input = new ObjectInputStream(new FileInputStream(file));
+				Context context = (Context) input.readObject();
+				context.initPool();
+				ContextManager.register(context); 
+			}catch(Exception e){
+				LOG.error("context[" + name + "] init failed", e);
+			}finally{
+				IoUtil.close(input);
+			}
+		}
 
 	}
 
@@ -144,7 +166,7 @@ public class FomContextListener implements ServletContextListener {
 			try {
 				Class<?> contextClass = Class.forName(clazz);
 				if(!Context.class.isAssignableFrom(contextClass)){
-					LOG.warn("ignore config, not subclass of com.fom.context.Context, [name=" 
+					LOG.warn("ignore config, isn't subclass of com.fom.context.Context, [name=" 
 							+ name + ",class=" + clazz + "]");
 					continue;
 				}
@@ -162,7 +184,7 @@ public class FomContextListener implements ServletContextListener {
 					LOG.warn("context[" + name + "] already exist, init canceled.");
 					continue;
 				}
-				
+
 				ContextManager.elementMap.put(name, element);
 				Context context = null;
 				if(isNameEmpty){ 
@@ -218,7 +240,7 @@ public class FomContextListener implements ServletContextListener {
 		if(ArrayUtils.isEmpty(pckages)){
 			return;
 		}
-		
+
 		Set<Class<?>> contextSet = new HashSet<>();
 		for(String pack : pckages){
 			Reflections reflections = new Reflections(pack.trim());
@@ -226,14 +248,27 @@ public class FomContextListener implements ServletContextListener {
 		}
 		for(Class<?> clazz : contextSet){
 			if(!Context.class.isAssignableFrom(clazz)){
-				LOG.warn(clazz + "没有继承com.fom.context.Context, 忽略@FomContext"); 
+				LOG.warn(clazz + " isn't subclass of com.fom.context.Context, ignored."); 
 				continue;
 			}
+			
+			String name = "";
+			FomContext fc = clazz.getAnnotation(FomContext.class);
+			if(fc != null && !StringUtils.isBlank(fc.name())){
+				name = fc.name();
+			}else{
+				name = clazz.getSimpleName();
+			}
+			if(ContextManager.exist(name)){
+				LOG.warn("context[" + name + "] already exist, init canceled.");
+				continue;
+			}
+			
 			try {
 				Context context = (Context)clazz.newInstance();
 				ContextManager.register(context); 
 			} catch (Exception e) {
-				LOG.error("context[" + clazz.getName() + "]初始化异常", e);
+				LOG.error("context[" + clazz.getName() + "] init failed", e);
 			} 
 		}
 	}

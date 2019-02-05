@@ -25,7 +25,6 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
 import com.fom.log.LoggerFactory;
-import com.fom.util.XmlUtil;
 
 /**
  * 负责监听配置变化,更新和提高poolMap中的pool
@@ -96,20 +95,17 @@ final class PoolManager {
 		Set<String> nameSet = new HashSet<String>();
 		while (it.hasNext()) {
 			Element ePool = (Element) it.next();
-
-			String name = XmlUtil.getString(ePool, "name", null);
+			String name = ePool.attributeValue("name");
+			String clazz = ePool.attributeValue("class");
 			if(name == null){
 				LOG.warn("no name, pool[" + name + "] init failed."); 
 				continue;
 			}
-
 			if(nameSet.contains(name)){
 				LOG.warn("pool[" + name + "] already exist, init canceled."); 
 				continue;
 			}
-
-			String className = XmlUtil.getString(ePool, "class", null);
-			if(className == null){
+			if(clazz == null){
 				LOG.warn("no class, pool[" + name + "] init failed.");
 				remve(name);
 				continue;
@@ -117,7 +113,7 @@ final class PoolManager {
 
 			Pool pool = poolMap.get(name);
 			if(pool != null){
-				if(pool.getClass().getName().equals(className)){
+				if(pool.getClass().getName().equals(clazz)){
 					try {
 						pool.load(ePool);
 						nameSet.add(name);
@@ -132,7 +128,7 @@ final class PoolManager {
 			}
 
 			try {
-				Class<?> poolClass = Class.forName(className);
+				Class<?> poolClass = Class.forName(clazz);
 				Constructor ct = poolClass.getDeclaredConstructor(String.class);
 				ct.setAccessible(true);
 				pool = (Pool)ct.newInstance(name);

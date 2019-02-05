@@ -1,34 +1,28 @@
-#Fom
-> 在公司呆的这一年时间里，发现由于项目性质，经常有关于文件操作的需求，每次就有童鞋临时写一个小工程部署，
-> 这样导致质量参差不齐，代码和日志风格也是各种各样，长久下去维护起来可能会比较困难，
-> 遂想私下写这样一个工具，希望能做到通用性，扩展性，也尽量提供一些util性质的工具。
+#概述
+> 在公司呆的这一年时间里，发现由于项目性质，经常有关于文件操作的需求，每次就有同学临时写一个小工程部署，
+> 这样导致质量参差不齐，代码和日志风格也是各种各样，毕竟不是长久之计，以后维护交接起来比较麻烦，
+> 遂决定私下写这样一个工具，尽量做到简单好用，方便扩展以及比较通用。
 
-##功能
-> Fom在上下文中对模块配置管理，任务线程分配作了统一处理，解决了可能出现的文件操作冲突、超时及异常问题，
-> 实现了失败补偿、错误恢复以及断点续传等机制，另外提供一了个简单地运维页面，可以实时监控和修改各模块的运行状态和配置信息
-> 目前实现的文件操作有解析入库、下载、上传，理论上应该可以实现任何关于文件的操作需求，暂时还没想到。
-1. 解析入库
-* 支持数据库：mysql、oracle、elasticsearch(2.x)；
-* 支持入库方式：mybatis、内置pool；
-* 支持文件来源：本地、HDFS服务、HTTP服务、FTP服务；
-* 支持文件类型：文本、zip包；
-* 支持文件文本格式：txt/orc、Excel[TODO]；
-2. 下载
-* 支持下载方式：文件下载、文件打包下载；
-* 支持下载服务：HDFS服务、HTTP服务、FTP服务；
-3. 上传[TODO]
-* 支持上传服务：HDFS服务、HTTP服务、FTP服务；
+> 可以将fom当作一个文件操作平台，它做到了模块化管理，以文件为独立单位创建任务线程，不同模块创建的任务线程提交各自独立的线程池。
+> 模块配置支持xml和注解扫描，结合springboot，提供了web页面维护，可以查看或者实时修改模块状态以及配置，可以参考examples的实现。
+> 也可以将fom当成一个工具jar，可以参考test中的例子，实现一个Context实例，使用executor包下面的策略，直接在main函数中启动即可。
 
-##维护（http://ip:port/.../index.html）
-1. list: 
-* 列出已加载的所有模块（包括信息：名称、类型、加载时间、启动时间、运行状态、配置是否合法），
-* 点击可以查看加载的详细信息，并且可以查看、修改(实时生效)所加载的实际xml配置
-2. srcs: 
-* 根据模块名列出源文件目录下的匹配文件名或者所有文件名
-3. logs: 
-* 列出所有运行的日志，点击可以查看内容，或者下载
-4. start/startAll/stop/stopAll/restart/restartAll：
-* 启动/停止/重启模块
+##api支持
+> fom提供了一些常用的操作策略，如常见的文件上传下载以及解析(考虑了失败恢复断点续传等问题)
+1. 解析
+* 文件来源：Local/HDFS/HTTP/FTP
+* 文件类型：文本/zip包
+* 文本格式：txt/orc/Excel
+2. 下载/打包下载
+* 文件服务器：HDFS/HTTP/FTP
+3. 上传
+* 文件服务器：HDFS/HTTP/FTP
+4. 数据库
+* 支持数据库：mysql/oracle/elasticsearch(2.x)
+* 支持操作方式：mybatis/自定义pool
+
+##web维护
+* http://ip:4040/fom/index.html
 
 ##打包
 * 在工程目录下执行cmd: mvn clean package(跳过测试：mvn clean package -Dmaven.test.skip=true)
@@ -50,18 +44,8 @@
 * 在eclipse中启动：如果不设置-Dwebapp.root，应用会以eclipse的编译结果目录作为根目录
 * 在tomcat容器中启动：工程中保留了web.xml和applicationContext.xml以及springnvc.xml就是为了兼容以往的web工程部署方式，将它们和需要的依赖文件一起以文件夹或war包形式放到tomcat目录下启动即可
 * java命令启动：打成jar包和需要的依赖以及resource一起部署到目录下，通过java指定classpath启动
-4. examples
-* example1  解析本地txt文件，使用自定义pool方式导入es
-* example2  解析本地txt文件，使用mybatis方式导入mysql
-* example3  解析本地txt文件，使用自定义pool方式导入mysql
-* example4  解析本地zip(txt)文件，使用mybatis方式导入oracle
-* example5  解析本地zip(txt)文件，使用自定义pool方式导入oracle
-* example6  下载HDFS服务指定目录下的文件
-* example6  下载并打包HDFS服务指定目录下的目录
 
 ##TODO
-* 页面logs,提供日志级别设置功能
-* 页面srcs,增加大小数目等统计信息
 * 页面添加实时新增模块功能
 * 安装包/rpm/注册系统服务
 

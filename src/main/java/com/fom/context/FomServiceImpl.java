@@ -1,5 +1,8 @@
 package com.fom.context;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -8,7 +11,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
+
+import com.alibaba.fastjson.JSONObject;
+import com.fom.util.IoUtil;
 
 /**
  * 
@@ -17,6 +25,8 @@ import org.springframework.stereotype.Service;
  */
 @Service(value="fomService")
 public class FomServiceImpl implements FomService {
+	
+	private static final Logger LOG = Logger.getRootLogger();
 
 	@Override
 	public Map<String, Object> list() {
@@ -45,7 +55,7 @@ public class FomServiceImpl implements FomService {
 	}
 
 	@Override
-	public Map<String, Object> save(String name, String data) throws Exception {
+	public Map<String, Object> save(String name, String json) throws Exception {
 		Map<String,Object> map = new HashMap<>();
 		Context context = ContextManager.contextMap.get(name);
 		if(context == null){
@@ -53,14 +63,73 @@ public class FomServiceImpl implements FomService {
 			map.put("msg", "context[" + name + "] not exist.");
 			return map;
 		} 
-		//TODO
+		Map<String,String> bakMap = new HashMap<>();
+		bakMap.putAll(context.valueMap);
+
+		JSONObject jsonObject = JSONObject.parseObject(json);  
+		for(Entry<String, Object> entry : jsonObject.entrySet()){
+			String key = entry.getKey();
+			String value = String.valueOf(entry.getValue());
+			switch(key){
+			case Context.QUEUESIZE:
+				context.setQueueSize(Integer.parseInt(value)); break;
+			case Context.THREADCORE:
+				context.setThreadCore(Integer.parseInt(value)); break;
+			case Context.THREADMAX:
+				context.setThreadMax(Integer.parseInt(value)); break;
+			case Context.ALIVETIME:
+				context.setAliveTime(Integer.parseInt(value)); break;
+			case Context.OVERTIME:
+				context.setOverTime(Integer.parseInt(value)); break;
+			case Context.CANCELLABLE:
+				context.setCancellable(Boolean.parseBoolean(value)); break;
+			case Context.CRON:
+				context.setCron(value); break;
+			default:
+				context.setValue(key, value);
+			}
+		}
+
+		if(context.valueMap.equals(bakMap)){ 
+			map.put("result", false);
+			map.put("msg", "context[" + name + "] has nothing changed.");
+			return map;
+		}
+		map.put("result", true);//已经更新成功
 		
-		//比较map
-		//不同则序列化
-		//返回值true则填充span和input
-		return null;
+		String cache = System.getProperty("cache.context");
+		String[] array = new File(cache).list();
+		if(!ArrayUtils.isEmpty(array)){//将已有的缓存文件移到history
+			for(String fname : array){
+				if(name.equals(fname.split("\\.")[0])){
+					File source = new File(cache + File.separator + fname);
+					File dest = new File(cache + File.separator + "history" + File.separator + fname);
+					if(!source.renameTo(dest)){
+						LOG.error("context[" + name + "]移动文件失败:" + fname);
+						map.put("msg", "context[" + name + "] changed success, but failed when save update to cache");
+						return map;
+					}
+					break;
+				}
+			}
+		}
+		
+		String file = cache + File.separator + name + "." + System.currentTimeMillis();
+		ObjectOutputStream out = null;
+		try{
+			out = new ObjectOutputStream(new FileOutputStream(file));
+			out.writeObject(context);
+			map.put("msg", "context[" + name + "] changed success.");
+			return map;
+		}catch(Exception e){
+			LOG.error("context[" + name + "]保存更新失败");
+			map.put("msg", "context[" + name + "] changed success, but failed when save update to cache");
+			return map;
+		}finally{
+			IoUtil.close(out);
+		}
 	}
-	
+
 	@Override
 	public Map<String,Object> start(String name) throws Exception {
 		Map<String,Object> map = new HashMap<>();
@@ -72,7 +141,7 @@ public class FomServiceImpl implements FomService {
 		}
 		return context.start();
 	}
-	
+
 	@Override
 	public Map<String,Object> stop(String name){
 		Map<String,Object> map = new HashMap<>();

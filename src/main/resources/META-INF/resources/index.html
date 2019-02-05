@@ -136,10 +136,10 @@ function operation(e, opid){
         			}); 
         		});
         	}else{
-        		TINY.box.show("failed, " + data.msg,0,0,0,0,4,false);
+        		TINY.box.show("failed, " + data.msg,0,0,0,0,4);
         	}
-        },error:function(data,type, err){
-        	TINY.box.show(err,0,0,0,0,4,false);
+        },error:function(XMLHttpRequest, textStatus, errorThrown){
+        	TINY.box.show(XMLHttpRequest.responseText,0,0,0,0,4);
 	    }
 	}); 
 }
@@ -171,26 +171,21 @@ function save(e){
 	json = json.substr(0, json.length-1) + '}';
 	//Tb = tbody
 	var name = Tb.parent().attr("id");
-	
-	Tb.parent().parent().parent().prev().data("{'data':{'name':'sdfsf'}}");
-	
-	var dat = Tb.parent().parent().parent().prev().data();
-	alert(dat.name);
-	
 	$.ajax({
         url: "/fom/save",
         type: "POST",
         dataType: "json",
-        data: { "name" : "xsde", "data" : json },
+        data: { "name" : name, "data" : json },
         success: function(data){
         	if(data.result){
-        		TINY.box.show("success, " + data.msg,0,0,0,0,4,true);
-        		//location.reload();
+        		TINY.box.show("success, " + data.msg,0,0,0,0,4,function(){
+        			location.reload();
+        		});
         	}else{
-        		TINY.box.show("failed, " + data.msg,0,0,0,0,4,false);
+        		TINY.box.show("failed, " + data.msg,0,0,0,0,4);
         	}
-        },error:function(data,type, err){
-        	TINY.box.show(err,0,0,0,0,4,false);
+        },error:function(XMLHttpRequest, textStatus, errorThrown){
+        	TINY.box.show(XMLHttpRequest.responseText,0,0,0,0,4);
 	    }
 	}); 
 }

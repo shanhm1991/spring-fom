@@ -52,9 +52,9 @@ public abstract class Context implements Serializable {
 
 	static final String CANCELLABLE = "cancellable";
 
-	protected final Logger log;
-
 	protected final String name;
+	
+	protected transient Logger log;
 
 	volatile long createTime;
 
@@ -69,14 +69,11 @@ public abstract class Context implements Serializable {
 		FomContext fc = clazz.getAnnotation(FomContext.class);
 		if(fc == null){
 			this.name = clazz.getSimpleName();
-			this.log = LoggerFactory.getLogger(name);
 		}else{
 			if(StringUtils.isBlank(fc.name())){
 				this.name = clazz.getSimpleName();
-				this.log = LoggerFactory.getLogger(name);
 			}else{
 				this.name = fc.name();
-				this.log = LoggerFactory.getLogger(name);
 			}
 		}
 		initValue(name, fc);
@@ -143,7 +140,7 @@ public abstract class Context implements Serializable {
 		}
 	}
 
-	//序列化时排除了pool，在反序列化时需要初始化
+	//反序列化时额外的初始化工作
 	void initPool(){
 		int core = Integer.parseInt(valueMap.get(THREADCORE)); 
 		int max = Integer.parseInt(valueMap.get(THREADMAX));
@@ -151,9 +148,11 @@ public abstract class Context implements Serializable {
 		int queueSize = Integer.parseInt(valueMap.get(QUEUESIZE));  
 		pool = new TimedExecutorPool(core,max,aliveTime,new LinkedBlockingQueue<Runnable>(queueSize));
 		pool.allowCoreThreadTimeOut(true);
+		//Logger不支持序列化，只好放到这里
+		this.log = LoggerFactory.getLogger(name); 
 	}
 
-	private int setQueueSize(int queueSize){
+	int setQueueSize(int queueSize){
 		if(queueSize < 1 || queueSize > 10000000){
 			queueSize = 200;
 		}
@@ -165,9 +164,8 @@ public abstract class Context implements Serializable {
 	}
 
 	private boolean validKey(String key){
-		boolean valid = THREADCORE.equals(key) || THREADMAX.equals(key) 
-				|| ALIVETIME.equals(key) || OVERTIME.equals(key) || QUEUESIZE.equals(key)
-				|| CANCELLABLE.equals(key) || CRON.equals(key) || REMARK.equals(key);
+		boolean valid = THREADCORE.equals(key) || THREADMAX.equals(key) || ALIVETIME.equals(key) 
+				|| OVERTIME.equals(key) || QUEUESIZE.equals(key) || CANCELLABLE.equals(key) || CRON.equals(key) ;
 		return !valid;
 	}
 
@@ -432,14 +430,12 @@ public abstract class Context implements Serializable {
 	 */
 	private int state = 0;
 
-	private Object lock_state = new Object();
-
 	/**
 	 * 获取context状态
 	 * @return
 	 */
 	public final int state(){
-		synchronized (lock_state) {
+		synchronized (name.intern()) {
 			return state;
 		}
 	}
@@ -449,7 +445,7 @@ public abstract class Context implements Serializable {
 	 * @return
 	 */
 	public final String stateString(){
-		synchronized (lock_state) {
+		synchronized (name.intern()) {
 			switch(state){
 			case 0: return "inited";
 			case 1: return "started";
@@ -465,7 +461,7 @@ public abstract class Context implements Serializable {
 	 */
 	public final Map<String,Object> start(){
 		Map<String,Object> map = new HashMap<>();
-		synchronized (lock_state) {
+		synchronized (name.intern()) {
 			if(state == 1){
 				log.warn("context[" + name + "] was already started."); 
 				map.put("result", true);
@@ -493,7 +489,7 @@ public abstract class Context implements Serializable {
 	 */
 	public final Map<String,Object> stop(){
 		Map<String,Object> map = new HashMap<>();
-		synchronized (lock_state) {
+		synchronized (name.intern()) {
 			if(state == 3){
 				log.warn("context[" + name + "] was already stoped."); 
 				map.put("result", true);
@@ -526,7 +522,7 @@ public abstract class Context implements Serializable {
 	 */
 	public final Map<String,Object> interrupt(){
 		Map<String,Object> map = new HashMap<>();
-		synchronized (lock_state) {
+		synchronized (name.intern()) {
 			if(state != 1){
 				log.warn("context[" + name + "] was not started, cann't interrupt."); 
 				map.put("result", false);
@@ -541,9 +537,11 @@ public abstract class Context implements Serializable {
 		}
 	}
 
-	private InnerThread innerThread;
+	private transient InnerThread innerThread;
 
-	private class InnerThread extends Thread {
+	private class InnerThread extends Thread implements  Serializable {
+
+		private static final long serialVersionUID = 2023244859604452982L;
 
 		public InnerThread(){
 			this.setName("context-" + name); 
@@ -553,7 +551,7 @@ public abstract class Context implements Serializable {
 		public void run() {
 			startTime = System.currentTimeMillis();
 			while(true){
-				synchronized (lock_state) {
+				synchronized (name.intern()) {
 					if(state == 2){
 						pool.shutdownNow();
 						try {
@@ -610,7 +608,7 @@ public abstract class Context implements Serializable {
 					}
 				}
 				if(cronExpression == null){
-					synchronized (lock_state) {
+					synchronized (name.intern()) {
 						//默认只执行一次，执行完便停止，等待提交的线程结束
 						pool.shutdown();
 						try {
