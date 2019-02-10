@@ -3,191 +3,290 @@
 <head>
 <meta name="viewport" content="width=device-width" />
 <title>fom</title>
-<script src="js/jquery-3.3.1.js"></script> 
+<script src="js/jquery-3.3.1.js"></script>
 <script src="js/dataTables.js"></script>
 <script src="js/tinybox.js"></script>
 <link href="js/dataTables.css" rel="stylesheet" />
 <style type="text/css">
 td.details-control {
-    background: url('images/details_open.png') no-repeat center center;
-    cursor: pointer;
+	background: url('images/details_open.png') no-repeat center center;
+	cursor: pointer;
 }
-img{
-   background: no-repeat center center;
-    cursor: pointer;
+
+img {
+	background: no-repeat center center;
+	cursor: pointer;
 }
-#tinybox{
-   position:absolute; 
-   display:none; padding:10px; 
-   background:#ffffff url(images/load.gif) no-repeat 50% 50%; 
-   border:10px solid #e3e3e3; z-index:2000;
+
+#tinybox {
+	position: absolute;
+	display: none;
+	padding: 10px;
+	background: #ffffff url(images/load.gif) no-repeat 50% 50%;
+	border: 10px solid #e3e3e3;
+	z-index: 2000;
 }
-#tinymask{
-   position:absolute; 
-   display:none; top:0; left:0; 
-   height:100%; width:100%; background:#000000; z-index:1500;
-   }
-#tinycontent{
-   background:#ffffff; font-size:1.1em;
+
+#tinymask {
+	position: absolute;
+	display: none;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	background: #000000;
+	z-index: 1500;
+}
+
+#tinycontent {
+	background: #ffffff;
+	font-size: 1.1em;
 }
 </style>
 </head>
 <body>
-    <table id="fom" class="display nowrap" style="width:100%">
-        <thead>
-            <tr>
-			    <th></th>
-                <th>name</th>
-                <th>cron expression</th>
-                <th>state</th>
-				<th>create time</th>
-				<th>last start time</th>
-                <th>option</th>
-            </tr>
-        </thead>
-    </table>
-    <div id="content"/>
+	<table class="display nowrap" style="width: 100%">
+		<tr>
+			<td><input type="button" value="new"></td>
+		</tr>
+		<tr>
+			<td>
+				<table id="fom" class="display nowrap" style="width: 100%">
+					<thead>
+						<tr>
+							<th></th>
+							<th>name</th>
+							<th>state</th>
+							<th>create time</th>
+							<th>last start time</th>
+							<th>cron expression</th>
+							<th>log level</th>
+							<th>option</th>
+						</tr>
+					</thead>
+				</table>
+			</td>
+		</tr>
+	</table>
 </body>
 <script type="text/javascript">
-var table;
-$(document).ready(function() {
-	table = $('#fom').DataTable( {
-    	"ajax": "/fom/list",
-        "columns": [
-            {
-                "class":          "details-control",
-                "data":           null,
-                "orderable":      false,
-                "defaultContent": ""
-            },
-            { "data": "name" },
-            { "data": "cron", "orderable": false},
-            { "data": "state"},
-            { "data": "creatTime"},
-            { "data": "startTime"},
-            { "defaultContent": "<img title='start' src='images/start.png' onclick='operation(this, 1)'/>" 
-            	 + "<img title='stop' src='images/stop.png' onclick='operation(this, 2)'/>"
-            	 + "<img title='execute immediately' src='images/exec.png' onclick='operation(this, 3)'/>"
-            	 , "orderable": false},
-        ],
-        "createdRow": function ( row, data, index ) {
-        	
-        },
-        "order": [[1, 'asc']]
-    } );
-     
-    $('#fom tbody').on('click', 'td.details-control', function () {
-        var tr = $(this).closest('tr');
-        var row = table.row( tr );
-        if ( row.child.isShown() ) {
-        	$(this).css("background","url('images/details_open.png') no-repeat center center");
-            row.child.hide();
-            tr.removeClass('shown');
-        }
-        else {
-        	$(this).css("background","url('images/details_close.png') no-repeat center center");
-            row.child( format(row.data()) ).show();
-            tr.addClass('shown');
-        }
-    } );
-} );
+	var table;
+	$(document)
+			.ready(
+					function() {
+						table = $('#fom')
+								.DataTable(
+										{
+											"ajax" : "/fom/list",
+											"columns" : [
+													{
+														"class" : "details-control",
+														"data" : null,
+														"orderable" : false,
+														"defaultContent" : ""
+													},
+													{
+														"data" : "name"
+													},
+													{
+														"data" : "state"
+													},
+													{
+														"data" : "creatTime"
+													},
+													{
+														"data" : "startTime"
+													},
+													{
+														"data" : "cron",
+														"orderable" : false
+													},
+													{
+														"defaultContent" : "<select onchange='log(this)'>"
+																+ "<option value='DEBUG'>DEBUG</option>"
+																+ "<option value='INFO'>INFO</option>"
+																+ "<option value='WARN'>WARN</option>"
+																+ "<option value='ERROR'>ERROR</option>"
+																+ "</select>",
+														"orderable" : false
+													},
+													{
+														"defaultContent" : "<img title='start' src='images/start.png' onclick='operation(this, 1)'/>"
+																+ "<img title='stop' src='images/stop.png' onclick='operation(this, 2)'/>"
+																+ "<img title='execute immediately' src='images/exec.png' onclick='operation(this, 3)'/>",
+														"orderable" : false
+													}, ],
+											"createdRow" : function(row, data,
+													index) {
+												var select = $('td', row).eq(6)
+														.find("select");
+												for ( var key in data) {
+													if (key == "name") {
+														select
+																.attr(
+																		"id",
+																		"select_"
+																				+ data[key]);
+													} else if (key == "level") {
+														select.val(data[key]);
+													}
+												}
+											},
+											"order" : [ [ 1, 'asc' ] ]
+										});
 
-function format ( data ) {
-	var html = ' cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'
-	+ '<tr><td><img title="save" src="images/save.png" onclick="save(this)"/></td>' 
-	+ '<td><img title="edit" src="images/edit.png" onclick="edit(this)"/><label id="msg"/></td></tr>';
-	var name = "";
-	for(var key in data){
-		if(key == "name"){
-			name = data[key];
-			continue;
-		}else if(key == "startTime" || key == "creatTime" || key == "state"){
-			continue;
-		}		
-		html = html + '<tr><td>' + key + '</td>' 
-		        + '<td><span>' + data[key] + '</span><input hidden=true value="' + data[key] + '" /></td></tr>';
+						$('#fom tbody')
+								.on(
+										'click',
+										'td.details-control',
+										function() {
+											var tr = $(this).closest('tr');
+											var row = table.row(tr);
+											if (row.child.isShown()) {
+												$(this)
+														.css("background",
+																"url('images/details_open.png') no-repeat center center");
+												row.child.hide();
+												tr.removeClass('shown');
+											} else {
+												$(this)
+														.css("background",
+																"url('images/details_close.png') no-repeat center center");
+												row.child(format(row.data()))
+														.show();
+												tr.addClass('shown');
+											}
+										});
+					});
+
+	function format(data) {
+		var html = ' cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'
+				+ '<tr><td><img title="save" src="images/save.png" onclick="save(this)"/></td>'
+				+ '<td><img title="edit" src="images/edit.png" onclick="edit(this)"/><label id="msg"/></td></tr>';
+		var name = "";
+		for ( var key in data) {
+			if (key == "name") {
+				name = data[key];
+				continue;
+			} else if (key == "startTime" || key == "creatTime"
+					|| key == "state") {
+				continue;
+			}
+			html = html
+					+ '<tr><td>'
+					+ key
+					+ '</td>'
+					+ '<td><span>'
+					+ data[key]
+					+ '</span><input hidden=true value="' + data[key] + '" /></td></tr>';
+		}
+		html = '<table id="' + name + '"' + html + '</table>';
+		return html;
 	}
-	html = '<table id="' + name + '"' + html + '</table>';
-	return html;
-}
 
-function operation(e, opid){
-	var Tr = $(e).parent().parent();
-	var name = Tr.find('td').eq(1).html();
-	if(opid == null || name == ""){
-		return;
+	function operation(e, opid) {
+		var Tr = $(e).parent().parent();
+		var name = Tr.find('td').eq(1).html();
+		if (opid == null || name == "") {
+			return;
+		}
+		$.ajax({
+			url : "/fom/operation",
+			type : "POST",
+			dataType : "json",
+			data : {
+				"name" : name,
+				"opid" : opid
+			},
+			success : function(data) {
+				if (data.result) {
+					TINY.box.show("success, " + data.msg, 0, 0, 0, 0, 4,
+							function() {
+								$.ajax({
+									url : "/fom/state",
+									type : "POST",
+									dataType : "json",
+									data : {
+										"name" : name
+									},
+									success : function(data) {
+										Tr.find('td').eq(3).html(data.state);
+									}
+								});
+							});
+				} else {
+					TINY.box.show("failed, " + data.msg, 0, 0, 0, 0, 4);
+				}
+			},
+			error : function(XMLHttpRequest, textStatus, errorThrown) {
+				TINY.box.show(XMLHttpRequest.responseText, 0, 0, 0, 0, 4);
+			}
+		});
 	}
-	$.ajax({
-        url: "/fom/operation",
-        type: "POST",
-        dataType: "json",
-        data: { "name" : name, "opid" : opid },
-        success: function(data){
-        	if(data.result){
-        		TINY.box.show("success, " + data.msg,0,0,0,0,4,function(){
-        			$.ajax({
-        		        url: "/fom/state",
-        		        type: "POST",
-        		        dataType: "json",
-        		        data: { "name" : name},
-        		        success: function(data){
-        		        	Tr.find('td').eq(3).html(data.state);
-        		        }
-        			}); 
-        		});
-        	}else{
-        		TINY.box.show("failed, " + data.msg,0,0,0,0,4);
-        	}
-        },error:function(XMLHttpRequest, textStatus, errorThrown){
-        	TINY.box.show(XMLHttpRequest.responseText,0,0,0,0,4);
-	    }
-	}); 
-}
 
-function edit(e){
-	var Tb = $(e).parent().parent().parent();
-	Tb.find("input").attr("hidden",false);
-	Tb.find("span").attr("hidden",true);
-}
-
-function save(e){
-	var Tb = $(e).parent().parent().parent();
-	var hidden = Tb.find("input").attr("hidden");
-	if(hidden == true || hidden == "hidden"){
-		return;
+	function edit(e) {
+		var Tb = $(e).parent().parent().parent();
+		Tb.find("input").attr("hidden", false);
+		Tb.find("span").attr("hidden", true);
 	}
-	
-	Tb.find("span").attr("hidden",false);
-	Tb.find("input").attr("hidden",true);
-	var json = '{'; 
-	Tb.find("tr").each(function(i){                   
-	       if(i == 0){
-	          return;
-	       }
-	       var key = $(this).find("td").eq(0).html();
-	       var value = $(this).find("td").eq(1).find("input").val();
-	       json = json + '"' + key + '":"' +  value + '",';
-	});
-	json = json.substr(0, json.length-1) + '}';
-	//Tb = tbody
-	var name = Tb.parent().attr("id");
-	$.ajax({
-        url: "/fom/save",
-        type: "POST",
-        dataType: "json",
-        data: { "name" : name, "data" : json },
-        success: function(data){
-        	if(data.result){
-        		TINY.box.show("success, " + data.msg,0,0,0,0,4,function(){
-        			location.reload();
-        		});
-        	}else{
-        		TINY.box.show("failed, " + data.msg,0,0,0,0,4);
-        	}
-        },error:function(XMLHttpRequest, textStatus, errorThrown){
-        	TINY.box.show(XMLHttpRequest.responseText,0,0,0,0,4);
-	    }
-	}); 
-}
+
+	function save(e) {
+		var Tb = $(e).parent().parent().parent();
+		var hidden = Tb.find("input").attr("hidden");
+		if (hidden == true || hidden == "hidden") {
+			return;
+		}
+
+		Tb.find("span").attr("hidden", false);
+		Tb.find("input").attr("hidden", true);
+		var json = '{';
+		Tb.find("tr").each(function(i) {
+			if (i == 0) {
+				return;
+			}
+			var key = $(this).find("td").eq(0).html();
+			var value = $(this).find("td").eq(1).find("input").val();
+			json = json + '"' + key + '":"' + value + '",';
+		});
+		json = json.substr(0, json.length - 1) + '}';
+		//Tb = tbody
+		var name = Tb.parent().attr("id");
+		$.ajax({
+			url : "/fom/save",
+			type : "POST",
+			dataType : "json",
+			data : {
+				"name" : name,
+				"data" : json
+			},
+			success : function(data) {
+				if (data.result) {
+					TINY.box.show("success, " + data.msg, 0, 0, 0, 0, 4,
+							function() {
+								location.reload();
+							});
+				} else {
+					TINY.box.show("failed, " + data.msg, 0, 0, 0, 0, 4);
+				}
+			},
+			error : function(XMLHttpRequest, textStatus, errorThrown) {
+				TINY.box.show(XMLHttpRequest.responseText, 0, 0, 0, 0, 4);
+			}
+		});
+	}
+
+	function log(e) {
+		var name = $(e).attr("id").split("_")[1];
+		var level = $(e).val();
+		$.ajax({
+			url : "/fom/log",
+			type : "POST",
+			dataType : "json",
+			data : {
+				"name" : name,
+				"level" : level
+			}
+		});
+	}
 </script>
 </html>

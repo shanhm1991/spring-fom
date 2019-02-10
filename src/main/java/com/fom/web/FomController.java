@@ -3,7 +3,6 @@ package com.fom.web;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,16 +66,10 @@ public class FomController {
 		return service.state(name);
 	}
 	
-	@RequestMapping("/logs")
-	@ResponseBody
-	public Map<String,Object> logs() throws Exception{ 
-		Map<String,Object> map = new HashMap<>();
-		File logs = new File(System.getProperty("log.root"));
-		String[] array = logs.list();
-		if(array != null){
-			map.put("logs", Arrays.asList(array));
-		}
-		return map;
+	@RequestMapping("/log")
+	public String log(String name, String level) throws Exception{ 
+		service.changeLogLevel(name, level); 
+		return "success";
 	}
 	
 	@RequestMapping("/download")

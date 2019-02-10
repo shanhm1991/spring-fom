@@ -8,11 +8,8 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.dom4j.Element;
-
-import com.fom.log.LoggerFactory;
-
 import org.apache.log4j.Logger;
+import org.dom4j.Element;
 
 /**
  * 连接池管理  维护一个空闲池; 轮询监控关闭超时的空闲连接; 限制最大创建连接数; 动态响应配置变化
@@ -23,7 +20,7 @@ import org.apache.log4j.Logger;
  */
 abstract class Pool<E> {
 
-	protected static final Logger LOG = LoggerFactory.getLogger("pool");
+	protected static final Logger LOG = Logger.getLogger(Pool.class);
 
 	private static AtomicInteger aliveTotal = new AtomicInteger(0);
 

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
@@ -16,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.hdfs.server.namenode.UnsupportedActionException;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.dom4j.Element;
 import org.quartz.CronExpression;
@@ -160,6 +162,13 @@ public abstract class Context implements Serializable {
 			valueMap.put(QUEUESIZE, String.valueOf(queueSize));
 		}
 		return queueSize;
+	}
+	
+	void changeLogLevel(String level){
+		if(log == null){
+			return;
+		}
+		log.setLevel(Level.toLevel(level));
 	}
 
 	private boolean validKey(String key){
@@ -450,7 +459,7 @@ public abstract class Context implements Serializable {
 		synchronized (name.intern()) {
 			switch(state){
 			case 0: return "inited";
-			case 1: return "started";
+			case 1: return "running";
 			case 2: return "waitting stop";
 			case 3: return "stoped";
 			}
@@ -675,6 +684,14 @@ public abstract class Context implements Serializable {
 					}
 				}
 				continue;
+			}
+			
+			try {
+				future.get();
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();//保留中断标记
+			} catch (ExecutionException e) {
+				log.error("", e); //result handler exception
 			}
 			it.remove();
 		}

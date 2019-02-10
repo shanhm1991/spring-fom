@@ -80,12 +80,12 @@ public abstract class Executor implements Callable<Result> {
 			}else{
 				log.warn("任务失败, 耗时=" + cost + "ms");
 			}
-			result.result = res;
+			result.success = res;
 			result.costTime = cost;
 		} catch(Throwable e) {
 			long cost = System.currentTimeMillis() - sTime;
 			log.error("任务异常, 耗时=" + cost, e);
-			result.result = false;
+			result.success = false;
 			result.throwable = e;
 			if(exceptionHandler != null){
 				exceptionHandler.handle(e); 
@@ -148,7 +148,7 @@ public abstract class Executor implements Callable<Result> {
 			logger.addAppender(appender); 
 		}
 		StringBuilder builder = new StringBuilder("sourceUri=" + result.sourceUri
-				+ ", result=" + result.result
+				+ ", result=" + result.success
 				+ ", startTime=" + result.startTime
 				+ ", costTime=" + result.costTime);
 		if(result.throwable == null){

@@ -45,7 +45,7 @@ import com.fom.util.IoUtil;
  */
 public class FomContextListener implements ServletContextListener {
 
-	private static final Logger LOG = Logger.getRootLogger();
+	private static final Logger LOG = Logger.getLogger(FomContextListener.class);
 
 	public FomContextListener(){
 
@@ -236,6 +236,8 @@ public class FomContextListener implements ServletContextListener {
 		if(StringUtils.isBlank(fomscan)){
 			return;
 		}
+		
+		LOG.info("load @FomContext from: " + fomscan);
 		String[] pckages = fomscan.split(",");
 		if(ArrayUtils.isEmpty(pckages)){
 			return;

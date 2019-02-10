@@ -21,4 +21,6 @@ public interface FomService {
 	
 	Map<String,Object> state(String name) throws Exception;
 	
+	void changeLogLevel(String name, String level);
+	
 }

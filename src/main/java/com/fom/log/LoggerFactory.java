@@ -18,8 +18,6 @@ public class LoggerFactory {
 	public static Logger getLogger(String name){
 		Logger logger = LogManager.exists(name);
 		if(logger != null){
-			
-			
 			return logger;
 		}
 		logger = Logger.getLogger(name); 

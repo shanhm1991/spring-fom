@@ -21,7 +21,7 @@ public class FileUtil {
 	 * @param signalName
 	 * @return
 	 */
-	public static final List<String> scan(FileSystem fs, String srcUri, 
+	public static List<String> scan(FileSystem fs, String srcUri, 
 			Pattern pattern, String signalName) throws Exception {
 		List<String> list = new LinkedList<String>();
 		FileStatus[] array = fs.listStatus(new Path(srcUri));
@@ -57,7 +57,7 @@ public class FileUtil {
 		return list;
 	}
 
-	public static final List<String> scan(String srcUri, Pattern pattern, boolean isDelMatchFail) throws Exception {
+	public static List<String> scan(String srcUri, Pattern pattern, boolean isDelMatchFail) throws Exception {
 		List<String> list = new LinkedList<>();
 		if(srcUri == null){
 			return list;

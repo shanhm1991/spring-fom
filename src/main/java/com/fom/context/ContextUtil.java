@@ -6,7 +6,7 @@ public class ContextUtil {
 	
 	private static volatile ServletContext scontext;
 
-	public final static void setContext(ServletContext context) {
+	public static void setContext(ServletContext context) {
 		if(scontext == null){
 			scontext = context;
 		}
@@ -17,7 +17,7 @@ public class ContextUtil {
 	 * @param path path
 	 * @return context location
 	 */
-	public static final String getContextPath(String path) {
+	public static String getContextPath(String path) {
 		return scontext.getRealPath(getEnvStr(path));
 	}
 
@@ -27,7 +27,7 @@ public class ContextUtil {
 	 * @return string
 	 * @throws IllegalArgumentException IllegalArgumentException
 	 */
-	public static final String getEnvStr(String val) throws IllegalArgumentException {
+	public static String getEnvStr(String val) throws IllegalArgumentException {
 		String DELIM_START = "${";
 		char   DELIM_STOP  = '}';
 		int DELIM_START_LEN = 2;

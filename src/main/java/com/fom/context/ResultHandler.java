@@ -7,5 +7,5 @@ package com.fom.context;
  */
 public interface ResultHandler {
 
-	void handle(Result result);
+	void handle(Result result) throws Exception;
 }

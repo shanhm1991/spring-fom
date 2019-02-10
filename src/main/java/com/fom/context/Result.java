@@ -11,7 +11,7 @@ public class Result {
 	
 	 final String sourceUri;
 	
-	 boolean result;
+	 boolean success;
 	
 	 long startTime;
 	
@@ -27,8 +27,8 @@ public class Result {
 		return sourceUri;
 	}
 
-	public boolean isResult() {
-		return result;
+	public boolean isSuccess() {
+		return success;
 	}
 
 	public long getStartTime() {

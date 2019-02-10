@@ -23,7 +23,7 @@ public class XmlUtil {
 	 * @param defaultValue defaultValue
 	 * @return value
 	 */
-	public static final String getString(Element el, String key, String defaultValue){
+	public static String getString(Element el, String key, String defaultValue){
 		Element e = el.element(key);
 		if(e == null){
 			return defaultValue;
@@ -44,7 +44,7 @@ public class XmlUtil {
 	 * @param max max
 	 * @return value
 	 */
-	public static final int getInt(Element el, String key, int defaultValue, int min, int max){
+	public static int getInt(Element el, String key, int defaultValue, int min, int max){
 		Element e = el.element(key);
 		if(e == null){
 			return defaultValue;
@@ -71,7 +71,7 @@ public class XmlUtil {
 	 * @param max max
 	 * @return value
 	 */
-	public static final long getLong(Element el, String key, long defaultValue, long min, long max){
+	public static long getLong(Element el, String key, long defaultValue, long min, long max){
 		Element e = el.element(key);
 		if(e == null){
 			return defaultValue;
@@ -96,7 +96,7 @@ public class XmlUtil {
 	 * @param defaultValue defaultValue
 	 * @return value
 	 */
-	public static final boolean getBoolean(Element el, String key, boolean defaultValue){
+	public static boolean getBoolean(Element el, String key, boolean defaultValue){
 		Element e = el.element(key);
 		if(e == null){
 			return defaultValue;
@@ -117,7 +117,7 @@ public class XmlUtil {
 	 * @param xml File
 	 * @throws Exception Exception
 	 */
-	public static final void writeDocToFile(Document doc, File xml) throws Exception { 
+	public static void writeDocToFile(Document doc, File xml) throws Exception { 
 		OutputFormat formater=OutputFormat.createPrettyPrint();  
 		formater.setEncoding("UTF-8");  
 		FileOutputStream out = null;

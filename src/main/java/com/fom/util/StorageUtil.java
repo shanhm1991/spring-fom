@@ -29,7 +29,7 @@ public class StorageUtil {
 	//StorageClient非线程安全，且没有提供close方法,这里保存所有创建成功过的storageClient以便复用
 	private static final ConcurrentMap<String, Queue<StorageClient>> storageMap = new ConcurrentHashMap<>(); 
 
-	public static final String storageFile(File file, String zkAddress, boolean deleteOnComplete) throws Exception {
+	public static String storageFile(File file, String zkAddress, boolean deleteOnComplete) throws Exception {
 		Queue<StorageClient> queue = storageMap.get(zkAddress);
 		if(queue ==null){
 			Queue<StorageClient> newQueue = new ConcurrentLinkedQueue<StorageClient>(); 

@@ -7,7 +7,7 @@ package com.fom.util;
  */
 public class IoUtil {
 	
-	public static final void close(AutoCloseable con){
+	public static void close(AutoCloseable con){
 		if(con == null){
 			return;
 		}

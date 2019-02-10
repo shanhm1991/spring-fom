@@ -94,7 +94,7 @@ public class HttpUtil {
 	 * @return T
 	 * @throws Exception Exception
 	 */
-	public static final <T> T request(HttpUriRequest request, ResponseHandler<? extends T> handler) 
+	public static <T> T request(HttpUriRequest request, ResponseHandler<? extends T> handler) 
 			throws Exception{
 		CloseableHttpResponse response = null;
 		try{
@@ -111,7 +111,7 @@ public class HttpUtil {
 	 * @return CloseableHttpResponse
 	 * @throws Exception Exception
 	 */
-	public static final CloseableHttpResponse request(HttpUriRequest request) throws Exception{
+	public static CloseableHttpResponse request(HttpUriRequest request) throws Exception{
 		return httpClient.execute(request);
 	}
 
@@ -121,7 +121,7 @@ public class HttpUtil {
 	 * @param file file
 	 * @throws Exception Exception
 	 */
-	public static final void download(String url, File file) throws Exception {
+	public static void download(String url, File file) throws Exception {
 		download(new HttpGet(url), file);
 	}
 	
@@ -131,7 +131,7 @@ public class HttpUtil {
 	 * @param file file
 	 * @throws Exception Exception
 	 */
-	public static final void download(HttpGet httpGet, File file) throws Exception {
+	public static void download(HttpGet httpGet, File file) throws Exception {
 		CloseableHttpResponse resp = request(httpGet);
 		InputStream input = null;
 		FileOutputStream output = null;
@@ -157,7 +157,7 @@ public class HttpUtil {
 	 * @return InputStream
 	 * @throws Exception Exception
 	 */
-	public static final InputStream open(String url, File file) throws Exception {
+	public static InputStream open(String url, File file) throws Exception {
 		return request(new HttpGet(url)).getEntity().getContent();
 	}
 	
@@ -168,7 +168,7 @@ public class HttpUtil {
 	 * @return InputStream
 	 * @throws Exception Exception
 	 */
-	public static final InputStream open(HttpGet httpGet, File file) throws Exception {
+	public static InputStream open(HttpGet httpGet, File file) throws Exception {
 		return request(httpGet).getEntity().getContent();
 	}
 

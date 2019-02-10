@@ -26,7 +26,7 @@ import com.fom.util.IoUtil;
 @Service(value="fomService")
 public class FomServiceImpl implements FomService {
 	
-	private static final Logger LOG = Logger.getRootLogger();
+	private static final Logger LOG = Logger.getLogger(FomServiceImpl.class);
 
 	@Override
 	public Map<String, Object> list() {
@@ -44,6 +44,7 @@ public class FomServiceImpl implements FomService {
 			}
 			valueMap.put("creatTime", format.format(context.createTime));
 			valueMap.put("startTime", format.format(context.startTime));
+			valueMap.put("level", context.log.getLevel().toString());
 			list.add(valueMap);
 		}
 		map.put("data", list);
@@ -178,6 +179,15 @@ public class FomServiceImpl implements FomService {
 		map.put("result", true);
 		map.put("state", context.stateString());
 		return map;
+	}
+
+	@Override
+	public void changeLogLevel(String name, String level) {
+		Context context = ContextManager.contextMap.get(name);
+		if(context == null){
+			return;
+		}
+		context.changeLogLevel(level);
 	}
 
 }

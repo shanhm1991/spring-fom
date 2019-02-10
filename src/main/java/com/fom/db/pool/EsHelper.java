@@ -31,7 +31,6 @@ import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.engine.VersionConflictEngineException;
 
-import com.fom.log.LoggerFactory;
 import com.fom.util.IoUtil;
 
 /**
@@ -41,7 +40,7 @@ import com.fom.util.IoUtil;
  */
 public class EsHelper {
 
-	protected static final Logger LOG = LoggerFactory.getLogger("pool");
+	protected static final Logger LOG = Logger.getLogger(EsHelper.class);
 
 	protected EsHelper(){
 

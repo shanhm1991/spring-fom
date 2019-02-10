@@ -14,7 +14,7 @@ import org.dom4j.Element;
  */
 public class ContextManager {
 
-	private static final Logger LOG = Logger.getRootLogger();
+	private static final Logger LOG = Logger.getLogger(ContextManager.class);
 
 	//容器启动时会给elementMap赋值，Context构造时尝试从中获取配置
 	static final Map<String, Element> elementMap = new ConcurrentHashMap<>();

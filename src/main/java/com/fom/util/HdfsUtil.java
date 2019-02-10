@@ -26,7 +26,7 @@ public class HdfsUtil {
 	 * @return FileSystem
 	 * @throws IOException IOException
 	 */
-	public static final FileSystem getFileSystem(String masterUrl, String slaveUrl) throws IOException{
+	public static FileSystem getFileSystem(String masterUrl, String slaveUrl) throws IOException{
 		Configuration conf = new Configuration();
 		conf.set("dfs.nameservices", "proxy");
 		conf.set("dfs.ha.namenodes.proxy", "nn1,nn2");
@@ -46,7 +46,7 @@ public class HdfsUtil {
 	 * @param dest dest
 	 * @throws Exception Exception
 	 */
-	public static final void download(FileSystem fs, boolean isDelSrc, String src, String dest) throws Exception{
+	public static void download(FileSystem fs, boolean isDelSrc, String src, String dest) throws Exception{
 		download(fs, isDelSrc, new Path(src), new Path(dest)); 
 	}
 	
@@ -58,7 +58,7 @@ public class HdfsUtil {
 	 * @param dest destPath
 	 * @throws Exception Exception
 	 */
-	public static final void download(FileSystem fs, boolean isDelSrc, Path src, Path dest) throws Exception{
+	public static void download(FileSystem fs, boolean isDelSrc, Path src, Path dest) throws Exception{
 		fs.copyToLocalFile(isDelSrc, src, dest, true); 
 	}
 	
@@ -69,7 +69,7 @@ public class HdfsUtil {
 	 * @return InputStream
 	 * @throws Exception Exception
 	 */
-	public static final InputStream open(FileSystem fs, String path) throws Exception {
+	public static InputStream open(FileSystem fs, String path) throws Exception {
 		return open(fs, new Path(path));
 	}
 	
@@ -80,7 +80,7 @@ public class HdfsUtil {
 	 * @return InputStream
 	 * @throws Exception Exception 
 	 */
-	public static final InputStream open(FileSystem fs, Path path) throws Exception {
+	public static InputStream open(FileSystem fs, Path path) throws Exception {
 		return fs.open(path);
 	}
 	
@@ -92,7 +92,7 @@ public class HdfsUtil {
 	 * @return List
 	 * @throws Exception Exception
 	 */
-	public static final List<String> listPath(FileSystem fs, String path, PathFilter filter) throws Exception {
+	public static List<String> listPath(FileSystem fs, String path, PathFilter filter) throws Exception {
 		return listPath(fs, new Path(path), filter);
 	}
 	
@@ -104,7 +104,7 @@ public class HdfsUtil {
 	 * @return List
 	 * @throws Exception Exception
 	 */
-	public static final List<String> listPath(FileSystem fs, Path path, PathFilter filter) throws Exception {
+	public static List<String> listPath(FileSystem fs, Path path, PathFilter filter) throws Exception {
 		List<String> list = new LinkedList<>();
 		FileStatus[] statusArray = null;   
 		if(filter == null){
@@ -130,7 +130,7 @@ public class HdfsUtil {
 	 * @return List
 	 * @throws Exception Exception
 	 */
-	public static final List<String> listName(FileSystem fs, String path, PathFilter filter) throws Exception {
+	public static List<String> listName(FileSystem fs, String path, PathFilter filter) throws Exception {
 		return listName(fs, new Path(path), filter);
 	}
 	
@@ -142,7 +142,7 @@ public class HdfsUtil {
 	 * @return List
 	 * @throws Exception Exception
 	 */
-	public static final List<String> listName(FileSystem fs, Path path, PathFilter filter) throws Exception {
+	public static List<String> listName(FileSystem fs, Path path, PathFilter filter) throws Exception {
 		List<String> list = new LinkedList<>();
 		FileStatus[] statusArray = null; 
 		if(filter == null){
@@ -167,7 +167,7 @@ public class HdfsUtil {
 	 * @return boolean
 	 * @throws Exception Exception
 	 */
-	public static final boolean delete(FileSystem fs, String path) throws Exception {
+	public static boolean delete(FileSystem fs, String path) throws Exception {
 		return delete(fs, new Path(path));
 	}
 	
@@ -178,7 +178,7 @@ public class HdfsUtil {
 	 * @return boolean
 	 * @throws Exception Exception
 	 */
-	public static final boolean delete(FileSystem fs, Path path) throws Exception {
+	public static boolean delete(FileSystem fs, Path path) throws Exception {
 		return fs.delete(path, true);
 	}
 }

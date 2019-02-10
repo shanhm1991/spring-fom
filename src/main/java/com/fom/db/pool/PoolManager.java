@@ -24,8 +24,6 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-import com.fom.log.LoggerFactory;
-
 /**
  * 负责监听配置变化,更新和提高poolMap中的pool
  * 
@@ -34,7 +32,7 @@ import com.fom.log.LoggerFactory;
  */
 final class PoolManager {
 
-	protected static final Logger LOG = LoggerFactory.getLogger("pool");
+	protected static final Logger LOG = Logger.getLogger(PoolManager.class);
 
 	private static final ConcurrentMap<String,Pool<?>> poolMap = new ConcurrentHashMap<String,Pool<?>>();
 
@@ -139,7 +137,7 @@ final class PoolManager {
 				LOG.error("pool[" + name + "] init failed.", e); 
 			}
 		}
-		LOG.info("all pools=" + poolMap.keySet());
+		LOG.info("loaded pools=" + poolMap.keySet());
 	}
 
 	private static class Listener extends Thread {
@@ -217,7 +215,7 @@ final class PoolManager {
 					pool.clean();
 				}
 
-				StringBuilder builder = new StringBuilder(", detail=[");
+				StringBuilder builder = new StringBuilder(", Details=[");
 				for(Pool<?> pool : poolMap.values()){
 					builder.append(pool.name + ":" + pool.getLocalAlives() + "; ");
 				}
@@ -226,7 +224,7 @@ final class PoolManager {
 				}
 				String detail = builder.append("]").toString();
 				if(cleanTimes++ % 10 == 0){
-					LOG.info("[statistics]total connections：" + Pool.getAlives() + detail); 
+					LOG.info("Total=" + Pool.getAlives() + detail); 
 				}
 			}
 		}

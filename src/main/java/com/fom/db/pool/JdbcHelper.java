@@ -19,7 +19,6 @@ import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
-import com.fom.log.LoggerFactory;
 import com.fom.util.IoUtil;
 
 import oracle.sql.ARRAY;
@@ -34,7 +33,7 @@ import oracle.sql.StructDescriptor;
  */
 public class JdbcHelper {
 
-	protected static final Logger LOG = LoggerFactory.getLogger("pool");
+	protected static final Logger LOG = Logger.getLogger(JdbcHelper.class);
 
 	protected JdbcHelper(){
 

@@ -10,7 +10,7 @@ import org.apache.hadoop.fs.PathFilter;
 
 import com.fom.context.Context;
 import com.fom.context.Executor;
-import com.fom.context.executor.DirZipDownloader;
+import com.fom.context.executor.ZipDownloader;
 import com.fom.context.helper.HdfsZipDownloaderHelper;
 import com.fom.util.HdfsUtil;
 
@@ -24,6 +24,8 @@ public class DownloadHdfsZipExample extends Context {
 	private static final long serialVersionUID = -6055805119506513553L;
 
 	private FileSystem fs;
+	
+	private String srPath;
 
 	private String destPath = "${webapp.root}/download"; 
 
@@ -63,8 +65,10 @@ public class DownloadHdfsZipExample extends Context {
 		});  
 
 		String sourceName = new File(sourceUri).getName();
-		DirZipDownloader zipDownloader = new DirZipDownloader(sourceName, pathList, destPath, 
-				entryMax, sizeMax, isDelSrc, helper);
+		DownloadHdfsZipExampleResultHandler handler = 
+				new DownloadHdfsZipExampleResultHandler(fs, srPath,isDelSrc);
+		ZipDownloader zipDownloader = new ZipDownloader(sourceName, pathList, destPath, 
+				entryMax, sizeMax, isDelSrc, helper, handler);
 		return zipDownloader;
 	}
 

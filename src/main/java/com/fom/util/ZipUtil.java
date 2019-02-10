@@ -37,7 +37,7 @@ public class ZipUtil {
 	 * @return zip length
 	 * @throws Exception Exception
 	 */
-	public static final long unZip(String uri, File destDir) throws Exception {
+	public static long unZip(String uri, File destDir) throws Exception {
 		return unZip(new File(uri), destDir);
 	}
 
@@ -48,7 +48,7 @@ public class ZipUtil {
 	 * @return zip length
 	 * @throws Exception Exception
 	 */
-	public static final long unZip(File file, File destDir) throws Exception{ 
+	public static long unZip(File file, File destDir) throws Exception{ 
 		long sTime = System.currentTimeMillis();
 		ZipFile zip = null;
 		try {
@@ -82,7 +82,7 @@ public class ZipUtil {
 	 * @param uri String
 	 * @return boolean
 	 */
-	public static final boolean valid(String uri){
+	public static boolean valid(String uri){
 		return valid(new File(uri));
 	}
 	
@@ -91,7 +91,7 @@ public class ZipUtil {
 	 * @param zip File
 	 * @return boolean
 	 */
-	public static final boolean valid(File zip){
+	public static boolean valid(File zip){
 		if(zip == null || !zip.exists() || !zip.canRead()){
 			return false;
 		}
@@ -121,7 +121,7 @@ public class ZipUtil {
 	 * @return InputStream length
 	 * @throws Exception Exception
 	 */
-	public static final long zipEntry(String entryName, 
+	public static long zipEntry(String entryName, 
 			InputStream in, ZipOutputStream zipOutStream) throws Exception{
 		BufferedInputStream buffer = null;
 		try{
@@ -147,7 +147,7 @@ public class ZipUtil {
 	 * @throws Exception Exception
 	 */
 	@SuppressWarnings("unchecked")
-	public static final Set<String> getEntrySet(File file) throws Exception{
+	public static Set<String> getEntrySet(File file) throws Exception{
 		Set<String> set = new HashSet<>();
 		if(!valid(file)){
 			return set;
