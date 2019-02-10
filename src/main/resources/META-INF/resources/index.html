@@ -6,7 +6,12 @@
 <script src="js/jquery-3.3.1.js"></script>
 <script src="js/dataTables.js"></script>
 <script src="js/tinybox.js"></script>
+<script src="layui/layui.js"></script>
+<script src="layui/lay/modules/layer.js"></script>
+
 <link href="js/dataTables.css" rel="stylesheet" />
+<link href="layui/css/layui.css" rel="stylesheet" />
+<link href="layui/css/modules/layer/default/layer.css" rel="stylesheet" />
 <style type="text/css">
 td.details-control {
 	background: url('images/details_open.png') no-repeat center center;
@@ -42,13 +47,23 @@ img {
 	background: #ffffff;
 	font-size: 1.1em;
 }
+
+.boxbtn {
+    cursor: pointer;
+    font-size: 15px; margin-left: 2px; color: #000;
+}
+
+.detailbtn{
+    cursor: pointer;
+    font-size: 18px; margin-left: 15px; color: #000; font-weight: bolder;
+}
 </style>
 </head>
 <body>
+    <button class="layui-btn" style="margin: 10px 10px 10px 10px" onclick="add();">
+       <i class="layui-icon layui-icon-add-circle"/></i>Create
+    </button>
 	<table class="display nowrap" style="width: 100%">
-		<tr>
-			<td><input type="button" value="new"></td>
-		</tr>
 		<tr>
 			<td>
 				<table id="fom" class="display nowrap" style="width: 100%">
@@ -68,6 +83,9 @@ img {
 			</td>
 		</tr>
 	</table>
+	<div id="div1">
+		<table class="layui-hide" id="dataList1" lay-filter="dataList1"></table>
+	</div>
 </body>
 <script type="text/javascript">
 	var table;
@@ -111,9 +129,10 @@ img {
 														"orderable" : false
 													},
 													{
-														"defaultContent" : "<img title='start' src='images/start.png' onclick='operation(this, 1)'/>"
-																+ "<img title='stop' src='images/stop.png' onclick='operation(this, 2)'/>"
-																+ "<img title='execute immediately' src='images/exec.png' onclick='operation(this, 3)'/>",
+														"defaultContent" : 
+													      "<i class='layui-icon layui-icon-play boxbtn' title='start' onclick='operation(this, 1)'/></i>"
+													    + "<i class='layui-icon layui-icon-pause boxbtn' title='stop' onclick='operation(this, 2)'/></i>"
+													    + "<i class='layui-icon layui-icon-refresh boxbtn' title='execute immediately' onclick='operation(this, 3)'/></i>",
 														"orderable" : false
 													}, ],
 											"createdRow" : function(row, data,
@@ -157,12 +176,16 @@ img {
 												tr.addClass('shown');
 											}
 										});
+						
+						layui.use(['layer'], function(){
+							  var layer = layui.layer;
+							});
 					});
 
 	function format(data) {
 		var html = ' cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'
-				+ '<tr><td><img title="save" src="images/save.png" onclick="save(this)"/></td>'
-				+ '<td><img title="edit" src="images/edit.png" onclick="edit(this)"/><label id="msg"/></td></tr>';
+				+ '<tr><td><i class="layui-icon layui-icon-ok detailbtn" title="save" onclick="save(this)"/></i></td>'
+				+ '<td><i class="layui-icon layui-icon-edit detailbtn" title="edit" onclick="edit(this)"/></i></td></tr>';
 		var name = "";
 		for ( var key in data) {
 			if (key == "name") {
@@ -210,7 +233,7 @@ img {
 										"name" : name
 									},
 									success : function(data) {
-										Tr.find('td').eq(3).html(data.state);
+										Tr.find('td').eq(2).html(data.state);
 									}
 								});
 							});
@@ -287,6 +310,18 @@ img {
 				"level" : level
 			}
 		});
+	}
+	
+	function add(){
+		 layer.open({
+			 title: 'new', 
+			 type: 1,
+			 skin: 'layui-layer-demo',
+			 area: ['500px', '300px'],
+			 closeBtn: 2, 
+			 anim: 2,
+			 content: 'ÄÚÈÝ'
+			}); 
 	}
 </script>
 </html>

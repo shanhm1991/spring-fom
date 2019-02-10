@@ -223,7 +223,7 @@ final class PoolManager {
 					builder.append(pool.name + "(removed):" + pool.getLocalAlives() + "; ");
 				}
 				String detail = builder.append("]").toString();
-				if(cleanTimes++ % 10 == 0){
+				if(cleanTimes++ % 100 == 0){
 					LOG.info("Total=" + Pool.getAlives() + detail); 
 				}
 			}
