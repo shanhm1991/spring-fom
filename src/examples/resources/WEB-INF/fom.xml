@@ -18,7 +18,7 @@
 			<cron></cron>
 			<threadCore>4</threadCore>
 			<threadMax>20</threadMax>
-			<threadAliveTime>3600</threadAliveTime>
+			<threadAliveTime>30</threadAliveTime>
 			<threadOverTime>3600</threadOverTime>
 			<queueSize>200</queueSize>
 			<cancellable>false</cancellable>

@@ -21,6 +21,8 @@ public interface FomService {
 	
 	Map<String,Object> state(String name) throws Exception;
 	
+	Map<String,Object> create(String json)  throws Exception;
+	
 	void changeLogLevel(String name, String level);
 	
 }

@@ -1,12 +1,7 @@
 package com.fom.web;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fom.context.FomService;
-import com.fom.util.IoUtil;
 
 /**
  * 
@@ -32,11 +26,12 @@ public class FomController {
 	public void setService(FomService service) {
 		this.service = service;
 	}
-	
+	 
 	@RequestMapping("/list")
 	@ResponseBody
 	public Map<String, Object> list() throws Exception{
-		return service.list();
+		Map<String, Object> a = service.list();
+		return a;
 	}
 	
 	@RequestMapping("/save")
@@ -72,26 +67,10 @@ public class FomController {
 		return "success";
 	}
 	
-	@RequestMapping("/download")
+	@RequestMapping("/create")
 	@ResponseBody
-	public Map<String,Object> download(String file, HttpServletResponse resp) throws Exception{ 
-		String path = System.getProperty("log.root") + File.separator + file;
-		File log = new File(path);
-		resp.reset();
-		resp.setContentType("application/octet-stream;charset=UTF-8");
-		resp.addHeader("Content-Disposition", "attachment;filename=\"" + file +"\""); 
-		InputStream in = null;
-		int len = 0;
-		byte[] bytes =  new byte[1024];
-		try{
-			in = new FileInputStream(log);
-			while((len = in.read(bytes)) > 0){
-				resp.getOutputStream().write(bytes, 0, len);
-			}
-		}finally{
-			IoUtil.close(in);
-		}
-		return null;
+	public Map<String,Object> create(String json) throws Exception{ 
+		return service.create(json);
 	}
 	
 }

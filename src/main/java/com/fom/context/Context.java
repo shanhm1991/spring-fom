@@ -54,14 +54,12 @@ public abstract class Context implements Serializable {
 	static final String CANCELLABLE = "cancellable";
 
 	protected final String name;
-	
+
 	protected transient Logger log;
 
 	volatile long createTime;
 
 	volatile long startTime;
-
-	private Element element;
 
 	private transient TimedExecutorPool pool;
 
@@ -91,14 +89,25 @@ public abstract class Context implements Serializable {
 		initValue(name, fc);
 	}
 
+	//valueMap只允许put动作，在put时先判断key是否存在，再判断value是否相等，可以很好的避免线程安全问题
+	Map<String, String> valueMap = new ConcurrentHashMap<>();
+
+	private volatile CronExpression cronExpression;
+
 	/**
 	 * xml > 注解  > 默认
 	 * @param name
 	 * @param fc
 	 */
+	@SuppressWarnings("unchecked")
 	private void initValue(String name,FomContext fc){
-		element = ContextManager.elementMap.get(name); 
+		Element element = ContextManager.elementMap.get(name); 
+		Map<String, String> cMap = ContextManager.createMap.get(name);
 		if(element != null){
+			List<Element> list = element.elements();
+			for(Element e : list){
+				valueMap.put(e.getName(), e.getTextTrim());
+			}
 			setThreadCore(XmlUtil.getInt(element, THREADCORE, 4, 1, 10));
 			setThreadMax(XmlUtil.getInt(element, THREADMAX, 20, 10, 100));
 			setAliveTime(XmlUtil.getInt(element, ALIVETIME, 30, 5, 300));
@@ -107,7 +116,16 @@ public abstract class Context implements Serializable {
 			setCancellable(XmlUtil.getBoolean(element, CANCELLABLE, false));
 			setCron(XmlUtil.getString(element, CRON, ""));
 			setRemark(XmlUtil.getString(element, REMARK, ""));
-			loadconfigs(element);
+		}else if(cMap != null){
+			valueMap.putAll(cMap);
+			setThreadCore(getInt(cMap, THREADCORE));
+			setThreadMax(getInt(cMap, THREADMAX));
+			setAliveTime(getInt(cMap, ALIVETIME));
+			setOverTime(getInt(cMap, OVERTIME));
+			setQueueSize(getInt(cMap, QUEUESIZE));
+			setCancellable(getBoolean(cMap, CANCELLABLE));
+			setCron(cMap.get(CRON)); 
+			setRemark(cMap.get(REMARK));
 		}else if(fc != null){
 			setThreadCore(fc.threadCore());
 			setThreadMax(fc.threadMax());
@@ -129,15 +147,19 @@ public abstract class Context implements Serializable {
 		createTime = System.currentTimeMillis();
 	}
 
-	@SuppressWarnings("unchecked")
-	private void loadconfigs(Element element){
-		List<Element> list = element.elements();
-		for(Element e : list){
-			String name = e.getName();
-			if(!validKey(name)){
-				continue;
-			}
-			valueMap.put(name, e.getTextTrim());
+	private int getInt(Map<String, String> map, String key){
+		try{
+			return Integer.parseInt(map.get(key)); 
+		}catch(Exception e){
+			return -1;
+		}
+	}
+
+	private boolean getBoolean(Map<String, String> map, String key){
+		try{
+			return Boolean.parseBoolean(map.get(key)); 
+		}catch(Exception e){
+			return false;
 		}
 	}
 
@@ -157,13 +179,10 @@ public abstract class Context implements Serializable {
 		if(queueSize < 1 || queueSize > 10000000){
 			queueSize = 200;
 		}
-		if(null == valueMap.get(QUEUESIZE) 
-				|| queueSize != Integer.parseInt(valueMap.get(QUEUESIZE))){
-			valueMap.put(QUEUESIZE, String.valueOf(queueSize));
-		}
+		valueMap.put(QUEUESIZE, String.valueOf(queueSize));
 		return queueSize;
 	}
-	
+
 	void changeLogLevel(String level){
 		if(log == null){
 			return;
@@ -255,11 +274,6 @@ public abstract class Context implements Serializable {
 		return value;
 	}
 
-	//valueMap只允许put动作，在put时先判断key是否存在，再判断value是否相等，可以很好的避免线程安全问题
-	Map<String, String> valueMap = new ConcurrentHashMap<>();
-
-	private volatile CronExpression cronExpression;
-
 	/**
 	 * 获取当前Context对象的name
 	 * @return name name
@@ -281,10 +295,7 @@ public abstract class Context implements Serializable {
 	 * @param remark remark
 	 */
 	public final void setRemark(String remark){
-		if(null == valueMap.get(REMARK) 
-				|| remark.equals(valueMap.get(REMARK))){ 
-			valueMap.put(REMARK, remark);
-		}
+		valueMap.put(REMARK, remark);
 	}
 
 	/**
@@ -304,10 +315,7 @@ public abstract class Context implements Serializable {
 		if(threadCore < 1 || threadCore > 10){
 			threadCore = 4;
 		}
-		if(null == valueMap.get(THREADCORE) 
-				|| threadCore != Integer.parseInt(valueMap.get(THREADCORE))){
-			valueMap.put(THREADCORE, String.valueOf(threadCore));
-		}
+		valueMap.put(THREADCORE, String.valueOf(threadCore));
 		return threadCore;
 	}
 
@@ -328,10 +336,7 @@ public abstract class Context implements Serializable {
 		if(threadMax < 10 || threadMax > 100){
 			threadMax = 20;
 		}
-		if(null == valueMap.get(THREADMAX) 
-				|| threadMax != Integer.parseInt(valueMap.get(THREADMAX))){
-			valueMap.put(THREADMAX, String.valueOf(threadMax));
-		}
+		valueMap.put(THREADMAX, String.valueOf(threadMax));
 		return threadMax;
 	}
 
@@ -352,10 +357,7 @@ public abstract class Context implements Serializable {
 		if(aliveTime < 3 || aliveTime > 600){
 			aliveTime = 30;
 		}
-		if(null == valueMap.get(ALIVETIME) 
-				|| aliveTime != Integer.parseInt(valueMap.get(ALIVETIME))){
-			valueMap.put(ALIVETIME, String.valueOf(aliveTime));
-		}
+		valueMap.put(ALIVETIME, String.valueOf(aliveTime));
 		return aliveTime;
 	}
 
@@ -376,10 +378,7 @@ public abstract class Context implements Serializable {
 		if(overTime < 60 || overTime > 86400){
 			overTime = 3600;
 		}
-		if(null == valueMap.get(OVERTIME) 
-				|| overTime != Integer.parseInt(valueMap.get(OVERTIME))){
-			valueMap.put(OVERTIME, String.valueOf(overTime));
-		}
+		valueMap.put(OVERTIME, String.valueOf(overTime));
 		return overTime;
 	}
 
@@ -397,10 +396,7 @@ public abstract class Context implements Serializable {
 	 * @return cancellable
 	 */
 	public final boolean setCancellable(boolean cancellable){
-		if(null == valueMap.get(CANCELLABLE) 
-				|| cancellable != Boolean.parseBoolean(valueMap.get(CANCELLABLE))){
-			valueMap.put(CANCELLABLE, String.valueOf(cancellable));
-		}
+		valueMap.put(CANCELLABLE, String.valueOf(cancellable));
 		return cancellable;
 	}
 
@@ -409,7 +405,7 @@ public abstract class Context implements Serializable {
 	 * @return cron
 	 */
 	public final String getCron(){
-		return (String)valueMap.get(CRON);
+		return valueMap.get(CRON);
 	}
 
 	/**
@@ -427,7 +423,7 @@ public abstract class Context implements Serializable {
 			throw new IllegalArgumentException(e);
 		}
 		if(null == valueMap.get(CRON) 
-				|| !cron.equals((String)valueMap.get(CRON))){
+				|| !cron.equals(valueMap.get(CRON))){
 			valueMap.put(CRON, cron);
 			cronExpression = c;
 		}
@@ -486,14 +482,14 @@ public abstract class Context implements Serializable {
 				map.put("msg", "context[" + name + "] is waitting stop, cann't start.");
 				return map;
 			}
+			state = 1;
 			innerThread = new InnerThread();
 			innerThread.start();
-			state = 1;
-			log.info("context[" + name + "] started"); 
-			map.put("result", true);
-			map.put("msg", "context[" + name + "] started.");
-			return map;
 		}
+		log.info("context[" + name + "] started"); 
+		map.put("result", true);
+		map.put("msg", "context[" + name + "] started.");
+		return map;
 	}
 
 	/**
@@ -523,11 +519,11 @@ public abstract class Context implements Serializable {
 			}
 			state = 2;
 			innerThread.interrupt();//尽快响应
-			log.info("context[" + name + "] received stop request."); 
-			map.put("result", true);
-			map.put("msg", "context[" + name + "] received stop request.");
-			return map;
 		}
+		log.info("context[" + name + "] received stop request."); 
+		map.put("result", true);
+		map.put("msg", "context[" + name + "] received stop request.");
+		return map;
 	}
 
 	/**
@@ -543,12 +539,12 @@ public abstract class Context implements Serializable {
 				map.put("msg", "context[" + name + "] was not started, cann't interrupt.");
 				return map;
 			}
-			log.info("context[" + name + "] execute now."); 
-			map.put("result", true);
-			map.put("msg", "context[" + name + "] execute now.");
 			innerThread.interrupt();
-			return map;
 		}
+		log.info("context[" + name + "] execute now."); 
+		map.put("result", true);
+		map.put("msg", "context[" + name + "] execute now.");
+		return map;
 	}
 
 	private transient InnerThread innerThread;
@@ -565,20 +561,25 @@ public abstract class Context implements Serializable {
 		public void run() {
 			startTime = System.currentTimeMillis();
 			while(true){
+				boolean isWaitingStop = false;
 				synchronized (name.intern()) {
-					if(state == 2){
-						pool.shutdownNow();
-						try {
-							pool.awaitTermination(1, TimeUnit.DAYS);
-						} catch (InterruptedException e) {
-							log.warn("interrupted when waiting stop."); 
-						}
-						cleanFutures();
-						state = 3;
-						log.info("context[" + name + "]结束");
-						return;
-					}
+					isWaitingStop = state == 2;
 				}
+				if(isWaitingStop){
+					pool.shutdownNow();
+					try {
+						pool.awaitTermination(1, TimeUnit.DAYS);
+					} catch (InterruptedException e) {
+						log.warn("interrupted when waiting stop."); 
+					}
+					cleanFutures();
+					synchronized (name.intern()) {
+						state = 3;
+					}
+					log.info("context[" + name + "]结束");
+					return;
+				}
+				
 				int threadCore = Integer.parseInt(valueMap.get(THREADCORE)); 
 				if(pool.getCorePoolSize() != threadCore){
 					pool.setCorePoolSize(threadCore);
@@ -622,19 +623,22 @@ public abstract class Context implements Serializable {
 					}
 				}
 				if(cronExpression == null){
+					//默认只执行一次，执行完便停止，等待提交的线程结束
 					synchronized (name.intern()) {
-						//默认只执行一次，执行完便停止，等待提交的线程结束
-						pool.shutdown();
-						try {
-							pool.awaitTermination(1, TimeUnit.DAYS);
-						} catch (InterruptedException e) {
-							log.warn("interrupted when waiting stop."); 
-						}
-						cleanFutures();
-						state = 3;
-						log.info("context[" + name + "]结束");
-						return;
+						state = 2;
 					}
+					pool.shutdown();
+					try {
+						pool.awaitTermination(1, TimeUnit.DAYS);
+					} catch (InterruptedException e) {
+						log.warn("interrupted when waiting stop."); 
+					}
+					cleanFutures();
+					synchronized (name.intern()) {
+						state = 3;
+					}
+					log.info("context[" + name + "]结束");
+					return;
 				}
 				Date nextTime = cronExpression.getTimeAfter(new Date());
 				long waitTime = nextTime.getTime() - System.currentTimeMillis();
@@ -685,7 +689,7 @@ public abstract class Context implements Serializable {
 				}
 				continue;
 			}
-			
+
 			try {
 				future.get();
 			} catch (InterruptedException e) {

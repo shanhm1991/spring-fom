@@ -8,7 +8,7 @@
 > 也可以将fom当成一个工具jar，可以参考test中的例子，实现一个Context实例，使用executor包下面的策略，直接在main函数中启动即可。
 
 ##api支持 
-> fom提供了一些已实现好的操作策略，如常用的文件上传下载以及解析(考虑了失败恢复断点续传等问题)
+> fom提供了一些已实现好的操作策略，如常用的文件上传下载以及解析
 1. 解析
 * 文件来源：Local/HDFS/HTTP/FTP
 * 文件类型：文本/zip包
@@ -45,8 +45,5 @@
 * 在tomcat容器中启动：工程中保留了web.xml和applicationContext.xml以及springnvc.xml就是为了兼容以往的web工程部署方式，将它们和需要的依赖文件一起以文件夹或war包形式放到tomcat目录下启动即可
 * java命令启动：打成jar包和需要的依赖以及resource一起部署到目录下，通过java指定classpath启动
 
-##TODO
-* 页面添加实时新增模块功能
-* 安装包/rpm/注册系统服务
 
 

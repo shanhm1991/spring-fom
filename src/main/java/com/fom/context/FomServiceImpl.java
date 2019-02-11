@@ -3,6 +3,7 @@ package com.fom.context;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Constructor;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +27,7 @@ import com.fom.util.IoUtil;
  */
 @Service(value="fomService")
 public class FomServiceImpl implements FomService {
-	
+
 	private static final Logger LOG = Logger.getLogger(FomServiceImpl.class);
 
 	@Override
@@ -44,12 +46,11 @@ public class FomServiceImpl implements FomService {
 			}
 			valueMap.put("creatTime", format.format(context.createTime));
 			valueMap.put("startTime", format.format(context.startTime));
-			valueMap.put("level", context.log.getLevel().toString());
+			valueMap.put("level", context.log.getLevel().toString()); 
 			list.add(valueMap);
 		}
 		map.put("data", list);
 		map.put("length", list.size());
-		map.put("draw", 1);
 		map.put("recordsTotal", list.size());
 		map.put("recordsFiltered", list.size());
 		return map;
@@ -97,7 +98,7 @@ public class FomServiceImpl implements FomService {
 			return map;
 		}
 		map.put("result", true);//已经更新成功
-		
+
 		String cache = System.getProperty("cache.context");
 		String[] array = new File(cache).list();
 		if(!ArrayUtils.isEmpty(array)){//将已有的缓存文件移到history
@@ -114,7 +115,7 @@ public class FomServiceImpl implements FomService {
 				}
 			}
 		}
-		
+
 		String file = cache + File.separator + name + "." + System.currentTimeMillis();
 		ObjectOutputStream out = null;
 		try{
@@ -181,6 +182,69 @@ public class FomServiceImpl implements FomService {
 		return map;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public Map<String, Object> create(String json) throws Exception {
+		Map<String, Object> resMap = new HashMap<>();
+
+		Map<String,String> map = (Map<String,String>) JSONObject.parse(json);
+		String clazz = map.get("class");
+		if(StringUtils.isBlank(clazz)){
+			resMap.put("result", false);
+			resMap.put("msg", "class不能为空");
+			return resMap;
+		}
+
+		Class<?> contextClass = null;
+		try {
+			contextClass = Class.forName(clazz);
+			if(!Context.class.isAssignableFrom(contextClass)){
+				resMap.put("result", false);
+				resMap.put("msg", clazz + "不是com.fom.context.Context的实现类");
+				return resMap;
+			}
+		}catch(Exception e){
+			LOG.error(clazz + "load failed", e);
+			resMap.put("result", false);
+			resMap.put("msg", clazz + "类加载失败");
+			return resMap;
+		}
+
+		String name = map.get("name");
+		boolean isNameEmpty = false; 
+		if(StringUtils.isBlank(name)){
+			isNameEmpty = true;
+			FomContext fc = contextClass.getAnnotation(FomContext.class);
+			if(fc != null && !StringUtils.isBlank(fc.name())){
+				name = fc.name();
+			}else{
+				name = contextClass.getSimpleName();
+			}
+		}
+
+		if(ContextManager.exist(name)){
+			LOG.warn("context[" + name + "] already exist, create canceled.");
+			resMap.put("result", false);
+			resMap.put("msg", "context[" + name + "] already exist, create canceled.");
+			return resMap;
+		}
+
+		ContextManager.createMap.put(name, map);
+		Context context = null;
+		if(isNameEmpty){ 
+			context = (Context)contextClass.newInstance();
+		}else{
+			Constructor constructor = contextClass.getConstructor(String.class);
+			context = (Context)constructor.newInstance(name);
+		}
+		ContextManager.register(context);
+
+		resMap.put("result", true);
+		resMap.put("msg", name + " created.");
+		return resMap;
+	}
+
+
 	@Override
 	public void changeLogLevel(String name, String level) {
 		Context context = ContextManager.contextMap.get(name);
@@ -189,5 +253,4 @@ public class FomServiceImpl implements FomService {
 		}
 		context.changeLogLevel(level);
 	}
-
 }
