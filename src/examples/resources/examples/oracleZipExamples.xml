@@ -15,7 +15,7 @@
 			<remark>使用自定义pool的方式将本地指定目录下text文本的zip包解析导入Oracle库</remark>
 			<cron>0/10 * * * * ?</cron>
 			<pattern>test.zip</pattern>
-			<srcPath>${webapp.root}/source</srcPath>
+			<srcPath>/source</srcPath>
 			<batch>5000</batch>
 			<isDelMatchFail>false</isDelMatchFail>
 			<zipEntryPattern>.\.bcp</zipEntryPattern>

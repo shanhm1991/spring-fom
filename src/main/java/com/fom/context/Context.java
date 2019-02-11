@@ -145,6 +145,7 @@ public abstract class Context implements Serializable {
 		}
 		initPool();
 		createTime = System.currentTimeMillis();
+		ContextManager.register(this); 
 	}
 
 	private int getInt(Map<String, String> map, String key){

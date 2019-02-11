@@ -1,15 +1,10 @@
 package com.fom.context;
 
-import java.io.File;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
 
-import com.fom.log.LoggerAppender;
 import com.fom.log.LoggerFactory;
 
 /**
@@ -92,7 +87,6 @@ public abstract class Executor implements Callable<Result> {
 			}
 		}
 		
-		record(name, result);
 		if(resultHandler != null){
 			resultHandler.handle(result);
 		}
@@ -124,41 +118,6 @@ public abstract class Executor implements Callable<Result> {
 		return true;
 	}
 	
-	private static void record(String name, Result result){
-		String logName = name + ".record";
-		Logger logger = LogManager.exists(logName);
-		if(logger == null){
-			logger = Logger.getLogger(logName); 
-			logger.setLevel(Level.INFO);  
-			logger.setAdditivity(false); 
-			logger.removeAllAppenders();
-			LoggerAppender appender = new LoggerAppender();
-			PatternLayout layout = new PatternLayout();  
-			layout.setConversionPattern("%m%n");  
-			appender.setLayout(layout); 
-			appender.setEncoding("UTF-8");
-			appender.setAppend(true);
-			if(StringUtils.isBlank(System.getProperty("log.root"))){
-				appender.setFile("log" + File.separator + logName);
-			}else{
-				appender.setFile(System.getProperty("log.root") + File.separator + logName);
-			}
-			appender.setRolling("false"); 
-			appender.activateOptions();
-			logger.addAppender(appender); 
-		}
-		StringBuilder builder = new StringBuilder("sourceUri=" + result.sourceUri
-				+ ", result=" + result.success
-				+ ", startTime=" + result.startTime
-				+ ", costTime=" + result.costTime);
-		if(result.throwable == null){
-			builder.append(", Throwable=null");
-		}else{
-			builder.append(", Throwable=" + result.throwable.getMessage());
-		}
-		logger.error(builder.toString()); 
-	}
-
 	public final String getName(){
 		return name;
 	}

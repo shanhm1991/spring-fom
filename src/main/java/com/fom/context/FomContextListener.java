@@ -186,14 +186,12 @@ public class FomContextListener implements ServletContextListener {
 				}
 
 				ContextManager.elementMap.put(name, element);
-				Context context = null;
 				if(isNameEmpty){ 
-					context = (Context)contextClass.newInstance();
+					contextClass.newInstance();
 				}else{
 					Constructor constructor = contextClass.getConstructor(String.class);
-					context = (Context)constructor.newInstance(name);
+					constructor.newInstance(name);
 				}
-				ContextManager.register(context); 
 			} catch (Exception e) {
 				LOG.error("context[" + name + ",class=" + clazz + "] init failed", e);
 			}
@@ -267,8 +265,7 @@ public class FomContextListener implements ServletContextListener {
 			}
 			
 			try {
-				Context context = (Context)clazz.newInstance();
-				ContextManager.register(context); 
+				clazz.newInstance();
 			} catch (Exception e) {
 				LOG.error("context[" + clazz.getName() + "] init failed", e);
 			} 

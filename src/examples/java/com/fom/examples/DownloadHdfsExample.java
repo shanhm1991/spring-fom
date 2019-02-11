@@ -20,13 +20,20 @@ import com.fom.context.helper.HdfsDownloaderHelper;
 public class DownloadHdfsExample extends Context {
 
 	private static final long serialVersionUID = -8950649337670940490L;
-	
+
 	private FileSystem fs;
-	
+
 	@Override
 	protected List<String> getUriList() throws Exception { 
 		log.info("没有初始化hdfs环境,不创建下载任务");
 		return null;
+
+		//		return HdfsUtil.listPath(fs, "/test", new PathFilter(){
+		//			@Override
+		//			public boolean accept(Path path) {
+		//				return PatternUtil.match("regex", path.getName());
+		//			}
+		//		});
 	}
 
 	@Override

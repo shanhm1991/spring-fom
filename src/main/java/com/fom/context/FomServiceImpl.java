@@ -237,13 +237,11 @@ public class FomServiceImpl implements FomService {
 			Constructor constructor = contextClass.getConstructor(String.class);
 			context = (Context)constructor.newInstance(name);
 		}
-		ContextManager.register(context);
-
+		context.start();
 		resMap.put("result", true);
 		resMap.put("msg", name + " created.");
 		return resMap;
 	}
-
 
 	@Override
 	public void changeLogLevel(String name, String level) {

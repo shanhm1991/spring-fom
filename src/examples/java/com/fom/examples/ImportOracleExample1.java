@@ -1,15 +1,15 @@
 package com.fom.examples;
 
+import java.io.File;
+import java.io.FileFilter;
 import java.util.List;
-import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.StringUtils;
 
 import com.fom.context.Context;
 import com.fom.context.ContextUtil;
 import com.fom.context.Executor;
 import com.fom.context.executor.LocalZipParser;
 import com.fom.util.FileUtil;
+import com.fom.util.PatternUtil;
 
 /**
  * 	
@@ -26,21 +26,29 @@ public class ImportOracleExample1 extends Context {
 
 	private boolean isDelMatchFail;
 	
-	private Pattern pattern;
+	private String pattern;
 
 	public ImportOracleExample1(){
 		srcPath = ContextUtil.getContextPath(getString("srcPath", ""));
 		batch = getInt("batch", 5000);
 		isDelMatchFail = getBoolean("isDelMatchFail", false);
-		String str = getString("pattern", "");
-		if(!StringUtils.isBlank(str)){
-			pattern = Pattern.compile(str);
-		}
+		pattern = getString("pattern", "");
 	}
 	
 	@Override
 	protected List<String> getUriList() throws Exception {
-		return FileUtil.scan(srcPath, pattern, isDelMatchFail);
+		return FileUtil.list(srcPath, new FileFilter(){
+			@Override
+			public boolean accept(File file) {
+				if(!PatternUtil.match(pattern, file.getName())){
+					if(isDelMatchFail && !file.delete()){
+						log.warn("删除文件[不匹配]失败:" + name);
+					}
+					return false;
+				}
+				return true;
+			}
+		}); 
 	}
 
 	@Override

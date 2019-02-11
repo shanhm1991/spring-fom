@@ -24,8 +24,8 @@ public class DownloadHdfsZipExample extends Context {
 	private static final long serialVersionUID = -6055805119506513553L;
 
 	private FileSystem fs;
-	
-	private String srPath;
+
+	private String srPath = "/test";
 
 	private String destPath = "${webapp.root}/download"; 
 
@@ -34,21 +34,51 @@ public class DownloadHdfsZipExample extends Context {
 	private int entryMax = 10;
 
 	private long sizeMax = 100 * 1024 * 1024;
-	
+
 	private String signalName;
-	
+
 	public DownloadHdfsZipExample(){
-		
+
 	}
-	
+
 	public DownloadHdfsZipExample(String name){
 		super(name);
 	}
-	
+
 	@Override
 	protected List<String> getUriList() throws Exception {
 		log.info("没有初始化hdfs环境,不创建下载任务");
 		return null;
+
+		//		return HdfsUtil.listPath(fs, srPath, new PathFilter(){
+		//			@Override
+		//			public boolean accept(Path path) {
+		//				if(!PatternUtil.match("regex", path.getName())){
+		//					return false;
+		//				}
+		//				
+		//				FileStatus[] subArray = null;
+		//				try {
+		//					subArray = fs.listStatus(path);
+		//				} catch (Exception e) {
+		//					log.error("", e);
+		//					return false;
+		//				}
+		//				if(ArrayUtils.isEmpty(subArray)){
+		//					return false;
+		//				}
+		//				if(StringUtils.isBlank(signalName)){
+		//					return true;
+		//				}
+		//				
+		//				for (FileStatus sub : subArray){
+		//					if(signalName.equals(sub.getPath().getName())){
+		//						return true;
+		//					}
+		//				}
+		//				return false;
+		//			}
+		//		});
 	}
 
 	@Override
@@ -66,7 +96,7 @@ public class DownloadHdfsZipExample extends Context {
 
 		String sourceName = new File(sourceUri).getName();
 		DownloadHdfsZipExampleResultHandler handler = 
-				new DownloadHdfsZipExampleResultHandler(fs, srPath,isDelSrc);
+				new DownloadHdfsZipExampleResultHandler(name, fs, srPath,isDelSrc);
 		ZipDownloader zipDownloader = new ZipDownloader(sourceName, pathList, destPath, 
 				entryMax, sizeMax, isDelSrc, helper, handler);
 		return zipDownloader;

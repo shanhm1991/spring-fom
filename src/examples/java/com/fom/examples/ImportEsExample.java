@@ -1,15 +1,14 @@
 package com.fom.examples;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.List;
-import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.StringUtils;
 
 import com.fom.context.Context;
 import com.fom.context.ContextUtil;
 import com.fom.context.Executor;
 import com.fom.util.FileUtil;
+import com.fom.util.PatternUtil;
 
 /**
  * 
@@ -25,22 +24,19 @@ public class ImportEsExample extends Context {
 	private int batch;
 
 	private boolean isDelMatchFail;
-	
-	private Pattern pattern;
+
+	private String pattern;
 
 	private String esIndex;
 
 	private String esType;
 
 	private File esJson;
-	
+
 	public ImportEsExample(String name){
 		super(name);
 		srcPath = ContextUtil.getContextPath(getString("srcPath", ""));
-		String str = getString("pattern", "");
-		if(!StringUtils.isBlank(str)){
-			pattern = Pattern.compile(str);
-		}
+		pattern = getString("pattern", "");
 		batch = getInt("batch", 5000);
 		isDelMatchFail = getBoolean("isDelMatchFail", false);
 		esIndex = getString("esIndex", "");
@@ -50,8 +46,18 @@ public class ImportEsExample extends Context {
 
 	@Override
 	protected List<String> getUriList() throws Exception {
-		List<String> list = FileUtil.scan(srcPath, pattern, isDelMatchFail);
-		return list;
+		return FileUtil.list(srcPath, new FileFilter(){
+			@Override
+			public boolean accept(File file) {
+				if(!PatternUtil.match(pattern, file.getName())){
+					if(isDelMatchFail && !file.delete()){
+						log.warn("删除文件[不匹配]失败:" + name);
+					}
+					return false;
+				}
+				return true;
+			}
+		}); 
 	}
 
 	@Override
