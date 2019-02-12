@@ -114,7 +114,7 @@ public class Parser extends Executor {
 			}
 		}
 		read(lineIndex);
-		String size = new DecimalFormat("#.##").format(helper.getSourceSize(sourceUri));
+		String size = new DecimalFormat("#.###").format(helper.getSourceSize(sourceUri));
 		log.info("处理文件结束(" + size + "KB),耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 		return true;
 	}

@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.Set;
 
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLHandshakeException;
@@ -16,7 +19,9 @@ import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.Registry;
@@ -26,6 +31,9 @@ import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -116,7 +124,7 @@ public class HttpUtil {
 	}
 
 	/**
-	 * 下载http服务文件到本地
+	 * 下载文件
 	 * @param url url
 	 * @param file file
 	 * @throws Exception Exception
@@ -124,9 +132,9 @@ public class HttpUtil {
 	public static void download(String url, File file) throws Exception {
 		download(new HttpGet(url), file);
 	}
-	
+
 	/**
-	 * 下载http服务文件到本地
+	 * 下载文件
 	 * @param httpGet httpGet
 	 * @param file file
 	 * @throws Exception Exception
@@ -149,27 +157,64 @@ public class HttpUtil {
 			IoUtil.close(output);
 		}
 	}
-	
+
 	/**
-	 * 获取http服务文件流
+	 * 获取文件流
 	 * @param url url
-	 * @param file file
 	 * @return InputStream
 	 * @throws Exception Exception
 	 */
-	public static InputStream open(String url, File file) throws Exception {
+	public static InputStream open(String url) throws Exception {
 		return request(new HttpGet(url)).getEntity().getContent();
 	}
-	
+
 	/**
-	 * 获取http服务文件流
+	 * 获取文件流
 	 * @param httpGet httpGet
-	 * @param file file
 	 * @return InputStream
 	 * @throws Exception Exception
 	 */
-	public static InputStream open(HttpGet httpGet, File file) throws Exception {
+	public static InputStream open(HttpGet httpGet) throws Exception {
 		return request(httpGet).getEntity().getContent();
 	}
 
+	/**
+	 * 删除文件
+	 * @param url
+	 * @return int 返回码
+	 * @throws Exception
+	 */
+	public static int delete(String url) throws Exception {
+		CloseableHttpResponse response= request(new HttpDelete(url));
+		return response.getStatusLine().getStatusCode();
+	}
+
+	/**
+	 * 上传文件
+	 * @param url url
+	 * @param params 参数列表
+	 * @param file 文件列表
+	 * @return 返回码
+	 * @throws Exception Exception
+	 */
+	public static int upload(File file, String url, Map<String,String> params) throws Exception{    
+		MultipartEntityBuilder mEntityBuilder = MultipartEntityBuilder.create();  
+		mEntityBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);  
+		mEntityBuilder.setCharset(Charset.forName("utf-8"));  
+		// 普通参数  
+		ContentType contentType = ContentType.create("text/plain",Charset.forName("utf-8"));
+		if (params != null && !params.isEmpty()) {  
+			Set<String> keySet = params.keySet();  
+			for (String key : keySet) {  
+				mEntityBuilder.addTextBody(key, params.get(key),contentType);  
+			}  
+		}  
+		//二进制参数  
+		mEntityBuilder.addBinaryBody("file", file);  
+		
+		HttpPost httpost = new HttpPost(url); 
+		httpost.setEntity(mEntityBuilder.build());  
+		CloseableHttpResponse response = request(httpost);
+		return response.getStatusLine().getStatusCode();
+	}   
 }

@@ -29,7 +29,7 @@
 
 ##测试 (启动类：com.fom.boot.Application)
 1. 启动参数
-* -Dwebapp.root：设置应用即StandardContext的根目录(默认为class.getResource("/"))
+* -Dwebapp.root：设置应用资源StandardContext的根目录,默认以classpath作为根目录
 * -Dcache.root：  设置缓存即应用处理过程中临时文件的根目录(默认为根目录下的WEB-INF/cache，如果找不到则设为根目录下的cache)
 * -Dlog.root:    设置生成日志文件的根目录，默认为根目录下的log
 * -Dlog4jConfigLocation：设置log4j配置文件路径，默认读取文件：/WEB-INF/log4j.properties

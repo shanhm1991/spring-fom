@@ -29,7 +29,7 @@ import com.fom.util.ZipUtil;
  */
 public class ZipDownloader extends Executor {
 	
-	private final DecimalFormat numFormat  = new DecimalFormat("#.##");
+	private final DecimalFormat numFormat  = new DecimalFormat("#.###");
 	
 	protected final ZipDownloaderHelper helper;
 
@@ -140,14 +140,21 @@ public class ZipDownloader extends Executor {
 			return false;
 		}
 		
+		File dest = new File(destPath);
+		if(!dest.exists() && !dest.mkdirs()){
+			log.error("下载目录创建失败:" + dest); 
+			return false;
+		}
+		
 		this.downloadPath = System.getProperty("cache.download")
 				+ File.separator + name + File.separator + zipName;
-		this.downloadZip = new File(downloadPath + File.separator + zipName + ".zip");
 		File file = new File(downloadPath);
 		if(!file.exists() && !file.mkdirs()){
 			log.error("下载目录创建失败:" + downloadPath); 
 			return false;
 		}
+		
+		this.downloadZip = new File(downloadPath + File.separator + zipName + ".zip");
 		return true;
 	}
 
@@ -197,7 +204,6 @@ public class ZipDownloader extends Executor {
 					continue;
 				}
 				entrySet.add(name); 
-				
 				String size = numFormat.format(ZipUtil.zipEntry(name, helper.open(uri), zipOutStream) / 1024.0);
 				log.info("下载文件结束:" + name + "(" + size + "KB), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 				if(entrySet.size() >= zipEntryMax || downloadZip.length() >= zipSizeMax){
@@ -244,7 +250,8 @@ public class ZipDownloader extends Executor {
 				for(String uri : uriList){ 
 					String uriName = helper.getSourceName(uri); 
 					if(entryName.equals(uriName)){
-						if(!helper.delete(uri)){
+						int code = helper.delete(uri);
+						if(code < 200 || code > 207){
 							log.error("删除源文件失败：" + entryName); 
 							return false;
 						}

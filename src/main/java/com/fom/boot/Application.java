@@ -35,7 +35,7 @@ public class Application implements ServletContextInitializer {
 	public static void main(String[] args) {
 		String rootPath = System.getProperty("webapp.root");
 		if(StringUtils.isBlank(rootPath)){
-			rootPath = Application.class.getResource("/").getPath();
+			rootPath = ClassLoader.getSystemResource("").getPath();
 			System.setProperty("webapp.root", rootPath);
 		}
 		

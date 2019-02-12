@@ -1,14 +1,16 @@
-package com.fom.context.helper;
+package com.fom.context.helper.impl;
 
 import java.io.File;
 import java.io.InputStream;
+
+import com.fom.context.helper.DownloaderHelper;
 
 /**
  * 
  * @author shanhm
  *
  */
-public class FtpDownloaderHelper implements DownloaderHelper {
+public class FtpHelper implements DownloaderHelper {
 
 	@Override
 	public InputStream open(String url) throws Exception {
@@ -23,9 +25,9 @@ public class FtpDownloaderHelper implements DownloaderHelper {
 	}
 
 	@Override
-	public boolean delete(String url) throws Exception {
+	public int delete(String url) throws Exception {
 		// TODO Auto-generated method stub
-		return false;
+		return 0;
 	}
 
 }

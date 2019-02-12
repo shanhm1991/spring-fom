@@ -11,7 +11,7 @@ import org.apache.hadoop.fs.PathFilter;
 import com.fom.context.Context;
 import com.fom.context.Executor;
 import com.fom.context.executor.ZipDownloader;
-import com.fom.context.helper.HdfsZipDownloaderHelper;
+import com.fom.context.helper.impl.HdfsHelper;
 import com.fom.util.HdfsUtil;
 
 /**
@@ -83,7 +83,7 @@ public class DownloadHdfsZipExample extends Context {
 
 	@Override
 	protected Executor createExecutor(String sourceUri) throws Exception {
-		HdfsZipDownloaderHelper helper = new HdfsZipDownloaderHelper(fs);
+		HdfsHelper helper = new HdfsHelper(fs);
 		List<String> pathList = HdfsUtil.listPath(fs, sourceUri, new PathFilter(){
 			@Override
 			public boolean accept(Path path) {

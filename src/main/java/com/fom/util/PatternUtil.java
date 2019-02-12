@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * 
  * @author shanhm
@@ -24,6 +26,9 @@ public class PatternUtil {
 	}
 	
 	public static boolean match(String regex, String target){
+		if(StringUtils.isBlank(regex)){
+			return true;
+		}
 		return get(regex).matcher(target).matches();
 	}
 

@@ -9,14 +9,14 @@ import com.fom.context.Context;
 import com.fom.context.Executor;
 import com.fom.context.FomContext;
 import com.fom.context.executor.Downloader;
-import com.fom.context.helper.HdfsDownloaderHelper;
+import com.fom.context.helper.impl.HdfsHelper;
 
 /**
  * 
  * @author shanhm
  *
  */
-@FomContext(remark="扫描下载Hdfs指定目录下文件的默认实现", cron="0/15 * * * * ?")
+@FomContext(remark="扫描下载Hdfs指定目录下的文件", cron="0/15 * * * * ?")
 public class DownloadHdfsExample extends Context {
 
 	private static final long serialVersionUID = -8950649337670940490L;
@@ -38,7 +38,7 @@ public class DownloadHdfsExample extends Context {
 
 	@Override
 	protected Executor createExecutor(String sourceUri) {
-		HdfsDownloaderHelper helper = new HdfsDownloaderHelper(fs);
+		HdfsHelper helper = new HdfsHelper(fs);
 		String sourceName = new File(sourceUri).getName();
 		Downloader downloader = new Downloader(sourceName, sourceUri, "${webapp.root}/download", 
 				false, true, helper);

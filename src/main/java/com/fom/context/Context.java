@@ -75,7 +75,7 @@ public abstract class Context implements Serializable {
 				this.name = fc.name();
 			}
 		}
-		initValue(name, fc);
+		initValue(name, fc); 
 	}
 
 	public Context(String name){
@@ -423,8 +423,8 @@ public abstract class Context implements Serializable {
 		} catch (ParseException e) {
 			throw new IllegalArgumentException(e);
 		}
-		if(null == valueMap.get(CRON) 
-				|| !cron.equals(valueMap.get(CRON))){
+		if(cronExpression == null
+				|| !(cron.equals(valueMap.get(CRON)  ))){
 			valueMap.put(CRON, cron);
 			cronExpression = c;
 		}

@@ -131,10 +131,13 @@ public class ZipUtil {
 			int count;
 			int BUFFER = 8192;
 			byte[] data = new byte[BUFFER];
+			
+			long length = 0;
 			while((count=buffer.read(data, 0, BUFFER))!=-1){
+				length =+ count;
 				zipOutStream.write(data, 0, count);
 			}
-			return zipEntry.getSize();
+			return length;
 		}finally{
 			IoUtil.close(buffer);
 		}

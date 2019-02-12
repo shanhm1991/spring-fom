@@ -42,7 +42,7 @@ public class FomServiceImpl implements FomService {
 			valueMap.put("name", context.name);
 			valueMap.put("state", context.stateString());
 			if(!valueMap.containsKey(Context.CRON)){
-				valueMap.put(Context.CRON, "null"); 
+				valueMap.put(Context.CRON, ""); 
 			}
 			valueMap.put("creatTime", format.format(context.createTime));
 			valueMap.put("startTime", format.format(context.startTime));

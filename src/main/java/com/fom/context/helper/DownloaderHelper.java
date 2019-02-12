@@ -29,8 +29,8 @@ public interface DownloaderHelper {
 	/**
 	 * 根据sourceUri删除文件
 	 * @param sourceUri sourceUri
-	 * @return is delete success
+	 * @return 返回码(success:200~207)
 	 * @throws Exception Exception
 	 */
-	boolean delete(String sourceUri) throws Exception;
+	int delete(String sourceUri) throws Exception;
 }

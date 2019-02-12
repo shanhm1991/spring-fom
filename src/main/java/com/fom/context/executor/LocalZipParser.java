@@ -37,7 +37,7 @@ public final class LocalZipParser extends Executor {
 	
 	private List<String> matchedEntrys;
 	
-	private DecimalFormat numFormat  = new DecimalFormat("#.##");
+	private DecimalFormat numFormat  = new DecimalFormat("#.###");
 	
 	/**
 	 * @param sourceUri 资源uri
