@@ -12,7 +12,6 @@ import org.apache.log4j.Logger;
 
 import com.fh.search.storage.client.StorageClient;
 import com.fh.search.storage.client.StorageClient.ReturnFlag;
-import com.fom.log.LoggerFactory;
 import com.fh.search.storage.client.StorageEntity;
 
 /**
@@ -24,16 +23,16 @@ import com.fh.search.storage.client.StorageEntity;
  */
 public class StorageUtil {
 
-	private static final Logger LOG = LoggerFactory.getLogger("storage");
-	
-	//StorageClient非线程安全，且没有提供close方法,这里保存所有创建成功过的storageClient以便复用
-	private static final ConcurrentMap<String, Queue<StorageClient>> storageMap = new ConcurrentHashMap<>(); 
+	private static final Logger LOG = Logger.getLogger(StorageUtil.class);
 
-	public static String storageFile(File file, String zkAddress, boolean deleteOnComplete) throws Exception {
-		Queue<StorageClient> queue = storageMap.get(zkAddress);
+	//StorageClient非线程安全，且没有提供close方法,这里保存所有创建成功过的storageClient以便复用
+	private static ConcurrentMap<String, Queue<StorageClient>> clientMap = new ConcurrentHashMap<>(); 
+
+	private static StorageClient get(String zkAddress) throws Exception{
+		Queue<StorageClient> queue = clientMap.get(zkAddress);
 		if(queue ==null){
 			Queue<StorageClient> newQueue = new ConcurrentLinkedQueue<StorageClient>(); 
-			queue = storageMap.putIfAbsent(zkAddress, newQueue);
+			queue = clientMap.putIfAbsent(zkAddress, newQueue);
 			if(queue == null){
 				queue = newQueue;
 			}
@@ -41,13 +40,27 @@ public class StorageUtil {
 
 		StorageClient client = queue.poll();
 		if(client == null){
-			client = new StorageClient();
-			client.setClusterManagerConnectionString(zkAddress);
-			client.setReturnFlag(ReturnFlag.RETURN_URL);
-			client.setMaxPackageCachedTime(1);
-			client.init(); 
+			client = getStorageClient(zkAddress);
 		}
+		return client;
+	}
 
+	private static void offer(String zkAddress, StorageClient client){
+		Queue<StorageClient> queue = clientMap.get(zkAddress);
+		queue.offer(client);
+	}
+
+	public static StorageClient getStorageClient(String zkAddress) throws Exception {
+		StorageClient client = new StorageClient();
+		client.setClusterManagerConnectionString(zkAddress);
+		client.setReturnFlag(ReturnFlag.RETURN_URL);
+		client.setMaxPackageCachedTime(1);
+		client.init(); 
+		return client;
+	}
+
+	public static String storageFile(File file, String zkAddress, boolean deleteOnComplete) throws Exception {
+		StorageClient client = get(zkAddress);
 		String url = null;
 		try{
 			StorageEntity entity = new StorageEntity();
@@ -55,14 +68,14 @@ public class StorageUtil {
 			entity.setContent(IOUtils.toByteArray(new FileInputStream(file)));
 			url = client.sendFile(entity);
 		}finally{
-			queue.offer(client);
+			offer(zkAddress, client);
 		}
 
-		LOG.info("上传文件[" + file.getName() + "],url=" + url);
+		LOG.debug("上传文件[" + file.getName() + "],url=" + url);
 		if(deleteOnComplete && !file.delete()){
 			LOG.warn("删除文件失败:" + file.getName()); 
 		}
 		return url;
 	}
-	
+
 }

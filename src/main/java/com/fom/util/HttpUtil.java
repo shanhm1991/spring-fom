@@ -46,7 +46,7 @@ import org.apache.http.protocol.HttpContext;
  */
 public class HttpUtil {
 
-	private static final CloseableHttpClient httpClient;
+	private static CloseableHttpClient httpClient;
 
 	static{
 		ConnectionSocketFactory csf = PlainConnectionSocketFactory.getSocketFactory();

@@ -3,7 +3,9 @@ package com.fom.examples;
 import java.io.File;
 import java.util.List;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
@@ -14,6 +16,7 @@ import com.fom.context.FomContext;
 import com.fom.context.executor.ZipDownloader;
 import com.fom.context.helper.impl.HdfsHelper;
 import com.fom.util.HdfsUtil;
+import com.fom.util.PatternUtil;
 
 /**
  * 
@@ -25,7 +28,9 @@ public class DownloadHdfsZipExample extends Context {
 
 	private static final long serialVersionUID = -6055805119506513553L;
 
-	private FileSystem fs;
+	private String masterUrl;
+
+	private String slaveUrl;
 
 	private String srPath = "/test";
 
@@ -49,44 +54,42 @@ public class DownloadHdfsZipExample extends Context {
 
 	@Override
 	protected List<String> getUriList() throws Exception {
-		log.info("没有初始化hdfs环境,不创建下载任务");
-		return null;
+		FileSystem fs = HdfsUtil.getFileSystem(masterUrl, slaveUrl);
+		return HdfsUtil.list(masterUrl, slaveUrl, new Path(srPath), new PathFilter(){
+			@Override
+			public boolean accept(Path path) {
+				if(!PatternUtil.match("regex", path.getName())){
+					return false;
+				}
 
-		//		return HdfsUtil.listPath(fs, srPath, new PathFilter(){
-		//			@Override
-		//			public boolean accept(Path path) {
-		//				if(!PatternUtil.match("regex", path.getName())){
-		//					return false;
-		//				}
-		//				
-		//				FileStatus[] subArray = null;
-		//				try {
-		//					subArray = fs.listStatus(path);
-		//				} catch (Exception e) {
-		//					log.error("", e);
-		//					return false;
-		//				}
-		//				if(ArrayUtils.isEmpty(subArray)){
-		//					return false;
-		//				}
-		//				if(StringUtils.isBlank(signalName)){
-		//					return true;
-		//				}
-		//				
-		//				for (FileStatus sub : subArray){
-		//					if(signalName.equals(sub.getPath().getName())){
-		//						return true;
-		//					}
-		//				}
-		//				return false;
-		//			}
-		//		});
+				FileStatus[] subArray = null;
+				try {
+					subArray = fs.listStatus(path);
+				} catch (Exception e) {
+					log.error("", e);
+					return false;
+				}
+				if(ArrayUtils.isEmpty(subArray)){
+					return false;
+				}
+				if(StringUtils.isBlank(signalName)){
+					return true;
+				}
+
+				for (FileStatus sub : subArray){
+					if(signalName.equals(sub.getPath().getName())){
+						return true;
+					}
+				}
+				return false;
+			}
+		});
 	}
 
 	@Override
 	protected Executor createExecutor(String sourceUri) throws Exception {
-		HdfsHelper helper = new HdfsHelper(fs);
-		List<String> pathList = HdfsUtil.listPath(fs, sourceUri, new PathFilter(){
+		HdfsHelper helper = new HdfsHelper(masterUrl, slaveUrl);
+		List<String> pathList = HdfsUtil.list(masterUrl, slaveUrl, new Path(sourceUri), new PathFilter(){
 			@Override
 			public boolean accept(Path path) {
 				if(StringUtils.isBlank(signalName)){
@@ -98,7 +101,7 @@ public class DownloadHdfsZipExample extends Context {
 
 		String sourceName = new File(sourceUri).getName();
 		DownloadHdfsZipExampleResultHandler handler = 
-				new DownloadHdfsZipExampleResultHandler(name, fs, srPath,isDelSrc);
+				new DownloadHdfsZipExampleResultHandler(name, masterUrl, slaveUrl, srPath,isDelSrc);
 		ZipDownloader zipDownloader = new ZipDownloader(sourceName, pathList, destPath, 
 				entryMax, sizeMax, isDelSrc, helper, handler);
 		return zipDownloader;

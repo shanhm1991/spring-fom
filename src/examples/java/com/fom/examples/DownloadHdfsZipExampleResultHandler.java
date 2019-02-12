@@ -3,7 +3,7 @@ package com.fom.examples;
 import java.io.File;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -18,14 +18,18 @@ public class DownloadHdfsZipExampleResultHandler implements ResultHandler {
 	
 	private String name;
 	
-	private FileSystem fs;
+	private String masterUrl;
+
+	private String slaveUrl;
 	
 	private String sourceUri;
 	
 	private boolean isDelSrc;
 	
-	public DownloadHdfsZipExampleResultHandler(String name, FileSystem fs, String sourceUri, boolean isDelSrc){
-		this.fs = fs;
+	public DownloadHdfsZipExampleResultHandler(String name, 
+			String masterUrl, String slaveUrl, String sourceUri, boolean isDelSrc){
+		this.masterUrl = masterUrl;
+		this.slaveUrl = slaveUrl;
 		this.name = name;
 		this.sourceUri = sourceUri;
 		this.isDelSrc = isDelSrc;
@@ -37,7 +41,7 @@ public class DownloadHdfsZipExampleResultHandler implements ResultHandler {
 		if(!result.isSuccess() || !isDelSrc){
 			return;
 		}
-		HdfsUtil.delete(fs, sourceUri);
+		HdfsUtil.delete(masterUrl, slaveUrl, new Path(sourceUri));
 	}
 	
 	private static void log(String logName, Result result){

@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class PatternUtil {
 	
-	private static final Map<String, Pattern> patternMap = new ConcurrentHashMap<>();
+	private static Map<String, Pattern> patternMap = new ConcurrentHashMap<>();
 	
 	private static Pattern get(String regex){
 		Pattern pattern = patternMap.get(regex);

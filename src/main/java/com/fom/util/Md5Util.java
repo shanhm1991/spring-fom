@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
  */
 public class Md5Util {
 
-	private static final Logger LOG = Logger.getRootLogger();
+	private static final Logger LOG = Logger.getLogger(Md5Util.class);
 	
 	/**
 	 * 默认的密码字符串组合，用来将字节转换成 16 进制表示的字符,
