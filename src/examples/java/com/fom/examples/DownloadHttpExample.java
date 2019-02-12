@@ -15,7 +15,7 @@ import com.fom.context.helper.impl.HttpHelper;
  * @author shanhm
  *
  */
-@FomContext(remark="下载Http指定url")
+@FomContext(remark="下载Http指定url", cron="0/15 * * * * ?")
 public class DownloadHttpExample extends Context {
 
 	private static final long serialVersionUID = 5448826206898051644L;

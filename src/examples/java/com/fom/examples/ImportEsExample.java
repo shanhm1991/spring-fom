@@ -32,6 +32,16 @@ public class ImportEsExample extends Context {
 	private String esType;
 
 	private File esJson;
+	
+	public ImportEsExample() {
+		srcPath = ContextUtil.getContextPath(getString("srcPath", ""));
+		pattern = getString("pattern", "");
+		batch = getInt("batch", 5000);
+		isDelMatchFail = getBoolean("isDelMatchFail", false);
+		esIndex = getString("esIndex", "");
+		esType = getString("esType", "");
+		esJson = new File(ContextUtil.getContextPath((getString("esJson", "")))); 
+	}
 
 	public ImportEsExample(String name){
 		super(name);

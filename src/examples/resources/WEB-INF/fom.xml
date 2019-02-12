@@ -13,9 +13,12 @@
 	</includes>
 
 	<contexts>
-		<context class="com.fom.examples.DownloadHdfsZipExample">
-			<remark>扫描下载Hdfs指定目录下的目录并打包成zip</remark>
-			<cron></cron>
+		<!-- context可以不配置name属性，则调用无参构造器，以类名作为name -->
+		<!-- 注意：如果配置name，则调用有参构造器（String），并需要在构造器中指明调用父类super(name) -->
+		<!-- 同一个context类可以配置多个不同name的context实例，分别配置(注解时不支持一个类多个name实例的配置 -->
+		<context class="com.fom.examples.ImportEsExample">
+			<remark>使用自定义pool的方式将本地指定目录下text文本解析导入Es库</remark>
+			<cron>0/5 * * * * ?</cron>
 			<threadCore>4</threadCore>
 			<threadMax>20</threadMax>
 			<threadAliveTime>30</threadAliveTime>
@@ -23,23 +26,6 @@
 			<queueSize>200</queueSize>
 			<cancellable>false</cancellable>
 			<!-- 以上为默认配置,可以在xml中覆盖默认值，以下为自定义配置 -->
-			<srPath>/test</srPath>
-			<hdfMaster>master.ip:port</hdfMaster>
-			<hdfSlave>slave.ip:port</hdfSlave>
-			<signalFile>a.orc</signalFile>
-			<isSrcDel>false</isSrcDel>
-			<isWithTemp>true</isWithTemp>
-			<desPath>${webapp.root}/download</desPath>
-			<zipEntryMax>100</zipEntryMax>
-			<zipSizeMax>5M</zipSizeMax>
-		</context>
-
-		<!-- context可以不配置name属性，则调用无参构造器，以类名作为name -->
-		<!-- 注意：如果配置name，则调用有参构造器（String），并需要在构造器中指明调用父类super(name) -->
-		<!-- 同一个context类可以配置多个不同name的context实例，分别配置(注解时不支持一个类多个name实例的配置 -->
-		<context name="ImportEsExample" class="com.fom.examples.ImportEsExample">
-			<remark>使用自定义pool的方式将本地指定目录下text文本解析导入Es库</remark>
-			<cron>0/5 * * * * ?</cron>
 			<pattern>demo.bcp</pattern>
 			<srcPath>/source</srcPath>
 			<batch>5000</batch>
@@ -49,15 +35,15 @@
 			<esJson>WEB-INF/index/index_example.json</esJson>
 		</context>
 
-		<context name="ImportEsExample2" class="com.fom.examples.ImportEsExample">
+		<context name="ImportEsExample1" class="com.fom.examples.ImportEsExample">
 			<remark>使用自定义pool的方式将本地指定目录下text文本解析导入Es库</remark>
 			<cron>0/10 * * * * ?</cron>
-			<pattern>demo2.bcp</pattern>
+			<pattern>demo1.bcp</pattern>
 			<srcPath>/source</srcPath>
 			<batch>3000</batch>
 			<isDelMatchFail>false</isDelMatchFail>
-			<esIndex>demo2</esIndex>
-			<esType>demo2</esType>
+			<esIndex>demo1</esIndex>
+			<esType>demo1</esType>
 			<esJson>WEB-INF/index/index_example.json</esJson>
 		</context>
 		

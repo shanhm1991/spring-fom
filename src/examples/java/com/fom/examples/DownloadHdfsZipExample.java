@@ -10,6 +10,7 @@ import org.apache.hadoop.fs.PathFilter;
 
 import com.fom.context.Context;
 import com.fom.context.Executor;
+import com.fom.context.FomContext;
 import com.fom.context.executor.ZipDownloader;
 import com.fom.context.helper.impl.HdfsHelper;
 import com.fom.util.HdfsUtil;
@@ -19,6 +20,7 @@ import com.fom.util.HdfsUtil;
  * @author shanhm
  *
  */
+@FomContext(remark="扫描下载Hdfs指定目录下的目录并打包成zip")
 public class DownloadHdfsZipExample extends Context {
 
 	private static final long serialVersionUID = -6055805119506513553L;

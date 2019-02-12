@@ -16,7 +16,7 @@ import com.fom.context.helper.impl.HttpHelper;
  * @author shanhm
  *
  */
-@FomContext(remark="上传文件到Http文件")
+@FomContext(remark="上传文件到Http服务")
 public class UploadHttpExample extends Context {
 
 	private static final long serialVersionUID = -6676559884214726673L;
