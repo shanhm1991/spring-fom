@@ -25,4 +25,6 @@ public interface FomService {
 	
 	void changeLogLevel(String name, String level);
 	
+	Map<String,Object> taskdetail(String name) throws Exception;
+	
 }

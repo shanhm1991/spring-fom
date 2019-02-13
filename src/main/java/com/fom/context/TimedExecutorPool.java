@@ -1,9 +1,10 @@
 package com.fom.context;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -13,8 +14,8 @@ import java.util.concurrent.TimeUnit;
  *
  */
 public class TimedExecutorPool extends ThreadPoolExecutor { 
-	
-	private Set<Thread> threadSet = new HashSet<>(); 
+
+	private Map<String, Thread> threadMap = new ConcurrentHashMap<>();
 
 	public TimedExecutorPool(int core, int max, long aliveTime, BlockingQueue<Runnable> workQueue) {
 		super(core, max, aliveTime, TimeUnit.SECONDS, workQueue);
@@ -24,15 +25,28 @@ public class TimedExecutorPool extends ThreadPoolExecutor {
 	protected <T> TimedFuture<T> newTaskFor(Runnable runnable, T value) {
 		return new TimedFuture<T>(runnable, value);
 	}
-	
+
 	@Override
 	protected <T> TimedFuture<T> newTaskFor(Callable<T> callable) {
 		return new TimedFuture<T>(callable);
 	}
-	
+
+	@SuppressWarnings({"rawtypes" })
 	@Override
 	protected void beforeExecute(Thread t, Runnable r) { 
-		threadSet.add(t);
+		if(r instanceof TimedFuture){
+			TimedFuture future = (TimedFuture)r;
+			threadMap.put(future.getName(), t);
+		}
+	}
+
+	@SuppressWarnings({"rawtypes" })
+	@Override
+	protected void afterExecute(Runnable r, Throwable t) { 
+		if(r instanceof TimedFuture){
+			TimedFuture future = (TimedFuture)r;
+			threadMap.remove(future.getName());
+		}
 	}
 
 	@Override
@@ -50,14 +64,8 @@ public class TimedExecutorPool extends ThreadPoolExecutor {
 		execute(future);
 		return future;
 	}
-	
-	public void getThreads() {
-		for(Thread t : threadSet) {
-			if(!t.isAlive()){
-				continue;
-			}
-			
-			
-		}
+
+	Collection<Thread> getThreads() {
+		return threadMap.values();
 	}
 }

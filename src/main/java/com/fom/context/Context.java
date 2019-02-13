@@ -2,6 +2,7 @@ package com.fom.context;
 
 import java.io.Serializable;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,6 +16,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -180,6 +182,28 @@ public abstract class Context implements Serializable {
 			return 0;
 		}
 		return pool.getActiveCount();
+	}
+	
+	public final long getCreated(){
+		if(pool == null){
+			return 0;
+		}
+		return pool.getTaskCount();
+	}
+	
+	public final long getCompleted(){
+		if(pool == null){
+			return 0;
+		}
+		return pool.getCompletedTaskCount();
+	}
+	
+	@SuppressWarnings("unchecked")
+	Collection<Thread> getThreads() {
+		if(pool == null){
+			return CollectionUtils.EMPTY_COLLECTION;
+		}
+		return pool.getThreads();
 	}
 
 	int setQueueSize(int queueSize){

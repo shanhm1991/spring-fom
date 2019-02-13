@@ -73,4 +73,9 @@ public class FomController {
 		return service.create(json);
 	}
 	
+	@RequestMapping("/taskdetail")
+	@ResponseBody
+	public Map<String,Object> taskdetail(String name) throws Exception{ 
+		return service.taskdetail(name);
+	}
 }

@@ -7,6 +7,7 @@ import java.lang.reflect.Constructor;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,8 @@ public class FomServiceImpl implements FomService {
 			cmap.put("execTime", format.format(context.execTime));
 			cmap.put("level", context.log.getLevel().toString());
 			cmap.put("actives", String.valueOf(context.getActives())); 
+			cmap.put("created", String.valueOf(context.getCreated()));
+			cmap.put("completed", String.valueOf(context.getCompleted()));
 			list.add(cmap);
 		}
 		map.put("data", list);
@@ -253,5 +256,26 @@ public class FomServiceImpl implements FomService {
 			return;
 		}
 		context.changeLogLevel(level);
+	}
+
+	@Override
+	public Map<String, Object> taskdetail(String name) throws Exception {
+		Map<String,Object> map = new HashMap<>();
+		map.put("size", 0);
+		Context context = ContextManager.contextMap.get(name);
+		if(context == null){
+			return map;
+		}
+		
+		Collection<Thread> collection = context.getThreads();
+		map.put("size", collection.size());
+		for(Thread thread : context.getThreads()){
+			StringBuilder builder = new StringBuilder();
+			for(StackTraceElement stack : thread.getStackTrace()){
+				builder.append(stack).append("<br>");
+			}
+			map.put(thread.getName(), builder.toString());
+		}
+		return map;
 	}
 }
