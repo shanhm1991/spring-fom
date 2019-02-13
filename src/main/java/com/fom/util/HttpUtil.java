@@ -130,17 +130,7 @@ public class HttpUtil {
 	 * @throws Exception Exception
 	 */
 	public static void download(String url, File file) throws Exception {
-		download(new HttpGet(url), file);
-	}
-
-	/**
-	 * 下载文件
-	 * @param httpGet httpGet
-	 * @param file file
-	 * @throws Exception Exception
-	 */
-	public static void download(HttpGet httpGet, File file) throws Exception {
-		CloseableHttpResponse resp = request(httpGet);
+		CloseableHttpResponse resp = request(new HttpGet(url));
 		InputStream input = null;
 		FileOutputStream output = null;
 		try{
@@ -166,16 +156,6 @@ public class HttpUtil {
 	 */
 	public static InputStream open(String url) throws Exception {
 		return request(new HttpGet(url)).getEntity().getContent();
-	}
-
-	/**
-	 * 获取文件流
-	 * @param httpGet httpGet
-	 * @return InputStream
-	 * @throws Exception Exception
-	 */
-	public static InputStream open(HttpGet httpGet) throws Exception {
-		return request(httpGet).getEntity().getContent();
 	}
 
 	/**

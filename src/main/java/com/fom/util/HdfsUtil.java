@@ -126,4 +126,8 @@ public class HdfsUtil {
 		FileSystem fs = get(masterUrl, slaveUrl);
 		return fs.delete(path, true);
 	}
+	
+	public static void upload() {
+		
+	}
 }

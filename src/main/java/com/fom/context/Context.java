@@ -16,7 +16,6 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.hdfs.server.namenode.UnsupportedActionException;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.dom4j.Element;
@@ -201,11 +200,10 @@ public abstract class Context implements Serializable {
 	 * 将key-value保存到valueMap中,可以在getValue或其他get中获取
 	 * @param key key
 	 * @param value value
-	 * @throws UnsupportedActionException UnsupportedActionException
 	 */
-	public final void setValue(String key, String value) throws UnsupportedActionException{
+	public final void setValue(String key, String value) {
 		if(!validKey(key)){
-			throw new UnsupportedActionException("不支持设置的key:" + key);
+			throw new IllegalArgumentException("不支持设置的key:" + key);
 		}
 		valueMap.put(key, value);
 	}
@@ -215,7 +213,7 @@ public abstract class Context implements Serializable {
 	 * @param key key
 	 * @return value
 	 */
-	public final Object getValue(String key){
+	public final String getValue(String key){
 		return valueMap.get(key);
 	}
 

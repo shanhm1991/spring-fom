@@ -10,6 +10,7 @@ import com.fom.context.Context;
 import com.fom.context.Executor;
 import com.fom.context.FomContext;
 import com.fom.context.executor.Downloader;
+import com.fom.context.helper.DownloaderHelper;
 import com.fom.context.helper.impl.HdfsHelper;
 import com.fom.util.HdfsUtil;
 import com.fom.util.PatternUtil;
@@ -27,6 +28,12 @@ public class DownloadHdfsExample extends Context {
 	private String masterUrl;
 
 	private String slaveUrl;
+	
+	private String dest;
+	
+	public DownloadHdfsExample(){
+		dest = new File("").getAbsolutePath() + "/download/" + name;
+	}
 
 	@Override
 	protected List<String> getUriList() throws Exception { 
@@ -40,10 +47,8 @@ public class DownloadHdfsExample extends Context {
 
 	@Override
 	protected Executor createExecutor(String sourceUri) {
-		HdfsHelper helper = new HdfsHelper(masterUrl, slaveUrl);
+		DownloaderHelper helper = new HdfsHelper(masterUrl, slaveUrl);
 		String sourceName = new File(sourceUri).getName();
-		Downloader downloader = new Downloader(sourceName, sourceUri, "${webapp.root}/download", 
-				false, true, helper);
-		return downloader;
+		return new Downloader(sourceName, sourceUri, dest, false, true, helper);
 	}
 }

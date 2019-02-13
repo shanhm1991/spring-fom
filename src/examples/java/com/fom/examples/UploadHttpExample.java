@@ -25,7 +25,7 @@ public class UploadHttpExample extends Context {
 	protected List<String> getUriList() throws Exception {
 		String path = ContextUtil.getContextPath("/source");
 		List<String> list = new ArrayList<String>();
-		list.add(path + File.separator + "et.jpg");
+		list.add(path + File.separator + "http.jpg");
 		return list;
 	}
 

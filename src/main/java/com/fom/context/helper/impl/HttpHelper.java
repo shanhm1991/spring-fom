@@ -2,11 +2,13 @@ package com.fom.context.helper.impl;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.zip.ZipOutputStream;
 
 import com.fom.context.helper.DownloaderHelper;
 import com.fom.context.helper.UploaderHelper;
 import com.fom.context.helper.ZipDownloaderHelper;
 import com.fom.util.HttpUtil;
+import com.fom.util.ZipUtil;
 
 /**
  * 
@@ -38,6 +40,11 @@ public class HttpHelper implements DownloaderHelper, ZipDownloaderHelper, Upload
 	@Override
 	public int upload(File file, String destUri) throws Exception {
 		return HttpUtil.upload(file, destUri, null);
+	}
+
+	@Override
+	public long zipEntry(String name, String uri, ZipOutputStream zipOutStream) throws Exception {
+		return ZipUtil.zipEntry(name, open(uri), zipOutStream);
 	}
 
 }

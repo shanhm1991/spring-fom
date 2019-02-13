@@ -2,6 +2,7 @@ package com.fom.context.helper.impl;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.zip.ZipOutputStream;
 
 import org.apache.hadoop.fs.Path;
 
@@ -9,6 +10,7 @@ import com.fom.context.helper.DownloaderHelper;
 import com.fom.context.helper.UploaderHelper;
 import com.fom.context.helper.ZipDownloaderHelper;
 import com.fom.util.HdfsUtil;
+import com.fom.util.ZipUtil;
 
 /**
  * 
@@ -50,6 +52,11 @@ public class HdfsHelper implements DownloaderHelper, ZipDownloaderHelper, Upload
 	public int upload(File file, String destUri) throws Exception {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public long zipEntry(String name, String uri, ZipOutputStream zipOutStream) throws Exception {
+		return ZipUtil.zipEntry(name, open(uri), zipOutStream);
 	}
 
 }

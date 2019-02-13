@@ -204,7 +204,7 @@ public class ZipDownloader extends Executor {
 					continue;
 				}
 				entrySet.add(name); 
-				String size = numFormat.format(ZipUtil.zipEntry(name, helper.open(uri), zipOutStream) / 1024.0);
+				String size = numFormat.format(helper.zipEntry(name, uri, zipOutStream) / 1024.0); //TODO
 				log.info("下载文件结束:" + name + "(" + size + "KB), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
 				if(entrySet.size() >= zipEntryMax || downloadZip.length() >= zipSizeMax){
 					//流管道关闭，如果继续写文件需要重新打开
@@ -220,7 +220,7 @@ public class ZipDownloader extends Executor {
 		}
 		return true;
 	}
-
+	
 	/**
 	 * 达到阈值的downloadZip编入序列，即重命名成指定名称
 	 * @param isRetry

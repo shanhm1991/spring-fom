@@ -34,7 +34,7 @@ public class DownloadHdfsZipExample extends Context {
 
 	private String srPath = "/test";
 
-	private String destPath = "${webapp.root}/download"; 
+	private String dest;
 
 	private boolean isDelSrc = false; 
 
@@ -45,11 +45,12 @@ public class DownloadHdfsZipExample extends Context {
 	private String signalName;
 
 	public DownloadHdfsZipExample(){
-
+		dest = new File("").getAbsolutePath() + "/download/" + name;
 	}
 
 	public DownloadHdfsZipExample(String name){
 		super(name);
+		dest = new File("").getAbsolutePath() + "/download/" + name;
 	}
 
 	@Override
@@ -102,7 +103,7 @@ public class DownloadHdfsZipExample extends Context {
 		String sourceName = new File(sourceUri).getName();
 		DownloadHdfsZipExampleResultHandler handler = 
 				new DownloadHdfsZipExampleResultHandler(name, masterUrl, slaveUrl, srPath,isDelSrc);
-		ZipDownloader zipDownloader = new ZipDownloader(sourceName, pathList, destPath, 
+		ZipDownloader zipDownloader = new ZipDownloader(sourceName, pathList, dest, 
 				entryMax, sizeMax, isDelSrc, helper, handler);
 		return zipDownloader;
 	}

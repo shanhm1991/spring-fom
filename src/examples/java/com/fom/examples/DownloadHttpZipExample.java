@@ -30,7 +30,7 @@ public class DownloadHttpZipExample extends Context {
 	@Override
 	protected List<String> getUriList() throws Exception {
 		List<String> list = new ArrayList<String>();
-		list.add("test");
+		list.add("httpTest");
 		return list;
 	}
 
