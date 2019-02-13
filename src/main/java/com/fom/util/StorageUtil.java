@@ -71,9 +71,9 @@ public class StorageUtil {
 			offer(zkAddress, client);
 		}
 
-		LOG.debug("上传文件[" + file.getName() + "],url=" + url);
+		LOG.debug("storage file[" + file.getName() + "],url=" + url);
 		if(deleteOnComplete && !file.delete()){
-			LOG.warn("删除文件失败:" + file.getName()); 
+			LOG.warn("delete file failed:" + file.getName()); 
 		}
 		return url;
 	}

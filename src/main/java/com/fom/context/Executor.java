@@ -71,15 +71,15 @@ public abstract class Executor implements Callable<Result> {
 			boolean res = onStart() && exec() && onComplete();
 			long cost = System.currentTimeMillis() - sTime;
 			if(res){
-				log.info("任务完成, 耗时=" + cost + "ms");
+				log.info("task finished, cost=" + cost + "ms");
 			}else{
-				log.warn("任务失败, 耗时=" + cost + "ms");
+				log.warn("task failed, cost=" + cost + "ms");
 			}
 			result.success = res;
 			result.costTime = cost;
 		} catch(Throwable e) {
 			long cost = System.currentTimeMillis() - sTime;
-			log.error("任务异常, 耗时=" + cost, e);
+			log.error("task failed, cost=" + cost, e);
 			result.success = false;
 			result.throwable = e;
 			if(exceptionHandler != null){

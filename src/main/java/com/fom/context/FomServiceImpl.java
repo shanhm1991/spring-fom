@@ -38,16 +38,19 @@ public class FomServiceImpl implements FomService {
 		List<Map<String, String>> list = new ArrayList<>();
 		for(Entry<String, Context> entry : ContextManager.contextMap.entrySet()){
 			Context context = entry.getValue();
-			Map<String,String> valueMap = context.valueMap;
-			valueMap.put("name", context.name);
-			valueMap.put("state", context.stateString());
-			if(!valueMap.containsKey(Context.CRON)){
-				valueMap.put(Context.CRON, ""); 
+			Map<String,String> cmap = new HashMap<>();
+			cmap.putAll(context.valueMap); 
+			
+			cmap.put("name", context.name);
+			cmap.put("state", context.stateString());
+			if(!cmap.containsKey(Context.CRON)){
+				cmap.put(Context.CRON, ""); 
 			}
-			valueMap.put("creatTime", format.format(context.createTime));
-			valueMap.put("startTime", format.format(context.startTime));
-			valueMap.put("level", context.log.getLevel().toString()); 
-			list.add(valueMap);
+			cmap.put("loadTime", format.format(context.loadTime));
+			cmap.put("execTime", format.format(context.execTime));
+			cmap.put("level", context.log.getLevel().toString());
+			cmap.put("actives", String.valueOf(context.getActives())); 
+			list.add(cmap);
 		}
 		map.put("data", list);
 		map.put("length", list.size());
@@ -124,7 +127,7 @@ public class FomServiceImpl implements FomService {
 			map.put("msg", "context[" + name + "] changed success.");
 			return map;
 		}catch(Exception e){
-			LOG.error("context[" + name + "]保存更新失败");
+			LOG.error("context[" + name + "] save update failed.");
 			map.put("msg", "context[" + name + "] changed success, but failed when save update to cache");
 			return map;
 		}finally{
@@ -191,7 +194,7 @@ public class FomServiceImpl implements FomService {
 		String clazz = map.get("class");
 		if(StringUtils.isBlank(clazz)){
 			resMap.put("result", false);
-			resMap.put("msg", "class不能为空");
+			resMap.put("msg", "class cann't be empty.");
 			return resMap;
 		}
 
@@ -200,13 +203,13 @@ public class FomServiceImpl implements FomService {
 			contextClass = Class.forName(clazz);
 			if(!Context.class.isAssignableFrom(contextClass)){
 				resMap.put("result", false);
-				resMap.put("msg", clazz + "不是com.fom.context.Context的实现类");
+				resMap.put("msg", clazz + " ism't subclass of com.fom.context.Context");
 				return resMap;
 			}
 		}catch(Exception e){
 			LOG.error(clazz + "load failed", e);
 			resMap.put("result", false);
-			resMap.put("msg", clazz + "类加载失败");
+			resMap.put("msg", clazz + " load failed.");
 			return resMap;
 		}
 

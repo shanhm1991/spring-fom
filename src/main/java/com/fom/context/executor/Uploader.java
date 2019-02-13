@@ -86,7 +86,7 @@ public class Uploader extends Executor {
 	@Override
 	protected boolean onStart() throws Exception {
 		if(!file.exists()){
-			log.warn("文件不存在.");
+			log.warn("file not exist.");
 			return false;
 		}
 		return true;
@@ -98,17 +98,17 @@ public class Uploader extends Executor {
 		String size = new DecimalFormat("#.###").format(file.length());
 		int code = helper.upload(file, destUri);
 		if(code < 200 || code > 207){
-			log.error("上传文件失败, code=" + code);
+			log.error("upload failed, code=" + code);
 			return false;
 		}
-		log.info("上传文件结束(" + size + "KB, code=" + code + "), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+		log.info("finish upload(" + size + "KB, code=" + code + "), cost=" + (System.currentTimeMillis() - sTime) + "ms");
 		return true;
 	}
 	
 	@Override
 	protected boolean onComplete() throws Exception {
 		if(isDelSrc && !file.delete()){
-			log.warn("删除文件失败.");
+			log.warn("delete file failed.");
 			return false;
 		}
 		return true;

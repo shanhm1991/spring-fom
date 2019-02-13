@@ -88,7 +88,7 @@ public class Parser extends Executor {
 				+ File.separator + name + File.separator + logName + ".log");
 		File parentFile = logFile.getParentFile();
 		if(!parentFile.exists() && !parentFile.mkdirs()){
-			log.error("创建目录失败:" + parentFile);
+			log.error("directory create failed: " + parentFile);
 			return false;
 		}
 		return true;
@@ -100,33 +100,33 @@ public class Parser extends Executor {
 		int lineIndex = 0;
 		if(!logFile.exists()){ 
 			if(!logFile.createNewFile()){
-				log.error("创建日志文件失败.");
+				log.error("directory create failed.");
 				return false;
 			}
 		}else{
-			log.warn("继续处理失败任务."); 
+			log.warn("continue to deal with uncompleted task."); 
 			List<String> lines = FileUtils.readLines(logFile);
 			try{
 				lineIndex = Integer.valueOf(lines.get(0));
-				log.info("获取文件处理进度:" + lineIndex); 
+				log.info("get failed file processed progress: " + lineIndex); 
 			}catch(Exception e){
-				log.warn("获取文件处理进度失败,将从第0行开始处理.");
+				log.warn("get failed file processed progress failed, will process from first line.");
 			}
 		}
 		read(lineIndex);
 		String size = new DecimalFormat("#.###").format(helper.getSourceSize(sourceUri));
-		log.info("处理文件结束(" + size + "KB),耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+		log.info("finish file(" + size + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
 		return true;
 	}
 	
 	@Override
 	protected boolean onComplete() throws Exception {
 		if(!helper.delete(sourceUri)){ 
-			log.error("删除源文件失败.");
+			log.error("delete src file failed.");
 			return false;
 		}
 		if(!logFile.delete()){
-			log.error("删除日志文件失败.");
+			log.error("delete logFile failed.");
 			return false;
 		}
 		return true;
@@ -164,7 +164,7 @@ public class Parser extends Executor {
 	}
 
 	private void logProcess(String uri, int lineIndex) throws IOException{ 
-		log.info("已读取行数:" + lineIndex);
+		log.info("rows processed: " + lineIndex);
 		FileUtils.writeStringToFile(logFile, String.valueOf(lineIndex), false);
 	}
 }

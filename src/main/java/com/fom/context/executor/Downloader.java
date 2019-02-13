@@ -106,7 +106,7 @@ public final class Downloader extends Executor {
 	protected boolean onStart() throws Exception {
 		File dest = new File(destPath);
 		if(!dest.exists() && !dest.mkdirs()){
-			log.error("下载目录创建失败:" + dest); 
+			log.error("directory create failed: " + dest); 
 			return false;
 		}
 
@@ -116,7 +116,7 @@ public final class Downloader extends Executor {
 			this.downloadPath = System.getProperty("cache.download") + File.separator + getName();
 			File file = new File(downloadPath);
 			if(!file.exists() && !file.mkdirs()){
-				log.error("下载目录创建失败:" + downloadPath); 
+				log.error("directory create failed: " + downloadPath); 
 				return false;
 			}
 		}
@@ -124,9 +124,9 @@ public final class Downloader extends Executor {
 		downloadFile = new File(downloadPath + File.separator + sourceName); 
 		if(downloadFile.exists()){
 			if(downloadFile.delete()){
-				log.info("删除已经存在的文件:" + downloadFile.getPath()); 
+				log.info("delete exist file: " + downloadFile.getPath()); 
 			}else{
-				log.error("删除已经存在的文件失败:" + downloadFile.getPath()); 
+				log.warn("delete exist file failed: " + downloadFile.getPath()); 
 				return false;
 			}
 		}
@@ -138,7 +138,7 @@ public final class Downloader extends Executor {
 		long sTime = System.currentTimeMillis();
 		helper.download(sourceUri, downloadFile);
 		String size = new DecimalFormat("#.###").format(downloadFile.length());
-		log.info("下载文件结束(" + size + "KB), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+		log.info("finish downlod(" + size + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
 		return true;
 	}
 
@@ -146,13 +146,13 @@ public final class Downloader extends Executor {
 	protected boolean onComplete() throws Exception {
 		if(isWithTemp && downloadFile.exists() 
 				&& !downloadFile.renameTo(new File(destPath + File.separator + downloadFile.getName()))){
-			log.error("文件移动失败:" + downloadFile.getName());
+			log.error("move file failed:" + downloadFile.getName());
 			return false;
 		}
 		if(isDelSrc){ 
 			int code = helper.delete(sourceUri);
 			if(code < 200 || code > 207){
-				log.error("删除源文件失败:" + sourceUri);
+				log.error("delete file failed:" + sourceUri);
 				return false;
 			}
 		}

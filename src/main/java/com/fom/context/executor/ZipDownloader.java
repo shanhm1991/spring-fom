@@ -136,13 +136,13 @@ public class ZipDownloader extends Executor {
 	@Override
 	protected boolean onStart() throws Exception {
 		if(uriList.isEmpty()){
-			log.warn("资源uri列表为空"); 
+			log.warn("uriList cann't be empty."); 
 			return false;
 		}
 		
 		File dest = new File(destPath);
 		if(!dest.exists() && !dest.mkdirs()){
-			log.error("下载目录创建失败:" + dest); 
+			log.error("directory create failed: " + dest); 
 			return false;
 		}
 		
@@ -150,7 +150,7 @@ public class ZipDownloader extends Executor {
 				+ File.separator + name + File.separator + zipName;
 		File file = new File(downloadPath);
 		if(!file.exists() && !file.mkdirs()){
-			log.error("下载目录创建失败:" + downloadPath); 
+			log.error("directory create failed: " + downloadPath); 
 			return false;
 		}
 		
@@ -176,12 +176,12 @@ public class ZipDownloader extends Executor {
 		}
 		for(File f : files){
 			if(!f.renameTo(new File(destPath + File.separator + f.getName()))){
-				log.error("文件移动失败:" + f.getName());
+				log.error("file move failed: " + f.getName());
 				return false;
 			}
 		}
 		if(!tempDir.delete()){
-			log.error("删除目录失败:" + downloadPath);
+			log.error("directory delete failed: " + downloadPath);
 			return false;
 		}
 		return true;
@@ -200,12 +200,12 @@ public class ZipDownloader extends Executor {
 				long sTime = System.currentTimeMillis();
 				String name = helper.getSourceName(uri);
 				if(entrySet.contains(name)){
-					log.warn("忽略重复下载的文件:" + name); 
+					log.warn("ignore downloaded file: " + name); 
 					continue;
 				}
 				entrySet.add(name); 
-				String size = numFormat.format(helper.zipEntry(name, uri, zipOutStream) / 1024.0); //TODO
-				log.info("下载文件结束:" + name + "(" + size + "KB), 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+				String size = numFormat.format(helper.zipEntry(name, uri, zipOutStream) / 1024.0);
+				log.info("finish download[" + name + "(" + size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
 				if(entrySet.size() >= zipEntryMax || downloadZip.length() >= zipSizeMax){
 					//流管道关闭，如果继续写文件需要重新打开
 					IoUtil.close(zipOutStream);
@@ -231,7 +231,7 @@ public class ZipDownloader extends Executor {
 	private boolean indexDownloadZip(boolean isRetry, boolean isLast) throws Exception{ 
 		if(!ZipUtil.valid(downloadZip)){ 
 			if(downloadZip.exists() && !downloadZip.delete()){
-				log.error(downloadZip.getName() + "已经损坏, 删除失败."); 
+				log.error(downloadZip.getName() + "was damaged, and delete failed."); 
 				return false;
 			}
 			entrySet = new HashSet<String>();
@@ -252,7 +252,7 @@ public class ZipDownloader extends Executor {
 					if(entryName.equals(uriName)){
 						int code = helper.delete(uri);
 						if(code < 200 || code > 207){
-							log.error("删除源文件失败：" + entryName); 
+							log.error("delete src file failed: " + entryName); 
 							return false;
 						}
 						break;
@@ -271,7 +271,7 @@ public class ZipDownloader extends Executor {
 				return true;
 			}else{
 				//最后一次命名失败则直接结束，交给下次任务补偿
-				log.error("命名文件失败:" + destName); 
+				log.error("index zip failed: " + destName); 
 				return false;
 			}
 		}
@@ -279,7 +279,7 @@ public class ZipDownloader extends Executor {
 		entrySet.clear();
 		
 		String size = numFormat.format(destFile.length() / 1024.0);
-		log.info("命名文件：" + destName + "(" + size + "KB)");
+		log.info("index zip: " + destName + "(" + size + "KB)");
 		return true;
 	}	
 	

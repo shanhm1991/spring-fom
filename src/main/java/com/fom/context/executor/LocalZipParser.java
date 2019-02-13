@@ -99,16 +99,16 @@ public final class LocalZipParser extends Executor {
 	@Override
 	protected boolean onStart() throws Exception {
 		if(!ZipUtil.valid(sourceUri)){ 
-			log.error("zip校验失败."); 
+			log.error("zip invalid."); 
 			if(!new File(sourceUri).delete()){
-				log.error("zip清除失败."); 
+				log.error("zip delete failed."); 
 			}
 			return false;
 		}
 		
 		File parentFile = logFile.getParentFile();
 		if(!parentFile.exists() && !parentFile.mkdirs()){
-			log.error("创建目录失败:" + parentFile);
+			log.error("directory create failed:" + parentFile);
 			return false;
 		}
 		return true;
@@ -126,7 +126,7 @@ public final class LocalZipParser extends Executor {
 	@Override
 	protected boolean exec() throws Exception {
 		if(logFile.exists()){
-			log.warn("继续处理失败任务."); 
+			log.warn("continue to deal with uncompleted task."); 
 			//失败在第5步
 			if(!unzipDir.exists()){ 
 				return true;
@@ -139,7 +139,7 @@ public final class LocalZipParser extends Executor {
 			matchedEntrys = filterEntrys(nameArray);
 			//失败在第4步
 			if(matchedEntrys.isEmpty()){
-				log.warn("没有需要处理的文件,直接清除.");
+				log.warn("no file need to be process, clear directly.");
 				return true;
 			}
 			//失败在第3步,继续处理未完成的文件
@@ -151,10 +151,10 @@ public final class LocalZipParser extends Executor {
 				File[] fileArray = unzipDir.listFiles();
 				if(!ArrayUtils.isEmpty(fileArray)){
 					//失败在第1、2步，清除并重新尝试
-					log.warn("清空未正确解压的文件目录");
+					log.warn("clear files which unzip uncorrectly.");
 					for(File file : fileArray){
 						if(!file.delete()){
-							log.error("清除文件失败:" + file.getName()); 
+							log.error("delete file failed: " + file.getName()); 
 							return false;
 						}
 					}
@@ -162,29 +162,29 @@ public final class LocalZipParser extends Executor {
 			}else{
 				//首次任务处理
 				if(!unzipDir.mkdirs()){
-					log.error("创建目录失败:" + unzipDir);
+					log.error("directory create failed: " + unzipDir);
 					return false;
 				}
 			}
 
 			long cost = ZipUtil.unZip(sourceUri, unzipDir);
 			String size = numFormat.format(helper.getSourceSize(sourceUri));
-			log.info("解压结束(" + size + "KB), 耗时=" + cost + "ms");
+			log.info("finish unzip(" + size + "KB), cost=" + cost + "ms");
 
 			String[] nameArray = unzipDir.list();
 			if(ArrayUtils.isEmpty(nameArray)){ 
-				log.warn("没有需要处理的文件,直接清除.");
+				log.warn("no file need to be process, clear directly.");
 				return true;
 			}
 
 			matchedEntrys = filterEntrys(nameArray);
 			if(matchedEntrys.isEmpty()){
-				log.warn("没有需要处理的文件,直接清除.");
+				log.warn("no file need to be process, clear directly.");
 				return true;
 			}
 
 			if(!logFile.createNewFile()){
-				log.warn("创建日志文件失败.");
+				log.warn("logFile create failed.");
 				return false;
 			}
 		}
@@ -198,23 +198,23 @@ public final class LocalZipParser extends Executor {
 			if(!ArrayUtils.isEmpty(fileArray)){
 				for(File file : fileArray){
 					if(!file.delete()){
-						log.warn("清除临时文件失败."); 
+						log.warn("clear temp file failed: " + file.getName()); 
 						return false;
 					}
 				}
 			}
 			if(!unzipDir.delete()){
-				log.warn("清除临时目录失败."); 
+				log.warn("clear temp directory failed."); 
 				return false;
 			}
 		}
 		//srcFile.exist = true
 		if(!helper.delete(sourceUri)){ 
-			log.warn("清除源文件失败."); 
+			log.warn("clear src file failed."); 
 			return false;
 		}
 		if(logFile.exists() && !logFile.delete()){
-			log.warn("清除日志失败.");
+			log.warn("clear logFile failed.");
 		}
 		return true;
 	}
@@ -238,7 +238,7 @@ public final class LocalZipParser extends Executor {
 		String name = lines.get(0); 
 		File file = new File(unzipDir + File.separator + name);
 		if(!file.exists()){
-			log.warn("未找到记录文件:" + name);
+			log.warn("cann't find failed file: " + name);
 			return true;
 		}
 
@@ -246,18 +246,18 @@ public final class LocalZipParser extends Executor {
 		int lineIndex = 0;
 		try{
 			lineIndex = Integer.valueOf(lines.get(1));
-			log.info("获取文件处理进度[" + name + "]:" + lineIndex); 
+			log.info("get failed file processed progress[" + name + "]: " + lineIndex); 
 		}catch(Exception e){
-			log.warn("获取文件处理进度失败,将从第0行开始处理:" + name);
+			log.warn("get failed file processed progress failed, will process from first line: " + name);
 		}
 
 		read(file.getPath(), lineIndex); 
 		matchedEntrys.remove(name);
 		
 		String size = numFormat.format(file.length() / 1024.0);
-		log.info("处理文件结束[" + name + "(" + size + "KB)], 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+		log.info("finish file[" + name + "(" + size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
 		if(!file.delete()){
-			log.error("删除临时文件失败:" + name); 
+			log.error("delete file failed: " + name); 
 			return false;
 		}
 		return true;
@@ -274,9 +274,9 @@ public final class LocalZipParser extends Executor {
 			it.remove();
 			
 			String size = numFormat.format(file.length() / 1024.0);
-			log.info("处理文件结束[" + name + "(" + size + "KB)], 耗时=" + (System.currentTimeMillis() - sTime) + "ms");
+			log.info("finish file[" + name + "(" + size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
 			if(!file.delete()){
-				log.error("删除临时文件失败:" + file.getName()); 
+				log.error("delete file failed: " + file.getName()); 
 				return false;
 			}
 		}
@@ -316,7 +316,7 @@ public final class LocalZipParser extends Executor {
 
 	private void logProcess(String uri, int lineIndex) throws IOException{ 
 		String data = uri + "\n" + lineIndex;
-		log.info("已读取行数:" + lineIndex);
+		log.info("rows processed: " + lineIndex);
 		FileUtils.writeStringToFile(logFile, data, false);
 	}
 		

@@ -90,10 +90,11 @@ img {
 						<tr>
 							<th></th>
 							<th>name</th>
-							<th>state</th>
-							<th>create time</th>
-							<th>last start time</th>
+							<th>load time</th>
+							<th>last execute time</th>
 							<th>cron expression</th>
+							<th>active tasks</th>
+							<th>state</th>
 							<th>log level</th>
 							<th>option</th>
 						</tr>
@@ -124,48 +125,83 @@ img {
 														"data" : "name"
 													},
 													{
-														"data" : "state"
+														"data" : "loadTime"
 													},
 													{
-														"data" : "creatTime"
-													},
-													{
-														"data" : "startTime"
+														"data" : "execTime"
 													},
 													{
 														"data" : "cron",
 														"orderable" : false,
 													},
 													{
-														"defaultContent" : "<select onchange='log(this)'>"
-																+ "<option value='DEBUG'>DEBUG</option>"
-																+ "<option value='INFO'>INFO</option>"
-																+ "<option value='WARN'>WARN</option>"
-																+ "<option value='ERROR'>ERROR</option>"
-																+ "</select>",
-														"orderable" : false
+														"data" : "actives"
 													},
 													{
+														"data" : "state"
+													},
+													{
+														"data" : "level"
+													},
+													{
+														"data" : null,
 														"defaultContent" : "<i class='layui-icon layui-icon-play boxbtn' title='start' onclick='operation(this, 1)'/></i>"
 																+ "<i class='layui-icon layui-icon-pause boxbtn' title='stop' onclick='operation(this, 2)'/></i>"
 																+ "<i class='layui-icon layui-icon-refresh boxbtn' title='execute immediately' onclick='operation(this, 3)'/></i>",
 														"orderable" : false
 													}, ],
-											"createdRow" : function(row, data,
-													index) {
-												var select = $('td', row).eq(6)
-														.find("select");
+											"createdRow" : function(row, data, index) {
+												var name;
+												var level;
+												var state;
 												for ( var key in data) {
 													if (key == "name") {
-														select
-																.attr(
-																		"id",
-																		"select_"
-																				+ data[key]);
+														name = data[key];
 													} else if (key == "level") {
-														select.val(data[key]);
+														level = data[key];
+													}else if(key == "state"){
+														state = data[key];
 													}
 												}
+												var select = "<select id='select_" + name + "' value='" + level + "' onchange='log(this)' >";
+												if(level == "DEBUG"){
+													select = select + "<option value='DEBUG' selected='selected'>DEBUG</option>"
+													+ "<option value='INFO'>INFO</option>"
+										            + "<option value='WARN'>WARN</option>"
+										            + "<option value='ERROR'>ERROR</option>"
+										            + "</select>"
+												}else if(level == "INFO"){
+													select = select + "<option value='DEBUG'>DEBUG</option>"
+													+ "<option value='INFO' selected='selected'>INFO</option>"
+										            + "<option value='WARN'>WARN</option>"
+										            + "<option value='ERROR'>ERROR</option>"
+										            + "</select>"
+												}else if(level == "WARN"){
+													select = select + "<option value='DEBUG'>DEBUG</option>"
+													+ "<option value='INFO'>INFO</option>"
+										            + "<option value='WARN' selected='selected'>WARN</option>"
+										            + "<option value='ERROR'>ERROR</option>"
+										            + "</select>"
+												}else{
+													select = select + "<option value='DEBUG'>DEBUG</option>"
+													+ "<option value='INFO'>INFO</option>"
+										            + "<option value='WARN'>WARN</option>"
+										            + "<option value='ERROR' selected='selected'>ERROR</option>"
+										            + "</select>"
+												}
+											    $('td', row).eq(7).html(select);
+												
+												var img;
+												if(state == "running"){
+													img = "<img src='images/running.png' title='running'>"
+												}else if(state == "stopping"){
+													img = "<img src='images/stopping.png' title='stopping'>"
+												}else if(state == "waiting"){
+													img = "<img src='images/waiting.png' title='waiting'>"
+												}else{
+													img = "<img src='images/stopped.png' title='stopped'>"
+												}
+												$('td', row).eq(6).html(img);
 											},
 											"order" : [ [ 1, 'asc' ] ]
 										});
@@ -207,8 +243,8 @@ img {
 			if (key == "name") {
 				name = data[key];
 				continue;
-			} else if (key == "startTime" || key == "creatTime"
-					|| key == "state") {
+			} else if (key == "loadTime" || key == "execTime"
+					|| key == "state" || key == "level" || key == "actives") {
 				continue;
 			}
 			html = html
