@@ -50,8 +50,8 @@ public class FomServiceImpl implements FomService {
 			cmap.put("loadTime", format.format(context.loadTime));
 			cmap.put("execTime", format.format(context.execTime));
 			cmap.put("level", context.log.getLevel().toString());
-			cmap.put("actives", String.valueOf(context.getActives())); 
-			cmap.put("created", String.valueOf(context.getCreated()));
+			cmap.put("active", String.valueOf(context.getActives())); 
+			cmap.put("waiting", String.valueOf(context.getWaitings()));
 			cmap.put("completed", String.valueOf(context.getCompleted()));
 			list.add(cmap);
 		}

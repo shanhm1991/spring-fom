@@ -184,6 +184,9 @@ public abstract class Context implements Serializable {
 		return pool.getActiveCount();
 	}
 	
+	public final int getWaitings(){
+		return pool.getQueue().size();
+	}
 	public final long getCreated(){
 		if(pool == null){
 			return 0;

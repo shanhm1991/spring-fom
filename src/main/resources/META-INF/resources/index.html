@@ -93,9 +93,9 @@ img {
 							<th>load time</th>
 							<th>last execute time</th>
 							<th>cron expression</th>
-							<th>task created</th>
 							<th>task completed</th>
-							<th>task actives</th>
+							<th>task waiting</th>
+							<th>task active</th>
 							<th>state</th>
 							<th>log level</th>
 							<th>option</th>
@@ -137,13 +137,13 @@ img {
 														"orderable" : false,
 													},
 													{
-														"data" : "created"
-													},
-													{
 														"data" : "completed"
 													},
 													{
-														"data" : "actives"
+														"data" : "waiting"
+													},
+													{
+														"data" : "active"
 													},
 													{
 														"data" : "state"
@@ -154,7 +154,7 @@ img {
 													{
 														"data" : null,
 														"defaultContent" : "<i class='layui-icon layui-icon-play boxbtn' title='start' onclick='operation(this, 1)'/></i>"
-																+ "<i class='layui-icon layui-icon-pause boxbtn' title='stop' onclick='operation(this, 2)'/></i>"
+																+ "<i class='layui-icon layui-icon-pause boxbtn' title='shutdown' onclick='operation(this, 2)'/></i>"
 																+ "<i class='layui-icon layui-icon-refresh boxbtn' title='execute immediately' onclick='operation(this, 3)'/></i>",
 														"orderable" : false
 													}, ],
@@ -170,7 +170,7 @@ img {
 														level = data[key];
 													}else if(key == "state"){
 														state = data[key];
-													}else if(key == "actives"){
+													}else if(key == "active"){
 														actives = data[key];
 													}
 												}
@@ -208,7 +208,7 @@ img {
 												}else if(state == "stopping"){
 													img = "<img src='images/stopping.png' title='stopping'>"
 												}else if(state == "waiting"){
-													img = "<img src='images/waiting.png' title='waiting'>"
+													img = "<img src='images/waiting.png' title='schedule waiting'>"
 												}else{
 													img = "<img src='images/stopped.png' title='stopped'>"
 												}
@@ -253,8 +253,8 @@ img {
 			if (key == "name") {
 				name = data[key];
 				continue;
-			} else if (key == "loadTime" || key == "execTime"
-					|| key == "state" || key == "level" || key == "actives") {
+			} else if (key == "loadTime" || key == "execTime" || key == "completed"
+					|| key == "state" || key == "level" || key == "active" || key == "waiting") {
 				continue;
 			}
 			html = html
@@ -482,7 +482,7 @@ img {
 				}
 				html = html + "</table>";
 				layer.open({
-					  title: 'dump threads',
+					  title: 'dump threads[' + data.size + ']',
 					  type : 1,
 					  skin : 'layui-layer-demo',
 					  area : [ '800px', '500px' ],
