@@ -50,8 +50,8 @@ public class HdfsHelper implements DownloaderHelper, ZipDownloaderHelper, Upload
 
 	@Override
 	public int upload(File file, String destUri) throws Exception {
-		// TODO Auto-generated method stub
-		return 0;
+		HdfsUtil.upload(masterUrl, slaveUrl, file, new Path(destUri)); 
+		return 200;
 	}
 
 	@Override

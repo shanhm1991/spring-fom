@@ -8,7 +8,8 @@ import com.fom.context.Context;
 import com.fom.context.ContextUtil;
 import com.fom.context.Executor;
 import com.fom.context.FomContext;
-import com.fom.context.helper.DownloaderHelper;
+import com.fom.context.executor.Uploader;
+import com.fom.context.helper.UploaderHelper;
 import com.fom.context.helper.impl.HdfsHelper;
 
 /**
@@ -24,6 +25,8 @@ public class UploadHdfsExample extends Context {
 	private String masterUrl;
 
 	private String slaveUrl;
+	
+	private String destPath;
 
 	@Override
 	protected List<String> getUriList() throws Exception {
@@ -35,12 +38,9 @@ public class UploadHdfsExample extends Context {
 
 	@Override
 	protected Executor createExecutor(String sourceUri) throws Exception {
-		DownloaderHelper helper = new HdfsHelper(masterUrl, slaveUrl);
+		UploaderHelper helper = new HdfsHelper(masterUrl, slaveUrl);
+		return new Uploader(sourceUri, destPath, false, helper);
 		
-		
-		
-		
-		return null;
 	}
 
 }
