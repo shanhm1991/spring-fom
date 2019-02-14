@@ -1,49 +1,34 @@
 #概述
-> 在公司呆的这一年时间里，发现由于项目性质，经常有关于文件操作的需求，每次就有同学临时写一个小工程部署，
-> 这样导致质量参差不齐，代码和日志风格也是各种各样，毕竟不是长久之计，以后维护交接起来比较麻烦，
-> 遂决定私下写这样一个工具，尽量做到简单好用，方便扩展以及比较通用。
+> 写这个程序是因为之前在项目组中，发现由于项目性质，经常有关于文件操作的需求，每次就有同学临时写一个小工程部署，
+> 而工程的质量参差不齐，代码和日志风格也是各种各样，经常会因为时间的紧迫性而将就质量， 这样以后注定会有很多的风险，
+> 遂决定私下写这样一个工具，希望能将这样的需求开发做到效率和质量兼顾，尽量做到简单好用，同时方便扩展。
+> 一开始初衷是为了解决各种文件操作的需求，后来发现其他的需求也可以满足，本质上其实是一个生产消费模式。
 
-> 可以将fom当作一个文件操作平台，它做到了模块化管理，以文件为独立单位创建任务线程，不同模块创建的任务线程提交各自独立的线程池。
-> 模块配置支持xml和注解扫描，结合springboot，提供了web页面维护，可以查看或者实时修改模块状态以及配置，可以参考examples的实现。
-> 也可以将fom当成一个工具jar，可以参考test中的例子，实现一个Context实例，使用executor包下面的策略，直接在main函数中启动即可。
+##打包：mvn clean package -Dmaven.test.skip=true
 
-##api支持 
-> fom提供了一些已实现好的操作策略，如常用的文件上传下载以及解析
-1. 解析
-* 文件来源：Local/HDFS/HTTP/FTP
-* 文件类型：文本/zip包
-* 文本格式：txt/orc/Excel
-2. 下载/打包下载
-* 文件服务器：HDFS/HTTP/FTP
-3. 上传
-* 文件服务器：HDFS/HTTP/FTP
-4. 数据库
-* 支持数据库：mysql/oracle/elasticsearch(2.x)
-* 支持操作方式：mybatis/自定义pool
-
-##web维护
-* http://ip:4040/fom/index.html
-
-##打包
-* 在工程目录下执行cmd: mvn clean package(跳过测试：mvn clean package -Dmaven.test.skip=true)
-
-##测试 (启动类：com.fom.boot.Application)
+##使用说明
 1. 启动参数
-* -Dwebapp.root：设置应用资源StandardContext的根目录,默认以classpath作为根目录
-* -Dcache.root：  设置缓存即应用处理过程中临时文件的根目录(默认为根目录下的WEB-INF/cache，如果找不到则设为根目录下的cache)
-* -Dlog.root:    设置生成日志文件的根目录，默认为根目录下的log
-* -Dlog4jConfigLocation：设置log4j配置文件路径，默认读取文件：/WEB-INF/log4j.properties
-* -DfomConfigLocation：    设置fom配置文件路径，默认读取文件：/WEB-INF/fom.xml
-* -DpoolConfigLocation：  设置pool配置文件路径，默认读取文件：/WEB-INF/pool.xml
-2. 配置
-* spring：应用启动时会加载所有目录带spring名字的xml文件，以及com.fom包下面所有的spring注解
-* log4j：在/WEB-INF/log4j.properties或-Dlog4jConfigLocation指定的配置文件中进行配置
-* fom:   在/WEB-INF/fom.xml或-DfomConfigLocation指定的配置文件中进行配置
-* pool：  在/WEB-INF/pool.xml或-DpoolConfigLocation指定的配置文件中进行配置
-3. 启动
-* 在eclipse中启动：如果不设置-Dwebapp.root，应用会以eclipse的编译结果目录作为根目录
-* 在tomcat容器中启动：工程中保留了web.xml和applicationContext.xml以及springnvc.xml就是为了兼容以往的web工程部署方式，将它们和需要的依赖文件一起以文件夹或war包形式放到tomcat目录下启动即可
-* java命令启动：打成jar包和需要的依赖以及resource一起部署到目录下，通过java指定classpath启动
+* -Dwebapp.root：设置资源根目录，默认将classpath作为根目录（eclipse中以bin或者target/classes作为classpath）
+* -Dcache.root：  设置缓存文件目录，默认为${webapp.root}/WEB-INF/cache（如果WEB-INF不存在则为${webapp.root}/cache）
+* -Dlog.root：设置日志文件目录，默认为${webapp.root}/log
+* -Dlog4jConfigLocation：设置log4j配置文件路径，默认位置：${webapp.root}/WEB-INF/log4j.properties
+* -DfomConfigLocation： 设置fom配置文件路径，默认位置：${webapp.root}/WEB-INF/fom.xml
+* -DpoolConfigLocation：设置pool配置文件路径，默认位置：${webapp.root}/WEB-INF/pool.xml
 
+2. 启动方式
+* 以springboot方式启动，启动类：com.fom.boot.Application
+> fom实现了功能模块化，状态和配置的实时管理，并提供简单的维护平台http://ip:4040/fom/index.html，只需将自己的业务功能实现为com.fom.Context便可以一键启动
+* 以tomcat方式部署（未测）
+> fom保留了web.xml和springmvc.xml，在main/resources/WEB-INF下面，对传统部署tomcat的方式作了兼容，可以以war包形式直接在tomcat中启动
+* 自定义main方法启动
+> com.fom.Context提供了启停方法，可以直接在main方法中启动自己的业务实现
 
+##api支持
+> fom另外提供了一些常见的文件操作策略，比如上次上传、下载（打包）、文件解析，实现方式有http、ftp、hdfs，
+> 对于入库操作合入了mybatis，另外自己也实现了一个pool（配置就是上面的pool.xml，支持mysql和oracle以及elasticsearch(2.x)的操作）
+> 如果不以fom的Context作为启动入口，同样可以将fom当成一个util性质的jar包
 
+##存在问题
+* 计算定时周期是使用的org.quartz.CronExpression，但测试发现第一次获取的时间总是会提前
+* ftpUtil未做测试
+* 其他问题，有待验证

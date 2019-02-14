@@ -1,29 +1,21 @@
-package com.fom.test.context;
+package com.fom.test;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.log4j.Logger;
 
 import com.fom.context.Context;
 import com.fom.context.Executor;
 import com.fom.context.FomContext;
 
 @FomContext(cron="0/10 * * * * ?")
-public class Test extends Context {
+public class ContextTest extends Context {
 	
 	private static final long serialVersionUID = -4648914163608513224L;
-	private Logger log = Logger.getRootLogger();
 	
-	public Test(String name){
-		super(name);
-	}
-
 	@Override
 	protected List<String> getUriList() throws Exception {
 		List<String> list = new ArrayList<String>();
-		list.add("task1");
-		log.info("scan");
+		list.add("demoTask");
 		return list;
 	}
 
@@ -40,16 +32,14 @@ public class Test extends Context {
 
 		@Override
 		protected boolean exec() throws Exception {
-			System.out.println("12124124");
-			Thread.sleep(60000); 
+			System.out.println("task executing...");
+			Thread.sleep(20000); 
 			return true;
 		}
 		
 	}
 
 	public static void main(String[] args) {
-		Test t = new Test("safasfafqw");
-
-		t.start();
+		new ContextTest().start();
 	}
 }
