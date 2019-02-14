@@ -173,11 +173,11 @@ public class HttpUtil {
 	 * 上传文件
 	 * @param url url
 	 * @param params 参数列表
-	 * @param file 文件列表
+	 * @param localFile 文件列表
 	 * @return 返回码
 	 * @throws Exception Exception
 	 */
-	public static int upload(File file, String url, Map<String,String> params) throws Exception{    
+	public static int upload(File localFile, String url, Map<String,String> params) throws Exception{    
 		MultipartEntityBuilder mEntityBuilder = MultipartEntityBuilder.create();  
 		mEntityBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);  
 		mEntityBuilder.setCharset(Charset.forName("utf-8"));  
@@ -190,7 +190,7 @@ public class HttpUtil {
 			}  
 		}  
 		//二进制参数  
-		mEntityBuilder.addBinaryBody("file", file);  
+		mEntityBuilder.addBinaryBody("file", localFile);  
 		
 		HttpPost httpost = new HttpPost(url); 
 		httpost.setEntity(mEntityBuilder.build());  

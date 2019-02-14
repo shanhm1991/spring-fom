@@ -469,7 +469,7 @@ public abstract class Context implements Serializable {
 	 * 3:已停止: stopped
 	 * 4:等待:waiting
 	 */
-	private int state = 0;
+	private transient int state = 0;
 
 	/**
 	 * 获取context状态
@@ -626,6 +626,7 @@ public abstract class Context implements Serializable {
 					return;
 				}
 				
+				Date execDate = new Date();
 				synchronized (name.intern()) {
 					state = 1;
 				}
@@ -692,7 +693,7 @@ public abstract class Context implements Serializable {
 					return;
 				}
 				
-				Date nextTime = cronExpression.getTimeAfter(new Date());
+				Date nextTime = cronExpression.getTimeAfter(execDate);
 				long waitTime = nextTime.getTime() - System.currentTimeMillis();
 				//如果设定周期较短，而执行时间较长
 				if(waitTime > 0){

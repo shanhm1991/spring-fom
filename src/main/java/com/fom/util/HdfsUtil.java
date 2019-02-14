@@ -1,5 +1,6 @@
 package com.fom.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
@@ -127,7 +128,16 @@ public class HdfsUtil {
 		return fs.delete(path, true);
 	}
 	
-	public static void upload() {
-		
+	/**
+	 * 上传文件
+	 * @param masterUrl masterUrl
+	 * @param slaveUrl slaveUrl
+	 * @param localFile localFile
+	 * @param remotePath remotePath
+	 * @throws Exception  Exception
+	 */ 
+	public static void upload(String masterUrl, String slaveUrl, File localFile, Path remotePath) throws Exception {
+		FileSystem fs = get(masterUrl, slaveUrl);
+        fs.copyFromLocalFile(new Path(localFile.getPath()), remotePath);
 	}
 }

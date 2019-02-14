@@ -109,15 +109,15 @@ public class FtpUtil {
 	 * @param passwd passwd
 	 * @param destPath 上传文件目录(绝对路径)
 	 * @param destName 上传文件名称
-	 * @param file 本地文件
+	 * @param localFile 本地文件
 	 * @throws Exception Exception
 	 */
 	public static void upload(String hostname, int port, String user, String passwd,
-			String destPath, String destName,File file) throws Exception{
+			String destPath, String destName,File localFile) throws Exception{
 		FTPClient ftpClient = null;
 		InputStream inputStream = null;
 		try{
-			inputStream = new FileInputStream(file);
+			inputStream = new FileInputStream(localFile);
 			ftpClient = get(hostname, port, user, passwd);
 			ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
 			cd(ftpClient, destPath); 
