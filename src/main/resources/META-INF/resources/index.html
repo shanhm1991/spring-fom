@@ -473,7 +473,7 @@ img {
 				if(data.size == 0){
 					return;
 				}
-				var html = "<table width='100%' border='1' cellpadding='20px'>";
+				var html = "<table width='100%' border='1' cellpadding='20px' style='height:100%;'>";
 				for ( var key in data) {
 					if(key == "size"){
 						continue;
@@ -485,7 +485,7 @@ img {
 					  title: 'dump threads[' + data.size + ']',
 					  type : 1,
 					  skin : 'layui-layer-demo',
-					  area : [ '800px', '500px' ],
+					  area : [ '1200px' ],
 					  maxmin: true,
 					  closeBtn : 2,
 					  anim : 2,

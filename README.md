@@ -8,7 +8,7 @@
 
 ##使用说明
 1. 启动参数
-* -Dwebapp.root：设置资源根目录，默认将classpath作为根目录（eclipse中以bin或者target/classes作为classpath）
+* -Dwebapp.root：设置资源根目录，默认将classpath作为根目录
 * -Dcache.root：  设置缓存文件目录，默认为${webapp.root}/WEB-INF/cache（如果WEB-INF不存在则为${webapp.root}/cache）
 * -Dlog.root：设置日志文件目录，默认为${webapp.root}/log
 * -Dlog4jConfigLocation：设置log4j配置文件路径，默认位置：${webapp.root}/WEB-INF/log4j.properties
@@ -21,12 +21,12 @@
 * 以tomcat方式部署（未测）
 > fom保留了web.xml和springmvc.xml，在main/resources/WEB-INF下面，对传统部署tomcat的方式作了兼容，可以以war包形式直接在tomcat中启动
 * 自定义main方法启动
-> com.fom.Context提供了启停方法，可以直接在main方法中启动自己的业务实现
+> com.fom.Context提供了启停方法，可以直接在main方法中启动自己的Context实现
 
 ##api支持
-> fom另外提供了一些常见的文件操作策略，比如上次上传、下载（打包）、文件解析，实现方式有http、ftp、hdfs，
-> 对于入库操作合入了mybatis，另外自己也实现了一个pool（配置就是上面的pool.xml，支持mysql和oracle以及elasticsearch(2.x)的操作）
-> 如果不以fom的Context作为启动入口，同样可以将fom当成一个util性质的jar包
+* fom另外提供了一些常见的文件操作策略，比如上次上传、下载（打包）、文件解析，实现方式有http、ftp、hdfs，
+* 对于数据库操作除了使用开源的mybatis/hibernate外，另外也提供了一个自定义实现的pool（配置就是上面的pool.xml，支持mysql和oracle以及elasticsearch(2.x)的操作）
+* 如果不以fom的Context作为启动入口，同样可以将fom当成一个工具包使用
 
 ##存在问题
 * 计算定时周期是使用的org.quartz.CronExpression，但测试发现第一次获取的时间总是会提前
