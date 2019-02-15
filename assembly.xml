@@ -27,11 +27,11 @@
 			<outputDirectory>/</outputDirectory>
 		</file>
 		<file>
-			<source>${project.build.directory}/${project.name}-context-${project.version}.jar</source>
+			<source>${project.build.directory}/${project.name}-${project.version}.jar</source>
 			<outputDirectory>WEB-INF/lib</outputDirectory>
 		</file>
 		<file>
-			<source>${project.build.directory}/${project.name}-examples-${project.version}.jar</source>
+			<source>${project.build.directory}/${project.name}-example-${project.version}.jar</source>
 			<outputDirectory>WEB-INF/lib</outputDirectory>
 		</file>
 	</files>

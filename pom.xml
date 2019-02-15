@@ -4,7 +4,7 @@
 
 	<groupId>com</groupId>
 	<artifactId>fom</artifactId>
-	<version>2.1.1</version>
+	<version>1.0</version>
 	<packaging>jar</packaging>
 
 	<name>fom</name>
@@ -111,7 +111,7 @@
 							<goal>jar</goal>
 						</goals>
 						<configuration>
-							<finalName>${project.name}-context-${project.version}</finalName>
+							<finalName>${project.name}-${project.version}</finalName>
 							<classesDirectory>${project.build.directory}/classes</classesDirectory>
 							<includes>
 								<include>com/**</include>
@@ -130,7 +130,7 @@
 							<goal>jar</goal>
 						</goals>
 						<configuration>
-							<classifier>examples-${project.version}</classifier>
+							<classifier>example-${project.version}</classifier>
 							<classesDirectory>${project.build.directory}/classes</classesDirectory>
 							<includes>
 								<include>com/fom/examples/**</include>
