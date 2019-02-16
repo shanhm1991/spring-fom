@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fom.context.Context;
-import com.fom.context.Executor;
+import com.fom.context.Task;
 import com.fom.context.FomContext;
-import com.fom.context.executor.Downloader;
 import com.fom.context.helper.impl.HttpHelper;
+import com.fom.context.task.Downloader;
 
 /**
  * 
@@ -28,14 +28,14 @@ public class DownloadHttpExample extends Context {
 	}
 
 	@Override
-	protected List<String> getUriList() throws Exception {
+	protected List<String> getTaskIdList() throws Exception {
 		List<String> list = new ArrayList<String>();
 		list.add("http://localhost:4040/fom/index.html");
 		return list;
 	}
  
 	@Override
-	protected Executor createExecutor(String sourceUri) throws Exception {
+	protected Task createTask(String sourceUri) throws Exception {
 		String destName = new File(sourceUri).getName();
 		return new Downloader(sourceUri, destName, dest, false, true, new HttpHelper());
 	}

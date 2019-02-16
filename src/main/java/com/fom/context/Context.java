@@ -635,7 +635,7 @@ public abstract class Context implements Serializable {
 
 				List<String> uriList = null;
 				try {
-					uriList = getUriList();
+					uriList = getTaskIdList();
 				} catch (Exception e) {
 					log.error("", e); 
 				}
@@ -646,7 +646,7 @@ public abstract class Context implements Serializable {
 							continue;
 						}
 						try {
-							Executor executor = createExecutor(sourceUri);
+							Task executor = createTask(sourceUri);
 							executor.setContext(name); 
 							FUTUREMAP.put(sourceUri, pool.submit(executor)); 
 							log.info("create task" + "[" + sourceUri + "]"); 
@@ -745,18 +745,18 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 返回资源uri列表，context将根据每个uri创建一个Executor执行器提交到线程池
-	 * @return List sourceUri list
+	 * @return List taskId list
 	 * @throws Exception Exception
 	 */
-	protected abstract List<String> getUriList() throws Exception;
+	protected abstract List<String> getTaskIdList() throws Exception;
 
 	/**
 	 * 根据uri创建一个Executor的具体实例
-	 * @param sourceUri 资源uri
+	 * @param executorId 资源uri
 	 * @return Executor
 	 * @throws Exception Exception
 	 */
-	protected abstract Executor createExecutor(String sourceUri) throws Exception;
+	protected abstract Task createTask(String executorId) throws Exception;
 
 	private void cleanFutures(){
 		Iterator<Map.Entry<String, TimedFuture<Result>>> it = FUTUREMAP.entrySet().iterator();

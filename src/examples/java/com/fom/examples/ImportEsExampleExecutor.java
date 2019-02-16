@@ -2,7 +2,7 @@ package com.fom.examples;
 
 import java.io.File;
 
-import com.fom.context.executor.Parser;
+import com.fom.context.task.Parser;
 import com.fom.db.handler.EsHandler;
 
 public class ImportEsExampleExecutor extends Parser {

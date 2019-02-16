@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fom.context.Context;
-import com.fom.context.Executor;
+import com.fom.context.Task;
 import com.fom.context.FomContext;
-import com.fom.context.executor.ZipDownloader;
 import com.fom.context.helper.impl.HttpHelper;
+import com.fom.context.task.ZipDownloader;
 
 /**
  * 
@@ -28,14 +28,14 @@ public class DownloadHttpZipExample extends Context {
 	}
 
 	@Override
-	protected List<String> getUriList() throws Exception {
+	protected List<String> getTaskIdList() throws Exception {
 		List<String> list = new ArrayList<String>();
 		list.add("httpTest");
 		return list;
 	}
 
 	@Override
-	protected Executor createExecutor(String sourceUri) throws Exception {
+	protected Task createTask(String sourceUri) throws Exception {
 		List<String> list = new ArrayList<String>();
 		list.add("http://localhost:4040/fom/index.html");
 		list.add("http://localhost:4040/fom/js/datatables.js");
@@ -56,7 +56,7 @@ public class DownloadHttpZipExample extends Context {
 		list.add("http://localhost:4040/fom/images/start.png");
 		list.add("http://localhost:4040/fom/images/stop.png");
 		
-		return new ZipDownloader("httpTest", list, dest, 
+		return new ZipDownloader(list, "httpTest", dest, 
 				10, 1024 * 1024, false, new HttpHelper());
 	}
 

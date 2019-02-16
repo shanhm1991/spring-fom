@@ -1,4 +1,4 @@
-package com.fom.context.executor;
+package com.fom.context.task;
 
 import java.io.File;
 import java.text.DecimalFormat;
@@ -6,7 +6,7 @@ import java.text.DecimalFormat;
 import org.apache.commons.lang.StringUtils;
 
 import com.fom.context.ExceptionHandler;
-import com.fom.context.Executor;
+import com.fom.context.Task;
 import com.fom.context.ResultHandler;
 import com.fom.context.helper.UploaderHelper;
 
@@ -15,7 +15,7 @@ import com.fom.context.helper.UploaderHelper;
  * @author shanhm
  *
  */
-public class Uploader extends Executor {
+public class Uploader extends Task {
 	
 	private File file;
 	

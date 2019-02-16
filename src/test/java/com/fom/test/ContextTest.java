@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fom.context.Context;
-import com.fom.context.Executor;
+import com.fom.context.Task;
 import com.fom.context.FomContext;
 
 @FomContext(cron="0/10 * * * * ?")
@@ -13,18 +13,18 @@ public class ContextTest extends Context {
 	private static final long serialVersionUID = -4648914163608513224L;
 	
 	@Override
-	protected List<String> getUriList() throws Exception {
+	protected List<String> getTaskIdList() throws Exception {
 		List<String> list = new ArrayList<String>();
 		list.add("demoTask");
 		return list;
 	}
 
 	@Override
-	protected Executor createExecutor(String sourceUri) throws Exception {
+	protected Task createTask(String sourceUri) throws Exception {
 		return new SelfExecutor(sourceUri);
 	}
 	
-	private static class SelfExecutor extends Executor {
+	private static class SelfExecutor extends Task {
 
 		public SelfExecutor(String sourceUri) {
 			super(sourceUri);

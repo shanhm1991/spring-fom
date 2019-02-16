@@ -8,63 +8,75 @@ import org.apache.log4j.Logger;
 import com.fom.log.LoggerFactory;
 
 /**
- * 针对source的任务执行者
+ * 任务，在context中时作为最小执行单位
  * 
  * @author shanhm
  *
  */
-public abstract class Executor implements Callable<Result> {
+public abstract class Task implements Callable<Result> {
 
 	protected volatile Logger log = Logger.getRootLogger();
 
-	protected volatile String contextName;
-
-	protected final String source;
-
-	protected ExceptionHandler exceptionHandler;
-
-	protected ResultHandler resultHandler;
+	/**
+	 * 任务唯一标识
+	 */
+	protected final String id;
 
 	/**
-	 * @param source 创建Executor的资源
+	 * 异常处理器
 	 */
-	public Executor(String source) { 
-		this.source = source;
+	protected ExceptionHandler exceptionHandler;
+
+	/**
+	 * 结果处理器
+	 */
+	protected ResultHandler resultHandler;
+	
+	/**
+	 * 只有在context中使用时才会赋值，否则将为null，
+	 */
+	protected volatile String contextName;
+
+	/**
+	 * @param id 创建Executor的资源
+	 */
+	public Task(String id) { 
+		this.id = id;
 	}
 
 	/**
-	 * @param source 创建Executor的资源
-	 * @param exceptionHandler ExceptionHandler
+	 * @param id 唯一标识
+	 * @param exceptionHandler 异常处理器
 	 */
-	public Executor(String source, ExceptionHandler exceptionHandler) { 
-		this(source);
+	public Task(String id, ExceptionHandler exceptionHandler) { 
+		this(id);
 		this.exceptionHandler = exceptionHandler;
 	}
 
 	/**
-	 * @param source 创建Executor的资源
-	 * @param resultHandler ResultHandler
+	 * @param id 唯一标识
+	 * @param resultHandler 结果处理器
 	 */
-	public Executor(String source, ResultHandler resultHandler) { 
-		this(source);
+	public Task(String id, ResultHandler resultHandler) { 
+		this(id);
 		this.resultHandler = resultHandler;
 	}
 
 	/**
-	 * @param source 创建Executor的资源
-	 * @param exceptionHandler ExceptionHandler
-	 * @param resultHandler ResultHandler
+	 * @param id 唯一标识
+	 * @param exceptionHandler 异常处理器
+	 * @param resultHandler 结果处理器
 	 */
-	public Executor(String source, ExceptionHandler exceptionHandler, ResultHandler resultHandler) { 
-		this(source);
+	public Task(String id, ExceptionHandler exceptionHandler, ResultHandler resultHandler) { 
+		this(id);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
 	}
 
 	@Override
 	public final Result call() throws Exception {  
-		Thread.currentThread().setName(source);
-		Result result = new Result(source); 
+		Thread.currentThread().setName(id);
+		Result result = new Result(id); 
 		long sTime = System.currentTimeMillis();
 		result.startTime = sTime;
 		try {
@@ -118,14 +130,6 @@ public abstract class Executor implements Callable<Result> {
 		return true;
 	}
 	
-	/**
-	 * 如果单独使用Executor，将返回null，只有在context中使用时才有值返回
-	 * @return context name
-	 */
-	protected final String getContextName(){
-		return contextName;
-	}
-
 	final void setContext(String contextName){
 		if(StringUtils.isBlank(contextName)){
 			return;

@@ -1,4 +1,4 @@
-package com.fom.context.executor;
+package com.fom.context.task;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +11,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 
 import com.fom.context.ExceptionHandler;
-import com.fom.context.Executor;
+import com.fom.context.Task;
 import com.fom.context.ResultHandler;
 import com.fom.context.helper.LocalZipParserHelper;
 import com.fom.context.reader.Reader;
@@ -24,7 +24,7 @@ import com.fom.util.ZipUtil;
  * @author shanhm
  *
  */
-public final class LocalZipParser extends Executor {
+public final class LocalZipParser extends Task {
 	
 	private int batch;
 	
@@ -98,9 +98,9 @@ public final class LocalZipParser extends Executor {
 	
 	@Override
 	protected boolean beforeExec() throws Exception {
-		if(!ZipUtil.valid(source)){ 
+		if(!ZipUtil.valid(id)){ 
 			log.error("zip invalid."); 
-			if(!new File(source).delete()){
+			if(!new File(id).delete()){
 				log.error("zip delete failed."); 
 			}
 			return false;
@@ -167,8 +167,8 @@ public final class LocalZipParser extends Executor {
 				}
 			}
 
-			long cost = ZipUtil.unZip(source, unzipDir);
-			String size = numFormat.format(helper.getSourceSize(source));
+			long cost = ZipUtil.unZip(id, unzipDir);
+			String size = numFormat.format(helper.getSourceSize(id));
 			log.info("finish unzip(" + size + "KB), cost=" + cost + "ms");
 
 			String[] nameArray = unzipDir.list();
@@ -209,7 +209,7 @@ public final class LocalZipParser extends Executor {
 			}
 		}
 		//srcFile.exist = true
-		if(!helper.delete(source)){ 
+		if(!helper.delete(id)){ 
 			log.warn("clear src file failed."); 
 			return false;
 		}

@@ -6,8 +6,8 @@ import java.util.List;
 
 import com.fom.context.Context;
 import com.fom.context.ContextUtil;
-import com.fom.context.Executor;
-import com.fom.context.executor.Parser;
+import com.fom.context.Task;
+import com.fom.context.task.Parser;
 import com.fom.util.FileUtil;
 import com.fom.util.PatternUtil;
 
@@ -37,7 +37,7 @@ public class ImportMysqlExample2 extends Context {
 	}
 
 	@Override
-	protected List<String> getUriList() throws Exception {
+	protected List<String> getTaskIdList() throws Exception {
 		return FileUtil.list(srcPath, new FileFilter(){
 			@Override
 			public boolean accept(File file) {
@@ -53,7 +53,7 @@ public class ImportMysqlExample2 extends Context {
 	}
 
 	@Override
-	protected Executor createExecutor(String sourceUri) throws Exception {
+	protected Task createTask(String sourceUri) throws Exception {
 		ImportMysqlExample2Helper helper = new ImportMysqlExample2Helper(getName());
 		Parser parser = new Parser(sourceUri, batch, helper);
 		return parser;

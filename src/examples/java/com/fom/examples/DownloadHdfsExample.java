@@ -7,11 +7,11 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 
 import com.fom.context.Context;
-import com.fom.context.Executor;
+import com.fom.context.Task;
 import com.fom.context.FomContext;
-import com.fom.context.executor.Downloader;
 import com.fom.context.helper.DownloaderHelper;
 import com.fom.context.helper.impl.HdfsHelper;
+import com.fom.context.task.Downloader;
 import com.fom.util.HdfsUtil;
 import com.fom.util.PatternUtil;
 
@@ -36,7 +36,7 @@ public class DownloadHdfsExample extends Context {
 	}
 
 	@Override
-	protected List<String> getUriList() throws Exception { 
+	protected List<String> getTaskIdList() throws Exception { 
 		Thread.sleep(15000); 
 		
 		return HdfsUtil.list(masterUrl, slaveUrl, new Path("/test"), new PathFilter(){
@@ -48,7 +48,7 @@ public class DownloadHdfsExample extends Context {
 	}
 
 	@Override
-	protected Executor createExecutor(String sourceUri) throws Exception { 
+	protected Task createTask(String sourceUri) throws Exception { 
 		DownloaderHelper helper = new HdfsHelper(masterUrl, slaveUrl);
 		String sourceName = new File(sourceUri).getName();
 		return new Downloader(sourceUri, sourceName, dest, false, true, helper);

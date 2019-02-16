@@ -23,8 +23,8 @@ public class TimedFuture<T> extends FutureTask<T> {
 	public TimedFuture(Callable<T> callable){
 		super(callable);
 		createTime = System.currentTimeMillis();
-		if(callable instanceof Executor){
-			executorName = ((Executor)callable).contextName;
+		if(callable instanceof Task){
+			executorName = ((Task)callable).contextName;
 		}
 	}
 

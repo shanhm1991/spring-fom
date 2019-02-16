@@ -1,4 +1,4 @@
-package com.fom.context.executor;
+package com.fom.context.task;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,7 +9,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 
 import com.fom.context.ExceptionHandler;
-import com.fom.context.Executor;
+import com.fom.context.Task;
 import com.fom.context.ResultHandler;
 import com.fom.context.helper.ParserHelper;
 import com.fom.context.reader.Reader;
@@ -21,7 +21,7 @@ import com.fom.util.IoUtil;
  * @author shanhm
  *
  */
-public class Parser extends Executor {
+public class Parser extends Task {
 
 	private int batch;
 	
@@ -83,7 +83,7 @@ public class Parser extends Executor {
 	
 	@Override
 	protected boolean beforeExec() throws Exception { 
-		String logName = new File(source).getName();
+		String logName = new File(id).getName();
 		this.logFile = new File(System.getProperty("cache.parse") 
 				+ File.separator + contextName + File.separator + logName + ".log");
 		File parentFile = logFile.getParentFile();
@@ -114,14 +114,14 @@ public class Parser extends Executor {
 			}
 		}
 		read(lineIndex);
-		String size = new DecimalFormat("#.###").format(helper.getSourceSize(source));
+		String size = new DecimalFormat("#.###").format(helper.getSourceSize(id));
 		log.info("finish file(" + size + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
 		return true;
 	}
 	
 	@Override
 	protected boolean afterExec() throws Exception {
-		if(!helper.delete(source)){ 
+		if(!helper.delete(id)){ 
 			log.error("delete src file failed.");
 			return false;
 		}
@@ -138,7 +138,7 @@ public class Parser extends Executor {
 		String line = "";
 		Reader reader = null;
 		try{
-			reader = helper.getReader(source);
+			reader = helper.getReader(id);
 			List lineDatas = new LinkedList<>(); 
 			long batchTime = System.currentTimeMillis();
 			while ((line = reader.readLine()) != null) {
@@ -148,7 +148,7 @@ public class Parser extends Executor {
 				}
 				if(batch > 0 && lineDatas.size() >= batch){
 					helper.batchProcessLineData(lineDatas, batchTime); 
-					logProcess(source, lineIndex);
+					logProcess(id, lineIndex);
 					lineDatas.clear();
 					batchTime = System.currentTimeMillis();
 				}
@@ -157,7 +157,7 @@ public class Parser extends Executor {
 			if(!lineDatas.isEmpty()){
 				helper.batchProcessLineData(lineDatas, batchTime); 
 			}
-			logProcess(source, lineIndex);
+			logProcess(id, lineIndex);
 		}finally{
 			IoUtil.close(reader);
 		}

@@ -6,10 +6,10 @@ import java.util.List;
 
 import com.fom.context.Context;
 import com.fom.context.ContextUtil;
-import com.fom.context.Executor;
+import com.fom.context.Task;
 import com.fom.context.FomContext;
-import com.fom.context.executor.Uploader;
 import com.fom.context.helper.impl.HttpHelper;
+import com.fom.context.task.Uploader;
 
 /**
  * 
@@ -22,7 +22,7 @@ public class UploadHttpExample extends Context {
 	private static final long serialVersionUID = -6676559884214726673L;
 
 	@Override
-	protected List<String> getUriList() throws Exception {
+	protected List<String> getTaskIdList() throws Exception {
 		String path = ContextUtil.getContextPath("/source");
 		List<String> list = new ArrayList<String>();
 		list.add(path + File.separator + "http.jpg");
@@ -30,7 +30,7 @@ public class UploadHttpExample extends Context {
 	}
 
 	@Override
-	protected Executor createExecutor(String sourceUri) throws Exception {
+	protected Task createTask(String sourceUri) throws Exception {
 		Thread.sleep(15000); 
 		
 		String destUri = "http://localhost:4040/fom/";

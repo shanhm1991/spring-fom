@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fom.context.Context;
-import com.fom.context.Executor;
+import com.fom.context.Task;
 import com.fom.context.FomContext;
-import com.fom.context.executor.ZipDownloader;
 import com.fom.context.helper.ZipDownloaderHelper;
 import com.fom.context.helper.impl.FtpHelper;
+import com.fom.context.task.ZipDownloader;
 
 /**
  * 
@@ -36,7 +36,7 @@ public class DownloadFtpZipExample extends Context {
 	}
 
 	@Override
-	protected List<String> getUriList() throws Exception {
+	protected List<String> getTaskIdList() throws Exception {
 		Thread.sleep(10000); 
 		
 		List<String> list = new ArrayList<String>();
@@ -45,7 +45,7 @@ public class DownloadFtpZipExample extends Context {
 	}
 
 	@Override
-	protected Executor createExecutor(String sourceUri) throws Exception {
+	protected Task createTask(String sourceUri) throws Exception {
 		ZipDownloaderHelper helper = new FtpHelper(hostname, port, user, passwd);
 		List<String> list = new ArrayList<String>();
 		list.add("/ftp/test1.txt");
@@ -57,7 +57,7 @@ public class DownloadFtpZipExample extends Context {
 		list.add("/ftp/test7.txt");
 		list.add("/ftp/test8.txt");
 		
-		return new ZipDownloader("httpTest", list, dest, 10, 1024 * 1024, false, helper);
+		return new ZipDownloader(list, "httpTest", dest, 10, 1024 * 1024, false, helper);
 	}
 
 }

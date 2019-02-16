@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.fom.context.Context;
 import com.fom.context.ContextUtil;
-import com.fom.context.Executor;
+import com.fom.context.Task;
 import com.fom.util.FileUtil;
 import com.fom.util.PatternUtil;
 
@@ -55,7 +55,7 @@ public class ImportEsExample extends Context {
 	}
 
 	@Override
-	protected List<String> getUriList() throws Exception {
+	protected List<String> getTaskIdList() throws Exception {
 		return FileUtil.list(srcPath, new FileFilter(){
 			@Override
 			public boolean accept(File file) {
@@ -71,7 +71,7 @@ public class ImportEsExample extends Context {
 	}
 
 	@Override
-	protected Executor createExecutor(String sourceUri) throws Exception {
+	protected Task createTask(String sourceUri) throws Exception {
 		ImportEsExampleHelper helper = new ImportEsExampleHelper(getName(), esIndex, esType); 
 		ImportEsExampleExecutor executor = 
 				new ImportEsExampleExecutor(sourceUri, batch, helper, esIndex, esType,  esJson);
