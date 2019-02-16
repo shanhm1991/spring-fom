@@ -8,9 +8,9 @@ import com.fom.context.Context;
 import com.fom.context.ContextUtil;
 import com.fom.context.Task;
 import com.fom.context.FomContext;
-import com.fom.context.helper.UploaderHelper;
+import com.fom.context.helper.UploadHelper;
 import com.fom.context.helper.impl.HdfsHelper;
-import com.fom.context.task.Uploader;
+import com.fom.context.task.UploadTask;
 
 /**
  * 
@@ -40,8 +40,8 @@ public class UploadHdfsExample extends Context {
 	protected Task createTask(String sourceUri) throws Exception {
 		Thread.sleep(10000); 
 		
-		UploaderHelper helper = new HdfsHelper(masterUrl, slaveUrl);
-		return new Uploader(sourceUri, destPath, false, helper);
+		UploadHelper helper = new HdfsHelper(masterUrl, slaveUrl);
+		return new UploadTask(sourceUri, destPath, false, helper);
 		
 	}
 

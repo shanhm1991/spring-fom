@@ -8,7 +8,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.fom.context.helper.ParserHelper;
+import com.fom.context.helper.ParseHelper;
 import com.fom.context.reader.Reader;
 import com.fom.context.reader.TextReader;
 import com.fom.db.handler.JdbcHandler;
@@ -18,7 +18,7 @@ import com.fom.db.handler.JdbcHandler;
  * @author shanhm
  *
  */
-public class ImportMysqlExample2Helper implements ParserHelper<Map<String, Object>> {
+public class ImportMysqlExample2Helper implements ParseHelper<Map<String, Object>> {
 
 	private static final String POOL = "example_mysql";
 

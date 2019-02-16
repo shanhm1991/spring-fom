@@ -8,7 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import com.fom.context.ExceptionHandler;
 import com.fom.context.Task;
 import com.fom.context.ResultHandler;
-import com.fom.context.helper.UploaderHelper;
+import com.fom.context.helper.UploadHelper;
 
 /**
  * 根据文件路径上传本地单个文件的任务实现，以文件路径作为task的id
@@ -22,7 +22,7 @@ import com.fom.context.helper.UploaderHelper;
  * @author shanhm
  *
  */
-public class Uploader extends Task {
+public class UploadTask extends Task {
 	
 	private File file;
 	
@@ -30,7 +30,7 @@ public class Uploader extends Task {
 	
 	private boolean isDelSrc;
 	
-	private UploaderHelper helper;
+	private UploadHelper helper;
 
 	/**
 	 * @param sourceUri sourceUri
@@ -38,7 +38,7 @@ public class Uploader extends Task {
 	 * @param isDelSrc isDelSrc
 	 * @param helper UploaderHelper
 	 */
-	public Uploader(String sourceUri, String destUri, boolean isDelSrc, UploaderHelper helper) {
+	public UploadTask(String sourceUri, String destUri, boolean isDelSrc, UploadHelper helper) {
 		super(sourceUri);
 		if(StringUtils.isBlank(sourceUri) || StringUtils.isBlank(destUri) || helper == null) {
 			throw new IllegalArgumentException(); 
@@ -56,8 +56,8 @@ public class Uploader extends Task {
 	 * @param helper UploaderHelper
 	 * @param exceptionHandler ExceptionHandler
 	 */
-	public Uploader(String sourceUri, String destUri, 
-			boolean isDelSrc, UploaderHelper helper, ExceptionHandler exceptionHandler) {
+	public UploadTask(String sourceUri, String destUri, 
+			boolean isDelSrc, UploadHelper helper, ExceptionHandler exceptionHandler) {
 		this(sourceUri, destUri, isDelSrc, helper);
 		this.exceptionHandler = exceptionHandler;
 	}
@@ -69,8 +69,8 @@ public class Uploader extends Task {
 	 * @param helper UploaderHelper
 	 * @param resultHandler ResultHandler
 	 */
-	public Uploader(String sourceUri, String destUri, 
-			boolean isDelSrc, UploaderHelper helper, ResultHandler resultHandler) {
+	public UploadTask(String sourceUri, String destUri, 
+			boolean isDelSrc, UploadHelper helper, ResultHandler resultHandler) {
 		this(sourceUri, destUri, isDelSrc, helper);
 		this.resultHandler = resultHandler;
 	}
@@ -83,8 +83,8 @@ public class Uploader extends Task {
 	 * @param exceptionHandler ExceptionHandler
 	 * @param resultHandler ResultHandler
 	 */
-	public Uploader(String sourceUri, String destUri, 
-			boolean isDelSrc, UploaderHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+	public UploadTask(String sourceUri, String destUri, 
+			boolean isDelSrc, UploadHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
 		this(sourceUri, destUri, isDelSrc, helper);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;

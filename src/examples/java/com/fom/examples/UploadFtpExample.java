@@ -8,9 +8,9 @@ import com.fom.context.Context;
 import com.fom.context.ContextUtil;
 import com.fom.context.Task;
 import com.fom.context.FomContext;
-import com.fom.context.helper.UploaderHelper;
+import com.fom.context.helper.UploadHelper;
 import com.fom.context.helper.impl.FtpHelper;
-import com.fom.context.task.Uploader;
+import com.fom.context.task.UploadTask;
 
 /**
  * 
@@ -46,9 +46,9 @@ public class UploadFtpExample extends Context {
 	protected Task createTask(String sourceUri) throws Exception {
 		Thread.sleep(5000); 
 		
-		UploaderHelper helper = new FtpHelper(hostname, port, user, passwd);
+		UploadHelper helper = new FtpHelper(hostname, port, user, passwd);
 		String destUri = "http://localhost:4040/fom/";
-		return new Uploader(sourceUri, destUri, false, helper);
+		return new UploadTask(sourceUri, destUri, false, helper);
 	}
 
 }

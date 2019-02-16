@@ -7,7 +7,7 @@ import java.io.File;
  * @author shanhms
  *
  */
-public interface UploaderHelper {
+public interface UploadHelper {
 	
 	/**
 	 * 上传文件

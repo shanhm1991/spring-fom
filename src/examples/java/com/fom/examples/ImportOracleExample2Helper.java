@@ -8,7 +8,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.fom.context.helper.LocalZipParserHelper;
+import com.fom.context.helper.ZipParseHelper;
 import com.fom.context.reader.Reader;
 import com.fom.context.reader.TextReader;
 import com.fom.db.handler.JdbcHandler;
@@ -19,7 +19,7 @@ import com.fom.util.PatternUtil;
  * @author shanhm
  *
  */
-public class ImportOracleExample2Helper implements LocalZipParserHelper<Map<String, Object>> {
+public class ImportOracleExample2Helper implements ZipParseHelper<Map<String, Object>> {
 
 	private static final String POOL = "example_oracle";
 

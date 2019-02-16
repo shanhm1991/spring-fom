@@ -7,7 +7,7 @@ import java.util.zip.ZipOutputStream;
  * @author shanhm
  *
  */
-public interface ZipDownloaderHelper extends DownloaderHelper {
+public interface ZipDownloadHelper extends DownloadHelper {
 
 	/**
 	 * 根据sourceUri获取资源名称

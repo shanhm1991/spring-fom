@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.zip.ZipOutputStream;
 
-import com.fom.context.helper.DownloaderHelper;
-import com.fom.context.helper.UploaderHelper;
-import com.fom.context.helper.ZipDownloaderHelper;
+import com.fom.context.helper.DownloadHelper;
+import com.fom.context.helper.UploadHelper;
+import com.fom.context.helper.ZipDownloadHelper;
 import com.fom.util.FtpUtil;
 import com.fom.util.FtpUtil.InputStreamStore;
 import com.fom.util.IoUtil;
@@ -17,7 +17,7 @@ import com.fom.util.ZipUtil;
  * @author shanhm
  *
  */
-public class FtpHelper implements DownloaderHelper, ZipDownloaderHelper, UploaderHelper {
+public class FtpHelper implements DownloadHelper, ZipDownloadHelper, UploadHelper {
 	
 	private String hostname;
 	

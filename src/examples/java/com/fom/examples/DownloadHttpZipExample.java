@@ -8,7 +8,7 @@ import com.fom.context.Context;
 import com.fom.context.Task;
 import com.fom.context.FomContext;
 import com.fom.context.helper.impl.HttpHelper;
-import com.fom.context.task.ZipDownloader;
+import com.fom.context.task.ZipDownloadTask;
 
 /**
  * 
@@ -56,8 +56,7 @@ public class DownloadHttpZipExample extends Context {
 		list.add("http://localhost:4040/fom/images/start.png");
 		list.add("http://localhost:4040/fom/images/stop.png");
 		
-		return new ZipDownloader(list, "httpTest", dest, 
-				10, 1024 * 1024, false, new HttpHelper());
+		return new ZipDownloadTask(list, "httpTest", dest, 10, 1024 * 1024, false, new HttpHelper());
 	}
 
 }

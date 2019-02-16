@@ -16,7 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import com.fom.context.ExceptionHandler;
 import com.fom.context.Task;
 import com.fom.context.ResultHandler;
-import com.fom.context.helper.ZipDownloaderHelper;
+import com.fom.context.helper.ZipDownloadHelper;
 import com.fom.util.IoUtil;
 import com.fom.util.ZipUtil;
 
@@ -46,11 +46,11 @@ import com.fom.util.ZipUtil;
  * @author shanhm
  *
  */
-public class ZipDownloader extends Task {
+public class ZipDownloadTask extends Task {
 
 	private final DecimalFormat numFormat  = new DecimalFormat("#.###");
 
-	private final ZipDownloaderHelper helper;
+	private final ZipDownloadHelper helper;
 
 	private final List<String> uriList;
 
@@ -81,8 +81,8 @@ public class ZipDownloader extends Task {
 	 * @param isDelSrc 下载结束是否删除资源文件
 	 * @param helper ZipDownloaderHelper下载方法实现
 	 */
-	public ZipDownloader(List<String> uriList, String zipName, String destPath, 
-			int zipEntryMax, long zipSizeMax, boolean isDelSrc, ZipDownloaderHelper helper) {
+	public ZipDownloadTask(List<String> uriList, String zipName, String destPath, 
+			int zipEntryMax, long zipSizeMax, boolean isDelSrc, ZipDownloadHelper helper) {
 		super(zipName);
 		if(uriList == null || uriList.isEmpty() || StringUtils.isBlank(zipName) || StringUtils.isBlank(destPath)
 				|| zipEntryMax < 0 || zipSizeMax < 0 || helper == null) {
@@ -106,9 +106,9 @@ public class ZipDownloader extends Task {
 	 * @param helper ZipDownloaderHelper下载方法实现
 	 * @param exceptionHandler ExceptionHandler
 	 */
-	public ZipDownloader(List<String> uriList, String zipName, String destPath, 
+	public ZipDownloadTask(List<String> uriList, String zipName, String destPath, 
 			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
-			ZipDownloaderHelper helper, ExceptionHandler exceptionHandler) {
+			ZipDownloadHelper helper, ExceptionHandler exceptionHandler) {
 		this(uriList, zipName, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
 		this.exceptionHandler = exceptionHandler;
 	}
@@ -123,9 +123,9 @@ public class ZipDownloader extends Task {
 	 * @param helper ZipDownloaderHelper下载方法实现
 	 * @param resultHandler ResultHandler
 	 */
-	public ZipDownloader(List<String> uriList, String zipName, String destPath, 
+	public ZipDownloadTask(List<String> uriList, String zipName, String destPath, 
 			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
-			ZipDownloaderHelper helper, ResultHandler resultHandler) {
+			ZipDownloadHelper helper, ResultHandler resultHandler) {
 		this(uriList, zipName, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
 		this.resultHandler = resultHandler;
 	}
@@ -141,9 +141,9 @@ public class ZipDownloader extends Task {
 	 * @param exceptionHandler ExceptionHandler
 	 * @param resultHandler ResultHandler
 	 */
-	public ZipDownloader(List<String> uriList, String zipName, String destPath, 
+	public ZipDownloadTask(List<String> uriList, String zipName, String destPath, 
 			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
-			ZipDownloaderHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+			ZipDownloadHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
 		this(uriList, zipName, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;

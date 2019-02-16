@@ -9,7 +9,7 @@ import com.fom.context.reader.Reader;
  *
  * @param <V> 行数据解析结果类型
  */
-public interface ParserHelper<V> {
+public interface ParseHelper<V> {
 	
 	/**
 	 * 获取对应文件的reader

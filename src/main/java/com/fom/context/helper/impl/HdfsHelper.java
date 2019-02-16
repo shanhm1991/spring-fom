@@ -6,9 +6,9 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.hadoop.fs.Path;
 
-import com.fom.context.helper.DownloaderHelper;
-import com.fom.context.helper.UploaderHelper;
-import com.fom.context.helper.ZipDownloaderHelper;
+import com.fom.context.helper.DownloadHelper;
+import com.fom.context.helper.UploadHelper;
+import com.fom.context.helper.ZipDownloadHelper;
 import com.fom.util.HdfsUtil;
 import com.fom.util.ZipUtil;
 
@@ -17,7 +17,7 @@ import com.fom.util.ZipUtil;
  * @author shanhm
  *
  */
-public class HdfsHelper implements DownloaderHelper, ZipDownloaderHelper, UploaderHelper {
+public class HdfsHelper implements DownloadHelper, ZipDownloadHelper, UploadHelper {
 	
 	protected final String masterUrl;
 	

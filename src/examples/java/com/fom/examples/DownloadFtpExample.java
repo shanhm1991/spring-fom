@@ -7,9 +7,9 @@ import java.util.List;
 import com.fom.context.Context;
 import com.fom.context.Task;
 import com.fom.context.FomContext;
-import com.fom.context.helper.DownloaderHelper;
+import com.fom.context.helper.DownloadHelper;
 import com.fom.context.helper.impl.FtpHelper;
-import com.fom.context.task.Downloader;
+import com.fom.context.task.DownloadTask;
 
 /**
  * 
@@ -47,9 +47,9 @@ public class DownloadFtpExample extends Context {
 		String passwd = getValue("passwd");
 		String dest = getValue("dest");
 		
-		DownloaderHelper helper = new FtpHelper(hostname, port, user, passwd);
+		DownloadHelper helper = new FtpHelper(hostname, port, user, passwd);
 		String sourceName = new File(sourceUri).getName();
-		return new Downloader(sourceUri, sourceName, dest, false, true, helper);
+		return new DownloadTask(sourceUri, sourceName, dest, false, true, helper);
 	}
 
 }

@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.fom.context.SpringContext;
-import com.fom.context.helper.LocalZipParserHelper;
+import com.fom.context.helper.ZipParseHelper;
 import com.fom.context.reader.Reader;
 import com.fom.context.reader.TextReader;
 import com.fom.examples.bean.ExampleBean;
@@ -19,7 +19,7 @@ import com.fom.util.PatternUtil;
  * @author shanhm
  *
  */
-public class ImportOracleExample1Helper implements LocalZipParserHelper<ExampleBean> {
+public class ImportOracleExample1Helper implements ZipParseHelper<ExampleBean> {
 	
 	private final String pattern;
 	

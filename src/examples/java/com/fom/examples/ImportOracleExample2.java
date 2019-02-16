@@ -7,7 +7,7 @@ import java.util.List;
 import com.fom.context.Context;
 import com.fom.context.ContextUtil;
 import com.fom.context.Task;
-import com.fom.context.task.LocalZipParser;
+import com.fom.context.task.ZipParseTask;
 import com.fom.util.FileUtil;
 import com.fom.util.PatternUtil;
 
@@ -55,9 +55,7 @@ public class ImportOracleExample2 extends Context{
 	@Override
 	protected Task createTask(String sourceUri) throws Exception {
 		String subPettern = getString("zipEntryPattern", "");
-		ImportOracleExample2Helper helper = 
-				new ImportOracleExample2Helper(getName(), subPettern);
-		LocalZipParser localZipParser = new LocalZipParser(sourceUri, batch, helper);
-		return localZipParser;
+		ImportOracleExample2Helper helper = new ImportOracleExample2Helper(getName(), subPettern);
+		return new ZipParseTask(sourceUri, batch, helper);
 	}
 }

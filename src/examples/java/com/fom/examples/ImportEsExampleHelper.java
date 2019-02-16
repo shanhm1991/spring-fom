@@ -8,7 +8,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.fom.context.helper.ParserHelper;
+import com.fom.context.helper.ParseHelper;
 import com.fom.context.reader.Reader;
 import com.fom.context.reader.TextReader;
 import com.fom.db.handler.EsHandler;
@@ -18,7 +18,7 @@ import com.fom.db.handler.EsHandler;
  * @author shanhm
  *
  */
-public class ImportEsExampleHelper implements ParserHelper<Map<String, Object>> {
+public class ImportEsExampleHelper implements ParseHelper<Map<String, Object>> {
 	
 	private static final String POOL = "example_es";
 	

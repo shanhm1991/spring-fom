@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.zip.ZipOutputStream;
 
-import com.fom.context.helper.DownloaderHelper;
-import com.fom.context.helper.UploaderHelper;
-import com.fom.context.helper.ZipDownloaderHelper;
+import com.fom.context.helper.DownloadHelper;
+import com.fom.context.helper.UploadHelper;
+import com.fom.context.helper.ZipDownloadHelper;
 import com.fom.util.HttpUtil;
 import com.fom.util.ZipUtil;
 
@@ -15,7 +15,7 @@ import com.fom.util.ZipUtil;
  * @author shanhm
  *
  */
-public class HttpHelper implements DownloaderHelper, ZipDownloaderHelper, UploaderHelper {
+public class HttpHelper implements DownloadHelper, ZipDownloadHelper, UploadHelper {
 
 	@Override
 	public InputStream open(String url) throws Exception {

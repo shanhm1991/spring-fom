@@ -9,7 +9,7 @@ import com.fom.context.ContextUtil;
 import com.fom.context.Task;
 import com.fom.context.FomContext;
 import com.fom.context.helper.impl.HttpHelper;
-import com.fom.context.task.Uploader;
+import com.fom.context.task.UploadTask;
 
 /**
  * 
@@ -34,7 +34,7 @@ public class UploadHttpExample extends Context {
 		Thread.sleep(15000); 
 		
 		String destUri = "http://localhost:4040/fom/";
-		return new Uploader(sourceUri, destUri, false, new HttpHelper());
+		return new UploadTask(sourceUri, destUri, false, new HttpHelper());
 	}
 
 }

@@ -14,7 +14,7 @@ import com.fom.context.Context;
 import com.fom.context.Task;
 import com.fom.context.FomContext;
 import com.fom.context.helper.impl.HdfsHelper;
-import com.fom.context.task.ZipDownloader;
+import com.fom.context.task.ZipDownloadTask;
 import com.fom.util.HdfsUtil;
 import com.fom.util.PatternUtil;
 
@@ -105,9 +105,7 @@ public class DownloadHdfsZipExample extends Context {
 		String sourceName = new File(sourceUri).getName();
 		DownloadHdfsZipExampleResultHandler handler = 
 				new DownloadHdfsZipExampleResultHandler(name, masterUrl, slaveUrl, srPath,isDelSrc);
-		ZipDownloader zipDownloader = new ZipDownloader(pathList, sourceName, dest, 
-				entryMax, sizeMax, isDelSrc, helper, handler);
-		return zipDownloader;
+		return new ZipDownloadTask(pathList, sourceName, dest, entryMax, sizeMax, isDelSrc, helper, handler);
 	}
 
 }

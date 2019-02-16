@@ -7,7 +7,7 @@ import java.util.List;
 import com.fom.context.Context;
 import com.fom.context.ContextUtil;
 import com.fom.context.Task;
-import com.fom.context.task.Parser;
+import com.fom.context.task.ParseTask;
 import com.fom.util.FileUtil;
 import com.fom.util.PatternUtil;
 
@@ -54,7 +54,6 @@ public class ImportMysqlExample1 extends Context {
 	@Override
 	protected Task createTask(String sourceUri) throws Exception {
 		ImportMysqlExample1Helper helper = new ImportMysqlExample1Helper(getName());
-		Parser parser = new Parser(sourceUri, batch, helper);
-		return parser;
+		return new ParseTask(sourceUri, batch, helper);
 	}
 }

@@ -13,7 +13,7 @@ import org.apache.commons.lang.ArrayUtils;
 import com.fom.context.ExceptionHandler;
 import com.fom.context.Task;
 import com.fom.context.ResultHandler;
-import com.fom.context.helper.LocalZipParserHelper;
+import com.fom.context.helper.ZipParseHelper;
 import com.fom.context.reader.Reader;
 import com.fom.util.IoUtil;
 import com.fom.util.ZipUtil;
@@ -24,12 +24,12 @@ import com.fom.util.ZipUtil;
  * @author shanhm
  *
  */
-public final class LocalZipParser extends Task {
+public final class ZipParseTask extends Task {
 	
 	private int batch;
 	
 	@SuppressWarnings("rawtypes")
-	private LocalZipParserHelper helper;
+	private ZipParseHelper helper;
 	
 	private File logFile;
 	
@@ -45,7 +45,7 @@ public final class LocalZipParser extends Task {
 	 * @param helper LocalZipParserHelper
 	 */
 	@SuppressWarnings("rawtypes")
-	public LocalZipParser(String sourceUri, int batch, LocalZipParserHelper helper) {
+	public ZipParseTask(String sourceUri, int batch, ZipParseHelper helper) {
 		super(sourceUri);
 		this.helper = helper;
 		String sourceName = new File(sourceUri).getName();
@@ -62,8 +62,8 @@ public final class LocalZipParser extends Task {
 	 * @param exceptionHandler ExceptionHandler
 	 */
 	@SuppressWarnings("rawtypes")
-	public LocalZipParser(String sourceUri, int batch, 
-			LocalZipParserHelper helper, ExceptionHandler exceptionHandler) { 
+	public ZipParseTask(String sourceUri, int batch, 
+			ZipParseHelper helper, ExceptionHandler exceptionHandler) { 
 		this(sourceUri, batch, helper);
 		this.exceptionHandler = exceptionHandler;
 	}
@@ -75,8 +75,8 @@ public final class LocalZipParser extends Task {
 	 * @param resultHandler ResultHandler
 	 */
 	@SuppressWarnings("rawtypes")
-	public LocalZipParser(String sourceUri, int batch, 
-			LocalZipParserHelper helper, ResultHandler resultHandler) {
+	public ZipParseTask(String sourceUri, int batch, 
+			ZipParseHelper helper, ResultHandler resultHandler) {
 		this(sourceUri, batch, helper);
 		this.resultHandler = resultHandler;
 	}
@@ -89,8 +89,8 @@ public final class LocalZipParser extends Task {
 	 * @param resultHandler ResultHandler
 	 */
 	@SuppressWarnings("rawtypes")
-	public LocalZipParser(String sourceUri, int batch, 
-			LocalZipParserHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+	public ZipParseTask(String sourceUri, int batch, 
+			ZipParseHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
 		this(sourceUri, batch, helper);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;

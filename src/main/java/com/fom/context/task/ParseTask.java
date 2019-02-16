@@ -11,7 +11,7 @@ import org.apache.commons.io.FileUtils;
 import com.fom.context.ExceptionHandler;
 import com.fom.context.Task;
 import com.fom.context.ResultHandler;
-import com.fom.context.helper.ParserHelper;
+import com.fom.context.helper.ParseHelper;
 import com.fom.context.reader.Reader;
 import com.fom.util.IoUtil;
 
@@ -25,12 +25,12 @@ import com.fom.util.IoUtil;
  * @author shanhm
  *
  */
-public class Parser extends Task {
+public class ParseTask extends Task {
 
 	private int batch;
 	
 	@SuppressWarnings("rawtypes")
-	private ParserHelper helper;
+	private ParseHelper helper;
 
 	private File logFile;
 
@@ -40,7 +40,7 @@ public class Parser extends Task {
 	 * @param helper ParserHelper
 	 */
 	@SuppressWarnings("rawtypes")
-	public Parser(String sourceUri, int batch, ParserHelper helper){
+	public ParseTask(String sourceUri, int batch, ParseHelper helper){
 		super(sourceUri);
 		this.batch = batch;
 		this.helper = helper;
@@ -53,7 +53,7 @@ public class Parser extends Task {
 	 * @param exceptionHandler ExceptionHandler
 	 */
 	@SuppressWarnings("rawtypes")
-	public Parser(String sourceUri, int batch, ParserHelper helper, ExceptionHandler exceptionHandler) {
+	public ParseTask(String sourceUri, int batch, ParseHelper helper, ExceptionHandler exceptionHandler) {
 		this(sourceUri, batch, helper);
 		this.exceptionHandler = exceptionHandler;
 	}
@@ -65,7 +65,7 @@ public class Parser extends Task {
 	 * @param resultHandler ResultHandler
 	 */
 	@SuppressWarnings("rawtypes")
-	public Parser(String sourceUri, int batch, ParserHelper helper, ResultHandler resultHandler) {
+	public ParseTask(String sourceUri, int batch, ParseHelper helper, ResultHandler resultHandler) {
 		this(sourceUri, batch, helper);
 		this.resultHandler = resultHandler;
 	}
@@ -78,8 +78,8 @@ public class Parser extends Task {
 	 * @param resultHandler ResultHandler
 	 */
 	@SuppressWarnings("rawtypes")
-	public Parser(String sourceUri, int batch, 
-			ParserHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+	public ParseTask(String sourceUri, int batch, 
+			ParseHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
 		this(sourceUri, batch, helper);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;

@@ -2,10 +2,10 @@ package com.fom.examples;
 
 import java.io.File;
 
-import com.fom.context.task.Parser;
+import com.fom.context.task.ParseTask;
 import com.fom.db.handler.EsHandler;
 
-public class ImportEsExampleParser extends Parser {
+public class ImportEsExampleParser extends ParseTask {
 	
 	private static final String POOL = "example_es";
 	

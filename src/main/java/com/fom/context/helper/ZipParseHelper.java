@@ -6,7 +6,7 @@ package com.fom.context.helper;
  *
  * @param <V> 行数据解析结果类型
  */
-public interface LocalZipParserHelper<V> extends ParserHelper<V> {
+public interface ZipParseHelper<V> extends ParseHelper<V> {
 
 	/**
 	 * 匹配zip的entry名称

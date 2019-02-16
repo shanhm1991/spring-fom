@@ -73,8 +73,6 @@ public class ImportEsExample extends Context {
 	@Override
 	protected Task createTask(String sourceUri) throws Exception {
 		ImportEsExampleHelper helper = new ImportEsExampleHelper(getName(), esIndex, esType); 
-		ImportEsExampleParser executor = 
-				new ImportEsExampleParser(sourceUri, batch, helper, esIndex, esType,  esJson);
-		return executor;
+		return new ImportEsExampleParser(sourceUri, batch, helper, esIndex, esType,  esJson);
 	}
 }

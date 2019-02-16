@@ -8,7 +8,7 @@ import java.io.InputStream;
  * @author shanhm
  *
  */
-public interface DownloaderHelper {  
+public interface DownloadHelper {  
 	
 	/**
 	 * 根据sourceUri打开文件输入流

@@ -8,7 +8,7 @@ import com.fom.context.Context;
 import com.fom.context.Task;
 import com.fom.context.FomContext;
 import com.fom.context.helper.impl.HttpHelper;
-import com.fom.context.task.Downloader;
+import com.fom.context.task.DownloadTask;
 
 /**
  * 
@@ -37,7 +37,7 @@ public class DownloadHttpExample extends Context {
 	@Override
 	protected Task createTask(String sourceUri) throws Exception {
 		String destName = new File(sourceUri).getName();
-		return new Downloader(sourceUri, destName, dest, false, true, new HttpHelper());
+		return new DownloadTask(sourceUri, destName, dest, false, true, new HttpHelper());
 	}
 
 }

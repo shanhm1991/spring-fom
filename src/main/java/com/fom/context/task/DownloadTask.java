@@ -8,7 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import com.fom.context.ExceptionHandler;
 import com.fom.context.Task;
 import com.fom.context.ResultHandler;
-import com.fom.context.helper.DownloaderHelper;
+import com.fom.context.helper.DownloadHelper;
 
 /**
  * 根据sourceUri下载单个文件的任务实现，以sourceUri作为task的id
@@ -23,7 +23,7 @@ import com.fom.context.helper.DownloaderHelper;
  * @author shanhm
  *
  */
-public final class Downloader extends Task {
+public final class DownloadTask extends Task {
 
 	private final String destName;
 
@@ -33,7 +33,7 @@ public final class Downloader extends Task {
 
 	private final boolean isWithTemp;
 
-	private final DownloaderHelper helper;
+	private final DownloadHelper helper;
 
 	private String downloadPath;
 
@@ -47,8 +47,8 @@ public final class Downloader extends Task {
 	 * @param isWithTemp 是否先下载到临时目录
 	 * @param helper DownloaderHelper下载方法实现
 	 */
-	public Downloader(String sourceUri, String destName, String destPath, 
-			boolean isDelSrc, boolean isWithTemp, DownloaderHelper helper) {
+	public DownloadTask(String sourceUri, String destName, String destPath, 
+			boolean isDelSrc, boolean isWithTemp, DownloadHelper helper) {
 		super(sourceUri);
 		if(StringUtils.isBlank(sourceUri) || StringUtils.isBlank(destName) || StringUtils.isBlank(destPath) || helper == null) {
 			throw new IllegalArgumentException(); 
@@ -69,8 +69,8 @@ public final class Downloader extends Task {
 	 * @param helper DownloaderHelper下载方法实现
 	 * @param exceptionHandler 异常处理器
 	 */
-	public Downloader(String sourceUri, String destName, String destPath, 
-			boolean isDelSrc, boolean isWithTemp, DownloaderHelper helper, ExceptionHandler exceptionHandler) {
+	public DownloadTask(String sourceUri, String destName, String destPath, 
+			boolean isDelSrc, boolean isWithTemp, DownloadHelper helper, ExceptionHandler exceptionHandler) {
 		this(sourceUri, destName, destPath, isDelSrc, isWithTemp, helper);
 		this.exceptionHandler = exceptionHandler;
 	}
@@ -84,8 +84,8 @@ public final class Downloader extends Task {
 	 * @param helper DownloaderHelper下载方法实现
 	 * @param resultHandler 结果处理器
 	 */
-	public Downloader(String sourceUri, String destName, String destPath, 
-			boolean isDelSrc, boolean isWithTemp, DownloaderHelper helper, ResultHandler resultHandler) {
+	public DownloadTask(String sourceUri, String destName, String destPath, 
+			boolean isDelSrc, boolean isWithTemp, DownloadHelper helper, ResultHandler resultHandler) {
 		this(sourceUri, destName, destPath, isDelSrc, isWithTemp, helper);
 		this.resultHandler = resultHandler;
 	}
@@ -100,8 +100,8 @@ public final class Downloader extends Task {
 	 * @param exceptionHandler 异常处理器
 	 * @param resultHandler 结果处理器
 	 */
-	public Downloader(String sourceUri, String destName, String destPath, 
-			boolean isDelSrc, boolean isWithTemp, DownloaderHelper helper, 
+	public DownloadTask(String sourceUri, String destName, String destPath, 
+			boolean isDelSrc, boolean isWithTemp, DownloadHelper helper, 
 			ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
 		this(sourceUri, destName, destPath, isDelSrc, isWithTemp, helper);
 		this.exceptionHandler = exceptionHandler;
