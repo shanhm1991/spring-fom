@@ -43,7 +43,7 @@ public class FomServiceImpl implements FomService {
 			cmap.putAll(context.valueMap); 
 			
 			cmap.put("name", context.name);
-			cmap.put("state", context.stateName());
+			cmap.put("state", context.getState().name());
 			if(!cmap.containsKey(Constants.CRON)){
 				cmap.put(Constants.CRON, ""); 
 			}
@@ -184,7 +184,7 @@ public class FomServiceImpl implements FomService {
 			return map;
 		}
 		map.put("result", true);
-		map.put("state", context.stateName());
+		map.put("state", context.getState().name());
 		return map;
 	}
 

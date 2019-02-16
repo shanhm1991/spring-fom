@@ -16,7 +16,11 @@ import com.fom.context.reader.Reader;
 import com.fom.util.IoUtil;
 
 /**
- * 根据sourceUri解析处理文本文件的执行器
+ * 根据sourceUri解析单个文件的任务实现
+ * <br>
+ * <br>解析策略：
+ * <br>1.检查缓存目录是否存在，没有则创建
+ * <br>2.
  * 
  * @author shanhm
  *
@@ -146,21 +150,32 @@ public class Parser extends Task {
 				if(lineIndex <= StartLine){
 					continue;
 				}
-				if(batch > 0 && lineDatas.size() >= batch){
+				if(batch > 0 && lineDatas.size() >= batch && notInterruped()){
+					int size = lineDatas.size();
 					helper.batchProcessLineData(lineDatas, batchTime); 
+					log.info("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 					logProcess(id, lineIndex);
 					lineDatas.clear();
 					batchTime = System.currentTimeMillis();
 				}
 				helper.praseLineData(lineDatas, line, batchTime);
 			}
-			if(!lineDatas.isEmpty()){
+			if(!lineDatas.isEmpty() && notInterruped()){
+				int size = lineDatas.size();
 				helper.batchProcessLineData(lineDatas, batchTime); 
+				log.info("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 			}
 			logProcess(id, lineIndex);
 		}finally{
 			IoUtil.close(reader);
 		}
+	}
+	
+	private boolean notInterruped() throws InterruptedException{
+		if(Thread.interrupted()){
+			throw new InterruptedException("interrupted when batchProcessLineData");
+		}
+		return true;
 	}
 
 	private void logProcess(String uri, int lineIndex) throws IOException{ 

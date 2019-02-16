@@ -297,21 +297,32 @@ public final class LocalZipParser extends Task {
 				if(lineIndex <= StartLine){
 					continue;
 				}
-				if(batch > 0 && lineDatas.size() >= batch){
+				if(batch > 0 && lineDatas.size() >= batch && notInterruped()){
+					int size = lineDatas.size();
 					helper.batchProcessLineData(lineDatas, batchTime); 
+					log.info("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 					logProcess(uri, lineIndex);
 					lineDatas.clear();
 					batchTime = System.currentTimeMillis();
 				}
 				helper.praseLineData(lineDatas, line, batchTime);
 			}
-			if(!lineDatas.isEmpty()){
+			if(!lineDatas.isEmpty() && notInterruped()){
+				int size = lineDatas.size();
 				helper.batchProcessLineData(lineDatas, batchTime); 
+				log.info("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 			}
 			logProcess(uri, lineIndex);
 		}finally{
 			IoUtil.close(reader);
 		}
+	}
+	
+	private boolean notInterruped() throws InterruptedException{
+		if(Thread.interrupted()){
+			throw new InterruptedException("interrupted when batchProcessLineData");
+		}
+		return true;
 	}
 
 	private void logProcess(String uri, int lineIndex) throws IOException{ 

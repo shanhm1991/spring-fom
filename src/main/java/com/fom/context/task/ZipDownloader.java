@@ -279,7 +279,7 @@ public class ZipDownloader extends Task {
 			return true;
 		}
 
-		if(isDelSrc){  //TODO
+		if(isDelSrc){ 
 			for(String entryName : currentDownloadFiles){
 				for(String uri : uriList){ 
 					String uriName = helper.getSourceName(uri); 

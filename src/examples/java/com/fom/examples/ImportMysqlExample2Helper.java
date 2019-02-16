@@ -6,8 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
-import com.fom.context.helper.AbstractParserHelper;
+import com.fom.context.helper.ParserHelper;
 import com.fom.context.reader.Reader;
 import com.fom.context.reader.TextReader;
 import com.fom.db.handler.JdbcHandler;
@@ -17,16 +18,18 @@ import com.fom.db.handler.JdbcHandler;
  * @author shanhm
  *
  */
-public class ImportMysqlExample2Helper extends AbstractParserHelper<Map<String, Object>> {
+public class ImportMysqlExample2Helper implements ParserHelper<Map<String, Object>> {
 
 	private static final String POOL = "example_mysql";
 
 	private static final String SQL = 
 			"insert into demo(id,name,source,filetype,importway) "
 					+ "values (#id#,#name#,#source#,#fileType#,#importWay#)";
+	
+	private final Logger log;
 
 	public ImportMysqlExample2Helper(String name) {
-		super(name);
+		log = Logger.getLogger(name);
 	}
 
 	@Override
@@ -51,9 +54,10 @@ public class ImportMysqlExample2Helper extends AbstractParserHelper<Map<String, 
 	}
 	
 	@Override
-	public void batchProcessIfNotInterrupted(List<Map<String, Object>> lineDatas, long batchTime) throws Exception {
+	public void batchProcessLineData(List<Map<String, Object>> lineDatas, long batchTime) throws Exception {
 		JdbcHandler.handler.batchExecute(POOL, SQL, lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());
+		
 	}
 
 	@Override
@@ -65,5 +69,4 @@ public class ImportMysqlExample2Helper extends AbstractParserHelper<Map<String, 
 	public long getSourceSize(String sourceUri) {
 		return new File(sourceUri).length();
 	}
-
 }

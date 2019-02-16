@@ -464,25 +464,12 @@ public abstract class Context implements Serializable {
 	 * 获取context状态
 	 * @return state
 	 */
-	public final int state(){
+	public final State getState(){
 		synchronized (name.intern()) {
 			if(state == stopping && pool.getActiveCount() == 0){
 				state = stopped;
 			}
-			return state.value();
-		}
-	}
-
-	/**
-	 * 获取context状态
-	 * @return state
-	 */
-	public final String stateName(){
-		synchronized (name.intern()) {
-			if(state == stopping && pool.getActiveCount() == 0){
-				state = stopped;
-			}
-			return state.name();
+			return state;
 		}
 	}
 

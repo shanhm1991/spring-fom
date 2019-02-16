@@ -11,6 +11,13 @@ import com.fom.context.ResultHandler;
 import com.fom.context.helper.UploaderHelper;
 
 /**
+ * 根据文件路径上传本地单个文件的任务实现，以文件路径作为task的id
+ * <br>
+ * <br>上传策略：
+ * <br>1.判断本地文件是否存在，存在则进行下一步，否则任务失败
+ * <br>2.上传文件
+ * <br>3.决定是否删除源文件
+ * <br>上述任何步骤失败或异常均会使任务提前失败结束
  * 
  * @author shanhm
  *

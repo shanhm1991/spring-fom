@@ -4,9 +4,10 @@ import java.io.File;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
 import com.fom.context.SpringContext;
-import com.fom.context.helper.AbstractParserHelper;
+import com.fom.context.helper.ParserHelper;
 import com.fom.context.reader.Reader;
 import com.fom.context.reader.TextReader;
 import com.fom.examples.bean.ExampleBean;
@@ -17,10 +18,12 @@ import com.fom.examples.dao.ExamplesDao;
  * @author shanhm
  *
  */
-public class ImportMysqlExample1Helper extends AbstractParserHelper<ExampleBean> {
+public class ImportMysqlExample1Helper implements ParserHelper<ExampleBean> {
+	
+	private final Logger log;
 
 	public ImportMysqlExample1Helper(String name) {
-		super(name);
+		log = Logger.getLogger(name);
 	}
 
 	@Override
@@ -40,9 +43,9 @@ public class ImportMysqlExample1Helper extends AbstractParserHelper<ExampleBean>
 		bean.setImportWay("mybatis");
 		lineDatas.add(bean); 
 	}
-
+	
 	@Override
-	public void batchProcessIfNotInterrupted(List<ExampleBean> lineDatas, long batchTime) throws Exception {
+	public void batchProcessLineData(List<ExampleBean> lineDatas, long batchTime) throws Exception {
 		ExamplesDao demoDao = SpringContext.getBean("mysqlExampleDao", ExamplesDao.class);
 		demoDao.batchInsert(lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());

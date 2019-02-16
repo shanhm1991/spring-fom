@@ -6,8 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
-import com.fom.context.helper.AbstractParserHelper;
+import com.fom.context.helper.ParserHelper;
 import com.fom.context.reader.Reader;
 import com.fom.context.reader.TextReader;
 import com.fom.db.handler.EsHandler;
@@ -17,16 +18,18 @@ import com.fom.db.handler.EsHandler;
  * @author shanhm
  *
  */
-public class ImportEsExampleHelper extends AbstractParserHelper<Map<String, Object>> {
+public class ImportEsExampleHelper implements ParserHelper<Map<String, Object>> {
 	
 	private static final String POOL = "example_es";
 	
 	private final String esIndex;
 	
 	private final String esType;
+	
+	private final Logger log;
 
 	public ImportEsExampleHelper(String name, String esIndex, String esType) {
-		super(name);
+		log = Logger.getLogger(name);
 		this.esIndex = esIndex;
 		this.esType = esType;
 	}
@@ -53,7 +56,7 @@ public class ImportEsExampleHelper extends AbstractParserHelper<Map<String, Obje
 	}
 	
 	@Override
-	public void batchProcessIfNotInterrupted(List<Map<String, Object>> lineDatas, long batchTime) throws Exception {
+	public void batchProcessLineData(List<Map<String, Object>> lineDatas, long batchTime) throws Exception {
 		Map<String,Map<String,Object>> map = new HashMap<>();
 		for(Map<String, Object> m : lineDatas){
 			map.put(String.valueOf(m.get("ID")), m);

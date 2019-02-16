@@ -2,10 +2,12 @@ package com.fom.context;
 
 /**
  * 
- * @author shanhm1991
+ * context状态表
+ * 
+ * @author shanhm
  *
  */
-enum State {
+public enum State {
 	
 	/**
 	 * 初始化
