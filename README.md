@@ -4,7 +4,8 @@
 > 遂决定私下写这样一个工具，希望能将这样的需求开发做到效率和质量兼顾，尽量做到简单好用，同时方便扩展。
 > 一开始初衷是为了解决各种文件操作的需求，后来发现其他的需求也可以满足，本质上其实是一个生产消费模式。
 
-##打包：mvn clean package -Dmaven.test.skip=true
+##打包：
+> mvn clean package -Dmaven.test.skip=true
 
 ##使用说明
 1. 启动参数

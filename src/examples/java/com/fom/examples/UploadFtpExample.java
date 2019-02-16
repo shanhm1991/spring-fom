@@ -44,6 +44,8 @@ public class UploadFtpExample extends Context {
 
 	@Override
 	protected Executor createExecutor(String sourceUri) throws Exception {
+		Thread.sleep(5000); 
+		
 		UploaderHelper helper = new FtpHelper(hostname, port, user, passwd);
 		String destUri = "http://localhost:4040/fom/";
 		return new Uploader(sourceUri, destUri, false, helper);

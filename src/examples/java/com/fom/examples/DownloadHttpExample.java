@@ -37,7 +37,7 @@ public class DownloadHttpExample extends Context {
 	@Override
 	protected Executor createExecutor(String sourceUri) throws Exception {
 		String destName = new File(sourceUri).getName();
-		return new Downloader(destName, sourceUri, dest, false, true, new HttpHelper());
+		return new Downloader(sourceUri, destName, dest, false, true, new HttpHelper());
 	}
 
 }

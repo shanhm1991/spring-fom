@@ -82,10 +82,10 @@ public class Parser extends Executor {
 	}
 	
 	@Override
-	protected boolean onStart() throws Exception { 
-		String logName = new File(sourceUri).getName();
+	protected boolean beforeExec() throws Exception { 
+		String logName = new File(source).getName();
 		this.logFile = new File(System.getProperty("cache.parse") 
-				+ File.separator + name + File.separator + logName + ".log");
+				+ File.separator + contextName + File.separator + logName + ".log");
 		File parentFile = logFile.getParentFile();
 		if(!parentFile.exists() && !parentFile.mkdirs()){
 			log.error("directory create failed: " + parentFile);
@@ -114,14 +114,14 @@ public class Parser extends Executor {
 			}
 		}
 		read(lineIndex);
-		String size = new DecimalFormat("#.###").format(helper.getSourceSize(sourceUri));
+		String size = new DecimalFormat("#.###").format(helper.getSourceSize(source));
 		log.info("finish file(" + size + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
 		return true;
 	}
 	
 	@Override
-	protected boolean onComplete() throws Exception {
-		if(!helper.delete(sourceUri)){ 
+	protected boolean afterExec() throws Exception {
+		if(!helper.delete(source)){ 
 			log.error("delete src file failed.");
 			return false;
 		}
@@ -138,7 +138,7 @@ public class Parser extends Executor {
 		String line = "";
 		Reader reader = null;
 		try{
-			reader = helper.getReader(sourceUri);
+			reader = helper.getReader(source);
 			List lineDatas = new LinkedList<>(); 
 			long batchTime = System.currentTimeMillis();
 			while ((line = reader.readLine()) != null) {
@@ -148,7 +148,7 @@ public class Parser extends Executor {
 				}
 				if(batch > 0 && lineDatas.size() >= batch){
 					helper.batchProcessLineData(lineDatas, batchTime); 
-					logProcess(sourceUri, lineIndex);
+					logProcess(source, lineIndex);
 					lineDatas.clear();
 					batchTime = System.currentTimeMillis();
 				}
@@ -157,7 +157,7 @@ public class Parser extends Executor {
 			if(!lineDatas.isEmpty()){
 				helper.batchProcessLineData(lineDatas, batchTime); 
 			}
-			logProcess(sourceUri, lineIndex);
+			logProcess(source, lineIndex);
 		}finally{
 			IoUtil.close(reader);
 		}

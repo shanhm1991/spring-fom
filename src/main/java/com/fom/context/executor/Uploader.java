@@ -84,7 +84,7 @@ public class Uploader extends Executor {
 	}
 	
 	@Override
-	protected boolean onStart() throws Exception {
+	protected boolean beforeExec() throws Exception {
 		if(!file.exists()){
 			log.warn("file not exist.");
 			return false;
@@ -106,7 +106,7 @@ public class Uploader extends Executor {
 	}
 	
 	@Override
-	protected boolean onComplete() throws Exception {
+	protected boolean afterExec() throws Exception {
 		if(isDelSrc && !file.delete()){
 			log.warn("delete file failed.");
 			return false;

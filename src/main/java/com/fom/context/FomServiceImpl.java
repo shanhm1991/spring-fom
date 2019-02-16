@@ -43,9 +43,9 @@ public class FomServiceImpl implements FomService {
 			cmap.putAll(context.valueMap); 
 			
 			cmap.put("name", context.name);
-			cmap.put("state", context.stateString());
-			if(!cmap.containsKey(Context.CRON)){
-				cmap.put(Context.CRON, ""); 
+			cmap.put("state", context.stateName());
+			if(!cmap.containsKey(Constants.CRON)){
+				cmap.put(Constants.CRON, ""); 
 			}
 			cmap.put("loadTime", format.format(context.loadTime));
 			cmap.put("execTime", format.format(context.execTime));
@@ -79,19 +79,19 @@ public class FomServiceImpl implements FomService {
 			String key = entry.getKey();
 			String value = String.valueOf(entry.getValue());
 			switch(key){
-			case Context.QUEUESIZE:
+			case Constants.QUEUESIZE:
 				context.setQueueSize(Integer.parseInt(value)); break;
-			case Context.THREADCORE:
+			case Constants.THREADCORE:
 				context.setThreadCore(Integer.parseInt(value)); break;
-			case Context.THREADMAX:
+			case Constants.THREADMAX:
 				context.setThreadMax(Integer.parseInt(value)); break;
-			case Context.ALIVETIME:
+			case Constants.ALIVETIME:
 				context.setAliveTime(Integer.parseInt(value)); break;
-			case Context.OVERTIME:
+			case Constants.OVERTIME:
 				context.setOverTime(Integer.parseInt(value)); break;
-			case Context.CANCELLABLE:
+			case Constants.CANCELLABLE:
 				context.setCancellable(Boolean.parseBoolean(value)); break;
-			case Context.CRON:
+			case Constants.CRON:
 				context.setCron(value); break;
 			default:
 				context.setValue(key, value);
@@ -139,7 +139,7 @@ public class FomServiceImpl implements FomService {
 	}
 
 	@Override
-	public Map<String,Object> start(String name) throws Exception {
+	public Map<String,Object> startup(String name) throws Exception {
 		Map<String,Object> map = new HashMap<>();
 		Context context = ContextManager.contextMap.get(name);
 		if(context == null){
@@ -147,11 +147,11 @@ public class FomServiceImpl implements FomService {
 			map.put("msg", "context[" + name + "] not exist.");
 			return map;
 		}
-		return context.start();
+		return context.startup();
 	}
 
 	@Override
-	public Map<String,Object> stop(String name){
+	public Map<String,Object> shutDown(String name){
 		Map<String,Object> map = new HashMap<>();
 		Context context = ContextManager.contextMap.get(name);
 		if(context == null){
@@ -159,11 +159,11 @@ public class FomServiceImpl implements FomService {
 			map.put("msg", "context[" + name + "] not exist.");
 			return map;
 		}
-		return context.stop();
+		return context.shutDown();
 	}
 
 	@Override
-	public Map<String, Object> interrupt(String name) throws Exception {
+	public Map<String, Object> execNow(String name) throws Exception {
 		Map<String,Object> map = new HashMap<>();
 		Context context = ContextManager.contextMap.get(name);
 		if(context == null){
@@ -171,7 +171,7 @@ public class FomServiceImpl implements FomService {
 			map.put("msg", "context[" + name + "] not exist.");
 			return map;
 		}
-		return context.interrupt();
+		return context.execNow();
 	}
 
 	@Override
@@ -184,7 +184,7 @@ public class FomServiceImpl implements FomService {
 			return map;
 		}
 		map.put("result", true);
-		map.put("state", context.stateString());
+		map.put("state", context.stateName());
 		return map;
 	}
 
@@ -243,7 +243,7 @@ public class FomServiceImpl implements FomService {
 			Constructor constructor = contextClass.getConstructor(String.class);
 			context = (Context)constructor.newInstance(name);
 		}
-		context.start();
+		context.startup();
 		resMap.put("result", true);
 		resMap.put("msg", name + " created.");
 		return resMap;

@@ -31,6 +31,8 @@ public class UploadHttpExample extends Context {
 
 	@Override
 	protected Executor createExecutor(String sourceUri) throws Exception {
+		Thread.sleep(15000); 
+		
 		String destUri = "http://localhost:4040/fom/";
 		return new Uploader(sourceUri, destUri, false, new HttpHelper());
 	}

@@ -40,6 +40,6 @@ public class ContextTest extends Context {
 	}
 
 	public static void main(String[] args) {
-		new ContextTest().start();
+		new ContextTest().startup();
 	}
 }

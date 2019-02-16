@@ -44,9 +44,9 @@ public class FomController {
 	@ResponseBody
 	public Map<String,Object> operation(String name, int opid) throws Exception{ 
 		switch(opid){
-		case 1: return service.start(name);
-		case 2: return service.stop(name);
-		case 3: return service.interrupt(name);
+		case 1: return service.startup(name);
+		case 2: return service.shutDown(name);
+		case 3: return service.execNow(name);
 		default : 
 			Map<String,Object> map = new HashMap<>();
 			map.put("result", false);

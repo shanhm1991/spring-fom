@@ -37,6 +37,8 @@ public class DownloadFtpZipExample extends Context {
 
 	@Override
 	protected List<String> getUriList() throws Exception {
+		Thread.sleep(10000); 
+		
 		List<String> list = new ArrayList<String>();
 		list.add("ftpTest");
 		return list;

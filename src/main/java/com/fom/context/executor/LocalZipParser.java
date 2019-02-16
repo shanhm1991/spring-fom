@@ -50,9 +50,9 @@ public final class LocalZipParser extends Executor {
 		this.helper = helper;
 		String sourceName = new File(sourceUri).getName();
 		this.unzipDir = new File(System.getProperty("cache.parse")
-				+ File.separator + name + File.separator + sourceName);
+				+ File.separator + contextName + File.separator + sourceName);
 		this.logFile = new File(System.getProperty("cache.parse") 
-				+ File.separator + name + File.separator + sourceName + ".log");
+				+ File.separator + contextName + File.separator + sourceName + ".log");
 	}
 	
 	/**
@@ -97,10 +97,10 @@ public final class LocalZipParser extends Executor {
 	}
 	
 	@Override
-	protected boolean onStart() throws Exception {
-		if(!ZipUtil.valid(sourceUri)){ 
+	protected boolean beforeExec() throws Exception {
+		if(!ZipUtil.valid(source)){ 
 			log.error("zip invalid."); 
-			if(!new File(sourceUri).delete()){
+			if(!new File(source).delete()){
 				log.error("zip delete failed."); 
 			}
 			return false;
@@ -167,8 +167,8 @@ public final class LocalZipParser extends Executor {
 				}
 			}
 
-			long cost = ZipUtil.unZip(sourceUri, unzipDir);
-			String size = numFormat.format(helper.getSourceSize(sourceUri));
+			long cost = ZipUtil.unZip(source, unzipDir);
+			String size = numFormat.format(helper.getSourceSize(source));
 			log.info("finish unzip(" + size + "KB), cost=" + cost + "ms");
 
 			String[] nameArray = unzipDir.list();
@@ -192,7 +192,7 @@ public final class LocalZipParser extends Executor {
 	}
 	
 	@Override
-	protected boolean onComplete() throws Exception {
+	protected boolean afterExec() throws Exception {
 		if(unzipDir.exists()){ 
 			File[] fileArray = unzipDir.listFiles();
 			if(!ArrayUtils.isEmpty(fileArray)){
@@ -209,7 +209,7 @@ public final class LocalZipParser extends Executor {
 			}
 		}
 		//srcFile.exist = true
-		if(!helper.delete(sourceUri)){ 
+		if(!helper.delete(source)){ 
 			log.warn("clear src file failed."); 
 			return false;
 		}

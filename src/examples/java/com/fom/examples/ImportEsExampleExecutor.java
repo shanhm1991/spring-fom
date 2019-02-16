@@ -24,8 +24,8 @@ public class ImportEsExampleExecutor extends Parser {
 	}
 
 	@Override
-	protected boolean onStart() throws Exception {
-		super.onStart();
+	protected boolean beforeExec() throws Exception {
+		super.beforeExec();
 		if(EsHandler.handler.synCreateIndex(POOL, esIndex, esType, esJson)){
 			log.info("创建ES索引[index=" + "demo" + ", type=" + "demo" + "]");
 		}

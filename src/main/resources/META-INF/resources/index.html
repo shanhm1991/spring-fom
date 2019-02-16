@@ -94,7 +94,7 @@ img {
 							<th>last execute time</th>
 							<th>cron expression</th>
 							<th>task completed</th>
-							<th>task waiting</th>
+							<th>task in queue</th>
 							<th>task active</th>
 							<th>state</th>
 							<th>log level</th>
@@ -153,7 +153,7 @@ img {
 													},
 													{
 														"data" : null,
-														"defaultContent" : "<i class='layui-icon layui-icon-play boxbtn' title='start' onclick='operation(this, 1)'/></i>"
+														"defaultContent" : "<i class='layui-icon layui-icon-play boxbtn' title='startup' onclick='operation(this, 1)'/></i>"
 																+ "<i class='layui-icon layui-icon-pause boxbtn' title='shutdown' onclick='operation(this, 2)'/></i>"
 																+ "<i class='layui-icon layui-icon-refresh boxbtn' title='execute immediately' onclick='operation(this, 3)'/></i>",
 														"orderable" : false
@@ -205,12 +205,16 @@ img {
 												var img;
 												if(state == "running"){
 													img = "<img src='images/running.png' title='running'>"
+												}else if(state == "waiting"){
+													img = "<img src='images/waiting.png' title='waiting for task completion'>"
+												}else if(state == "sleeping"){
+													img = "<img src='images/sleeping.png' title='sleeping'>"
 												}else if(state == "stopping"){
 													img = "<img src='images/stopping.png' title='stopping'>"
-												}else if(state == "waiting"){
-													img = "<img src='images/waiting.png' title='schedule waiting'>"
-												}else{
+												}else if(state == "stopped"){
 													img = "<img src='images/stopped.png' title='stopped'>"
+												}else{
+													img = "<img src='images/unknown.png' title='unknown'>"
 												}
 												$('td', row).eq(8).html(img);
 												
@@ -295,7 +299,21 @@ img {
 										"name" : name
 									},
 									success : function(data) {
-										Tr.find('td').eq(2).html(data.state);
+										var img;
+										if(data.state == "running"){
+											img = "<img src='images/running.png' title='running'>"
+										}else if(data.state == "waiting"){
+											img = "<img src='images/waiting.png' title='waiting for task completion'>"
+										}else if(data.state == "sleeping"){
+											img = "<img src='images/sleeping.png' title='sleeping'>"
+										}else if(data.state == "stopping"){
+											img = "<img src='images/stopping.png' title='stopping'>"
+										}else if(data.state == "stopped"){
+											img = "<img src='images/stopped.png' title='stopped'>"
+										}else{
+											img = "<img src='images/unknown.png' title='unknown'>"
+										}
+										Tr.find('td').eq(8).html(img);
 									}
 								});
 							});
@@ -485,7 +503,7 @@ img {
 					  title: 'dump threads[' + data.size + ']',
 					  type : 1,
 					  skin : 'layui-layer-demo',
-					  area : [ '1200px' ],
+					  area : [ '1200px', '600px' ],
 					  maxmin: true,
 					  closeBtn : 2,
 					  anim : 2,

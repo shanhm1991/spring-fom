@@ -39,7 +39,7 @@ public class ContextManager {
 	static void startAll(){
 		for(Entry<String, Context> entry : contextMap.entrySet()){
 			LOG.info("start context[" + entry.getKey() + "]");
-			entry.getValue().start();
+			entry.getValue().startup();
 		}
 
 	}

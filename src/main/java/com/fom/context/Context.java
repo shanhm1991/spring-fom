@@ -1,5 +1,12 @@
 package com.fom.context;
 
+import static com.fom.context.State.inited;
+import static com.fom.context.State.running;
+import static com.fom.context.State.sleeping;
+import static com.fom.context.State.stopped;
+import static com.fom.context.State.stopping;
+import static com.fom.context.State.waiting;
+
 import java.io.Serializable;
 import java.text.ParseException;
 import java.util.Collection;
@@ -27,6 +34,7 @@ import com.fom.log.LoggerFactory;
 import com.fom.util.XmlUtil;
 
 /**
+ * 模块最小单位，相当于一个组织者的角色，负责创建和组织任务执行者的运行
  * 
  * @author shanhm
  *
@@ -37,22 +45,6 @@ public abstract class Context implements Serializable {
 
 	//所有的Context共用，防止两个Context创建针对同一个文件的任务
 	private static final Map<String,TimedFuture<Result>> FUTUREMAP = new ConcurrentHashMap<>(500);
-
-	static final String CRON = "cron";
-
-	static final String REMARK = "remark";
-
-	static final String QUEUESIZE = "queueSize";
-
-	static final String THREADCORE = "threadCore";
-
-	static final String THREADMAX = "threadMax";
-
-	static final String ALIVETIME = "threadAliveTime";
-
-	static final String OVERTIME = "threadOverTime";
-
-	static final String CANCELLABLE = "cancellable";
 
 	protected final String name;
 
@@ -109,24 +101,24 @@ public abstract class Context implements Serializable {
 			for(Element e : list){
 				valueMap.put(e.getName(), e.getTextTrim());
 			}
-			setThreadCore(XmlUtil.getInt(element, THREADCORE, 4, 1, 10));
-			setThreadMax(XmlUtil.getInt(element, THREADMAX, 20, 10, 100));
-			setAliveTime(XmlUtil.getInt(element, ALIVETIME, 30, 5, 300));
-			setOverTime(XmlUtil.getInt(element, OVERTIME, 3600, 60, 86400));
-			setQueueSize(XmlUtil.getInt(element, QUEUESIZE, 200, 1, 10000000));
-			setCancellable(XmlUtil.getBoolean(element, CANCELLABLE, false));
-			setCron(XmlUtil.getString(element, CRON, ""));
-			setRemark(XmlUtil.getString(element, REMARK, ""));
+			setThreadCore(XmlUtil.getInt(element, Constants.THREADCORE, 4, 1, 10));
+			setThreadMax(XmlUtil.getInt(element, Constants.THREADMAX, 20, 10, 100));
+			setAliveTime(XmlUtil.getInt(element, Constants.ALIVETIME, 30, 5, 300));
+			setOverTime(XmlUtil.getInt(element, Constants.OVERTIME, 3600, 60, 86400));
+			setQueueSize(XmlUtil.getInt(element, Constants.QUEUESIZE, 200, 1, 10000000));
+			setCancellable(XmlUtil.getBoolean(element, Constants.CANCELLABLE, false));
+			setCron(XmlUtil.getString(element, Constants.CRON, ""));
+			setRemark(XmlUtil.getString(element, Constants.REMARK, ""));
 		}else if(cMap != null){
 			valueMap.putAll(cMap);
-			setThreadCore(getInt(cMap, THREADCORE));
-			setThreadMax(getInt(cMap, THREADMAX));
-			setAliveTime(getInt(cMap, ALIVETIME));
-			setOverTime(getInt(cMap, OVERTIME));
-			setQueueSize(getInt(cMap, QUEUESIZE));
-			setCancellable(getBoolean(cMap, CANCELLABLE));
-			setCron(cMap.get(CRON)); 
-			setRemark(cMap.get(REMARK));
+			setThreadCore(getInt(cMap, Constants.THREADCORE));
+			setThreadMax(getInt(cMap, Constants.THREADMAX));
+			setAliveTime(getInt(cMap, Constants.ALIVETIME));
+			setOverTime(getInt(cMap, Constants.OVERTIME));
+			setQueueSize(getInt(cMap, Constants.QUEUESIZE));
+			setCancellable(getBoolean(cMap, Constants.CANCELLABLE));
+			setCron(cMap.get(Constants.CRON)); 
+			setRemark(cMap.get(Constants.REMARK));
 		}else if(fc != null){
 			setThreadCore(fc.threadCore());
 			setThreadMax(fc.threadMax());
@@ -167,23 +159,23 @@ public abstract class Context implements Serializable {
 
 	//反序列化时额外的初始化工作
 	void initPool(){
-		int core = Integer.parseInt(valueMap.get(THREADCORE)); 
-		int max = Integer.parseInt(valueMap.get(THREADMAX));
-		int aliveTime = Integer.parseInt(valueMap.get(ALIVETIME));   
-		int queueSize = Integer.parseInt(valueMap.get(QUEUESIZE));  
+		int core = Integer.parseInt(valueMap.get(Constants.THREADCORE)); 
+		int max = Integer.parseInt(valueMap.get(Constants.THREADMAX));
+		int aliveTime = Integer.parseInt(valueMap.get(Constants.ALIVETIME));   
+		int queueSize = Integer.parseInt(valueMap.get(Constants.QUEUESIZE));  
 		pool = new TimedExecutorPool(core,max,aliveTime,new LinkedBlockingQueue<Runnable>(queueSize));
 		pool.allowCoreThreadTimeOut(true);
 		//Logger不支持序列化，只好放到这里
 		this.log = LoggerFactory.getLogger(name); 
 	}
-	
+
 	public final long getActives(){
 		if(pool == null){
 			return 0;
 		}
 		return pool.getActiveCount();
 	}
-	
+
 	public final int getWaitings(){
 		return pool.getQueue().size();
 	}
@@ -193,14 +185,14 @@ public abstract class Context implements Serializable {
 		}
 		return pool.getTaskCount();
 	}
-	
+
 	public final long getCompleted(){
 		if(pool == null){
 			return 0;
 		}
 		return pool.getCompletedTaskCount();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	Collection<Thread> getThreads() {
 		if(pool == null){
@@ -213,7 +205,7 @@ public abstract class Context implements Serializable {
 		if(queueSize < 1 || queueSize > 10000000){
 			queueSize = 200;
 		}
-		valueMap.put(QUEUESIZE, String.valueOf(queueSize));
+		valueMap.put(Constants.QUEUESIZE, String.valueOf(queueSize));
 		return queueSize;
 	}
 
@@ -224,19 +216,13 @@ public abstract class Context implements Serializable {
 		log.setLevel(Level.toLevel(level));
 	}
 
-	private boolean validKey(String key){
-		boolean valid = THREADCORE.equals(key) || THREADMAX.equals(key) || ALIVETIME.equals(key) 
-				|| OVERTIME.equals(key) || QUEUESIZE.equals(key) || CANCELLABLE.equals(key) || CRON.equals(key) ;
-		return !valid;
-	}
-
 	/**
 	 * 将key-value保存到valueMap中,可以在getValue或其他get中获取
 	 * @param key key
 	 * @param value value
 	 */
 	public final void setValue(String key, String value) {
-		if(!validKey(key)){
+		if(!Constants.validKey(key)){
 			throw new IllegalArgumentException("not support key:" + key);
 		}
 		valueMap.put(key, value);
@@ -320,7 +306,7 @@ public abstract class Context implements Serializable {
 	 * @return remark
 	 */
 	public final String getRemark(){
-		return valueMap.get(REMARK);
+		return valueMap.get(Constants.REMARK);
 	}
 
 	/**
@@ -328,7 +314,7 @@ public abstract class Context implements Serializable {
 	 * @param remark remark
 	 */
 	public final void setRemark(String remark){
-		valueMap.put(REMARK, remark);
+		valueMap.put(Constants.REMARK, remark);
 	}
 
 	/**
@@ -336,7 +322,7 @@ public abstract class Context implements Serializable {
 	 * @return threadCore
 	 */
 	public final int getThreadCore(){
-		return Integer.parseInt(valueMap.get(THREADCORE));
+		return Integer.parseInt(valueMap.get(Constants.THREADCORE));
 	}
 
 	/**
@@ -348,7 +334,10 @@ public abstract class Context implements Serializable {
 		if(threadCore < 1 || threadCore > 10){
 			threadCore = 4;
 		}
-		valueMap.put(THREADCORE, String.valueOf(threadCore));
+		valueMap.put(Constants.THREADCORE, String.valueOf(threadCore));
+		if(pool != null && pool.getCorePoolSize() != threadCore){
+			pool.setCorePoolSize(threadCore);
+		}
 		return threadCore;
 	}
 
@@ -357,7 +346,7 @@ public abstract class Context implements Serializable {
 	 * @return threadMax
 	 */
 	public final int getThreadMax(){
-		return Integer.parseInt(valueMap.get(THREADMAX));
+		return Integer.parseInt(valueMap.get(Constants.THREADMAX));
 	}
 
 	/**
@@ -369,7 +358,10 @@ public abstract class Context implements Serializable {
 		if(threadMax < 10 || threadMax > 100){
 			threadMax = 20;
 		}
-		valueMap.put(THREADMAX, String.valueOf(threadMax));
+		valueMap.put(Constants.THREADMAX, String.valueOf(threadMax));
+		if(pool != null && pool.getMaximumPoolSize() != threadMax){
+			pool.setMaximumPoolSize(threadMax);
+		}
 		return threadMax;
 	}
 
@@ -378,7 +370,7 @@ public abstract class Context implements Serializable {
 	 * @return aliveTime
 	 */
 	public final int getAliveTime(){
-		return Integer.parseInt(valueMap.get(ALIVETIME));
+		return Integer.parseInt(valueMap.get(Constants.ALIVETIME));
 	}
 
 	/**
@@ -390,7 +382,10 @@ public abstract class Context implements Serializable {
 		if(aliveTime < 3 || aliveTime > 600){
 			aliveTime = 30;
 		}
-		valueMap.put(ALIVETIME, String.valueOf(aliveTime));
+		valueMap.put(Constants.ALIVETIME, String.valueOf(aliveTime));
+		if(pool != null && pool.getKeepAliveTime(TimeUnit.SECONDS) != aliveTime){
+			pool.setKeepAliveTime(aliveTime, TimeUnit.SECONDS);
+		}
 		return aliveTime;
 	}
 
@@ -399,7 +394,7 @@ public abstract class Context implements Serializable {
 	 * @return overTime
 	 */
 	public final int getOverTime(){
-		return Integer.parseInt(valueMap.get(OVERTIME));
+		return Integer.parseInt(valueMap.get(Constants.OVERTIME));
 	}
 
 	/**
@@ -411,7 +406,7 @@ public abstract class Context implements Serializable {
 		if(overTime < 60 || overTime > 86400){
 			overTime = 3600;
 		}
-		valueMap.put(OVERTIME, String.valueOf(overTime));
+		valueMap.put(Constants.OVERTIME, String.valueOf(overTime));
 		return overTime;
 	}
 
@@ -420,7 +415,7 @@ public abstract class Context implements Serializable {
 	 * @return cancellable
 	 */
 	public final boolean getCancellable(){
-		return Boolean.parseBoolean(valueMap.get(CANCELLABLE));
+		return Boolean.parseBoolean(valueMap.get(Constants.CANCELLABLE));
 	}
 
 	/**
@@ -429,7 +424,7 @@ public abstract class Context implements Serializable {
 	 * @return cancellable
 	 */
 	public final boolean setCancellable(boolean cancellable){
-		valueMap.put(CANCELLABLE, String.valueOf(cancellable));
+		valueMap.put(Constants.CANCELLABLE, String.valueOf(cancellable));
 		return cancellable;
 	}
 
@@ -438,7 +433,7 @@ public abstract class Context implements Serializable {
 	 * @return cron
 	 */
 	public final String getCron(){
-		return valueMap.get(CRON);
+		return valueMap.get(Constants.CRON);
 	}
 
 	/**
@@ -456,20 +451,14 @@ public abstract class Context implements Serializable {
 			throw new IllegalArgumentException(e);
 		}
 		if(cronExpression == null
-				|| !(cron.equals(valueMap.get(CRON)  ))){
-			valueMap.put(CRON, cron);
+				|| !(cron.equals(valueMap.get(Constants.CRON)  ))){
+			valueMap.put(Constants.CRON, cron);
 			cronExpression = c;
 		}
 	}
 
-	/**
-	 * 0:初始化
-	 * 1:启动 started
-	 * 2:正在停止  stopping
-	 * 3:已停止: stopped
-	 * 4:等待:waiting
-	 */
-	private transient int state = 0;
+
+	private transient State state = inited; 
 
 	/**
 	 * 获取context状态
@@ -477,7 +466,10 @@ public abstract class Context implements Serializable {
 	 */
 	public final int state(){
 		synchronized (name.intern()) {
-			return state;
+			if(state == stopping && pool.getActiveCount() == 0){
+				state = stopped;
+			}
+			return state.value();
 		}
 	}
 
@@ -485,16 +477,12 @@ public abstract class Context implements Serializable {
 	 * 获取context状态
 	 * @return state
 	 */
-	public final String stateString(){
+	public final String stateName(){
 		synchronized (name.intern()) {
-			switch(state){
-			case 0: return "inited";
-			case 1: return "running";
-			case 2: return "stopping";
-			case 3: return "stopped";
-			case 4: return "waiting";
+			if(state == stopping && pool.getActiveCount() == 0){
+				state = stopped;
 			}
-			return "";
+			return state.name();
 		}
 	}
 
@@ -502,96 +490,118 @@ public abstract class Context implements Serializable {
 	 * 启动context
 	 * @return map(result/mag)
 	 */
-	public final Map<String,Object> start(){
+	public final Map<String,Object> startup(){
 		Map<String,Object> map = new HashMap<>();
 		synchronized (name.intern()) {
-			if(state == 1 || state == 4){
-				log.warn("context[" + name + "] was already started."); 
+			switch(state){
+			case inited:
+			case stopped:
+				state = running;
+				innerThread = new InnerThread();
+				innerThread.start();
 				map.put("result", true);
-				map.put("msg", "context[" + name + "] was already started.");
+				map.put("msg", "context[" + name + "] started.");
+				log.info("context[" + name + "] started"); 
 				return map;
-			}
-			if(state == 2){
-				log.warn("context[" + name + "] is stopping, cann't start."); 
+			case stopping:
 				map.put("result", false);
 				map.put("msg", "context[" + name + "] is stopping, cann't start.");
+				log.warn("context[" + name + "] is stopping, cann't start."); 
+				return map;
+			case running:
+			case waiting:
+			case sleeping:
+				map.put("result", true);
+				map.put("msg", "context[" + name + "] was already started.");
+				log.warn("context[" + name + "] was already started."); 
+				return map;
+			default:
+				map.put("result", false);
+				map.put("msg", "invalid state.");
 				return map;
 			}
-			state = 1;
-			innerThread = new InnerThread();
-			innerThread.start();
 		}
-		log.info("context[" + name + "] started"); 
-		map.put("result", true);
-		map.put("msg", "context[" + name + "] started.");
-		return map;
 	}
 
 	/**
 	 * 停止context
 	 * @return map(result/mag)
 	 */
-	public final Map<String,Object> stop(){
+	public final Map<String,Object> shutDown(){
 		Map<String,Object> map = new HashMap<>();
 		synchronized (name.intern()) {
-			if(state == 3){
-				log.warn("context[" + name + "] was already stoped."); 
-				map.put("result", true);
-				map.put("msg", "context[" + name + "] was already stoped.");
-				return map;
+			synchronized (name.intern()) {
+				switch(state){
+				case inited:
+				case stopped:
+					map.put("result", true);
+					map.put("msg", "context[" + name + "] was already stoped.");
+					log.warn("context[" + name + "] was already stoped."); 
+					return map;
+				case stopping:
+					map.put("result", false);
+					map.put("msg", "context[" + name + "] is stopping, cann't stop.");
+					log.warn("context[" + name + "] is stopping, cann't stop."); 
+					return map;
+				case running:
+				case waiting:
+				case sleeping:
+					state = stopping;
+					innerThread.interrupt();//尽快响应
+					map.put("result", true);
+					map.put("msg", "context[" + name + "] is stopping.");
+					log.info("context[" + name + "] is stopping."); 
+					return map;
+				default:
+					map.put("result", false);
+					map.put("msg", "invalid state.");
+					return map;
+				}
 			}
-			if(state == 0){
-				log.warn("context[" + name + "] was not started, cann't stop."); 
-				map.put("result", false);
-				map.put("msg", "context[" + name + "] was not started, cann't stop.");
-				return map;
-			}
-			if(state == 2){
-				log.warn("context[" + name + "] is stopping, cann't stop."); 
-				map.put("result", false);
-				map.put("msg", "context[" + name + "] is stopping, cann't stop.");
-				return map;
-			}
-			state = 2;
-			innerThread.interrupt();//尽快响应
 		}
-		log.info("context[" + name + "] is stopping."); 
-		map.put("result", true);
-		map.put("msg", "context[" + name + "] is stopping.");
-		return map;
 	}
 
 	/**
 	 * 中断context
 	 * @return map(result/mag)
 	 */
-	public final Map<String,Object> interrupt(){
+	public final Map<String,Object> execNow(){
 		Map<String,Object> map = new HashMap<>();
 		synchronized (name.intern()) {
-			if(state == 3){
-				log.warn("context[" + name + "] was already stoped, cann't execut now."); 
+			switch(state){
+			case inited:
+			case stopped:
 				map.put("result", false);
 				map.put("msg", "context[" + name + "] was already stoped, cann't execut now.");
+				log.warn("context[" + name + "] isn't running, cann't execut now."); 
 				return map;
-			}
-			if(state == 0){
-				log.warn("context[" + name + "] was not started, cann't execut now."); 
-				map.put("result", false);
-				map.put("msg", "context[" + name + "] was not started, cann't execut now.");
-				return map;
-			}
-			if(state == 2){
-				log.warn("context[" + name + "] is stopping, cann't execut now."); 
+			case stopping:
 				map.put("result", false);
 				map.put("msg", "context[" + name + "] is stopping, cann't execut now.");
+				log.warn("context[" + name + "] is stopping, cann't execut now."); 
+				return map;
+			case running:
+				map.put("result", false);
+				map.put("msg", "context[" + name + "] is already executing.");
+				log.info("context[" + name + "] is alrady executing."); 
+				return map;
+			case waiting:
+				map.put("result", false);
+				map.put("msg", "context[" + name + "] is waiting for task completion.");
+				log.info("context[" + name + "] is waiting for task completion."); 
+				return map;
+			case sleeping:
+				innerThread.interrupt();
+				map.put("result", true);
+				map.put("msg", "context[" + name + "] execute now.");
+				log.info("context[" + name + "] execute now."); 
+				return map;
+			default:
+				map.put("result", false);
+				map.put("msg", "invalid state.");
 				return map;
 			}
-			innerThread.interrupt();
 		}
-		log.info("context[" + name + "] execute now."); 
-		map.put("result", true);
-		map.put("msg", "context[" + name + "] execute now.");
-		return map;
 	}
 
 	private transient InnerThread innerThread;
@@ -601,50 +611,25 @@ public abstract class Context implements Serializable {
 		private static final long serialVersionUID = 2023244859604452982L;
 
 		public InnerThread(){
-			this.setName("context-" + name); 
+			this.setName("context[" + name + "]"); 
 		}
 
 		@Override
 		public void run() {
 			while(true){
-				boolean isWaitingStop = false;
+				boolean isStopping = false;
 				synchronized (name.intern()) {
-					isWaitingStop = state == 2;
+					isStopping = state == stopping;
 				}
-				if(isWaitingStop){
-					pool.shutdownNow();
-					try {
-						pool.awaitTermination(1, TimeUnit.DAYS);
-					} catch (InterruptedException e) {
-						log.warn("interrupted when waiting stop."); 
-					}
-					cleanFutures();
-					synchronized (name.intern()) {
-						state = 3;
-					}
-					log.info("context[" + name + "] stoped.");
+				if(isStopping){
+					Context.this.stop();
 					return;
 				}
-				
-				Date execDate = new Date();
+
 				synchronized (name.intern()) {
-					state = 1;
+					state = running;
 				}
 				execTime = System.currentTimeMillis();
-				int threadCore = Integer.parseInt(valueMap.get(THREADCORE)); 
-				if(pool.getCorePoolSize() != threadCore){
-					pool.setCorePoolSize(threadCore);
-				}
-
-				int threadMax = Integer.parseInt(valueMap.get(THREADMAX)); 
-				if(pool.getMaximumPoolSize() != threadMax){
-					pool.setMaximumPoolSize(threadMax);
-				}
-
-				int threadAliveTime = Integer.parseInt(valueMap.get(ALIVETIME)); 
-				if(pool.getKeepAliveTime(TimeUnit.SECONDS) != threadAliveTime){
-					pool.setKeepAliveTime(threadAliveTime, TimeUnit.SECONDS);
-				}
 
 				cleanFutures();
 
@@ -662,7 +647,7 @@ public abstract class Context implements Serializable {
 						}
 						try {
 							Executor executor = createExecutor(sourceUri);
-							executor.setName(name); 
+							executor.setContext(name); 
 							FUTUREMAP.put(sourceUri, pool.submit(executor)); 
 							log.info("create task" + "[" + sourceUri + "]"); 
 						} catch (RejectedExecutionException e) {
@@ -673,41 +658,86 @@ public abstract class Context implements Serializable {
 						}
 					}
 				}
-				
+
+				//默认只执行一次，提交后等待任务线程完成
 				if(cronExpression == null){
-					//默认只执行一次，执行完便停止，等待提交的线程结束
-					synchronized (name.intern()) {
-						state = 2;
-					}
-					pool.shutdown();
-					try {
-						pool.awaitTermination(1, TimeUnit.DAYS);
-					} catch (InterruptedException e) {
-						log.warn("interrupted when waiting stop."); 
-					}
-					cleanFutures();
-					synchronized (name.intern()) {
-						state = 3;
-					}
-					log.info("context[" + name + "] stoped.");
+					terminate();
 					return;
 				}
-				
-				Date nextTime = cronExpression.getTimeAfter(execDate);
+
+				Date nextTime = cronExpression.getTimeAfter(new Date(execTime)); 
 				long waitTime = nextTime.getTime() - System.currentTimeMillis();
 				//如果设定周期较短，而执行时间较长
 				if(waitTime > 0){
 					synchronized (name.intern()) {
-						state = 4;
+						state = sleeping;
 					}
 					synchronized (this) {
 						try {
 							wait(waitTime);
 						} catch (InterruptedException e) {
 							//借助interrupted标记来重启
-							log.info("wait interrupted."); 
+							log.info("sleep interrupted."); 
 						}
 					}
+				}
+			}
+		}
+	}
+
+	private void stop(){
+		pool.shutdownNow();
+		boolean stopSucc = false;
+		try {
+			stopSucc = pool.awaitTermination(1, TimeUnit.DAYS);
+		} catch (InterruptedException e) {
+			log.error("interrupted when stopping, which should never happened."); 
+		}
+		cleanFutures();
+		synchronized (name.intern()) {
+			if(stopSucc){
+				state = stopped;
+				log.info("context[" + name + "] stoped.");
+			}else{
+				log.warn("context[" + name + "] is still stopping, though has waiting for a day.");
+			}
+		}
+	}
+
+	private void terminate(){
+		synchronized (name.intern()) {
+			state = waiting;
+		}
+		pool.shutdown();
+		
+		if(waitTask()){
+			synchronized (name.intern()) {
+				state = stopped;
+			}
+		}
+
+		cleanFutures();
+	}
+
+	private boolean waitTask(){
+		boolean isStopping = false;
+		while(true){
+			try {
+				if(pool.awaitTermination(1, TimeUnit.DAYS)){
+					log.info("context[" + name + "] stoped.");
+					return true;
+				}else if(isStopping){
+					log.warn("context[" + name + "] is still stopping, though has waiting for a day.");
+					return false;
+				}
+			} catch (InterruptedException e) {
+				log.warn("interrupted when waiting executing task."); 
+			}
+
+			synchronized (name.intern()) {
+				if(state == stopping){
+					isStopping = true;
+					pool.shutdownNow();
 				}
 			}
 		}
@@ -739,10 +769,10 @@ public abstract class Context implements Serializable {
 			String sourceUri = entry.getKey();
 			if(!future.isDone()){
 				long existTime = (System.currentTimeMillis() - future.getCreateTime()) / 1000;
-				int threadOverTime = Integer.parseInt(valueMap.get(OVERTIME)); 
+				int threadOverTime = Integer.parseInt(valueMap.get(Constants.OVERTIME)); 
 				if(existTime > threadOverTime) {
 					log.warn("task overtime[" + sourceUri + "]," + existTime + "s");
-					if(Boolean.parseBoolean(valueMap.get(CANCELLABLE))) { 
+					if(Boolean.parseBoolean(valueMap.get(Constants.CANCELLABLE))) { 
 						future.cancel(true);
 					}
 				}

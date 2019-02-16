@@ -37,6 +37,8 @@ public class DownloadHdfsExample extends Context {
 
 	@Override
 	protected List<String> getUriList() throws Exception { 
+		Thread.sleep(15000); 
+		
 		return HdfsUtil.list(masterUrl, slaveUrl, new Path("/test"), new PathFilter(){
 			@Override
 			public boolean accept(Path path) {
@@ -46,9 +48,9 @@ public class DownloadHdfsExample extends Context {
 	}
 
 	@Override
-	protected Executor createExecutor(String sourceUri) {
+	protected Executor createExecutor(String sourceUri) throws Exception { 
 		DownloaderHelper helper = new HdfsHelper(masterUrl, slaveUrl);
 		String sourceName = new File(sourceUri).getName();
-		return new Downloader(sourceName, sourceUri, dest, false, true, helper);
+		return new Downloader(sourceUri, sourceName, dest, false, true, helper);
 	}
 }

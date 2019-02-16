@@ -22,7 +22,7 @@ import com.fom.util.IoUtil;
 import com.fom.util.ZipUtil;
 
 /**
- * 根据sourceUri列表下载并打包成zip文件的执行器
+ * 根据sourceUri列表下载并打包成zip的实现
  * 
  * @author shanhm
  *
@@ -134,7 +134,7 @@ public class ZipDownloader extends Executor {
 	}
 	
 	@Override
-	protected boolean onStart() throws Exception {
+	protected boolean beforeExec() throws Exception {
 		if(uriList.isEmpty()){
 			log.warn("uriList cann't be empty."); 
 			return false;
@@ -147,7 +147,7 @@ public class ZipDownloader extends Executor {
 		}
 		
 		this.downloadPath = System.getProperty("cache.download")
-				+ File.separator + name + File.separator + zipName;
+				+ File.separator + contextName + File.separator + zipName;
 		File file = new File(downloadPath);
 		if(!file.exists() && !file.mkdirs()){
 			log.error("directory create failed: " + downloadPath); 
@@ -168,7 +168,7 @@ public class ZipDownloader extends Executor {
 	}
 	
 	@Override
-	protected boolean onComplete() throws Exception {
+	protected boolean afterExec() throws Exception {
 		File tempDir = new File(downloadPath);
 		File[] files = tempDir.listFiles();
 		if(ArrayUtils.isEmpty(files)){
@@ -291,7 +291,7 @@ public class ZipDownloader extends Executor {
 	 */
 	protected String getNextName(int index, int entrySize){
 		StringBuilder builder = new StringBuilder(); 
-		builder.append(sourceUri).append("_");
+		builder.append(source).append("_");
 		builder.append(index).append("_").append(entrySize).append(".zip");
 		return builder.toString();
 	}
@@ -310,7 +310,7 @@ public class ZipDownloader extends Executor {
 			return index;
 		}
 		for(String name : array){
-			if(!name.startsWith(sourceUri) || name.equals(downloadZip.getName())){
+			if(!name.startsWith(source) || name.equals(downloadZip.getName())){
 				continue;
 			}
 			try{

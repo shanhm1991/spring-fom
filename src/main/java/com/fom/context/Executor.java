@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 import com.fom.log.LoggerFactory;
 
 /**
- * 针对资源uri的执行器
+ * 针对source的任务执行者
  * 
  * @author shanhm
  *
@@ -17,58 +17,58 @@ public abstract class Executor implements Callable<Result> {
 
 	protected volatile Logger log = Logger.getRootLogger();
 
-	protected volatile String name;
+	protected volatile String contextName;
 
-	protected final String sourceUri;
+	protected final String source;
 
 	protected ExceptionHandler exceptionHandler;
 
 	protected ResultHandler resultHandler;
 
 	/**
-	 * @param sourceUri 资源uri
+	 * @param source 创建Executor的资源
 	 */
-	public Executor(String sourceUri) { 
-		this.sourceUri = sourceUri;
+	public Executor(String source) { 
+		this.source = source;
 	}
 
 	/**
-	 * @param sourceUri 资源uri
+	 * @param source 创建Executor的资源
 	 * @param exceptionHandler ExceptionHandler
 	 */
-	public Executor(String sourceUri, ExceptionHandler exceptionHandler) { 
-		this(sourceUri);
+	public Executor(String source, ExceptionHandler exceptionHandler) { 
+		this(source);
 		this.exceptionHandler = exceptionHandler;
 	}
 
 	/**
-	 * @param sourceUri 资源uri
+	 * @param source 创建Executor的资源
 	 * @param resultHandler ResultHandler
 	 */
-	public Executor(String sourceUri, ResultHandler resultHandler) { 
-		this(sourceUri);
+	public Executor(String source, ResultHandler resultHandler) { 
+		this(source);
 		this.resultHandler = resultHandler;
 	}
 
 	/**
-	 * @param sourceUri 资源uri
+	 * @param source 创建Executor的资源
 	 * @param exceptionHandler ExceptionHandler
 	 * @param resultHandler ResultHandler
 	 */
-	public Executor(String sourceUri, ExceptionHandler exceptionHandler, ResultHandler resultHandler) { 
-		this(sourceUri);
+	public Executor(String source, ExceptionHandler exceptionHandler, ResultHandler resultHandler) { 
+		this(source);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
 	}
 
 	@Override
 	public final Result call() throws Exception {  
-		Thread.currentThread().setName("[" + sourceUri + "]");
-		Result result = new Result(sourceUri); 
+		Thread.currentThread().setName(source);
+		Result result = new Result(source); 
 		long sTime = System.currentTimeMillis();
 		result.startTime = sTime;
 		try {
-			boolean res = onStart() && exec() && onComplete();
+			boolean res = beforeExec() && exec() && afterExec();
 			long cost = System.currentTimeMillis() - sTime;
 			if(res){
 				log.info("task finished, cost=" + cost + "ms");
@@ -94,40 +94,44 @@ public abstract class Executor implements Callable<Result> {
 	}
 
 	/**
-	 * 在文件处理前时执行的动作
-	 * @return isSuccess
-	 * @throws Exception Exception
-	 */
-	protected boolean onStart() throws Exception {
-		return true;
-	}
-
-	/**
-	 * 文件处理
+	 * 任务执行
 	 * @return isSuccess
 	 * @throws Exception Exception
 	 */
 	protected abstract boolean exec() throws Exception;
 
 	/**
-	 * 在文件处理完成时执行的动作
+	 * 任务执行前的工作
 	 * @return isSuccess
 	 * @throws Exception Exception
 	 */
-	protected boolean onComplete() throws Exception {
+	protected boolean beforeExec() throws Exception {
 		return true;
 	}
 	
-	public final String getName(){
-		return name;
+	/**
+	 * 任务执行后的工作
+	 * @return isSuccess
+	 * @throws Exception Exception
+	 */
+	protected boolean afterExec() throws Exception {
+		return true;
+	}
+	
+	/**
+	 * 如果单独使用Executor，将返回null，只有在context中使用时才有值返回
+	 * @return context name
+	 */
+	protected final String getContextName(){
+		return contextName;
 	}
 
-	final void setName(String name){
-		if(StringUtils.isBlank(name)){
+	final void setContext(String contextName){
+		if(StringUtils.isBlank(contextName)){
 			return;
 		}
-		this.name = name;
-		this.log = LoggerFactory.getLogger(name);
+		this.contextName = contextName;
+		this.log = LoggerFactory.getLogger(contextName);
 	}
 	
 }

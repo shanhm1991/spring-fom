@@ -32,6 +32,8 @@ public class DownloadFtpExample extends Context {
 
 	@Override
 	protected List<String> getUriList() throws Exception {
+		Thread.sleep(5000); 
+		
 		List<String> list = new ArrayList<String>();
 		list.add("/ftp/test.txt");
 		return list;
@@ -47,7 +49,7 @@ public class DownloadFtpExample extends Context {
 		
 		DownloaderHelper helper = new FtpHelper(hostname, port, user, passwd);
 		String sourceName = new File(sourceUri).getName();
-		return new Downloader(sourceName, sourceUri, dest, false, true, helper);
+		return new Downloader(sourceUri, sourceName, dest, false, true, helper);
 	}
 
 }

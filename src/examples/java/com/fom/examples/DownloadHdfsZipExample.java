@@ -55,6 +55,8 @@ public class DownloadHdfsZipExample extends Context {
 
 	@Override
 	protected List<String> getUriList() throws Exception {
+		Thread.sleep(20000); 
+		
 		final FileSystem fs = HdfsUtil.getFileSystem(masterUrl, slaveUrl);
 		return HdfsUtil.list(masterUrl, slaveUrl, new Path(srPath), new PathFilter(){
 			@Override

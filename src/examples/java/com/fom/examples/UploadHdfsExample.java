@@ -38,6 +38,8 @@ public class UploadHdfsExample extends Context {
 
 	@Override
 	protected Executor createExecutor(String sourceUri) throws Exception {
+		Thread.sleep(10000); 
+		
 		UploaderHelper helper = new HdfsHelper(masterUrl, slaveUrl);
 		return new Uploader(sourceUri, destPath, false, helper);
 		
