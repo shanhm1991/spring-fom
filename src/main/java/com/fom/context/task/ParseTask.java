@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.fom.context.ExceptionHandler;
 import com.fom.context.Task;
@@ -20,7 +21,13 @@ import com.fom.util.IoUtil;
  * <br>
  * <br>解析策略：
  * <br>1.检查缓存目录是否存在，没有则创建
- * <br>2.
+ * <br>2.检查缓存目录下是否存在logFile（纪录任务处理进度），没有则从第0行开始读取，有则读取logFile中的处理进度n，从第n行开始
+ * <br>3.逐行读取解析成指定的bean或者map，放入lineDatas中
+ * <br>4.当lineDatas的size达到batch时（batch为0时则读取所有），进行批量处理，处理结束后纪录进度到logFile，然后重复步骤3
+ * <br>5.删除源文件，删除logFile
+ * <br>上述任何步骤失败或异常均会使任务提前失败结束
+ * 
+ * @see ParseHelper
  * 
  * @author shanhm
  *
@@ -88,8 +95,13 @@ public class ParseTask extends Task {
 	@Override
 	protected boolean beforeExec() throws Exception { 
 		String logName = new File(id).getName();
-		this.logFile = new File(System.getProperty("cache.parse") 
-				+ File.separator + contextName + File.separator + logName + ".log");
+		if(StringUtils.isBlank(contextName)){
+			this.logFile = new File(System.getProperty("cache.parse") + File.separator + logName + ".log");
+		}else{
+			this.logFile = new File(System.getProperty("cache.parse") 
+					+ File.separator + contextName + File.separator + logName + ".log");
+		}
+		
 		File parentFile = logFile.getParentFile();
 		if(!parentFile.exists() && !parentFile.mkdirs()){
 			log.error("directory create failed: " + parentFile);

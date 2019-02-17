@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.fom.context.ExceptionHandler;
 import com.fom.context.Task;
@@ -19,12 +20,33 @@ import com.fom.util.IoUtil;
 import com.fom.util.ZipUtil;
 
 /**
- * 根据sourceUri解析处理本地zip文件的执行器
+ * 根据sourceUri解析本地单个zip包的任务实现
+ * <br>
+ * <br>解析策略：
+ * <br>1.校验zip文件是否有效，如果无效则直接删除并且任务失败；检查缓存目录是否存在，没有则创建
+ * <br>2.检查缓存目录下是否存在logFile（纪录任务处理进度）
+ * <br>2.1如果存在，则判断解压目录是否存在
+ * <br>2.1.1如果不存在，则进行步骤5 。。。。。。。。
+ * <br>2.1.2如果存在，则遍历过滤解压目录下的文件
+ * <br>2.1.2.1如果过滤结果为空，则进行步骤5。。。。。。。
+ * <br>2.1.2.2如果过滤结果不为空，则先处理logFile中纪录的文件，然后逐个处理过滤的结果文件，最后进行步骤5
+ * <br>2.2如果不存在，则判读解压目录是否存在，如果不存在则直接解压，否则清空解压目录后再重新解压，然后遍历过滤解压目录下的文件
+ * <br>2.2.1如果过滤结果为空，则进行步骤5。。。。。。。
+ * <br>2.2.2如果过滤结果不为空，则逐个处理过滤的结果文件，最后进行步骤5
+ * <br>3.执行清除
+ * <br>3.1如果解压目录存在，则清空并删除目录
+ * <br>3.2删除源文件
+ * <br>3.3删除logFile
+ * <br>上述任何步骤失败或异常均会使任务提前失败结束
+ * <br>单个文件处理的说明：同理于ParseTask中
+ * 
+ * @see ZipParseHelper
+ * @see ParseTask
  * 
  * @author shanhm
- *
+ * 
  */
-public final class ZipParseTask extends Task {
+public class ZipParseTask extends Task {
 	
 	private int batch;
 	
@@ -49,10 +71,16 @@ public final class ZipParseTask extends Task {
 		super(sourceUri);
 		this.helper = helper;
 		String sourceName = new File(sourceUri).getName();
-		this.unzipDir = new File(System.getProperty("cache.parse")
-				+ File.separator + contextName + File.separator + sourceName);
-		this.logFile = new File(System.getProperty("cache.parse") 
-				+ File.separator + contextName + File.separator + sourceName + ".log");
+		
+		if(StringUtils.isBlank(contextName)){
+			this.unzipDir = new File(System.getProperty("cache.parse") + File.separator + sourceName);
+			this.logFile = new File(System.getProperty("cache.parse") + File.separator + sourceName + ".log");
+		}else{
+			this.unzipDir = new File(System.getProperty("cache.parse")
+					+ File.separator + contextName + File.separator + sourceName);
+			this.logFile = new File(System.getProperty("cache.parse") 
+					+ File.separator + contextName + File.separator + sourceName + ".log");
+		}
 	}
 	
 	/**
@@ -114,15 +142,6 @@ public final class ZipParseTask extends Task {
 		return true;
 	}
 	
-	/**
-	 * 1.解压到缓存目录，并校验解压结果是否合法
-	 * 2.创建对应的处理日志文件
-	 * 3.挨个处理并删除文件
-	 * 4.清空并删除解压目录
-	 * 5.删除源文件
-	 * 6.删除日志文件
-	 * 上述任何步骤返回失败或出现异常则结束任务
-	 */
 	@Override
 	protected boolean exec() throws Exception {
 		if(logFile.exists()){

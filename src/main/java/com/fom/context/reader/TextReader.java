@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import com.fom.util.IoUtil;
 
 /**
+ * BufferedReader适配，读取普通文本文件
  * 
  * @author shanhm
  *

@@ -9,7 +9,7 @@ import com.fom.log.LoggerFactory;
 
 /**
  * 任务
- * <br>Callable的抽象实现，在context中作为最小执行单位，也可以自行创建调用或者提交线程池
+ * <br>Callable的抽象实现，在context中作为最小执行单位，也可以单独创建调用或者提交线程池
  * 
  * @author shanhm
  *

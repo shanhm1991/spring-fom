@@ -2,7 +2,9 @@ package com.fom.context;
 
 /**
  * 
- * Executor执行结果
+ * Task执行结果
+ * 
+ * @see Task
  * 
  * @author shanhm
  *

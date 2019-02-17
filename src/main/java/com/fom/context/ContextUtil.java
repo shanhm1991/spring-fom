@@ -22,7 +22,7 @@ public class ContextUtil {
 	}
 
 	/**
-	 * 获取带环境变量的字符串值，如${webapp.root}/test
+	 * 解析带环境变量的字符串值，如${webapp.root}/test
 	 * @param val string
 	 * @return string
 	 * @throws IllegalArgumentException IllegalArgumentException

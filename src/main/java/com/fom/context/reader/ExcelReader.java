@@ -4,6 +4,8 @@ import java.io.IOException;
 
 /**
  * 
+ * Excel适配，读取excel文件
+ * 
  * @author shanhm
  *
  */

@@ -11,6 +11,7 @@ import com.fom.util.HttpUtil;
 import com.fom.util.ZipUtil;
 
 /**
+ * http的一些默认实现
  * 
  * @author shanhm
  *

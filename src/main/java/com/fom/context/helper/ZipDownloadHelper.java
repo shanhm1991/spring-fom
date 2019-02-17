@@ -3,6 +3,10 @@ package com.fom.context.helper;
 import java.util.zip.ZipOutputStream;
 
 /**
+ * ZipDownloadTask中需要的具体操作方法
+ * 
+ * @see DownloadHelper
+ * @see ZipDownloadTask
  * 
  * @author shanhm
  *
@@ -11,18 +15,18 @@ public interface ZipDownloadHelper extends DownloadHelper {
 
 	/**
 	 * 根据sourceUri获取资源名称
-	 * @param sourceUri sourceUri
+	 * @param sourceUri 资源uri
 	 * @return source name
 	 */
 	String getSourceName(String sourceUri);
 	
 	/**
 	 * 将uri对应的资源写入zipOutStream
-	 * @param name name
-	 * @param uri 资源uri
-	 * @param zipOutStream ZipOutputStream
+	 * @param name 写入zip时使用的文件名称
+	 * @param sourceUri 资源uri
+	 * @param zipOutStream zip输出流
 	 * @return 写入字节数
 	 * @throws Exception Exception
 	 */
-	long zipEntry(String name, String uri, ZipOutputStream zipOutStream) throws Exception;
+	long zipEntry(String name, String sourceUri, ZipOutputStream zipOutStream) throws Exception;
 }

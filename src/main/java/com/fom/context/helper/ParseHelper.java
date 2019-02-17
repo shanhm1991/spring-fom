@@ -4,8 +4,11 @@ import java.util.List;
 
 import com.fom.context.reader.Reader;
 /**
+ * ParseTask中需要的具体操作方法
  * 
  * @author shanhm
+ * 
+ * @see ParseTask
  *
  * @param <V> 行数据解析结果类型
  */
@@ -13,7 +16,7 @@ public interface ParseHelper<V> {
 	
 	/**
 	 * 获取对应文件的reader
-	 * @param sourceUri sourceUri
+	 * @param sourceUri 资源uri
 	 * @return Reader
 	 * @throws Exception Exception
 	 */
@@ -38,15 +41,15 @@ public interface ParseHelper<V> {
 	
 	/**
 	 * 根据sourceUri删除文件
-	 * @param sourceUri sourceUri
-	 * @return is delete success
+	 * @param sourceUri 资源uri
+	 * @return 是否删除成功
 	 */
 	boolean delete(String sourceUri);
 	
 	/**
-	 * 获取对应sourceUri的资源大小
-	 * @param sourceUri sourceUri
-	 * @return size
+	 * 获取对应sourceUri的资源字节数
+	 * @param sourceUri 资源uri
+	 * @return 资源字节数
 	 */
 	long getSourceSize(String sourceUri);
 	

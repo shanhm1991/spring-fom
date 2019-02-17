@@ -13,10 +13,10 @@ import java.util.concurrent.TimeUnit;
  * @author shanhm
  *
  */
-public class TimedExecutorPool extends ThreadPoolExecutor { 
+class TimedExecutorPool extends ThreadPoolExecutor { 
 
 	private Map<String, Thread> threadMap = new ConcurrentHashMap<>();
-	
+
 	public TimedExecutorPool(int core, int max, long aliveTime, BlockingQueue<Runnable> workQueue) {
 		super(core, max, aliveTime, TimeUnit.SECONDS, workQueue);
 	}
@@ -65,7 +65,7 @@ public class TimedExecutorPool extends ThreadPoolExecutor {
 		return future;
 	}
 
-	Collection<Thread> getThreads() {
+	Collection<Thread> getActiveThreads() {
 		return threadMap.values();
 	}
 }

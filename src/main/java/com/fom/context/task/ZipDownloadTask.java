@@ -39,9 +39,12 @@ import com.fom.util.ZipUtil;
  * <br>3.2.1如果命名成功，则重复3.1步骤
  * <br>3.2.2如果命名失败，但不是最后一次命名(uriList遍历到最后)则重复3.1步骤，否则直接任务失败
  * <br>4.将缓存目录下所有的命名的文件移到目标下载目录中
- * <br>上述任何步骤失败或异常均会使任务提前失败结束，另外说明下上面的重新命名步骤：
- * <br>如果删除源文件，会在正式重新命名前进行比较删除，另外可以插入一些自己的操作（比如加入一些自己需要的文件）
+ * <br>上述任何步骤失败或异常均会使任务提前失败结束
+ * <br>重新命名步骤说明：
+ * <br>正式重新命名前会决定是否删除源文件，另外可以插入一些自己的操作（比如加入一些自己需要的文件）
  * <br>命名文件使用的名称格式、命名序号的获取以及获取zip的下载文件列表均可以自己实现覆盖
+ * 
+ * @see ZipDownloadHelper
  * 
  * @author shanhm
  *
@@ -174,12 +177,8 @@ public class ZipDownloadTask extends Task {
 		return true;
 	}
 
-	/**
-	 * 1.打开downloadZip的输出流(如果downloadZip已经存在则直接打开，否则新建);
-	 * 2.挨个写入下载的文件流，如果压缩数或压缩文件大小大于阈值则重新命名，否则继续;
-	 */
 	@Override
-	protected final boolean exec() throws Exception {
+	protected boolean exec() throws Exception {
 		return indexDownloadZip(zip.exists(), false) 
 				&& downloadIntoZip() 
 				&& indexDownloadZip(false, true);

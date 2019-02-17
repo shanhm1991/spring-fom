@@ -34,7 +34,7 @@ import com.fom.log.LoggerFactory;
 import com.fom.util.XmlUtil;
 
 /**
- * 模块最小单位，相当于一个组织者的角色，负责创建和组织任务执行者的运行
+ * 模块最小单位，相当于一个组织者的角色，负责创建和组织Task的运行
  * 
  * @author shanhm
  *
@@ -71,6 +71,9 @@ public abstract class Context implements Serializable {
 		initValue(name, fc); 
 	}
 
+	/**
+	 * @param name 模块名称
+	 */
 	public Context(String name){
 		if(StringUtils.isBlank(name)){
 			throw new IllegalArgumentException("param name cann't be empty.");
@@ -169,6 +172,10 @@ public abstract class Context implements Serializable {
 		this.log = LoggerFactory.getLogger(name); 
 	}
 
+	/**
+	 * 获取正在执行的任务数
+	 * @return 正在执行的任务数
+	 */
 	public final long getActives(){
 		if(pool == null){
 			return 0;
@@ -176,9 +183,18 @@ public abstract class Context implements Serializable {
 		return pool.getActiveCount();
 	}
 
+	/**
+	 * 获取等待队列中的任务数
+	 * @return 等待队列中的任务数
+	 */
 	public final int getWaitings(){
 		return pool.getQueue().size();
 	}
+	
+	/**
+	 * 获取所有创建过的任务数
+	 * @return 所有创建过的任务数
+	 */
 	public final long getCreated(){
 		if(pool == null){
 			return 0;
@@ -186,6 +202,10 @@ public abstract class Context implements Serializable {
 		return pool.getTaskCount();
 	}
 
+	/**
+	 * 获取已完成的任务数
+	 * @return 已完成的任务数
+	 */
 	public final long getCompleted(){
 		if(pool == null){
 			return 0;
@@ -194,11 +214,11 @@ public abstract class Context implements Serializable {
 	}
 
 	@SuppressWarnings("unchecked")
-	Collection<Thread> getThreads() {
+	Collection<Thread> getActiveThreads() {
 		if(pool == null){
 			return CollectionUtils.EMPTY_COLLECTION;
 		}
-		return pool.getThreads();
+		return pool.getActiveThreads();
 	}
 
 	int setQueueSize(int queueSize){
@@ -217,7 +237,7 @@ public abstract class Context implements Serializable {
 	}
 
 	/**
-	 * 将key-value保存到valueMap中,可以在getValue或其他get中获取
+	 * 将key-value保存到本地context的valueMap中
 	 * @param key key
 	 * @param value value
 	 */
@@ -294,7 +314,7 @@ public abstract class Context implements Serializable {
 	}
 
 	/**
-	 * 获取当前Context对象的name
+	 * 获取当前本地context的名称
 	 * @return name name
 	 */
 	public final String getName(){
@@ -302,7 +322,7 @@ public abstract class Context implements Serializable {
 	}
 
 	/**
-	 * 获取remark备注信息
+	 * 获取本地context的备注信息
 	 * @return remark
 	 */
 	public final String getRemark(){
@@ -326,7 +346,7 @@ public abstract class Context implements Serializable {
 	}
 
 	/**
-	 * 设置本地线程池的核心线程数，将在下一个周期生效
+	 * 设置本地线程池的核心线程数，将在下一次运行生效
 	 * @param threadCore threadCore
 	 * @return threadCore
 	 */
@@ -350,7 +370,7 @@ public abstract class Context implements Serializable {
 	}
 
 	/**
-	 * 设置本地线程池的最大线程数，将在下一个周期生效
+	 * 设置本地线程池的最大线程数，将在下一次运行生效
 	 * @param threadMax threadMax
 	 * @return threadMax
 	 */
@@ -374,7 +394,7 @@ public abstract class Context implements Serializable {
 	}
 
 	/**
-	 * 设置本地线程池的线程存活时间，将在下一个周期生效
+	 * 设置本地线程池的线程存活时间，将在下一次运行生效
 	 * @param aliveTime aliveTime
 	 * @return aliveTime
 	 */
@@ -398,7 +418,7 @@ public abstract class Context implements Serializable {
 	}
 
 	/**
-	 * 设置任务线程的超时时间，将在下一个周期生效
+	 * 设置任务线程的超时时间，将在下一次运行生效
 	 * @param overTime overTime
 	 * @return overTime
 	 */
@@ -437,7 +457,8 @@ public abstract class Context implements Serializable {
 	}
 
 	/**
-	 * 设置context定时表达式，将在下一个周期生效
+	 * 设置context定时表达式
+	 * <br>如果之前存在，将在下一次运行生效，否则需要重新激活（startup）才能生效
 	 * @param cron cron
 	 */
 	public final void setCron(String cron){
@@ -474,7 +495,7 @@ public abstract class Context implements Serializable {
 	}
 
 	/**
-	 * 启动context
+	 * 启动
 	 * @return map(result/mag)
 	 */
 	public final Map<String,Object> startup(){
@@ -511,7 +532,7 @@ public abstract class Context implements Serializable {
 	}
 
 	/**
-	 * 停止context
+	 * 停止
 	 * @return map(result/mag)
 	 */
 	public final Map<String,Object> shutDown(){
@@ -549,7 +570,7 @@ public abstract class Context implements Serializable {
 	}
 
 	/**
-	 * 中断context
+	 * 立即运行（中断等待）
 	 * @return map(result/mag)
 	 */
 	public final Map<String,Object> execNow(){

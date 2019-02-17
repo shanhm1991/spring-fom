@@ -76,6 +76,6 @@ public class FomController {
 	@RequestMapping("/taskdetail")
 	@ResponseBody
 	public Map<String,Object> taskdetail(String name) throws Exception{ 
-		return service.taskdetail(name);
+		return service.getActiveThreads(name);
 	}
 }

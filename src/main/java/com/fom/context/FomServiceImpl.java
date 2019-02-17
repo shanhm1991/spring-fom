@@ -259,7 +259,7 @@ public class FomServiceImpl implements FomService {
 	}
 
 	@Override
-	public Map<String, Object> taskdetail(String name) throws Exception {
+	public Map<String, Object> getActiveThreads(String name) throws Exception {
 		Map<String,Object> map = new HashMap<>();
 		map.put("size", 0);
 		Context context = ContextManager.contextMap.get(name);
@@ -267,9 +267,9 @@ public class FomServiceImpl implements FomService {
 			return map;
 		}
 		
-		Collection<Thread> collection = context.getThreads();
+		Collection<Thread> collection = context.getActiveThreads();
 		map.put("size", collection.size());
-		for(Thread thread : context.getThreads()){
+		for(Thread thread : context.getActiveThreads()){
 			StringBuilder builder = new StringBuilder();
 			for(StackTraceElement stack : thread.getStackTrace()){
 				builder.append(stack).append("<br>");

@@ -13,6 +13,7 @@ import com.fom.util.IoUtil;
 import com.fom.util.ZipUtil;
 
 /**
+ * ftp的一些默认实现
  * 
  * @author shanhm
  *

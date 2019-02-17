@@ -13,6 +13,7 @@ import com.fom.util.HdfsUtil;
 import com.fom.util.ZipUtil;
 
 /**
+ * hdfs的一些默认实现
  * 
  * @author shanhm
  *

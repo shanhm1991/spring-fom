@@ -20,6 +20,8 @@ import com.fom.context.helper.DownloadHelper;
  * <br>4.决定是否删除源文件
  * <br>上述任何步骤失败或异常均会使任务提前失败结束
  * 
+ * @see DownloadHelper
+ * 
  * @author shanhm
  *
  */

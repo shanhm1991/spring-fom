@@ -11,6 +11,7 @@ import org.apache.orc.RecordReader;
 import com.fom.util.IoUtil;
 
 /**
+ * RecordReader适配，读取hadoop上orc压缩格式的文件
  * 
  * @author shanhm
  *

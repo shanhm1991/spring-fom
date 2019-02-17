@@ -12,23 +12,23 @@ import org.dom4j.Element;
  * @author shanhm
  *
  */
-public class ContextManager {
+class ContextManager {
 
 	private static final Logger LOG = Logger.getLogger(ContextManager.class);
 
 	//Context构造器从中获取配置
-	static final Map<String, Element> elementMap = new ConcurrentHashMap<>();
+	public static final Map<String, Element> elementMap = new ConcurrentHashMap<>();
 
 	//Context构造器从中获取配置
-	static final Map<String, Map<String,String>> createMap = new ConcurrentHashMap<>();
+	public static final Map<String, Map<String,String>> createMap = new ConcurrentHashMap<>();
 
-	static Map<String,Context> contextMap = new ConcurrentHashMap<>();
+	public static Map<String,Context> contextMap = new ConcurrentHashMap<>();
 
-	static boolean exist(String contextName){
+	public static boolean exist(String contextName){
 		return contextMap.containsKey(contextName);
 	}
 
-	static void register(Context context){
+	public static void register(Context context){
 		if(context == null){
 			return;
 		}
@@ -36,7 +36,7 @@ public class ContextManager {
 		LOG.info("init context[" + context.name + "]");
 	}
 
-	static void startAll(){
+	public static void startAll(){
 		for(Entry<String, Context> entry : contextMap.entrySet()){
 			LOG.info("start context[" + entry.getKey() + "]");
 			entry.getValue().startup();
