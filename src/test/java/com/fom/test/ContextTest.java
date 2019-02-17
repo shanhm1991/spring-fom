@@ -7,6 +7,11 @@ import com.fom.context.Context;
 import com.fom.context.Task;
 import com.fom.context.FomContext;
 
+/**
+ * 
+ * @author shanhm
+ *
+ */
 @FomContext(cron="0/10 * * * * ?")
 public class ContextTest extends Context {
 	

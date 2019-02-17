@@ -7,6 +7,11 @@ import org.apache.orc.OrcFile;
 import org.apache.orc.Reader;
 import org.apache.orc.RecordReader;
 
+/**
+ * 
+ * @author shanhm
+ *
+ */
 public class OrcReadTest {
 
 	public static void main(String[] args) {
