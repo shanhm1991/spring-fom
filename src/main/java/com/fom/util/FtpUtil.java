@@ -84,6 +84,15 @@ public class FtpUtil {
 		}
 	}
 
+	/**
+	 * 获取FTPClient
+	 * @param hostname hostname
+	 * @param port port
+	 * @param user user
+	 * @param passwd passwd
+	 * @return FTPClient
+	 * @throws Exception Exception
+	 */
 	public static FTPClient getFTPClient(String hostname, int port, String user, String passwd) throws Exception{
 		FTPClient ftpClient = new FTPClient();
 		ftpClient.setControlEncoding("utf-8");
@@ -103,6 +112,7 @@ public class FtpUtil {
 	}
 
 	/**
+	 * 上传
 	 * @param hostname hostname
 	 * @param port port
 	 * @param user user
@@ -132,12 +142,13 @@ public class FtpUtil {
 	}
 
 	/**
-	 * @param hostname
-	 * @param port
-	 * @param user
-	 * @param passwd
+	 * 下载
+	 * @param hostname hostname
+	 * @param port port
+	 * @param user user
+	 * @param passwd passwd
 	 * @param sourceUri 资源绝对路径
-	 * @param file 本地文件
+	 * @param file 本地下载目标文件
 	 * @throws Exception Exception
 	 */
 	public static void download(String hostname, int port, String user, String passwd,
@@ -162,6 +173,7 @@ public class FtpUtil {
 	}
 	
 	/**
+	 * 删除
 	 * @param hostname hostname
 	 * @param port port
 	 * @param user user
@@ -186,13 +198,14 @@ public class FtpUtil {
 	}
 
 	/**
+	 * 遍历目录
 	 * @param hostname hostname
 	 * @param port port
 	 * @param user user
 	 * @param passwd passwd
 	 * @param sourceUri 资源目录绝对路径  
 	 * @param filter FTPFileFilter
-	 * @return List 
+	 * @return 遍历过滤结果 
 	 * @throws Exception Exception
 	 */
 	public static List<String> list(String hostname, int port, String user, String passwd
@@ -225,10 +238,11 @@ public class FtpUtil {
 	}
 
 	/**
-	 * @param hostname
-	 * @param port
-	 * @param user
-	 * @param passwd
+	 * 打开文件流
+	 * @param hostname hostname
+	 * @param port port
+	 * @param user user
+	 * @param passwd passwd
 	 * @param sourceUri 资源绝对路径
 	 * @return InputStreamStore
 	 * @throws Exception Exception

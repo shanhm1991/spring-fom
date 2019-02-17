@@ -3,6 +3,8 @@ package com.fom.context.helper;
 import java.io.File;
 import java.io.InputStream;
 
+import com.fom.context.task.DownloadTask;
+
 /**
  * DownloadTask中需要的具体操作方法
  * 

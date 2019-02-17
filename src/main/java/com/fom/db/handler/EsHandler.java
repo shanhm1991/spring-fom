@@ -22,6 +22,7 @@ public interface EsHandler {
 	 * @param index index
 	 * @param type type
 	 * @param jsonFile jsonFile
+	 * @return 创建结果
 	 * @throws Exception Exception
 	 */
 	boolean synCreateIndex(String poolName, String index, String type, File jsonFile) throws Exception;

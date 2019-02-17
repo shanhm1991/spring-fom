@@ -2,6 +2,8 @@ package com.fom.context.helper;
 
 import java.util.zip.ZipOutputStream;
 
+import com.fom.context.task.ZipDownloadTask;
+
 /**
  * ZipDownloadTask中需要的具体操作方法
  * 

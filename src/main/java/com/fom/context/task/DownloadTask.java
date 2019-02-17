@@ -6,8 +6,8 @@ import java.text.DecimalFormat;
 import org.apache.commons.lang.StringUtils;
 
 import com.fom.context.ExceptionHandler;
-import com.fom.context.Task;
 import com.fom.context.ResultHandler;
+import com.fom.context.Task;
 import com.fom.context.helper.DownloadHelper;
 
 /**

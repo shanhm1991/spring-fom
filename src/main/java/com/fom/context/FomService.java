@@ -12,7 +12,7 @@ public interface FomService {
 
 	/**
 	 * 获取容器中所有的context模块
-	 * @return Map<String, Object>
+	 * @return map结果
 	 * @throws Exception Exception
 	 */
 	Map<String, Object> list() throws Exception;
@@ -21,7 +21,7 @@ public interface FomService {
 	 * 更新context的配置项
 	 * @param name context名称
 	 * @param data json数据
-	 * @return Map<String, Object>
+	 * @return map结果
 	 * @throws Exception Exception
 	 */
 	Map<String, Object> save(String name, String data) throws Exception;
@@ -29,7 +29,7 @@ public interface FomService {
 	/**
 	 * 启动
 	 * @param name context名称
-	 * @return Map<String,Object>
+	 * @return map结果
 	 * @throws Exception Exception
 	 */
 	Map<String,Object> startup(String name) throws Exception;
@@ -37,7 +37,7 @@ public interface FomService {
 	/**
 	 * 停止
 	 * @param name context名称
-	 * @return Map<String,Object>
+	 * @return map结果
 	 * @throws Exception Exception
 	 */
 	Map<String,Object> shutDown(String name) throws Exception;
@@ -45,7 +45,7 @@ public interface FomService {
 	/**
 	 * 立即运行
 	 * @param name context名称
-	 * @return Map<String,Object>
+	 * @return map结果
 	 * @throws Exception Exception
 	 */
 	Map<String,Object> execNow(String name) throws Exception;
@@ -53,7 +53,7 @@ public interface FomService {
 	/**
 	 * 获取context状态
 	 * @param name context名称
-	 * @return Map<String,Object>
+	 * @return map结果
 	 * @throws Exception Exception
 	 */
 	Map<String,Object> state(String name) throws Exception;
@@ -61,7 +61,7 @@ public interface FomService {
 	/**
 	 * 新建context模块
 	 * @param json json数据
-	 * @return Map<String,Object>
+	 * @return map结果
 	 * @throws Exception Exception
 	 */
 	Map<String,Object> create(String json)  throws Exception;
@@ -76,7 +76,7 @@ public interface FomService {
 	/**
 	 * 获取context正在执行的任务线程的堆栈
 	 * @param name context名称
-	 * @return Map<String,Object>
+	 * @return map结果
 	 * @throws Exception Exception
 	 */
 	Map<String,Object> getActiveThreads(String name) throws Exception;

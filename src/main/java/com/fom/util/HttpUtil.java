@@ -42,7 +42,7 @@ import org.apache.http.protocol.HttpContext;
 /**
  * 
  * @author shanhm
- *
+ * 
  */
 public class HttpUtil {
 
@@ -160,9 +160,9 @@ public class HttpUtil {
 
 	/**
 	 * 删除文件
-	 * @param url
+	 * @param url url
 	 * @return int 返回码
-	 * @throws Exception
+	 * @throws Exception Exception
 	 */
 	public static int delete(String url) throws Exception {
 		CloseableHttpResponse response= request(new HttpDelete(url));

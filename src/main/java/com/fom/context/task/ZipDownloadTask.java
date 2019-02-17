@@ -381,7 +381,7 @@ public class ZipDownloadTask extends Task {
 	 * <br>默认返回zip中所有entry的name
 	 * @param zip zip文件
 	 * @return zip中真实下载的文件名称集合
-	 * @throws Exception
+	 * @throws Exception Exception
 	 */
 	protected Set<String> getZipEntryNames(File zip) throws Exception {
 		return ZipUtil.getEntrySet(zip);

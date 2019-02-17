@@ -2,6 +2,8 @@ package com.fom.context.helper;
 
 import java.io.File;
 
+import com.fom.context.task.UploadTask;
+
 /**
  * UploadTask中需要的具体操作方法
  * 

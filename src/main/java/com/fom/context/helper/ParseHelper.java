@@ -3,6 +3,7 @@ package com.fom.context.helper;
 import java.util.List;
 
 import com.fom.context.reader.Reader;
+import com.fom.context.task.ParseTask;
 /**
  * ParseTask中需要的具体操作方法
  * 

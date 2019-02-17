@@ -1,5 +1,7 @@
 package com.fom.context.helper;
 
+import com.fom.context.task.ZipParseTask;
+
 /**
  * ZipParseTask中需要的操作方法
  * 
