@@ -74,7 +74,7 @@ abstract class Pool<E> {
 			aliveTotal.decrementAndGet();
 			node.close();
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("关闭连接[overTime]" + state());
+				LOG.debug("close[overTime]" + state());
 			}
 		}
 	}
@@ -87,12 +87,12 @@ abstract class Pool<E> {
 					return node;
 				}else{
 					if (LOG.isDebugEnabled()) {
-						LOG.debug("关闭连接[reseted when acquire]" + state()); 
+						LOG.debug("close[reseted when acquire]" + state()); 
 					}
 				}
 			}else{
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("关闭连接[invalid when acquire]" + state()); 
+					LOG.debug("close[invalid when acquire]" + state()); 
 				}
 			}
 			node.close();
@@ -109,7 +109,7 @@ abstract class Pool<E> {
 
 			while(aliveCount.get() >= max){
 				if(!condition.await(waitTimeOut, TimeUnit.MILLISECONDS)){
-					throw new Exception("获取连接超时" + state());
+					throw new Exception("acquire overtime" + state());
 				}
 				node = acquireFree();
 				if(node != null){
@@ -125,7 +125,7 @@ abstract class Pool<E> {
 		aliveCount.incrementAndGet();
 		aliveTotal.incrementAndGet();
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("获取连接[create]" + state());
+			LOG.debug("acquire[create]" + state());
 		}
 		return node;
 	}
@@ -138,7 +138,7 @@ abstract class Pool<E> {
 			synchronized (node) { 
 				if(node.isClosed){
 					if (LOG.isDebugEnabled()) {
-						LOG.debug("忽略连接[closed when acquire free]" + state()); 
+						LOG.debug("ignore[closed when acquire free]" + state()); 
 					}
 					continue;
 				}
@@ -151,7 +151,7 @@ abstract class Pool<E> {
 				aliveCount.decrementAndGet();
 				aliveTotal.decrementAndGet();
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("关闭连接[invalid when acquire free]" + state()); 
+					LOG.debug("close[invalid when acquire free]" + state()); 
 				}
 				continue;
 			}
@@ -161,14 +161,14 @@ abstract class Pool<E> {
 				aliveCount.decrementAndGet();
 				aliveTotal.decrementAndGet();
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("关闭连接[reseted when acquire free]" + state()); 
+					LOG.debug("close[reseted when acquire free]" + state()); 
 				}
 				continue;
 			}
 
 			threadLocal.set(node);
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("获取连接[free]" + state()); 
+				LOG.debug("acquire[free]" + state()); 
 			}
 			return node;
 		}
@@ -194,7 +194,7 @@ abstract class Pool<E> {
 			aliveCount.decrementAndGet();
 			aliveTotal.decrementAndGet();
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("关闭连接[invalid when release]" + state()); 
+				LOG.debug("close[invalid when release]" + state()); 
 			}
 			return;
 		}
@@ -204,7 +204,7 @@ abstract class Pool<E> {
 			aliveCount.decrementAndGet();
 			aliveTotal.decrementAndGet();
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("关闭连接[reseted when release]" + state()); 
+				LOG.debug("close[reseted when release]" + state()); 
 			}
 			return;
 		}
@@ -216,7 +216,7 @@ abstract class Pool<E> {
 				aliveCount.decrementAndGet();
 				aliveTotal.decrementAndGet();
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("关闭连接[free full when release]" + state()); 
+					LOG.debug("close[free full when release]" + state()); 
 				}
 				return;
 			}
@@ -226,14 +226,14 @@ abstract class Pool<E> {
 				aliveCount.decrementAndGet();
 				aliveTotal.decrementAndGet();
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("关闭连接[release failed]" + state()); 
+					LOG.debug("close[release failed]" + state()); 
 				}
 				return;
 			}
 
 			freeCount.incrementAndGet();
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("释放连接" + state()); 
+				LOG.debug("release" + state()); 
 			}
 			condition.signalAll();
 		}finally{
@@ -242,7 +242,7 @@ abstract class Pool<E> {
 	}
 
 	private String state(){
-		return ", " + name + "连接池状态[空闲数/总数]：" + freeCount.get() + "/" + aliveCount.get();
+		return ", " + name + " state[free/total]：" + freeCount.get() + "/" + aliveCount.get();
 	}
 
 	protected abstract Node<E> create() throws Exception;
@@ -259,8 +259,7 @@ abstract class Pool<E> {
 	 * 将同步操作的单元由pool改为node,原先的pool实现要实现动态响应配置变化非常麻烦
 	 * 修改之后只需要在acquire()和release()时判断node是否 进行isReset()
 	 * 
-	 * @author X4584
-	 * @date 2018年12月13日
+	 * @author shanhm
 	 *
 	 * @param <T>
 	 */

@@ -39,7 +39,7 @@ public class PoolListener implements ServletContextListener{
 			}
 			PoolManager.listen(poolXml);
 		}catch(Exception e){
-			log.warn("pool初始化失败", e); 
+			log.warn("pool init failed", e); 
 			return;
 		}
 	}

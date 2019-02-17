@@ -114,7 +114,7 @@ class JdbcPool extends Pool<Connection>{
 			try {
 				v.close();
 			} catch (SQLException e) {
-				LOG.error("连接关闭异常[" + name + "]", e); 
+				LOG.error("close failed[" + name + "]", e); 
 			}
 		}
 
@@ -128,7 +128,7 @@ class JdbcPool extends Pool<Connection>{
 					return true;
 				}
 			}catch(SQLException e){
-				LOG.error("连接检查异常[" + name + "]", e); 
+				LOG.error("check failed[" + name + "]", e); 
 			}
 			
 			return false;
