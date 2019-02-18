@@ -90,11 +90,11 @@ img {
 						<tr>
 							<th></th>
 							<th>name</th>
+							<th>cron</th>
 							<th>load time</th>
 							<th>last execute time</th>
-							<th>cron expression</th>
 							<th>task completed</th>
-							<th>task in queue</th>
+							<th>task waiting</th>
 							<th>task active</th>
 							<th>state</th>
 							<th>log level</th>
@@ -127,14 +127,14 @@ img {
 														"data" : "name"
 													},
 													{
+														"data" : "cron",
+														"orderable" : false,
+													},
+													{
 														"data" : "loadTime"
 													},
 													{
 														"data" : "execTime"
-													},
-													{
-														"data" : "cron",
-														"orderable" : false,
 													},
 													{
 														"data" : "completed"
@@ -206,9 +206,9 @@ img {
 												if(state == "running"){
 													img = "<img src='images/running.png' title='running'>"
 												}else if(state == "waiting"){
-													img = "<img src='images/waiting.png' title='waiting for task completion'>"
+													img = "<img src='images/waiting.png' title='waiting for completion'>"
 												}else if(state == "sleeping"){
-													img = "<img src='images/sleeping.png' title='sleeping'>"
+													img = "<img src='images/sleeping.png' title='waiting for next time'>"
 												}else if(state == "stopping"){
 													img = "<img src='images/stopping.png' title='stopping'>"
 												}else if(state == "stopped"){
@@ -303,9 +303,9 @@ img {
 										if(data.state == "running"){
 											img = "<img src='images/running.png' title='running'>"
 										}else if(data.state == "waiting"){
-											img = "<img src='images/waiting.png' title='waiting for task completion'>"
+											img = "<img src='images/waiting.png' title='waiting for completion'>"
 										}else if(data.state == "sleeping"){
-											img = "<img src='images/sleeping.png' title='sleeping'>"
+											img = "<img src='images/sleeping.png' title='waiting for next time'>"
 										}else if(data.state == "stopping"){
 											img = "<img src='images/stopping.png' title='stopping'>"
 										}else if(data.state == "stopped"){
