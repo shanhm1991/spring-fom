@@ -110,7 +110,9 @@ public class UploadTask extends Task {
 			log.error("upload failed, code=" + code);
 			return false;
 		}
-		log.info("finish upload(" + size + "KB, code=" + code + "), cost=" + (System.currentTimeMillis() - sTime) + "ms");
+		if (log.isDebugEnabled()) {
+			log.debug("finish upload(" + size + "KB, code=" + code + "), cost=" + (System.currentTimeMillis() - sTime) + "ms");
+		}
 		return true;
 	}
 	

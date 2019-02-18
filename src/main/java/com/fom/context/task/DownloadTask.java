@@ -150,7 +150,9 @@ public final class DownloadTask extends Task {
 		long sTime = System.currentTimeMillis();
 		helper.download(id, downloadFile);
 		String size = new DecimalFormat("#.###").format(downloadFile.length());
-		log.info("finish downlod(" + size + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
+		if (log.isDebugEnabled()) {
+			log.debug("finish downlod(" + size + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
+		}
 		return true;
 	}
 

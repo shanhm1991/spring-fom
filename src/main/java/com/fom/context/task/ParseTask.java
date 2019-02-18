@@ -130,8 +130,10 @@ public class ParseTask extends Task {
 			}
 		}
 		read(lineIndex);
-		String size = new DecimalFormat("#.###").format(helper.getSourceSize(id));
-		log.info("finish file(" + size + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
+		if (log.isDebugEnabled()) {
+			String size = new DecimalFormat("#.###").format(helper.getSourceSize(id));
+			log.debug("finish file(" + size + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
+		}
 		return true;
 	}
 	
@@ -165,7 +167,9 @@ public class ParseTask extends Task {
 				if(batch > 0 && lineDatas.size() >= batch && notInterruped()){
 					int size = lineDatas.size();
 					helper.batchProcessLineData(lineDatas, batchTime); 
-					log.info("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
+					if (log.isDebugEnabled()) {
+						log.debug("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
+					}
 					logProcess(id, lineIndex);
 					lineDatas.clear();
 					batchTime = System.currentTimeMillis();
@@ -175,7 +179,9 @@ public class ParseTask extends Task {
 			if(!lineDatas.isEmpty() && notInterruped()){
 				int size = lineDatas.size();
 				helper.batchProcessLineData(lineDatas, batchTime); 
-				log.info("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
+				if (log.isDebugEnabled()) {
+					log.debug("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
+				}
 			}
 			logProcess(id, lineIndex);
 		}finally{
@@ -190,8 +196,10 @@ public class ParseTask extends Task {
 		return true;
 	}
 
-	private void logProcess(String uri, int lineIndex) throws IOException{ 
-		log.info("rows processed: " + lineIndex);
+	private void logProcess(String uri, int lineIndex) throws IOException{
+		if (log.isDebugEnabled()) {
+			log.debug("rows processed: " + lineIndex);
+		}
 		FileUtils.writeStringToFile(logFile, String.valueOf(lineIndex), false);
 	}
 }

@@ -221,10 +221,13 @@ public class ZipDownloadTask extends Task {
 					log.warn("ignore, file already downloaded: " + name); 
 					continue;
 				}
-				
+
 				currentDownloadFiles.add(name); 
-				String size = numFormat.format(helper.zipEntry(name, uri, zipOutStream) / 1024.0);
-				log.info("finish download[" + name + "(" + size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
+				if (log.isDebugEnabled()) {
+					String size = numFormat.format(helper.zipEntry(name, uri, zipOutStream) / 1024.0);
+					log.debug("finish download[" + name + "(" 
+							+ size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
+				}
 				if(currentDownloadFiles.size() >= zipEntryMax || zip.length() >= zipSizeMax){
 					//流管道关闭，如果继续写文件需要重新打开
 					IoUtil.close(zipOutStream);
@@ -247,7 +250,7 @@ public class ZipDownloadTask extends Task {
 		if(ArrayUtils.isEmpty(array)){
 			return historyDownloadFiles;
 		}
-		
+
 		for(File file : array){
 			historyDownloadFiles.addAll(getZipEntryNames(file));
 		}
@@ -311,8 +314,10 @@ public class ZipDownloadTask extends Task {
 		index++;
 		currentDownloadFiles.clear();
 
-		String size = numFormat.format(destFile.length() / 1024.0);
-		log.info("index zip: " + destName + "(" + size + "KB)");
+		if (log.isDebugEnabled()) {
+			String size = numFormat.format(destFile.length() / 1024.0);
+			log.debug("index zip: " + destName + "(" + size + "KB)");
+		}
 		return true;
 	}	
 

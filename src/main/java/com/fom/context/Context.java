@@ -644,28 +644,33 @@ public abstract class Context implements Serializable {
 
 				cleanFutures();
 
-				List<String> uriList = null;
+				List<String> taskIdList = null;
 				try {
-					uriList = getTaskIdList();
+					taskIdList = getTaskIdList();
 				} catch (Exception e) {
 					log.error("", e); 
 				}
 
-				if(uriList != null){
-					for (String sourceUri : uriList){
-						if(isExecutorAlive(sourceUri)){
+				if(taskIdList != null){
+					for (String taskId : taskIdList){
+						if(isExecutorAlive(taskId)){ 
+							if (log.isDebugEnabled()) {
+								log.debug("task" + "[" + taskId + "] is still alive, create canceled"); 
+							}
 							continue;
 						}
 						try {
-							Task executor = createTask(sourceUri);
+							Task executor = createTask(taskId);
 							executor.setContext(name); 
-							FUTUREMAP.put(sourceUri, pool.submit(executor)); 
-							log.info("create task" + "[" + sourceUri + "]"); 
+							FUTUREMAP.put(taskId, pool.submit(executor)); 
+							if (log.isDebugEnabled()) {
+								log.debug("create task" + "[" + taskId + "]"); 
+							}
 						} catch (RejectedExecutionException e) {
-							log.warn("task submit rejected, will try next time[" + sourceUri + "].");
+							log.warn("task submit rejected, will try next time[" + taskId + "].");
 							break;
 						}catch (Exception e) {
-							log.error("create task failed[" + sourceUri + "]", e); 
+							log.error("create task failed[" + taskId + "]", e); 
 						}
 					}
 				}

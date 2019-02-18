@@ -47,20 +47,20 @@ import com.fom.util.ZipUtil;
  * 
  */
 public class ZipParseTask extends Task {
-	
+
 	private int batch;
-	
+
 	@SuppressWarnings("rawtypes")
 	private ZipParseHelper helper;
-	
+
 	private File logFile;
-	
+
 	private File unzipDir;
-	
+
 	private List<String> matchedEntrys;
-	
+
 	private DecimalFormat numFormat  = new DecimalFormat("#.###");
-	
+
 	/**
 	 * @param sourceUri 资源uri
 	 * @param batch 批处理数
@@ -71,7 +71,7 @@ public class ZipParseTask extends Task {
 		super(sourceUri);
 		this.helper = helper;
 		String sourceName = new File(sourceUri).getName();
-		
+
 		if(StringUtils.isBlank(contextName)){
 			this.unzipDir = new File(System.getProperty("cache.parse") + File.separator + sourceName);
 			this.logFile = new File(System.getProperty("cache.parse") + File.separator + sourceName + ".log");
@@ -82,7 +82,7 @@ public class ZipParseTask extends Task {
 					+ File.separator + contextName + File.separator + sourceName + ".log");
 		}
 	}
-	
+
 	/**
 	 * @param sourceUri 资源uri
 	 * @param batch 批处理数
@@ -95,7 +95,7 @@ public class ZipParseTask extends Task {
 		this(sourceUri, batch, helper);
 		this.exceptionHandler = exceptionHandler;
 	}
-	
+
 	/**
 	 * @param sourceUri 资源uri
 	 * @param batch 批处理数
@@ -108,7 +108,7 @@ public class ZipParseTask extends Task {
 		this(sourceUri, batch, helper);
 		this.resultHandler = resultHandler;
 	}
-	
+
 	/**
 	 * @param sourceUri 资源uri
 	 * @param batch 批处理数
@@ -123,7 +123,7 @@ public class ZipParseTask extends Task {
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
 	}
-	
+
 	@Override
 	protected boolean beforeExec() throws Exception {
 		if(!ZipUtil.valid(id)){ 
@@ -133,7 +133,7 @@ public class ZipParseTask extends Task {
 			}
 			return false;
 		}
-		
+
 		File parentFile = logFile.getParentFile();
 		if(!parentFile.exists() && !parentFile.mkdirs()){
 			log.error("directory create failed:" + parentFile);
@@ -141,7 +141,7 @@ public class ZipParseTask extends Task {
 		}
 		return true;
 	}
-	
+
 	@Override
 	protected boolean exec() throws Exception {
 		if(logFile.exists()){
@@ -187,8 +187,10 @@ public class ZipParseTask extends Task {
 			}
 
 			long cost = ZipUtil.unZip(id, unzipDir);
-			String size = numFormat.format(helper.getSourceSize(id));
-			log.info("finish unzip(" + size + "KB), cost=" + cost + "ms");
+			if (log.isDebugEnabled()) {
+				String size = numFormat.format(helper.getSourceSize(id));
+				log.debug("finish unzip(" + size + "KB), cost=" + cost + "ms");
+			}
 
 			String[] nameArray = unzipDir.list();
 			if(ArrayUtils.isEmpty(nameArray)){ 
@@ -209,7 +211,7 @@ public class ZipParseTask extends Task {
 		}
 		return processFiles();
 	}
-	
+
 	@Override
 	protected boolean afterExec() throws Exception {
 		if(unzipDir.exists()){ 
@@ -272,9 +274,11 @@ public class ZipParseTask extends Task {
 
 		read(file.getPath(), lineIndex); 
 		matchedEntrys.remove(name);
-		
-		String size = numFormat.format(file.length() / 1024.0);
-		log.info("finish file[" + name + "(" + size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
+
+		if (log.isDebugEnabled()) {
+			String size = numFormat.format(file.length() / 1024.0);
+			log.debug("finish file[" + name + "(" + size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
+		}
 		if(!file.delete()){
 			log.error("delete file failed: " + name); 
 			return false;
@@ -288,12 +292,14 @@ public class ZipParseTask extends Task {
 			String name = it.next();
 			long sTime = System.currentTimeMillis();
 			File file = new File(unzipDir + File.separator + name);
-			
+
 			read(file.getPath(), 0);
 			it.remove();
-			
-			String size = numFormat.format(file.length() / 1024.0);
-			log.info("finish file[" + name + "(" + size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
+
+			if (log.isDebugEnabled()) {
+				String size = numFormat.format(file.length() / 1024.0);
+				log.debug("finish file[" + name + "(" + size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
+			}
 			if(!file.delete()){
 				log.error("delete file failed: " + file.getName()); 
 				return false;
@@ -301,7 +307,7 @@ public class ZipParseTask extends Task {
 		}
 		return true;
 	}
-	
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void read(String uri, int StartLine) throws Exception {
 		int lineIndex = 0;
@@ -319,7 +325,9 @@ public class ZipParseTask extends Task {
 				if(batch > 0 && lineDatas.size() >= batch && notInterruped()){
 					int size = lineDatas.size();
 					helper.batchProcessLineData(lineDatas, batchTime); 
-					log.info("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
+					if (log.isDebugEnabled()) {
+						log.debug("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
+					}
 					logProcess(uri, lineIndex);
 					lineDatas.clear();
 					batchTime = System.currentTimeMillis();
@@ -329,14 +337,16 @@ public class ZipParseTask extends Task {
 			if(!lineDatas.isEmpty() && notInterruped()){
 				int size = lineDatas.size();
 				helper.batchProcessLineData(lineDatas, batchTime); 
-				log.info("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
+				if (log.isDebugEnabled()) {
+					log.debug("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
+				}
 			}
 			logProcess(uri, lineIndex);
 		}finally{
 			IoUtil.close(reader);
 		}
 	}
-	
+
 	private boolean notInterruped() throws InterruptedException{
 		if(Thread.interrupted()){
 			throw new InterruptedException("interrupted when batchProcessLineData");
@@ -346,8 +356,10 @@ public class ZipParseTask extends Task {
 
 	private void logProcess(String uri, int lineIndex) throws IOException{ 
 		String data = uri + "\n" + lineIndex;
-		log.info("rows processed: " + lineIndex);
+		if (log.isDebugEnabled()) {
+			log.debug("rows processed: " + lineIndex);
+		}
 		FileUtils.writeStringToFile(logFile, data, false);
 	}
-		
+
 }

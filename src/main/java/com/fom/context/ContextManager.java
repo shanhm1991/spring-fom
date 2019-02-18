@@ -33,7 +33,7 @@ class ContextManager {
 			return;
 		}
 		contextMap.put(context.name, context);
-		LOG.info("init context[" + context.name + "]");
+		LOG.info("regist context[" + context.name + "]");
 	}
 
 	public static void startAll(){
