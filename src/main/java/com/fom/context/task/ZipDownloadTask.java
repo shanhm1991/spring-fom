@@ -218,7 +218,9 @@ public class ZipDownloadTask extends Task {
 				long sTime = System.currentTimeMillis();
 				String name = helper.getSourceName(uri);
 				if(historyDownloadFiles.contains(name)){
-					log.warn("ignore, file already downloaded: " + name); 
+					if (log.isDebugEnabled()) {
+						log.debug("ignore, file[" + name + "] was already downloaded."); 
+					}
 					continue;
 				}
 

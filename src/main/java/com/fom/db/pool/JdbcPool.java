@@ -55,7 +55,7 @@ class JdbcPool extends Pool<Connection>{
 				acquire();
 				release();
 			}
-			LOG.info("init pool[" + name + "] " + this);
+			LOG.info("pool[" + name + "] created" + this);
 		}
 	}
 	
@@ -114,7 +114,7 @@ class JdbcPool extends Pool<Connection>{
 			try {
 				v.close();
 			} catch (SQLException e) {
-				LOG.error("close failed[" + name + "]", e); 
+				LOG.error("connection close failed, [pool=" + name + "]", e); 
 			}
 		}
 
@@ -128,7 +128,7 @@ class JdbcPool extends Pool<Connection>{
 					return true;
 				}
 			}catch(SQLException e){
-				LOG.error("check failed[" + name + "]", e); 
+				LOG.error("connection check failed, [pool=" + name + "]", e); 
 			}
 			
 			return false;

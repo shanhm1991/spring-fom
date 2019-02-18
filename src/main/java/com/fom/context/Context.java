@@ -50,9 +50,9 @@ public abstract class Context implements Serializable {
 
 	protected transient Logger log;
 
-	volatile long loadTime;
+	volatile transient long loadTime;
 
-	volatile long execTime;
+	volatile transient long execTime;
 
 	private transient TimedExecutorPool pool;
 
@@ -97,6 +97,7 @@ public abstract class Context implements Serializable {
 	 */
 	@SuppressWarnings("unchecked")
 	private void initValue(String name,FomContext fc){
+		this.log = LoggerFactory.getLogger(name); 
 		Element element = ContextManager.elementMap.get(name); 
 		Map<String, String> cMap = ContextManager.createMap.get(name);
 		if(element != null){
@@ -142,7 +143,10 @@ public abstract class Context implements Serializable {
 		initPool();
 		loadTime = System.currentTimeMillis();
 	}
-	
+
+	/**
+	 * 注册到容器
+	 */
 	public void regist() {
 		ContextManager.register(this); 
 	}
@@ -163,7 +167,6 @@ public abstract class Context implements Serializable {
 		}
 	}
 
-	//反序列化时额外的初始化工作
 	void initPool(){
 		int core = Integer.parseInt(valueMap.get(Constants.THREADCORE)); 
 		int max = Integer.parseInt(valueMap.get(Constants.THREADMAX));
@@ -171,8 +174,15 @@ public abstract class Context implements Serializable {
 		int queueSize = Integer.parseInt(valueMap.get(Constants.QUEUESIZE));  
 		pool = new TimedExecutorPool(core,max,aliveTime,new LinkedBlockingQueue<Runnable>(queueSize));
 		pool.allowCoreThreadTimeOut(true);
-		//Logger不支持序列化，只好放到这里
+	}
+	
+	void unSerialize(){
 		this.log = LoggerFactory.getLogger(name); 
+		synchronized (name.intern()) {
+			state = inited; 
+		}
+		initPool();
+		loadTime = System.currentTimeMillis();
 	}
 
 	/**
@@ -193,7 +203,7 @@ public abstract class Context implements Serializable {
 	public final int getWaitings(){
 		return pool.getQueue().size();
 	}
-	
+
 	/**
 	 * 获取所有创建过的任务数
 	 * @return 所有创建过的任务数
@@ -490,7 +500,7 @@ public abstract class Context implements Serializable {
 	 */
 	public final State getState(){
 		synchronized (name.intern()) {
-			if(state == stopping && pool.getActiveCount() == 0){
+			if(state == stopping && pool.isTerminated()){
 				state = stopped;
 			}
 			return state;
@@ -508,6 +518,9 @@ public abstract class Context implements Serializable {
 			case inited:
 			case stopped:
 				state = running;
+				if(pool.isShutdown()){
+					initPool();
+				}
 				innerThread = new InnerThread();
 				innerThread.start();
 				map.put("result", true);
@@ -655,7 +668,7 @@ public abstract class Context implements Serializable {
 					for (String taskId : taskIdList){
 						if(isExecutorAlive(taskId)){ 
 							if (log.isDebugEnabled()) {
-								log.debug("task" + "[" + taskId + "] is still alive, create canceled"); 
+								log.debug("task[" + taskId + "] is still alive, create canceled"); 
 							}
 							continue;
 						}
@@ -663,14 +676,12 @@ public abstract class Context implements Serializable {
 							Task executor = createTask(taskId);
 							executor.setContext(name); 
 							FUTUREMAP.put(taskId, pool.submit(executor)); 
-							if (log.isDebugEnabled()) {
-								log.debug("create task" + "[" + taskId + "]"); 
-							}
+							log.info("task[" + taskId + "] created"); 
 						} catch (RejectedExecutionException e) {
-							log.warn("task submit rejected, will try next time[" + taskId + "].");
+							log.warn("task[" + taskId + "] submit rejected, will try in next time.");
 							break;
 						}catch (Exception e) {
-							log.error("create task failed[" + taskId + "]", e); 
+							log.error("task[" + taskId + "] create failed", e); 
 						}
 					}
 				}
@@ -725,7 +736,7 @@ public abstract class Context implements Serializable {
 			state = waiting;
 		}
 		pool.shutdown();
-		
+
 		if(waitTask()){
 			synchronized (name.intern()) {
 				state = stopped;

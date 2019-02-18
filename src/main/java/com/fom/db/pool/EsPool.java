@@ -69,7 +69,7 @@ class EsPool extends Pool<TransportClient>{
 			}
 			client = newClient;
 			clientNode.v = client;
-			LOG.info("init pool[" + this.name + "]" + this);
+			LOG.info("pool[" + this.name + "] created" + this);
 		}
 	}
 

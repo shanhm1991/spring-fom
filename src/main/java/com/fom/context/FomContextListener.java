@@ -137,7 +137,7 @@ public class FomContextListener implements ServletContextListener {
 			try{
 				input = new ObjectInputStream(new FileInputStream(file));
 				Context context = (Context) input.readObject();
-				context.initPool();
+				context.unSerialize();
 				context.regist();
 			}catch(Exception e){
 				LOG.error("context[" + name + "] init failed", e);

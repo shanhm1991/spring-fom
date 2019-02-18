@@ -74,7 +74,7 @@ abstract class Pool<E> {
 			aliveTotal.decrementAndGet();
 			node.close();
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("close[overTime]" + state());
+				LOG.debug("connection closed[overTime]" + state());
 			}
 		}
 	}
@@ -87,12 +87,12 @@ abstract class Pool<E> {
 					return node;
 				}else{
 					if (LOG.isDebugEnabled()) {
-						LOG.debug("close[reseted when acquire]" + state()); 
+						LOG.debug("connection closed[reseted when acquire]" + state()); 
 					}
 				}
 			}else{
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("close[invalid when acquire]" + state()); 
+					LOG.debug("connection closed[invalid when acquire]" + state()); 
 				}
 			}
 			node.close();
@@ -109,7 +109,7 @@ abstract class Pool<E> {
 
 			while(aliveCount.get() >= max){
 				if(!condition.await(waitTimeOut, TimeUnit.MILLISECONDS)){
-					throw new Exception("acquire overtime" + state());
+					throw new Exception("acquire connection overtime" + state());
 				}
 				node = acquireFree();
 				if(node != null){
@@ -125,7 +125,7 @@ abstract class Pool<E> {
 		aliveCount.incrementAndGet();
 		aliveTotal.incrementAndGet();
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("acquire[create]" + state());
+			LOG.debug("connection acquired[create]" + state());
 		}
 		return node;
 	}
@@ -138,7 +138,7 @@ abstract class Pool<E> {
 			synchronized (node) { 
 				if(node.isClosed){
 					if (LOG.isDebugEnabled()) {
-						LOG.debug("ignore[closed when acquire free]" + state()); 
+						LOG.debug("connection ignored[closed when acquire free]" + state()); 
 					}
 					continue;
 				}
@@ -151,7 +151,7 @@ abstract class Pool<E> {
 				aliveCount.decrementAndGet();
 				aliveTotal.decrementAndGet();
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("close[invalid when acquire free]" + state()); 
+					LOG.debug("connection closed[invalid when acquire free]" + state()); 
 				}
 				continue;
 			}
@@ -161,14 +161,14 @@ abstract class Pool<E> {
 				aliveCount.decrementAndGet();
 				aliveTotal.decrementAndGet();
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("close[reseted when acquire free]" + state()); 
+					LOG.debug("connection closed[reseted when acquire free]" + state()); 
 				}
 				continue;
 			}
 
 			threadLocal.set(node);
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("acquire[free]" + state()); 
+				LOG.debug("connection acquired[free]" + state()); 
 			}
 			return node;
 		}
@@ -194,7 +194,7 @@ abstract class Pool<E> {
 			aliveCount.decrementAndGet();
 			aliveTotal.decrementAndGet();
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("close[invalid when release]" + state()); 
+				LOG.debug("connection closed[invalid when release]" + state()); 
 			}
 			return;
 		}
@@ -204,7 +204,7 @@ abstract class Pool<E> {
 			aliveCount.decrementAndGet();
 			aliveTotal.decrementAndGet();
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("close[reseted when release]" + state()); 
+				LOG.debug("connection closed[reseted when release]" + state()); 
 			}
 			return;
 		}
@@ -216,7 +216,7 @@ abstract class Pool<E> {
 				aliveCount.decrementAndGet();
 				aliveTotal.decrementAndGet();
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("close[free full when release]" + state()); 
+					LOG.debug("connection closed[free full when release]" + state()); 
 				}
 				return;
 			}
@@ -226,7 +226,7 @@ abstract class Pool<E> {
 				aliveCount.decrementAndGet();
 				aliveTotal.decrementAndGet();
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("close[release failed]" + state()); 
+					LOG.debug("connection closed[release failed]" + state()); 
 				}
 				return;
 			}
@@ -242,7 +242,7 @@ abstract class Pool<E> {
 	}
 
 	private String state(){
-		return ", " + name + " state[free/total]：" + freeCount.get() + "/" + aliveCount.get();
+		return ", pool[" + name + "] state[free/total]：" + freeCount.get() + "/" + aliveCount.get();
 	}
 
 	protected abstract Node<E> create() throws Exception;
