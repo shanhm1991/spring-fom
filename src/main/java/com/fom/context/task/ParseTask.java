@@ -132,7 +132,7 @@ public class ParseTask extends Task {
 		read(lineIndex);
 		if (log.isDebugEnabled()) {
 			String size = new DecimalFormat("#.###").format(helper.getSourceSize(id));
-			log.debug("finish file(" + size + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
+			log.debug("finish parse(" + size + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
 		}
 		return true;
 	}

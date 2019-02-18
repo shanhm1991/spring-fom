@@ -223,8 +223,8 @@ public class ZipDownloadTask extends Task {
 				}
 
 				currentDownloadFiles.add(name); 
+				String size = numFormat.format(helper.zipEntry(name, uri, zipOutStream) / 1024.0);
 				if (log.isDebugEnabled()) {
-					String size = numFormat.format(helper.zipEntry(name, uri, zipOutStream) / 1024.0);
 					log.debug("finish download[" + name + "(" 
 							+ size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
 				}

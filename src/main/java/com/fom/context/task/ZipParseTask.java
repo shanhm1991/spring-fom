@@ -277,7 +277,7 @@ public class ZipParseTask extends Task {
 
 		if (log.isDebugEnabled()) {
 			String size = numFormat.format(file.length() / 1024.0);
-			log.debug("finish file[" + name + "(" + size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
+			log.debug("finish parse[" + name + "(" + size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
 		}
 		if(!file.delete()){
 			log.error("delete file failed: " + name); 
