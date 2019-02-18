@@ -90,9 +90,9 @@ public class DownloadHdfsZipExample extends Context {
 	}
 
 	@Override
-	protected Task createTask(String sourceUri) throws Exception {
+	protected Task createTask(String taskId) throws Exception {
 		HdfsHelper helper = new HdfsHelper(masterUrl, slaveUrl);
-		List<String> pathList = HdfsUtil.list(masterUrl, slaveUrl, new Path(sourceUri), new PathFilter(){
+		List<String> pathList = HdfsUtil.list(masterUrl, slaveUrl, new Path(taskId), new PathFilter(){
 			@Override
 			public boolean accept(Path path) {
 				if(StringUtils.isBlank(signalName)){
@@ -102,7 +102,7 @@ public class DownloadHdfsZipExample extends Context {
 			}
 		});  
 
-		String sourceName = new File(sourceUri).getName();
+		String sourceName = new File(taskId).getName();
 		DownloadHdfsZipExampleResultHandler handler = 
 				new DownloadHdfsZipExampleResultHandler(name, masterUrl, slaveUrl, srPath,isDelSrc);
 		return new ZipDownloadTask(pathList, sourceName, dest, entryMax, sizeMax, isDelSrc, helper, handler);

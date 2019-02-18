@@ -53,8 +53,8 @@ public class ImportMysqlExample2 extends Context {
 	}
 
 	@Override
-	protected Task createTask(String sourceUri) throws Exception {
+	protected Task createTask(String taskId) throws Exception { 
 		ImportMysqlExample2Helper helper = new ImportMysqlExample2Helper(getName());
-		return new ParseTask(sourceUri, batch, helper);
+		return new ParseTask(taskId, batch, helper);
 	}
 }

@@ -45,7 +45,7 @@ public class DownloadFtpZipExample extends Context {
 	}
 
 	@Override
-	protected Task createTask(String sourceUri) throws Exception {
+	protected Task createTask(String taskId) throws Exception {
 		ZipDownloadHelper helper = new FtpHelper(hostname, port, user, passwd);
 		List<String> list = new ArrayList<String>();
 		list.add("/ftp/test1.txt");
@@ -57,7 +57,7 @@ public class DownloadFtpZipExample extends Context {
 		list.add("/ftp/test7.txt");
 		list.add("/ftp/test8.txt");
 		
-		return new ZipDownloadTask(list, "httpTest", dest, 10, 1024 * 1024, false, helper);
+		return new ZipDownloadTask(list, taskId, dest, 10, 1024 * 1024, false, helper);
 	}
 
 }

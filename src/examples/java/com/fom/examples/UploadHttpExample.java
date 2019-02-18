@@ -30,11 +30,10 @@ public class UploadHttpExample extends Context {
 	}
 
 	@Override
-	protected Task createTask(String sourceUri) throws Exception {
+	protected Task createTask(String taskId) throws Exception { 
 		Thread.sleep(15000); 
 		
-		String destUri = "http://localhost:4040/fom/";
-		return new UploadTask(sourceUri, destUri, false, new HttpHelper());
+		return new UploadTask(taskId, "http://localhost:4040/fom/", false, new HttpHelper());
 	}
 
 }

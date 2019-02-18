@@ -138,7 +138,7 @@ public class FomContextListener implements ServletContextListener {
 				input = new ObjectInputStream(new FileInputStream(file));
 				Context context = (Context) input.readObject();
 				context.initPool();
-				ContextManager.register(context); 
+				context.regist();
 			}catch(Exception e){
 				LOG.error("context[" + name + "] init failed", e);
 			}finally{
@@ -187,10 +187,12 @@ public class FomContextListener implements ServletContextListener {
 
 				ContextManager.elementMap.put(name, element);
 				if(isNameEmpty){ 
-					contextClass.newInstance();
+					Context context = (Context)contextClass.newInstance();
+					context.regist();
 				}else{
 					Constructor constructor = contextClass.getConstructor(String.class);
-					constructor.newInstance(name);
+					Context context = (Context)constructor.newInstance(name);
+					context.regist();
 				}
 			} catch (Exception e) {
 				LOG.error("context[" + name + ",class=" + clazz + "] init failed", e);
@@ -265,7 +267,8 @@ public class FomContextListener implements ServletContextListener {
 			}
 			
 			try {
-				clazz.newInstance();
+				Context context = (Context)clazz.newInstance();
+				context.regist();
 			} catch (Exception e) {
 				LOG.error("context[" + clazz.getName() + "] init failed", e);
 			} 

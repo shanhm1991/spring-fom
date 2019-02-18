@@ -41,14 +41,13 @@ public class UploadFtpExample extends Context {
 		list.add(path + File.separator + "ftp.jpg");
 		return list;
 	}
-
+ 
 	@Override
-	protected Task createTask(String sourceUri) throws Exception {
+	protected Task createTask(String taskId) throws Exception {
 		Thread.sleep(5000); 
 		
 		UploadHelper helper = new FtpHelper(hostname, port, user, passwd);
-		String destUri = "http://localhost:4040/fom/";
-		return new UploadTask(sourceUri, destUri, false, helper);
+		return new UploadTask(taskId, "http://localhost:4040/fom/", false, helper);
 	}
 
 }

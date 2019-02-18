@@ -40,7 +40,7 @@ public class DownloadFtpExample extends Context {
 	}
 
 	@Override
-	protected Task createTask(String sourceUri) throws Exception {
+	protected Task createTask(String taskId) throws Exception { 
 		String hostname = getValue("hostname");
 		int port = getInt("port", 0);
 		String user = getValue("user");
@@ -48,8 +48,8 @@ public class DownloadFtpExample extends Context {
 		String dest = getValue("dest");
 		
 		DownloadHelper helper = new FtpHelper(hostname, port, user, passwd);
-		String sourceName = new File(sourceUri).getName();
-		return new DownloadTask(sourceUri, sourceName, dest, false, true, helper);
+		String sourceName = new File(taskId).getName();
+		return new DownloadTask(taskId, sourceName, dest, false, true, helper);
 	}
 
 }

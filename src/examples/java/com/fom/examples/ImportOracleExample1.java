@@ -52,9 +52,9 @@ public class ImportOracleExample1 extends Context {
 	}
 
 	@Override
-	protected Task createTask(String sourceUri) throws Exception {
+	protected Task createTask(String taskId) throws Exception { 
 		String subPettern = getString("zipEntryPattern", "");
 		ImportOracleExample1Helper helper = new ImportOracleExample1Helper(getName(), subPettern);
-		return new ZipParseTask(sourceUri, batch, helper);
+		return new ZipParseTask(taskId, batch, helper);
 	}
 }

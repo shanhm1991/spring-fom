@@ -141,6 +141,9 @@ public abstract class Context implements Serializable {
 		}
 		initPool();
 		loadTime = System.currentTimeMillis();
+	}
+	
+	public void regist() {
 		ContextManager.register(this); 
 	}
 

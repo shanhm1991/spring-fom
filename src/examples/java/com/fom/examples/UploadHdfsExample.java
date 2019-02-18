@@ -37,11 +37,11 @@ public class UploadHdfsExample extends Context {
 	}
 
 	@Override
-	protected Task createTask(String sourceUri) throws Exception {
+	protected Task createTask(String taskId) throws Exception { 
 		Thread.sleep(10000); 
 		
 		UploadHelper helper = new HdfsHelper(masterUrl, slaveUrl);
-		return new UploadTask(sourceUri, destPath, false, helper);
+		return new UploadTask(taskId, destPath, false, helper);
 		
 	}
 

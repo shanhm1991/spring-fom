@@ -35,7 +35,7 @@ public class DownloadHttpZipExample extends Context {
 	}
 
 	@Override
-	protected Task createTask(String sourceUri) throws Exception {
+	protected Task createTask(String taskId) throws Exception {
 		List<String> list = new ArrayList<String>();
 		list.add("http://localhost:4040/fom/index.html");
 		list.add("http://localhost:4040/fom/js/datatables.js");
@@ -56,7 +56,7 @@ public class DownloadHttpZipExample extends Context {
 		list.add("http://localhost:4040/fom/images/start.png");
 		list.add("http://localhost:4040/fom/images/stop.png");
 		
-		return new ZipDownloadTask(list, "httpTest", dest, 10, 1024 * 1024, false, new HttpHelper());
+		return new ZipDownloadTask(list, taskId, dest, 10, 1024 * 1024, false, new HttpHelper());
 	}
 
 }

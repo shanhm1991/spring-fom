@@ -20,14 +20,14 @@ public class DemoStateTest1 extends Context {
 	@Override
 	protected List<String> getTaskIdList() throws Exception {
 		List<String> list = new ArrayList<String>();
-		list.add("stateTest");
+		list.add("task1");
 		return list;
 	}
 
 	@Override
-	protected Task createTask(String sourceUri) throws Exception {
+	protected Task createTask(String taskId) throws Exception {
 		
-		return new Task(sourceUri){
+		return new Task(taskId){
 
 			@Override
 			protected boolean exec() throws Exception {
