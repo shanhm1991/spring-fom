@@ -71,7 +71,9 @@ public class StorageUtil {
 			offer(zkAddress, client);
 		}
 
-		LOG.debug("storage file[" + file.getName() + "],url=" + url);
+		if(LOG.isDebugEnabled()){
+			LOG.debug("storage file[" + file.getName() + "],url=" + url);
+		}
 		if(deleteOnComplete && !file.delete()){
 			LOG.warn("delete file failed:" + file.getName()); 
 		}

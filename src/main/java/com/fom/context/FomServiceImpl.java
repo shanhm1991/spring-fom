@@ -8,6 +8,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +43,7 @@ public class FomServiceImpl implements FomService {
 			Context context = entry.getValue();
 			Map<String,String> cmap = new HashMap<>();
 			cmap.putAll(context.valueMap); 
-			
+
 			cmap.put("name", context.name);
 			cmap.put("state", context.getState().name());
 			if(!cmap.containsKey(Constants.CRON)){
@@ -62,7 +64,7 @@ public class FomServiceImpl implements FomService {
 		map.put("recordsFiltered", list.size());
 		return map;
 	}
-	
+
 	@Override
 	public Map<String, Object> save(String name, String json) throws Exception {
 		Map<String,Object> map = new HashMap<>();
@@ -262,13 +264,27 @@ public class FomServiceImpl implements FomService {
 
 	@Override
 	public Map<String, Object> getActiveThreads(String name) throws Exception {
+
+		Logger root = LogManager.getRootLogger();
+
+		Enumeration e = LogManager.getLoggerRepository().getCurrentLoggers();
+		while(e.hasMoreElements()){
+			Logger logger = (Logger)e.nextElement();
+			if((logger.getAdditivity() && logger.getParent() != root)
+					|| ContextManager.contextMap.containsKey(logger.getName())){ 
+				continue;
+			}
+			System.out.println(logger.getName()); 
+		}
+
+
 		Map<String,Object> map = new HashMap<>();
 		map.put("size", 0);
 		Context context = ContextManager.contextMap.get(name);
 		if(context == null){
 			return map;
 		}
-		
+
 		Collection<Thread> collection = context.getActiveThreads();
 		map.put("size", collection.size());
 		for(Thread thread : context.getActiveThreads()){

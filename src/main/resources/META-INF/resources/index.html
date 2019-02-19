@@ -78,6 +78,21 @@ img {
 </style>
 </head>
 <body>
+	<div class="layui-input-inline" style="float: right;">
+	    Log Level:
+		<select id="logger" style="margin: 10px 1px 5px 1px" onchange="">
+			<option>adadad</option>
+			<option>wqeq</option>
+			<option>wdqd</option>
+			<option>sasadsa</option>
+		</select>-
+		<select id="level" style="margin: 10px 1px 5px 1px;" onchange="">
+			<option>DEBUG</option>
+			<option>INFO</option>
+			<option>WARN</option>
+			<option>ERROR</option>
+		</select>
+	</div>
 	<button class="layui-btn" style="margin: 10px 10px 10px 10px"
 		onclick="create();">
 		<i class="layui-icon layui-icon-add-circle" /></i>New
@@ -117,7 +132,9 @@ img {
 								.DataTable(
 										{
 											"ajax" : "/fom/list",
-											"aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
+											"aLengthMenu" : [
+													[ 25, 50, 100, -1 ],
+													[ 25, 50, 100, "All" ] ],
 											"columns" : [
 													{
 														"class" : "details-control",
@@ -163,7 +180,8 @@ img {
 																+ "<i class='layui-icon layui-icon-refresh boxbtn' title='execute immediately' onclick='operation(this, 3)'/></i>",
 														"orderable" : false
 													}, ],
-											"createdRow" : function(row, data, index) {
+											"createdRow" : function(row, data,
+													index) {
 												var name;
 												var level;
 												var state;
@@ -173,62 +191,81 @@ img {
 														name = data[key];
 													} else if (key == "level") {
 														level = data[key];
-													}else if(key == "state"){
+													} else if (key == "state") {
 														state = data[key];
-													}else if(key == "active"){
+													} else if (key == "active") {
 														actives = data[key];
 													}
 												}
-												var select = "<select id='select_" + name + "' value='" + level + "' onchange='log(this)' >";
-												if(level == "DEBUG"){
-													select = select + "<option value='DEBUG' selected='selected'>DEBUG</option>"
-													+ "<option value='INFO'>INFO</option>"
-										            + "<option value='WARN'>WARN</option>"
-										            + "<option value='ERROR'>ERROR</option>"
-										            + "</select>"
-												}else if(level == "INFO"){
-													select = select + "<option value='DEBUG'>DEBUG</option>"
-													+ "<option value='INFO' selected='selected'>INFO</option>"
-										            + "<option value='WARN'>WARN</option>"
-										            + "<option value='ERROR'>ERROR</option>"
-										            + "</select>"
-												}else if(level == "WARN"){
-													select = select + "<option value='DEBUG'>DEBUG</option>"
-													+ "<option value='INFO'>INFO</option>"
-										            + "<option value='WARN' selected='selected'>WARN</option>"
-										            + "<option value='ERROR'>ERROR</option>"
-										            + "</select>"
-												}else{
-													select = select + "<option value='DEBUG'>DEBUG</option>"
-													+ "<option value='INFO'>INFO</option>"
-										            + "<option value='WARN'>WARN</option>"
-										            + "<option value='ERROR' selected='selected'>ERROR</option>"
-										            + "</select>"
+												var select = "<select id='select_"
+														+ name
+														+ "' value='"
+														+ level
+														+ "' onchange='log(this)' >";
+												if (level == "DEBUG") {
+													select = select
+															+ "<option value='DEBUG' selected='selected'>DEBUG</option>"
+															+ "<option value='INFO'>INFO</option>"
+															+ "<option value='WARN'>WARN</option>"
+															+ "<option value='ERROR'>ERROR</option>"
+															+ "</select>"
+												} else if (level == "INFO") {
+													select = select
+															+ "<option value='DEBUG'>DEBUG</option>"
+															+ "<option value='INFO' selected='selected'>INFO</option>"
+															+ "<option value='WARN'>WARN</option>"
+															+ "<option value='ERROR'>ERROR</option>"
+															+ "</select>"
+												} else if (level == "WARN") {
+													select = select
+															+ "<option value='DEBUG'>DEBUG</option>"
+															+ "<option value='INFO'>INFO</option>"
+															+ "<option value='WARN' selected='selected'>WARN</option>"
+															+ "<option value='ERROR'>ERROR</option>"
+															+ "</select>"
+												} else {
+													select = select
+															+ "<option value='DEBUG'>DEBUG</option>"
+															+ "<option value='INFO'>INFO</option>"
+															+ "<option value='WARN'>WARN</option>"
+															+ "<option value='ERROR' selected='selected'>ERROR</option>"
+															+ "</select>"
 												}
-											    $('td', row).eq(10).html(select);
-												
+												$('td', row).eq(10)
+														.html(select);
+
 												var img;
-												if(state == "running"){
+												if (state == "running") {
 													img = "<img src='images/running.png' title='running'>"
-												}else if(state == "waiting"){
+												} else if (state == "waiting") {
 													img = "<img src='images/waiting.png' title='waiting for completion'>"
-												}else if(state == "sleeping"){
+												} else if (state == "sleeping") {
 													img = "<img src='images/sleeping.png' title='waiting for next time'>"
-												}else if(state == "stopping"){
+												} else if (state == "stopping") {
 													img = "<img src='images/stopping.png' title='stopping'>"
-												}else if(state == "stopped"){
+												} else if (state == "stopped") {
 													img = "<img src='images/stopped.png' title='stopped'>"
-												}else{
+												} else {
 													img = "<img src='images/unknown.png' title='unknown'>"
 												}
 												$('td', row).eq(9).html(img);
-												
-												$('td', row).eq(8).html("<a id='a_" + name + "' onclick='taskdetail(this)' href='#'>" + actives + "</a>");
+
+												$('td', row)
+														.eq(8)
+														.html(
+																"<a id='a_"
+																		+ name
+																		+ "' onclick='taskdetail(this)' href='#'>"
+																		+ actives
+																		+ "</a>");
 											},
 											"order" : [ [ 1, 'asc' ] ]
 										});
 
-						$('#fom tbody').on('click', 'td.details-control',
+						$('#fom tbody')
+								.on(
+										'click',
+										'td.details-control',
 										function() {
 											var tr = $(this).closest('tr');
 											var row = table.row(tr);
@@ -262,8 +299,9 @@ img {
 			if (key == "name") {
 				name = data[key];
 				continue;
-			} else if (key == "loadTime" || key == "execTime" || key == "success" || key == "failed"
-					|| key == "state" || key == "level" || key == "active" || key == "waiting") {
+			} else if (key == "loadTime" || key == "execTime"
+					|| key == "success" || key == "failed" || key == "state"
+					|| key == "level" || key == "active" || key == "waiting") {
 				continue;
 			}
 			html = html
@@ -284,52 +322,68 @@ img {
 		if (opid == null || name == "") {
 			return;
 		}
-		$.ajax({
-			url : "/fom/operation",
-			type : "POST",
-			dataType : "json",
-			data : {
-				"name" : name,
-				"opid" : opid
-			},
-			success : function(data) {
-				if (data.result) {
-					TINY.box.show("success, " + data.msg, 0, 0, 0, 0, 4,
-							function() {
-								$.ajax({
-									url : "/fom/state",
-									type : "POST",
-									dataType : "json",
-									data : {
-										"name" : name
-									},
-									success : function(data) {
-										var img;
-										if(data.state == "running"){
-											img = "<img src='images/running.png' title='running'>"
-										}else if(data.state == "waiting"){
-											img = "<img src='images/waiting.png' title='waiting for completion'>"
-										}else if(data.state == "sleeping"){
-											img = "<img src='images/sleeping.png' title='waiting for next time'>"
-										}else if(data.state == "stopping"){
-											img = "<img src='images/stopping.png' title='stopping'>"
-										}else if(data.state == "stopped"){
-											img = "<img src='images/stopped.png' title='stopped'>"
-										}else{
-											img = "<img src='images/unknown.png' title='unknown'>"
-										}
-										Tr.find('td').eq(9).html(img);
-									}
-								});
-							});
-				} else {
-					TINY.box.show("failed, " + data.msg, 0, 0, 0, 0, 4);
-				}
-			},
-			error : function(XMLHttpRequest, textStatus, errorThrown) {
-				TINY.box.show(XMLHttpRequest.responseText, 0, 0, 0, 0, 4);
-			}
-		});
+		$
+				.ajax({
+					url : "/fom/operation",
+					type : "POST",
+					dataType : "json",
+					data : {
+						"name" : name,
+						"opid" : opid
+					},
+					success : function(data) {
+						if (data.result) {
+							TINY.box
+									.show(
+											"success, " + data.msg,
+											0,
+											0,
+											0,
+											0,
+											4,
+											function() {
+												$
+														.ajax({
+															url : "/fom/state",
+															type : "POST",
+															dataType : "json",
+															data : {
+																"name" : name
+															},
+															success : function(
+																	data) {
+																var img;
+																if (data.state == "running") {
+																	img = "<img src='images/running.png' title='running'>"
+																} else if (data.state == "waiting") {
+																	img = "<img src='images/waiting.png' title='waiting for completion'>"
+																} else if (data.state == "sleeping") {
+																	img = "<img src='images/sleeping.png' title='waiting for next time'>"
+																} else if (data.state == "stopping") {
+																	img = "<img src='images/stopping.png' title='stopping'>"
+																} else if (data.state == "stopped") {
+																	img = "<img src='images/stopped.png' title='stopped'>"
+																} else {
+																	img = "<img src='images/unknown.png' title='unknown'>"
+																}
+																Tr
+																		.find(
+																				'td')
+																		.eq(9)
+																		.html(
+																				img);
+															}
+														});
+											});
+						} else {
+							TINY.box.show("failed, " + data.msg, 0, 0, 0, 0, 4);
+						}
+					},
+					error : function(XMLHttpRequest, textStatus, errorThrown) {
+						TINY.box.show(XMLHttpRequest.responseText, 0, 0, 0, 0,
+								4);
+					}
+				});
 	}
 
 	function edit(e) {
@@ -418,22 +472,22 @@ img {
 			type : 1,
 			skin : 'layui-layer-demo',
 			area : [ '800px', '500px' ],
-			maxmin: true,
+			maxmin : true,
 			closeBtn : 2,
 			anim : 2,
 			content : html,
-			btn : ['save'],
-		    btn1: function(index, layero){
-		    	var trList = layero.find("table tbody").children("tr");
-		    	var json = '{';
-		    	for (var i=0;i<trList.length - 1;i++) {
-		            var tdArr = trList.eq(i).find("td");
-		            var key = tdArr.eq(0).find('input').val();
-		            var value = tdArr.eq(1).find('input').val();
-		            json = json + '"' + key + '":"' + value + '",';
-		        }
-		    	json = json.substr(0, json.length - 1) + '}';
-		    	$.ajax({
+			btn : [ 'save' ],
+			btn1 : function(index, layero) {
+				var trList = layero.find("table tbody").children("tr");
+				var json = '{';
+				for (var i = 0; i < trList.length - 1; i++) {
+					var tdArr = trList.eq(i).find("td");
+					var key = tdArr.eq(0).find('input').val();
+					var value = tdArr.eq(1).find('input').val();
+					json = json + '"' + key + '":"' + value + '",';
+				}
+				json = json.substr(0, json.length - 1) + '}';
+				$.ajax({
 					url : "/fom/create",
 					type : "POST",
 					dataType : "json",
@@ -444,30 +498,30 @@ img {
 						if (data.result) {
 							created = 1;
 							layer.open({
-								  title: 'result'
-								  ,content: 'success, ' + data.msg
-								});
+								title : 'result',
+								content : 'success, ' + data.msg
+							});
 						} else {
 							layer.open({
-								  title: 'result'
-								  ,content: 'failed, ' + data.msg
-								});
+								title : 'result',
+								content : 'failed, ' + data.msg
+							});
 						}
 					},
 					error : function(XMLHttpRequest, textStatus, errorThrown) {
 						layer.open({
-							  title: 'result'
-							  ,content: 'failed, ' + XMLHttpRequest.responseText
-							});
+							title : 'result',
+							content : 'failed, ' + XMLHttpRequest.responseText
+						});
 					}
 				});
-		    },
-		    cancel: function(index, layero){ 
-		    	if(created == 1){ 
-		    	   table.ajax.reload();
-		        }
-		    	return true; 
-		    }  
+			},
+			cancel : function(index, layero) {
+				if (created == 1) {
+					table.ajax.reload();
+				}
+				return true;
+			}
 		});
 	}
 
@@ -478,47 +532,50 @@ img {
 						"<tr><td><input type='text'/></td><td><input type='text'/></td>"
 								+ "<td title='delete row' onclick='rowdel(this)' class='rowdel'/></tr>");
 	}
-	
+
 	function rowdel(e) {
 		$(e).parent().remove();
 	}
-	
+
 	function taskdetail(e) {
 		var name = $(e).attr("id").split("_")[1];
-		$.ajax({
-			url : "/fom/taskdetail",
-			type : "POST",
-			dataType : "json",
-			data : {
-				"name" : name,
-			},
-			success : function(data) {
-				if(data.size == 0){
-					return;
-				}
-				var html = "<table width='100%' border='1' cellpadding='20px' style='height:100%;'>";
-				for ( var key in data) {
-					if(key == "size"){
-						continue;
+		$
+				.ajax({
+					url : "/fom/taskdetail",
+					type : "POST",
+					dataType : "json",
+					data : {
+						"name" : name,
+					},
+					success : function(data) {
+						if (data.size == 0) {
+							return;
+						}
+						var html = "<table width='100%' border='1' cellpadding='20px' style='height:100%;'>";
+						for ( var key in data) {
+							if (key == "size") {
+								continue;
+							}
+							html = html + "<tr><td><div>" + key
+									+ "</div></td><td><div>" + data[key]
+									+ "</div></td></tr>"
+						}
+						html = html + "</table>";
+						layer.open({
+							title : 'dump threads[' + data.size + ']',
+							type : 1,
+							skin : 'layui-layer-demo',
+							area : [ '1200px', '600px' ],
+							maxmin : true,
+							closeBtn : 2,
+							anim : 2,
+							content : html
+						});
+					},
+					error : function(XMLHttpRequest, textStatus, errorThrown) {
+						layer.msg(XMLHttpRequest.responseText);
 					}
-					html = html + "<tr><td><div>" + key + "</div></td><td><div>" + data[key] + "</div></td></tr>"
-				}
-				html = html + "</table>";
-				layer.open({
-					  title: 'dump threads[' + data.size + ']',
-					  type : 1,
-					  skin : 'layui-layer-demo',
-					  area : [ '1200px', '600px' ],
-					  maxmin: true,
-					  closeBtn : 2,
-					  anim : 2,
-					  content: html
-					});
-			},
-			error : function(XMLHttpRequest, textStatus, errorThrown) {
-				layer.msg(XMLHttpRequest.responseText);
-			}
-		});
+				});
 	}
 </script>
 </html>
