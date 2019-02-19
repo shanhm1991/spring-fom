@@ -121,10 +121,10 @@ public final class DownloadTask extends Task {
 		if(!isWithTemp){
 			this.downloadPath = destPath;
 		}else{
-			if(StringUtils.isBlank(contextName)){
+			if(StringUtils.isBlank(getContextName())){
 				this.downloadPath = System.getProperty("cache.download");
 			}else{
-				this.downloadPath = System.getProperty("cache.download") + File.separator + contextName;
+				this.downloadPath = System.getProperty("cache.download") + File.separator + getContextName();
 			}
 			File file = new File(downloadPath);
 			if(!file.exists() && !file.mkdirs()){

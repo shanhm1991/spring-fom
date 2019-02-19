@@ -2,7 +2,6 @@ package com.fom.context;
 
 import java.util.concurrent.Callable;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.fom.log.LoggerFactory;
@@ -33,10 +32,7 @@ public abstract class Task implements Callable<Result> {
 	 */
 	protected ResultHandler resultHandler;
 	
-	/**
-	 * 只有在context中使用时才会赋值，否则将为null，
-	 */
-	protected volatile String contextName;
+	private volatile Context context;
 
 	/**
 	 * @param id 创建Executor的资源
@@ -75,7 +71,7 @@ public abstract class Task implements Callable<Result> {
 	}
 
 	@Override
-	public final Result call() throws Exception {  
+	public final Result call() {  
 		Thread.currentThread().setName(id);
 		Result result = new Result(id); 
 		long sTime = System.currentTimeMillis();
@@ -84,13 +80,16 @@ public abstract class Task implements Callable<Result> {
 			boolean res = beforeExec() && exec() && afterExec();
 			long cost = System.currentTimeMillis() - sTime;
 			if(res){
-				log.info("task finished, cost=" + cost + "ms");
+				context.successIncrease();
+				log.info("task success, cost=" + cost + "ms");
 			}else{
+				context.failedIncrease();
 				log.warn("task failed, cost=" + cost + "ms");
 			}
 			result.success = res;
 			result.costTime = cost;
 		} catch(Throwable e) {
+			context.failedIncrease();
 			long cost = System.currentTimeMillis() - sTime;
 			log.error("task failed, cost=" + cost, e);
 			result.success = false;
@@ -101,7 +100,13 @@ public abstract class Task implements Callable<Result> {
 		}
 		
 		if(resultHandler != null){
-			resultHandler.handle(result);
+			try{
+				resultHandler.handle(result);
+			}catch(Exception e){
+				log.error("task result handle failed", e);
+				result.success = false;
+			}
+			
 		}
 		return result;
 	}
@@ -131,12 +136,73 @@ public abstract class Task implements Callable<Result> {
 		return true;
 	}
 	
-	final void setContext(String contextName){
-		if(StringUtils.isBlank(contextName)){
+	final void setContext(Context context){
+		if(context == null){
 			return;
 		}
-		this.contextName = contextName;
-		this.log = LoggerFactory.getLogger(contextName);
+		this.context = context;
+		this.log = LoggerFactory.getLogger(context.name); 
 	}
 	
+	/**
+	 * 只有在context中使用时才会赋值，否则将为null，
+	 */
+	protected final String getContextName(){
+		if(context == null){
+			return null;
+		}
+		return context.getName();
+	}
+	
+	/**
+	 * 获取context配置值
+	 * @param key key
+	 * @param defaultValue defaultValue
+	 * @return 配置值
+	 */
+	protected final String getContextValue(String key, String defaultValue){
+		if(context == null){
+			return defaultValue;
+		}
+		return context.getString(key, defaultValue);
+	}
+	
+	/**
+	 * 获取context配置int值
+	 * @param key key
+	 * @param defaultValue defaultValue
+	 * @return 配置值
+	 */
+	protected final int getContextIntValue(String key, int defaultValue){
+		if(context == null){
+			return defaultValue;
+		}
+		return context.getInt(key, defaultValue);
+	}
+	
+	/**
+	 * 获取context配置long值
+	 * @param key key
+	 * @param defaultValue defaultValue
+	 * @return 配置值
+	 */
+	protected final long getContextLongValue(String key, long defaultValue){
+		if(context == null){
+			return defaultValue;
+		}
+		return context.getLong(key, defaultValue);
+	}
+
+	/**
+	 * 获取context配置boolean值
+	 * @param key key
+	 * @param defaultValue defaultValue
+	 * @return 配置值
+	 */
+	protected final boolean getContextBooleanValue(String key, boolean defaultValue){
+		if(context == null){
+			return defaultValue;
+		}
+		return context.getBoolean(key, defaultValue);
+	}
 }

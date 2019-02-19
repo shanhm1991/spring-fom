@@ -72,14 +72,14 @@ public class ZipParseTask extends Task {
 		this.helper = helper;
 		String sourceName = new File(sourceUri).getName();
 
-		if(StringUtils.isBlank(contextName)){
+		if(StringUtils.isBlank(getContextName())){
 			this.unzipDir = new File(System.getProperty("cache.parse") + File.separator + sourceName);
 			this.logFile = new File(System.getProperty("cache.parse") + File.separator + sourceName + ".log");
 		}else{
 			this.unzipDir = new File(System.getProperty("cache.parse")
-					+ File.separator + contextName + File.separator + sourceName);
+					+ File.separator + getContextName() + File.separator + sourceName);
 			this.logFile = new File(System.getProperty("cache.parse") 
-					+ File.separator + contextName + File.separator + sourceName + ".log");
+					+ File.separator + getContextName() + File.separator + sourceName + ".log");
 		}
 	}
 

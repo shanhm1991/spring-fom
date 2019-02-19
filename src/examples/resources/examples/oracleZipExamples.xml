@@ -8,7 +8,7 @@
 			<srcPath>/source</srcPath>
 			<batch>5000</batch>
 			<isDelMatchFail>false</isDelMatchFail>
-			<zipEntryPattern>.\.bcp</zipEntryPattern>
+			<zipEntryPattern>.*[.]txt</zipEntryPattern>
 		</context>
 
 		<context name="ImportOracleExample2" class="com.fom.examples.ImportOracleExample2">
@@ -18,7 +18,7 @@
 			<srcPath>/source</srcPath>
 			<batch>5000</batch>
 			<isDelMatchFail>false</isDelMatchFail>
-			<zipEntryPattern>.\.bcp</zipEntryPattern>
+			<zipEntryPattern>.*[.]bcp</zipEntryPattern>
 		</context>
 	</contexts>
 </fom>

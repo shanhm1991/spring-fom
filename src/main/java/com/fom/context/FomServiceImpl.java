@@ -52,7 +52,8 @@ public class FomServiceImpl implements FomService {
 			cmap.put("level", context.log.getLevel().toString());
 			cmap.put("active", String.valueOf(context.getActives())); 
 			cmap.put("waiting", String.valueOf(context.getWaitings()));
-			cmap.put("completed", String.valueOf(context.getCompleted()));
+			cmap.put("success", String.valueOf(context.getSuccess()));
+			cmap.put("failed", String.valueOf(context.getFailed()));
 			list.add(cmap);
 		}
 		map.put("data", list);

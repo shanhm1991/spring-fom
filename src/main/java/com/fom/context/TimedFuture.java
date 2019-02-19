@@ -24,7 +24,7 @@ class TimedFuture<T> extends FutureTask<T> {
 		super(callable);
 		createTime = System.currentTimeMillis();
 		if(callable instanceof Task){
-			executorName = ((Task)callable).contextName;
+			executorName = ((Task)callable).getContextName();
 		}
 	}
 

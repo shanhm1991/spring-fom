@@ -160,11 +160,11 @@ public class ZipDownloadTask extends Task {
 			return false;
 		}
 
-		if(StringUtils.isBlank(contextName)){
+		if(StringUtils.isBlank(getContextName())){
 			this.cachePath = System.getProperty("cache.download") + File.separator + id;
 		}else{
 			this.cachePath = System.getProperty("cache.download")
-					+ File.separator + contextName + File.separator + id;
+					+ File.separator + getContextName() + File.separator + id;
 		}
 
 		File file = new File(cachePath);

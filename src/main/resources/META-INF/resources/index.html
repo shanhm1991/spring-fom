@@ -93,7 +93,8 @@ img {
 							<th>cron</th>
 							<th>load time</th>
 							<th>last execute time</th>
-							<th>task completed</th>
+							<th>task success</th>
+							<th>task failed</th>
 							<th>task waiting</th>
 							<th>task active</th>
 							<th>state</th>
@@ -116,6 +117,7 @@ img {
 								.DataTable(
 										{
 											"ajax" : "/fom/list",
+											"aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
 											"columns" : [
 													{
 														"class" : "details-control",
@@ -137,7 +139,10 @@ img {
 														"data" : "execTime"
 													},
 													{
-														"data" : "completed"
+														"data" : "success"
+													},
+													{
+														"data" : "failed"
 													},
 													{
 														"data" : "waiting"
@@ -200,7 +205,7 @@ img {
 										            + "<option value='ERROR' selected='selected'>ERROR</option>"
 										            + "</select>"
 												}
-											    $('td', row).eq(9).html(select);
+											    $('td', row).eq(10).html(select);
 												
 												var img;
 												if(state == "running"){
@@ -216,9 +221,9 @@ img {
 												}else{
 													img = "<img src='images/unknown.png' title='unknown'>"
 												}
-												$('td', row).eq(8).html(img);
+												$('td', row).eq(9).html(img);
 												
-												$('td', row).eq(7).html("<a id='a_" + name + "' onclick='taskdetail(this)' href='#'>" + actives + "</a>");
+												$('td', row).eq(8).html("<a id='a_" + name + "' onclick='taskdetail(this)' href='#'>" + actives + "</a>");
 											},
 											"order" : [ [ 1, 'asc' ] ]
 										});
@@ -257,7 +262,7 @@ img {
 			if (key == "name") {
 				name = data[key];
 				continue;
-			} else if (key == "loadTime" || key == "execTime" || key == "completed"
+			} else if (key == "loadTime" || key == "execTime" || key == "success" || key == "failed"
 					|| key == "state" || key == "level" || key == "active" || key == "waiting") {
 				continue;
 			}
@@ -313,7 +318,7 @@ img {
 										}else{
 											img = "<img src='images/unknown.png' title='unknown'>"
 										}
-										Tr.find('td').eq(8).html(img);
+										Tr.find('td').eq(9).html(img);
 									}
 								});
 							});

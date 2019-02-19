@@ -17,11 +17,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -55,6 +55,10 @@ public abstract class Context implements Serializable {
 	volatile transient long execTime;
 
 	private transient TimedExecutorPool pool;
+	
+	private transient AtomicLong successCount = new AtomicLong(0);
+	
+	private transient AtomicLong failedCount = new AtomicLong(0);
 
 	public Context(){
 		Class<?> clazz = this.getClass();
@@ -182,6 +186,8 @@ public abstract class Context implements Serializable {
 			state = inited; 
 		}
 		initPool();
+		successCount = new AtomicLong(0);
+		failedCount = new AtomicLong(0);
 		loadTime = System.currentTimeMillis();
 	}
 
@@ -224,6 +230,30 @@ public abstract class Context implements Serializable {
 			return 0;
 		}
 		return pool.getCompletedTaskCount();
+	}
+	
+	/**
+	 * 获取成功的任务数
+	 * @return 成功的任务数
+	 */
+	public final long getSuccess(){
+		return successCount.get();
+	}
+	
+	/**
+	 * 获取失败的任务数
+	 * @return 失败的任务数
+	 */
+	public final long getFailed(){
+		return failedCount.get();
+	}
+	
+	void successIncrease(){
+		successCount.incrementAndGet();
+	}
+	
+	void failedIncrease(){
+		failedCount.incrementAndGet();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -674,7 +704,7 @@ public abstract class Context implements Serializable {
 						}
 						try {
 							Task executor = createTask(taskId);
-							executor.setContext(name); 
+							executor.setContext(Context.this); 
 							FUTUREMAP.put(taskId, pool.submit(executor)); 
 							log.info("task[" + taskId + "] created"); 
 						} catch (RejectedExecutionException e) {
@@ -806,13 +836,6 @@ public abstract class Context implements Serializable {
 				continue;
 			}
 
-			try {
-				future.get();
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();//保留中断标记
-			} catch (ExecutionException e) {
-				log.error("", e); //result handler exception
-			}
 			it.remove();
 		}
 	}

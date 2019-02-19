@@ -95,11 +95,11 @@ public class ParseTask extends Task {
 	@Override
 	protected boolean beforeExec() throws Exception { 
 		String logName = new File(id).getName();
-		if(StringUtils.isBlank(contextName)){
+		if(StringUtils.isBlank(getContextName())){
 			this.logFile = new File(System.getProperty("cache.parse") + File.separator + logName + ".log");
 		}else{
 			this.logFile = new File(System.getProperty("cache.parse") 
-					+ File.separator + contextName + File.separator + logName + ".log");
+					+ File.separator + getContextName() + File.separator + logName + ".log");
 		}
 		
 		File parentFile = logFile.getParentFile();
