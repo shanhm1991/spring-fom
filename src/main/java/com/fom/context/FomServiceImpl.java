@@ -10,12 +10,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Appender;
+import org.apache.log4j.Category;
+import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -264,20 +269,6 @@ public class FomServiceImpl implements FomService {
 
 	@Override
 	public Map<String, Object> getActiveThreads(String name) throws Exception {
-
-		Logger root = LogManager.getRootLogger();
-
-		Enumeration e = LogManager.getLoggerRepository().getCurrentLoggers();
-		while(e.hasMoreElements()){
-			Logger logger = (Logger)e.nextElement();
-			if((logger.getAdditivity() && logger.getParent() != root)
-					|| ContextManager.contextMap.containsKey(logger.getName())){ 
-				continue;
-			}
-			System.out.println(logger.getName()); 
-		}
-
-
 		Map<String,Object> map = new HashMap<>();
 		map.put("size", 0);
 		Context context = ContextManager.contextMap.get(name);
@@ -296,4 +287,95 @@ public class FomServiceImpl implements FomService {
 		}
 		return map;
 	}
+	
+	@SuppressWarnings("rawtypes")
+	public Map<String, String> listOtherLogs() throws Exception {
+		Enumeration loggerEnumeration = LogManager.getLoggerRepository().getCurrentLoggers();
+		Map<String, String> map = new HashMap<>();
+		Set<String> listed = new HashSet<>();
+		while(loggerEnumeration.hasMoreElements()){
+			Logger logger = (Logger)loggerEnumeration.nextElement();
+			if(ContextManager.contextMap.containsKey(logger.getName())){  
+				continue;
+			}
+			listLog(logger, map, listed);
+		}
+		return map;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	private void listLog(Category logger, Map<String, String> map, Set<String> listed){
+		String loggerName = logger.getName();
+		if(listed.contains(loggerName)){
+			return;
+		}
+		
+		Enumeration appenderEnumeration = logger.getAllAppenders(); 
+		if(!appenderEnumeration.hasMoreElements()){
+			if(!logger.getAdditivity()){
+				return;
+			}else if(logger.getParent() == Logger.getRootLogger()){
+				appenderEnumeration = Logger.getRootLogger().getAllAppenders(); 
+				String append = "";
+				while(appenderEnumeration.hasMoreElements()){
+					append += ((Appender)appenderEnumeration.nextElement()).getName() + ",";
+				}
+				append = append.substring(0, append.length() - 1);
+				
+				Level level = logger.getLevel();
+				if(level == null){
+					level = Logger.getRootLogger().getLevel();
+				}
+				
+				map.put(loggerName + "[" + append + "]", level.toString());
+				listed.add(loggerName);
+				return;
+			}
+			listLog(logger.getParent(), map, listed);
+		}else{
+			String append = "";
+			while(appenderEnumeration.hasMoreElements()){
+				append += ((Appender)appenderEnumeration.nextElement()).getName() + ",";
+			}
+			append = append.substring(0, append.length() - 1);
+			Level level = logger.getLevel();
+			
+			map.put(loggerName + "[" + append + "]", level.toString());
+			listed.add(loggerName);
+		}
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	public String queryLevel(String key) {
+		Enumeration loggerEnumeration = LogManager.getLoggerRepository().getCurrentLoggers();
+		Map<String, String> map = new HashMap<>();
+		Set<String> listed = new HashSet<>();
+		while(loggerEnumeration.hasMoreElements()){
+			Logger logger = (Logger)loggerEnumeration.nextElement();
+			if(ContextManager.contextMap.containsKey(logger.getName())){  
+				continue;
+			}
+			listLog(logger, map, listed);
+		}
+		String level = map.get(key);
+		if(level == null){
+			level = "NULL";
+		}
+		return level;
+	}
+
+	@Override
+	public void saveLevel(String key, String level) {
+		if("NULL".equalsIgnoreCase(level)){
+			return;
+		}
+		String name = key.substring(0, key.indexOf("["));
+		Logger logger = LogManager.exists(name);
+		if(logger == null){
+			return;
+		}
+		logger.setLevel(Level.toLevel(level)); 
+	}
+	
 }

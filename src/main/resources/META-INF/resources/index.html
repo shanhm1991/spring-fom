@@ -79,18 +79,15 @@ img {
 </head>
 <body>
 	<div class="layui-input-inline" style="float: right;">
-	    Log Level:
-		<select id="logger" style="margin: 10px 1px 5px 1px" onchange="">
-			<option>adadad</option>
-			<option>wqeq</option>
-			<option>wdqd</option>
-			<option>sasadsa</option>
-		</select>-
-		<select id="level" style="margin: 10px 1px 5px 1px;" onchange="">
-			<option>DEBUG</option>
-			<option>INFO</option>
-			<option>WARN</option>
-			<option>ERROR</option>
+		other log level: <select id="logger" style="margin: 10px 1px 5px 1px"
+			onchange="queryLevel(this);"></select>- <select id="level"
+			style="margin: 10px 1px 5px 1px;" onchange="saveLevel(this);">
+			<option value="ALL">ALL</option>
+			<option value="NULL">NULL</option>
+			<option value="DEBUG">DEBUG</option>
+			<option value="INFO">INFO</option>
+			<option value="WARN">WARN</option>
+			<option value="ERROR">ERROR</option>
 		</select>
 	</div>
 	<button class="layui-btn" style="margin: 10px 10px 10px 10px"
@@ -288,7 +285,55 @@ img {
 						layui.use([ 'layer' ], function() {
 							var layer = layui.layer;
 						});
+
+						initLogger();
 					});
+
+	function initLogger() {
+		$
+				.ajax({
+					url : "/fom/listOtherLogs",
+					type : "POST",
+					dataType : "json",
+					success : function(data) {
+						for ( var key in data) {
+							$("#logger").append(
+									"<option value='" + key + "'>" + key
+											+ "</option>");
+						}
+						$("#logger").trigger("change");
+					}
+				});
+	}
+
+	function queryLevel(e) {
+		var logger = $(e).val();
+		$.ajax({
+			url : "/fom/queryLevel",
+			type : "POST",
+			dataType : "json",
+			data : {
+				"logger" : logger
+			},
+			success : function(data) {
+				$("#level").val(data.level);
+			}
+		});
+	}
+
+	function saveLevel(e) {
+		var level = $(e).val();
+		var logger = $("#logger").val();
+		$.ajax({
+			url : "/fom/saveLevel",
+			type : "POST",
+			dataType : "json",
+			data : {
+				"logger" : logger,
+				"level" : level
+			}
+		});
+	}
 
 	function format(data) {
 		var html = ' cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'

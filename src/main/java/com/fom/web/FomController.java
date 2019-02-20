@@ -1,11 +1,8 @@
 package com.fom.web;
 
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -80,5 +77,25 @@ public class FomController {
 	@ResponseBody
 	public Map<String,Object> taskdetail(String name) throws Exception{ 
 		return service.getActiveThreads(name);
+	}
+	
+	@RequestMapping("/listOtherLogs")
+	@ResponseBody
+	public Map<String, String> listOtherLogs() throws Exception {
+		return service.listOtherLogs();
+	}
+	
+	@RequestMapping("/queryLevel")
+	@ResponseBody
+	public Map<String, String> queryLevel(String logger) {
+		Map<String, String> map = new HashMap<>();
+		map.put("level", service.queryLevel(logger));
+		return map;
+	}
+	
+	@RequestMapping("/saveLevel")
+	public String saveLevel(String logger, String level) {
+		service.saveLevel(logger, level);
+		return "success";
 	}
 }

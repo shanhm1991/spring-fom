@@ -16,17 +16,17 @@ public class OracleExamplesDaoImpl extends SqlSessionDaoSupport implements Examp
 
 	@Override
 	public List<Map<String,String>> select() {
-		return getSqlSession().selectList("oracleExample.select");
+		return getSqlSession().selectList("org.mybatis.oracleExample.select");
 	}
 
 	@Override
 	public int insert(ExampleBean bean) {
-		 return getSqlSession().insert("oracleExample.insert", bean);
+		 return getSqlSession().insert("org.mybatis.oracleExample.insert", bean);
 	}
 
 	@Override
 	public int batchInsert(List<ExampleBean> list) {
-		 return getSqlSession().insert("oracleExample.batchInsert", list);
+		 return getSqlSession().insert("org.mybatis.oracleExample.batchInsert", list);
 	}
 
 }
