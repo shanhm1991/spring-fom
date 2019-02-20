@@ -56,7 +56,12 @@ public abstract class Context implements Serializable {
 
 	private transient TimedExecutorPool pool;
 	
-	private transient AtomicLong successCount = new AtomicLong(0);
+	//需要维护successCount与successTotalCost的约束关系
+	transient Object lock = new Object();
+	
+	private transient long successCount = 0;
+	
+	private transient long successTotalCost = 0;
 	
 	private transient AtomicLong failedCount = new AtomicLong(0);
 
@@ -186,7 +191,9 @@ public abstract class Context implements Serializable {
 			state = inited; 
 		}
 		initPool();
-		successCount = new AtomicLong(0);
+		lock = new Object();
+		successCount = 0;
+		successTotalCost = 0;
 		failedCount = new AtomicLong(0);
 		loadTime = System.currentTimeMillis();
 	}
@@ -237,7 +244,9 @@ public abstract class Context implements Serializable {
 	 * @return 成功的任务数
 	 */
 	public final long getSuccess(){
-		return successCount.get();
+		synchronized (lock) {
+			return successCount;
+		}
 	}
 	
 	/**
@@ -248,8 +257,21 @@ public abstract class Context implements Serializable {
 		return failedCount.get();
 	}
 	
-	void successIncrease(){
-		successCount.incrementAndGet();
+	String getSuccessAndCost(){
+		synchronized (lock) {
+			if(successCount == 0){
+				return "0";
+			}else{
+				return successCount + "(" + (successTotalCost / successCount) + "ms)";
+			}
+		}
+	}
+	
+	void successIncrease(long cost){
+		synchronized (lock) {
+			successCount++;
+			successTotalCost += cost;
+		}
 	}
 	
 	void failedIncrease(){

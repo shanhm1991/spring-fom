@@ -76,37 +76,39 @@ public abstract class Task implements Callable<Result> {
 		Result result = new Result(id); 
 		long sTime = System.currentTimeMillis();
 		result.startTime = sTime;
+		
 		try {
-			boolean res = beforeExec() && exec() && afterExec();
-			long cost = System.currentTimeMillis() - sTime;
-			if(res){
-				context.successIncrease();
-				log.info("task success, cost=" + cost + "ms");
-			}else{
-				context.failedIncrease();
-				log.warn("task failed, cost=" + cost + "ms");
-			}
-			result.success = res;
-			result.costTime = cost;
+			result.success = beforeExec() && exec() && afterExec();
 		} catch(Throwable e) {
-			context.failedIncrease();
-			long cost = System.currentTimeMillis() - sTime;
-			log.error("task failed, cost=" + cost, e);
 			result.success = false;
 			result.throwable = e;
+			log.error(e); 
 			if(exceptionHandler != null){
 				exceptionHandler.handle(e); 
 			}
 		}
 		
+		result.costTime = System.currentTimeMillis() - sTime;
 		if(resultHandler != null){
 			try{
 				resultHandler.handle(result);
 			}catch(Exception e){
-				log.error("task result handle failed", e);
 				result.success = false;
+				log.error(e);
+				if(result.throwable == null){
+					result.throwable = e;
+				}
 			}
-			
+		}
+		
+		//这里算上resulthandler的结果和耗时
+		long cost = System.currentTimeMillis() - sTime;
+		if(result.success){
+			context.successIncrease(cost); 
+			log.info("task success, cost=" + cost + "ms");
+		}else{
+			context.failedIncrease();
+			log.warn("task failed, cost=" + cost + "ms");
 		}
 		return result;
 	}

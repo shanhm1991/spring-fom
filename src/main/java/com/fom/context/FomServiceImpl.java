@@ -59,7 +59,7 @@ public class FomServiceImpl implements FomService {
 			cmap.put("level", context.log.getLevel().toString());
 			cmap.put("active", String.valueOf(context.getActives())); 
 			cmap.put("waiting", String.valueOf(context.getWaitings()));
-			cmap.put("success", String.valueOf(context.getSuccess()));
+			cmap.put("success", context.getSuccessAndCost());
 			cmap.put("failed", String.valueOf(context.getFailed()));
 			list.add(cmap);
 		}
@@ -287,7 +287,7 @@ public class FomServiceImpl implements FomService {
 		}
 		return map;
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	public Map<String, String> listOtherLogs() throws Exception {
 		Enumeration loggerEnumeration = LogManager.getLoggerRepository().getCurrentLoggers();
@@ -302,14 +302,14 @@ public class FomServiceImpl implements FomService {
 		}
 		return map;
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	private void listLog(Category logger, Map<String, String> map, Set<String> listed){
 		String loggerName = logger.getName();
 		if(listed.contains(loggerName)){
 			return;
 		}
-		
+
 		Enumeration appenderEnumeration = logger.getAllAppenders(); 
 		if(!appenderEnumeration.hasMoreElements()){
 			if(!logger.getAdditivity()){
@@ -321,12 +321,12 @@ public class FomServiceImpl implements FomService {
 					append += ((Appender)appenderEnumeration.nextElement()).getName() + ",";
 				}
 				append = append.substring(0, append.length() - 1);
-				
+
 				Level level = logger.getLevel();
 				if(level == null){
 					level = Logger.getRootLogger().getLevel();
 				}
-				
+
 				map.put(loggerName + "[" + append + "]", level.toString());
 				listed.add(loggerName);
 				return;
@@ -339,7 +339,7 @@ public class FomServiceImpl implements FomService {
 			}
 			append = append.substring(0, append.length() - 1);
 			Level level = logger.getLevel();
-			
+
 			map.put(loggerName + "[" + append + "]", level.toString());
 			listed.add(loggerName);
 		}
@@ -377,5 +377,5 @@ public class FomServiceImpl implements FomService {
 		}
 		logger.setLevel(Level.toLevel(level)); 
 	}
-	
+
 }

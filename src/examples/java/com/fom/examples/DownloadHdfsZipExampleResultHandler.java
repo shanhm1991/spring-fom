@@ -66,7 +66,7 @@ public class DownloadHdfsZipExampleResultHandler implements ResultHandler {
 			appender.activateOptions();
 			logger.addAppender(appender); 
 		}
-		StringBuilder builder = new StringBuilder("sourceUri=" + result.getSourceUri()
+		StringBuilder builder = new StringBuilder("sourceUri=" + result.getTaskId()
 				+ ", result=" + result.isSuccess()
 				+ ", startTime=" + result.getStartTime()
 				+ ", costTime=" + result.getCostTime());

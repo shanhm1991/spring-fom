@@ -11,7 +11,7 @@ package com.fom.context;
  */
 public class Result {
 	
-	 final String sourceUri;
+	 final String taskId;
 	
 	 boolean success;
 	
@@ -22,11 +22,11 @@ public class Result {
 	 Throwable throwable;
 	
 	public Result(String sourceUri) {
-		this.sourceUri = sourceUri;
+		this.taskId = sourceUri;
 	}
 
-	public String getSourceUri() {
-		return sourceUri;
+	public String getTaskId() {
+		return taskId;
 	}
 
 	public boolean isSuccess() {
