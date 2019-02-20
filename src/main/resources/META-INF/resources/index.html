@@ -191,10 +191,7 @@ img {
 													}, ],
 											"createdRow" : function(row, data,
 													index) {
-												var name;
-												var level;
-												var state;
-												var actives;
+												var name,level,state,actives,failed,waiting;
 												for ( var key in data) {
 													if (key == "name") {
 														name = data[key];
@@ -204,6 +201,10 @@ img {
 														state = data[key];
 													} else if (key == "active") {
 														actives = data[key];
+													} else if (key == "failed") {
+														failed = data[key];
+													} else if(key = "waiting") {
+														waiting = data[key];
 													}
 												}
 												var select = "<select id='select_"
@@ -259,14 +260,36 @@ img {
 												}
 												$('td', row).eq(12).html(img);
 
-												$('td', row)
-														.eq(11)
-														.html(
-																"<a id='a_"
-																		+ name
-																		+ "' onclick='taskdetail(this)' href='#'>"
-																		+ actives
-																		+ "</a>");
+												if (actives > 0) {
+													$('td', row)
+															.eq(11)
+															.html(
+																	"<a style='color:#ff0000;' id='"
+																			+ name
+																			+ "' onclick='activedetail(this)' href='#'>"
+																			+ actives
+																			+ "</a>");
+												}
+												if (failed > 0) {
+													$('td', row)
+															.eq(9)
+															.html(
+																	"<a style='color:#ff0000;' id='"
+																			+ name
+																			+ "' onclick='faileddetail(this)' href='#'>"
+																			+ failed
+																			+ "</a>");
+												}
+												if (waiting > 0) {
+													$('td', row)
+															.eq(10)
+															.html(
+																	"<a style='color:#ff0000;' id='"
+																			+ name
+																			+ "' onclick='waitingdetail(this)' href='#'>"
+																			+ waiting
+																			+ "</a>");
+												}
 											},
 											"order" : [ [ 1, 'asc' ] ]
 										});
@@ -356,9 +379,10 @@ img {
 			if (key == "name") {
 				name = data[key];
 				continue;
-			} else if (key == "execTime" || key == "state" || key == "level" || key == "loadTime"
-					|| key == "minCost" || key == "maxCost" || key == "avgCost"
-					|| key == "success" || key == "failed" || key == "active" || key == "waiting") {
+			} else if (key == "execTime" || key == "state" || key == "level"
+					|| key == "loadTime" || key == "minCost"
+					|| key == "maxCost" || key == "avgCost" || key == "success"
+					|| key == "failed" || key == "active" || key == "waiting") {
 				continue;
 			}
 			html = html
@@ -594,11 +618,11 @@ img {
 		$(e).parent().remove();
 	}
 
-	function taskdetail(e) {
-		var name = $(e).attr("id").split("_")[1];
+	function activedetail(e) {
+		var name = $(e).attr("id");
 		$
 				.ajax({
-					url : "/fom/taskdetail",
+					url : "/fom/activedetail",
 					type : "POST",
 					dataType : "json",
 					data : {
@@ -619,7 +643,89 @@ img {
 						}
 						html = html + "</table>";
 						layer.open({
-							title : 'dump threads[' + data.size + ']',
+							title : 'active tasks[' + data.size + ']',
+							type : 1,
+							skin : 'layui-layer-demo',
+							area : [ '1200px', '600px' ],
+							maxmin : true,
+							closeBtn : 2,
+							anim : 2,
+							content : html
+						});
+					},
+					error : function(XMLHttpRequest, textStatus, errorThrown) {
+						layer.msg(XMLHttpRequest.responseText);
+					}
+				});
+	}
+
+	function faileddetail(e) {
+		var name = $(e).attr("id");
+		$
+				.ajax({
+					url : "/fom/faileddetail",
+					type : "POST",
+					dataType : "json",
+					data : {
+						"name" : name,
+					},
+					success : function(data) {
+						if (data.size == 0) {
+							return;
+						}
+						var html = "<table width='100%' border='1' cellpadding='20px' style='height:100%;'>";
+						for ( var key in data) {
+							if (key == "size") {
+								continue;
+							}
+							html = html + "<tr><td><div>" + key
+									+ "</div></td><td><div>" + data[key]
+									+ "</div></td></tr>"
+						}
+						html = html + "</table>";
+						layer.open({
+							title : 'failed tasks[' + data.size + ']',
+							type : 1,
+							skin : 'layui-layer-demo',
+							area : [ '1200px', '600px' ],
+							maxmin : true,
+							closeBtn : 2,
+							anim : 2,
+							content : html
+						});
+					},
+					error : function(XMLHttpRequest, textStatus, errorThrown) {
+						layer.msg(XMLHttpRequest.responseText);
+					}
+				});
+	}
+	
+	function waitingdetail(e){
+		var name = $(e).attr("id");
+		$
+				.ajax({
+					url : "/fom/waitingdetail",
+					type : "POST",
+					dataType : "json",
+					data : {
+						"name" : name,
+					},
+					success : function(data) {
+						if (data.size == 0) {
+							return;
+						}
+						var html = "<table width='100%' border='1' cellpadding='20px' style='height:100%;'>";
+						for ( var key in data) {
+							if (key == "size") {
+								continue;
+							}
+							html = html + "<tr><td><div>" + key
+									+ "</div></td><td><div>" + data[key]
+									+ "</div></td></tr>"
+						}
+						html = html + "</table>";
+						layer.open({
+							title : 'waiting tasks[' + data.size + ']',
 							type : 1,
 							skin : 'layui-layer-demo',
 							area : [ '1200px', '600px' ],

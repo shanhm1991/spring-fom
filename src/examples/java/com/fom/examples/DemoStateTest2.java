@@ -12,7 +12,7 @@ import com.fom.context.FomContext;
  * @author shanhm1991
  *
  */
-@FomContext(remark="状态测试")
+@FomContext(remark="状态测试", threadMax=10)
 public class DemoStateTest2 extends Context {
 
 	private static final long serialVersionUID = -838223512003059760L;
@@ -31,11 +31,9 @@ public class DemoStateTest2 extends Context {
 
 			@Override
 			protected boolean exec() throws Exception {
-				
 				while(true){
-					
 					try{
-						Thread.sleep(2000); 
+						Thread.sleep(30000); 
 					}catch(InterruptedException e){
 						//ignore
 					}

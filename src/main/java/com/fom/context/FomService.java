@@ -79,8 +79,24 @@ public interface FomService {
 	 * @return map结果
 	 * @throws Exception Exception
 	 */
-	Map<String,Object> getActiveThreads(String name) throws Exception;
+	Map<String,Object> getActiveDetail(String name) throws Exception;
+	
+	/**
+	 * 获取失败的任务详情
+	 * @param name context名称
+	 * @return map结果
+	 * @throws Exception Exception
+	 */
+	Map<String,Object> failedDetail(String name) throws Exception;
 
+	/**
+	 * 获取正在等待的任务详情
+	 * @param name context名称
+	 * @return map结果
+	 * @throws Exception Exception
+	 */
+	Map<String,Object> waitingdetail(String name) throws Exception;
+	
 	/**
 	 * 获取其他log的级别
 	 * @return log名称与级别

@@ -2,10 +2,11 @@ package com.fom.examples;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import com.fom.context.Context;
-import com.fom.context.Task;
 import com.fom.context.FomContext;
+import com.fom.context.Task;
 
 /**
  * 
@@ -16,11 +17,15 @@ import com.fom.context.FomContext;
 public class DemoStateTest1 extends Context {
 
 	private static final long serialVersionUID = -838223512003059760L;
+	
+	private Random random = new Random(30000);
 
 	@Override
 	protected List<String> getTaskIdList() throws Exception {
 		List<String> list = new ArrayList<String>();
-		list.add("task1");
+		for(int i = 1; i < 50;i++){
+			list.add("task-" + i);
+		}
 		return list;
 	}
 
@@ -32,7 +37,7 @@ public class DemoStateTest1 extends Context {
 			@Override
 			protected boolean exec() throws Exception {
 				
-				Thread.sleep(40000);
+				Thread.sleep(random.nextInt(30000)); 
 				
 				return true;
 			}

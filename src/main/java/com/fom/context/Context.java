@@ -8,7 +8,9 @@ import static com.fom.context.State.stopping;
 import static com.fom.context.State.waiting;
 
 import java.io.Serializable;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -67,6 +70,8 @@ public abstract class Context implements Serializable {
 	private transient long maxCost = 0;
 
 	private transient AtomicLong failedCount = new AtomicLong(0);
+	
+	transient Map<String, Throwable> failedMap = new ConcurrentHashMap<>();
 
 	public Context(){
 		Class<?> clazz = this.getClass();
@@ -196,6 +201,7 @@ public abstract class Context implements Serializable {
 		initPool();
 		successLock = new Object();
 		failedCount = new AtomicLong(0);
+		failedMap = new ConcurrentHashMap<>();
 		loadTime = System.currentTimeMillis();
 	}
 
@@ -215,7 +221,31 @@ public abstract class Context implements Serializable {
 	 * @return 等待队列中的任务数
 	 */
 	public final int getWaitings(){
+		if(pool == null){
+			return 0;
+		}
 		return pool.getQueue().size();
+	}
+	
+	@SuppressWarnings("rawtypes")
+	Map<String, Object> waitingDetail(){
+		Map<String, Object> map = new HashMap<>();
+		if(pool == null){
+			return map;
+		}
+		
+		Object[] array = pool.getQueue().toArray();
+		if(ArrayUtils.isEmpty(array)){
+			return map;
+		}
+		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss SSS");
+		for(Object obj : array){
+			if(obj instanceof TimedFuture){
+				TimedFuture future = (TimedFuture)obj;
+				map.put(future.getTaskId(), format.format(future.getCreateTime()));
+			}
+		}
+		return map;
 	}
 
 	/**
@@ -274,7 +304,8 @@ public abstract class Context implements Serializable {
 		}
 	}
 
-	void successIncrease(long cost){
+	void successIncrease(String taskId, long cost){
+		failedMap.remove(taskId);
 		synchronized (successLock) {
 			successCount++;
 			totalCost += cost;
@@ -287,7 +318,8 @@ public abstract class Context implements Serializable {
 		}
 	}
 
-	void failedIncrease(){
+	void failedIncrease(String taskId, Throwable throwable){
+		failedMap.put(taskId, throwable);
 		failedCount.incrementAndGet();
 	}
 
@@ -855,7 +887,7 @@ public abstract class Context implements Serializable {
 		while(it.hasNext()){
 			Entry<String, TimedFuture<Result>> entry = it.next();
 			TimedFuture<Result> future = entry.getValue();
-			if(!name.equals(future.getName())){   
+			if(!name.equals(future.getContextName())){   
 				continue;
 			}
 			String sourceUri = entry.getKey();

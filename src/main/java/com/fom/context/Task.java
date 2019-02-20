@@ -21,7 +21,7 @@ public abstract class Task implements Callable<Result> {
 	 * 任务唯一标识
 	 */
 	protected final String id;
-
+	
 	/**
 	 * 异常处理器
 	 */
@@ -104,10 +104,10 @@ public abstract class Task implements Callable<Result> {
 		//这里算上resulthandler的结果和耗时
 		long cost = System.currentTimeMillis() - sTime;
 		if(result.success){
-			context.successIncrease(cost); 
+			context.successIncrease(id, cost); 
 			log.info("task success, cost=" + cost + "ms");
 		}else{
-			context.failedIncrease();
+			context.failedIncrease(id, result.throwable);
 			log.warn("task failed, cost=" + cost + "ms");
 		}
 		return result;

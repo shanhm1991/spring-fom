@@ -36,7 +36,7 @@ class TimedExecutorPool extends ThreadPoolExecutor {
 	protected void beforeExecute(Thread t, Runnable r) { 
 		if(r instanceof TimedFuture){
 			TimedFuture future = (TimedFuture)r;
-			threadMap.put(future.getName(), t);
+			threadMap.put(future.getTaskId(), t);
 		}
 	}
 
@@ -45,7 +45,7 @@ class TimedExecutorPool extends ThreadPoolExecutor {
 	protected void afterExecute(Runnable r, Throwable t) { 
 		if(r instanceof TimedFuture){
 			TimedFuture future = (TimedFuture)r;
-			threadMap.remove(future.getName());
+			threadMap.remove(future.getTaskId());
 		}
 	}
 

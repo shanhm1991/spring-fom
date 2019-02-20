@@ -73,10 +73,22 @@ public class FomController {
 		return service.create(json);
 	}
 	
-	@RequestMapping("/taskdetail")
+	@RequestMapping("/activedetail")
 	@ResponseBody
-	public Map<String,Object> taskdetail(String name) throws Exception{ 
-		return service.getActiveThreads(name);
+	public Map<String,Object> activeDetail(String name) throws Exception{ 
+		return service.getActiveDetail(name);
+	}
+	
+	@RequestMapping("/faileddetail")
+	@ResponseBody
+	public Map<String,Object> failedDetail(String name) throws Exception { 
+		return service.failedDetail(name);
+	}
+	
+	@RequestMapping("/waitingdetail")
+	@ResponseBody
+	public Map<String,Object> waitingdetail(String name) throws Exception { 
+		return service.waitingdetail(name);
 	}
 	
 	@RequestMapping("/listOtherLogs")

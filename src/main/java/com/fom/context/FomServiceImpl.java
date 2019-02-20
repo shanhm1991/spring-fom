@@ -7,7 +7,6 @@ import java.lang.reflect.Constructor;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -271,27 +270,6 @@ public class FomServiceImpl implements FomService {
 		context.changeLogLevel(level);
 	}
 
-	@Override
-	public Map<String, Object> getActiveThreads(String name) throws Exception {
-		Map<String,Object> map = new HashMap<>();
-		map.put("size", 0);
-		Context context = ContextManager.contextMap.get(name);
-		if(context == null){
-			return map;
-		}
-
-		Collection<Thread> collection = context.getActiveThreads();
-		map.put("size", collection.size());
-		for(Thread thread : context.getActiveThreads()){
-			StringBuilder builder = new StringBuilder();
-			for(StackTraceElement stack : thread.getStackTrace()){
-				builder.append(stack).append("<br>");
-			}
-			map.put(thread.getName(), builder.toString());
-		}
-		return map;
-	}
-
 	@SuppressWarnings("rawtypes")
 	public Map<String, String> listOtherLogs() throws Exception {
 		Enumeration loggerEnumeration = LogManager.getLoggerRepository().getCurrentLoggers();
@@ -380,6 +358,63 @@ public class FomServiceImpl implements FomService {
 			return;
 		}
 		logger.setLevel(Level.toLevel(level)); 
+	}
+	
+	@Override
+	public Map<String, Object> getActiveDetail(String name) throws Exception {
+		Map<String,Object> map = new HashMap<>();
+		map.put("size", 0);
+		Context context = ContextManager.contextMap.get(name);
+		if(context == null){
+			return map;
+		}
+
+		for(Thread thread : context.getActiveThreads()){
+			StringBuilder builder = new StringBuilder();
+			for(StackTraceElement stack : thread.getStackTrace()){
+				builder.append(stack).append("<br>");
+			}
+			map.put(thread.getName(), builder.toString());
+		}
+		map.put("size", map.size() - 1);
+		return map;
+	}
+
+	@Override
+	public Map<String, Object> failedDetail(String name) throws Exception {
+		Map<String,Object> map = new HashMap<>();
+		map.put("size", 0);
+		Context context = ContextManager.contextMap.get(name);
+		if(context == null){
+			return map;
+		} 
+		
+		for(Entry<String, Throwable> entry : context.failedMap.entrySet()){
+			if(entry.getValue() == null){
+				map.put(entry.getKey(), "null");
+				continue;
+			}
+			StringBuilder builder = new StringBuilder("msg = " + entry.getValue().getMessage() + "<br>stackTrace:<br>");
+			for(StackTraceElement stack : entry.getValue().getStackTrace()){
+				builder.append(stack).append("<br>");
+			}
+			map.put(entry.getKey(), builder.toString());
+		}
+		map.put("size", map.size() - 1);
+		return map;
+	}
+
+	@Override
+	public Map<String, Object> waitingdetail(String name) throws Exception {
+		Map<String,Object> map = new HashMap<>();
+		map.put("size", 0);
+		Context context = ContextManager.contextMap.get(name);
+		if(context == null){
+			return map;
+		} 
+		map = context.waitingDetail();
+		map.put("size", map.size());
+		return map;
 	}
 
 }

@@ -13,7 +13,9 @@ class TimedFuture<T> extends FutureTask<T> {
 
 	private long createTime;
 
-	private String executorName;
+	private String contextName;
+	
+	private String taskId;
 
 	public TimedFuture(Runnable runnable, T result) {
 		super(runnable, result);
@@ -24,7 +26,9 @@ class TimedFuture<T> extends FutureTask<T> {
 		super(callable);
 		createTime = System.currentTimeMillis();
 		if(callable instanceof Task){
-			executorName = ((Task)callable).getContextName();
+			Task task = ((Task)callable);
+			contextName = task.getContextName();
+			taskId = task.id;
 		}
 	}
 
@@ -32,8 +36,12 @@ class TimedFuture<T> extends FutureTask<T> {
 		return createTime;
 	}
 
-	public String getName(){
-		return executorName;
+	public String getContextName(){
+		return contextName;
+	}
+
+	public String getTaskId() {
+		return taskId;
 	}
 
 }
