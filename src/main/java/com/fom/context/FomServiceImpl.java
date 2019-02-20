@@ -54,13 +54,17 @@ public class FomServiceImpl implements FomService {
 			if(!cmap.containsKey(Constants.CRON)){
 				cmap.put(Constants.CRON, ""); 
 			}
-			cmap.put("loadTime", format.format(context.loadTime));
 			cmap.put("execTime", format.format(context.execTime));
+			cmap.put("loadTime", format.format(context.loadTime));
 			cmap.put("level", context.log.getLevel().toString());
 			cmap.put("active", String.valueOf(context.getActives())); 
 			cmap.put("waiting", String.valueOf(context.getWaitings()));
-			cmap.put("success", context.getSuccessAndCost());
 			cmap.put("failed", String.valueOf(context.getFailed()));
+			String[] array = context.getSuccessDetail();
+			cmap.put("success", array[0]);
+			cmap.put("minCost", array[1]);
+			cmap.put("maxCost", array[2]);
+			cmap.put("avgCost", array[3]);
 			list.add(cmap);
 		}
 		map.put("data", list);

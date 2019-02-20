@@ -105,7 +105,10 @@ img {
 							<th>cron</th>
 							<th>load time</th>
 							<th>last execute time</th>
-							<th>task success(avg cost)</th>
+							<th>cost min</th>
+							<th>cost max</th>
+							<th>cost avg</th>
+							<th>task success</th>
 							<th>task failed</th>
 							<th>task waiting</th>
 							<th>task active</th>
@@ -151,6 +154,15 @@ img {
 													},
 													{
 														"data" : "execTime"
+													},
+													{
+														"data" : "minCost"
+													},
+													{
+														"data" : "maxCost"
+													},
+													{
+														"data" : "avgCost"
 													},
 													{
 														"data" : "success"
@@ -228,7 +240,7 @@ img {
 															+ "<option value='ERROR' selected='selected'>ERROR</option>"
 															+ "</select>"
 												}
-												$('td', row).eq(10)
+												$('td', row).eq(13)
 														.html(select);
 
 												var img;
@@ -245,10 +257,10 @@ img {
 												} else {
 													img = "<img src='images/unknown.png' title='unknown'>"
 												}
-												$('td', row).eq(9).html(img);
+												$('td', row).eq(12).html(img);
 
 												$('td', row)
-														.eq(8)
+														.eq(11)
 														.html(
 																"<a id='a_"
 																		+ name
@@ -344,9 +356,9 @@ img {
 			if (key == "name") {
 				name = data[key];
 				continue;
-			} else if (key == "loadTime" || key == "execTime"
-					|| key == "success" || key == "failed" || key == "state"
-					|| key == "level" || key == "active" || key == "waiting") {
+			} else if (key == "execTime" || key == "state" || key == "level" || key == "loadTime"
+					|| key == "minCost" || key == "maxCost" || key == "avgCost"
+					|| key == "success" || key == "failed" || key == "active" || key == "waiting") {
 				continue;
 			}
 			html = html
@@ -414,7 +426,7 @@ img {
 																Tr
 																		.find(
 																				'td')
-																		.eq(9)
+																		.eq(12)
 																		.html(
 																				img);
 															}

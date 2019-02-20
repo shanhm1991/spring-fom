@@ -49,20 +49,23 @@ public abstract class Context implements Serializable {
 	protected final String name;
 
 	protected transient Logger log;
-
+	
 	volatile transient long loadTime;
 
 	volatile transient long execTime;
 
 	private transient TimedExecutorPool pool;
-	
-	//需要维护successCount与successTotalCost的约束关系
-	transient Object lock = new Object();
-	
-	private transient long successCount = 0;
-	
-	private transient long successTotalCost = 0;
-	
+
+	transient Object successLock = new Object();
+
+	private transient long successCount = 0; 
+
+	private transient long totalCost = 0;
+
+	private transient long minCost = 0;
+
+	private transient long maxCost = 0;
+
 	private transient AtomicLong failedCount = new AtomicLong(0);
 
 	public Context(){
@@ -184,16 +187,14 @@ public abstract class Context implements Serializable {
 		pool = new TimedExecutorPool(core,max,aliveTime,new LinkedBlockingQueue<Runnable>(queueSize));
 		pool.allowCoreThreadTimeOut(true);
 	}
-	
+
 	void unSerialize(){
 		this.log = LoggerFactory.getLogger(name); 
 		synchronized (name.intern()) {
 			state = inited; 
 		}
 		initPool();
-		lock = new Object();
-		successCount = 0;
-		successTotalCost = 0;
+		successLock = new Object();
 		failedCount = new AtomicLong(0);
 		loadTime = System.currentTimeMillis();
 	}
@@ -238,17 +239,17 @@ public abstract class Context implements Serializable {
 		}
 		return pool.getCompletedTaskCount();
 	}
-	
+
 	/**
 	 * 获取成功的任务数
 	 * @return 成功的任务数
 	 */
 	public final long getSuccess(){
-		synchronized (lock) {
+		synchronized (successLock) {
 			return successCount;
 		}
 	}
-	
+
 	/**
 	 * 获取失败的任务数
 	 * @return 失败的任务数
@@ -256,24 +257,36 @@ public abstract class Context implements Serializable {
 	public final long getFailed(){
 		return failedCount.get();
 	}
-	
-	String getSuccessAndCost(){
-		synchronized (lock) {
+
+	//maintain by successLock
+	String[] getSuccessDetail(){
+		synchronized (successLock) {
 			if(successCount == 0){
-				return "0";
-			}else{
-				return successCount + "(" + (successTotalCost / successCount) + "ms)";
+				String[] array = {"0", "0", "0", "0"};
+				return array;
+			}
+			String[] array = new String[4];
+			array[0] = String.valueOf(successCount);
+			array[1] = minCost + "ms";
+			array[2] = maxCost + "ms";
+			array[3] = (totalCost / successCount) + "ms";
+			return array;
+		}
+	}
+
+	void successIncrease(long cost){
+		synchronized (successLock) {
+			successCount++;
+			totalCost += cost;
+			if(minCost == 0 || cost < minCost){
+				minCost = cost;
+			}
+			if(cost > maxCost){
+				maxCost = cost;
 			}
 		}
 	}
-	
-	void successIncrease(long cost){
-		synchronized (lock) {
-			successCount++;
-			successTotalCost += cost;
-		}
-	}
-	
+
 	void failedIncrease(){
 		failedCount.incrementAndGet();
 	}
