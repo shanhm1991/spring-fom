@@ -72,6 +72,14 @@ public interface FomService {
 	 * @param level 日志级别
 	 */
 	void changeLogLevel(String name, String level);
+	
+	/**
+	 * 获取成功的任务耗时详情
+	 * @param name context名称
+	 * @return map结果
+	 * @throws Exception Exception
+	 */
+	Map<String,Object> successDetail(String name) throws Exception;
 
 	/**
 	 * 获取context正在执行的任务线程的堆栈
@@ -79,7 +87,7 @@ public interface FomService {
 	 * @return map结果
 	 * @throws Exception Exception
 	 */
-	Map<String,Object> getActiveDetail(String name) throws Exception;
+	Map<String,Object> activeDetail(String name) throws Exception;
 	
 	/**
 	 * 获取失败的任务详情

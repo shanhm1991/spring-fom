@@ -73,24 +73,6 @@ public class FomController {
 		return service.create(json);
 	}
 	
-	@RequestMapping("/activedetail")
-	@ResponseBody
-	public Map<String,Object> activeDetail(String name) throws Exception{ 
-		return service.getActiveDetail(name);
-	}
-	
-	@RequestMapping("/faileddetail")
-	@ResponseBody
-	public Map<String,Object> failedDetail(String name) throws Exception { 
-		return service.failedDetail(name);
-	}
-	
-	@RequestMapping("/waitingdetail")
-	@ResponseBody
-	public Map<String,Object> waitingdetail(String name) throws Exception { 
-		return service.waitingdetail(name);
-	}
-	
 	@RequestMapping("/listOtherLogs")
 	@ResponseBody
 	public Map<String, String> listOtherLogs() throws Exception {
@@ -109,5 +91,29 @@ public class FomController {
 	public String saveLevel(String logger, String level) {
 		service.saveLevel(logger, level);
 		return "success";
+	}
+	
+	@RequestMapping("/successdetail")
+	@ResponseBody
+	public Map<String,Object> successDetail(String name) throws Exception { 
+		return service.successDetail(name);
+	}
+	
+	@RequestMapping("/faileddetail")
+	@ResponseBody
+	public Map<String,Object> failedDetail(String name) throws Exception { 
+		return service.failedDetail(name);
+	}
+	
+	@RequestMapping("/activedetail")
+	@ResponseBody
+	public Map<String,Object> activeDetail(String name) throws Exception{ 
+		return service.activeDetail(name);
+	}
+	
+	@RequestMapping("/waitingdetail")
+	@ResponseBody
+	public Map<String,Object> waitingdetail(String name) throws Exception { 
+		return service.waitingdetail(name);
 	}
 }

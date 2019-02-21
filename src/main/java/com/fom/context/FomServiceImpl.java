@@ -59,11 +59,7 @@ public class FomServiceImpl implements FomService {
 			cmap.put("active", String.valueOf(context.getActives())); 
 			cmap.put("waiting", String.valueOf(context.getWaitings()));
 			cmap.put("failed", context.failedDetail());
-			String[] array = context.successDetail();
-			cmap.put("success", array[0]);
-			cmap.put("minCost", array[1]);
-			cmap.put("maxCost", array[2]);
-			cmap.put("avgCost", array[3]);
+			cmap.put("success", String.valueOf(context.getSuccess()));
 			list.add(cmap);
 		}
 		map.put("data", list);
@@ -361,7 +357,7 @@ public class FomServiceImpl implements FomService {
 	}
 	
 	@Override
-	public Map<String, Object> getActiveDetail(String name) throws Exception {
+	public Map<String, Object> activeDetail(String name) throws Exception {
 		Map<String,Object> map = new HashMap<>();
 		map.put("size", 0);
 		Context context = ContextManager.contextMap.get(name);
@@ -408,14 +404,26 @@ public class FomServiceImpl implements FomService {
 
 	@Override
 	public Map<String, Object> waitingdetail(String name) throws Exception {
-		Map<String,Object> map = new HashMap<>();
-		map.put("size", 0);
 		Context context = ContextManager.contextMap.get(name);
 		if(context == null){
+			Map<String,Object> map = new HashMap<>();
+			map.put("size", 0);
 			return map;
 		} 
-		map = context.waitingDetail();
+		Map<String,Object> map = context.waitingDetail();
 		map.put("size", map.size());
+		return map;
+	}
+
+	@Override
+	public Map<String, Object> successDetail(String name) throws Exception {
+		Context context = ContextManager.contextMap.get(name);
+		if(context == null){
+			return new HashMap<String, Object>(); 
+		}
+		Map<String, Object> map = context.successDetail();
+		map.put("avgCost", (long)map.get("totalCost") / (long)map.get("successCount"));
+		
 		return map;
 	}
 

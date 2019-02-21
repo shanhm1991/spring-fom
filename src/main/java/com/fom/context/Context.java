@@ -289,18 +289,17 @@ public abstract class Context implements Serializable {
 	}
 
 	//maintain by successLock 
-	String[] successDetail(){
+	Map<String, Object> successDetail(){
+		Map<String, Object> map = new HashMap<>();
 		synchronized (successLock) {
 			if(successCount == 0){
-				String[] array = {"0", "0", "0", "0"};
-				return array;
+				return map;
 			}
-			String[] array = new String[4];
-			array[0] = String.valueOf(successCount);
-			array[1] = minCost + "ms";
-			array[2] = maxCost + "ms";
-			array[3] = (totalCost / successCount) + "ms";
-			return array;
+			map.put("successCount", successCount);
+			map.put("totalCost", totalCost);
+			map.put("minCost", minCost);
+			map.put("maxCost", maxCost);
+			return map;
 		}
 	}
 	
