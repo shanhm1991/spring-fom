@@ -71,7 +71,7 @@ public abstract class Context implements Serializable {
 
 	private transient AtomicLong failedCount = new AtomicLong(0);
 	
-	transient Map<String, Throwable> failedMap = new ConcurrentHashMap<>();
+	transient Map<String, Object> failedMap = new ConcurrentHashMap<>();
 
 	public Context(){
 		Class<?> clazz = this.getClass();
@@ -288,8 +288,8 @@ public abstract class Context implements Serializable {
 		return failedCount.get();
 	}
 
-	//maintain by successLock
-	String[] getSuccessDetail(){
+	//maintain by successLock 
+	String[] successDetail(){
 		synchronized (successLock) {
 			if(successCount == 0){
 				String[] array = {"0", "0", "0", "0"};
@@ -302,6 +302,14 @@ public abstract class Context implements Serializable {
 			array[3] = (totalCost / successCount) + "ms";
 			return array;
 		}
+	}
+	
+	String failedDetail(){
+		long fails = failedCount.get();
+		if(fails == 0){
+			return "0";
+		}
+		return fails + "(" + failedMap.size() + ")";
 	}
 
 	void successIncrease(String taskId, long cost){
@@ -319,7 +327,11 @@ public abstract class Context implements Serializable {
 	}
 
 	void failedIncrease(String taskId, Throwable throwable){
-		failedMap.put(taskId, throwable);
+		if(throwable == null){
+			failedMap.put(taskId, "null");
+		}else{
+			failedMap.put(taskId, throwable);
+		}
 		failedCount.incrementAndGet();
 	}
 
@@ -890,12 +902,12 @@ public abstract class Context implements Serializable {
 			if(!name.equals(future.getContextName())){   
 				continue;
 			}
-			String sourceUri = entry.getKey();
+			String taskId = entry.getKey(); 
 			if(!future.isDone()){
 				long existTime = (System.currentTimeMillis() - future.getCreateTime()) / 1000;
 				int threadOverTime = Integer.parseInt(valueMap.get(Constants.OVERTIME)); 
 				if(existTime > threadOverTime) {
-					log.warn("task overtime[" + sourceUri + "]," + existTime + "s");
+					log.warn("task overtime[" + taskId + "]," + existTime + "s");
 					if(Boolean.parseBoolean(valueMap.get(Constants.CANCELLABLE))) { 
 						future.cancel(true);
 					}

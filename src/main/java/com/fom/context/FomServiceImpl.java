@@ -58,8 +58,8 @@ public class FomServiceImpl implements FomService {
 			cmap.put("level", context.log.getLevel().toString());
 			cmap.put("active", String.valueOf(context.getActives())); 
 			cmap.put("waiting", String.valueOf(context.getWaitings()));
-			cmap.put("failed", String.valueOf(context.getFailed()));
-			String[] array = context.getSuccessDetail();
+			cmap.put("failed", context.failedDetail());
+			String[] array = context.successDetail();
 			cmap.put("success", array[0]);
 			cmap.put("minCost", array[1]);
 			cmap.put("maxCost", array[2]);
@@ -389,16 +389,18 @@ public class FomServiceImpl implements FomService {
 			return map;
 		} 
 		
-		for(Entry<String, Throwable> entry : context.failedMap.entrySet()){
-			if(entry.getValue() == null){
-				map.put(entry.getKey(), "null");
-				continue;
+		for(Entry<String, Object> entry : context.failedMap.entrySet()){
+			Object obj = entry.getValue();
+			if(obj instanceof Throwable) {
+				Throwable throwable = (Throwable)obj;
+				StringBuilder builder = new StringBuilder("msg = " + throwable.getMessage() + "<br>stackTrace:<br>");
+				for(StackTraceElement stack : throwable.getStackTrace()){
+					builder.append(stack).append("<br>");
+				}
+				map.put(entry.getKey(), builder.toString());
+			}else{
+				map.put(entry.getKey(), obj.toString());
 			}
-			StringBuilder builder = new StringBuilder("msg = " + entry.getValue().getMessage() + "<br>stackTrace:<br>");
-			for(StackTraceElement stack : entry.getValue().getStackTrace()){
-				builder.append(stack).append("<br>");
-			}
-			map.put(entry.getKey(), builder.toString());
 		}
 		map.put("size", map.size() - 1);
 		return map;
