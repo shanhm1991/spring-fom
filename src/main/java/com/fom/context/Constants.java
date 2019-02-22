@@ -52,5 +52,5 @@ class Constants {
 		return !THREADCORE.equals(key) && !THREADMAX.equals(key) && !ALIVETIME.equals(key) 
 				&& !OVERTIME.equals(key) && !QUEUESIZE.equals(key) && !CANCELLABLE.equals(key) && !CRON.equals(key) ;
 	}
-
+	
 }

@@ -58,7 +58,7 @@ public class FomServiceImpl implements FomService {
 			cmap.put("level", context.log.getLevel().toString());
 			cmap.put("active", String.valueOf(context.getActives())); 
 			cmap.put("waiting", String.valueOf(context.getWaitings()));
-			cmap.put("failed", context.failedDetail());
+			cmap.put("failed", context.statistics.failedDetail());
 			cmap.put("success", String.valueOf(context.getSuccess()));
 			list.add(cmap);
 		}
@@ -385,7 +385,7 @@ public class FomServiceImpl implements FomService {
 			return map;
 		} 
 		
-		for(Entry<String, Object> entry : context.failedMap.entrySet()){
+		for(Entry<String, Object> entry : context.statistics.failedMap.entrySet()){
 			Object obj = entry.getValue();
 			if(obj instanceof Throwable) {
 				Throwable throwable = (Throwable)obj;
@@ -416,15 +416,14 @@ public class FomServiceImpl implements FomService {
 	}
 
 	@Override
-	public Map<String, Object> successDetail(String name) throws Exception {
+	public Map<String, Map<String, Object>> successDetail(String name) throws Exception {
 		Context context = ContextManager.contextMap.get(name);
 		if(context == null){
-			return new HashMap<String, Object>(); 
+			return new HashMap<String, Map<String, Object>>(); 
 		}
-		Map<String, Object> map = context.successDetail();
-		map.put("avgCost", (long)map.get("totalCost") / (long)map.get("successCount"));
 		
-		return map;
+		
+		return context.statistics.successDetail();
 	}
 
 }

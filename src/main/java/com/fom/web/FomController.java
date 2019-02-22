@@ -95,7 +95,7 @@ public class FomController {
 	
 	@RequestMapping("/successdetail")
 	@ResponseBody
-	public Map<String,Object> successDetail(String name) throws Exception { 
+	public Map<String,Map<String, Object>> successDetail(String name) throws Exception { 
 		return service.successDetail(name);
 	}
 	

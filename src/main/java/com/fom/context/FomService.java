@@ -79,7 +79,7 @@ public interface FomService {
 	 * @return map结果
 	 * @throws Exception Exception
 	 */
-	Map<String,Object> successDetail(String name) throws Exception;
+	Map<String,Map<String, Object>> successDetail(String name) throws Exception;
 
 	/**
 	 * 获取context正在执行的任务线程的堆栈

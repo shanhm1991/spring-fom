@@ -12,7 +12,7 @@
 <script src="layui/lay/modules/layer.js"></script>
 <script src="highcharts/highcharts.js"></script>
 <script src="highcharts/modules/exporting.js"></script>
-<script src="highcharts-plugins/highcharts-zh_CN.js"></script>
+<!-- <script src="highcharts-plugins/highcharts-zh_CN.js"></script> -->
 <script src="highcharts/themes/grid-light.js"></script>
 <link href="js/datatables.css" rel="stylesheet" />
 <link href="layui/css/layui.css" rel="stylesheet" />
@@ -762,17 +762,34 @@ img {
 					"name" : name,
 				},
 				success : function(data) {
+					var all = data.all;
+					var day1 = data.day1;
+					var day2 = data.day2;
+					var day3 = data.day3;
+					var day4 = data.day4;
+					var day5 = data.day5;
+					var day6 = data.day6;
+					var day7 = data.day7;
+					var day8 = data.day8;
+					var day9 = data.day9;
+					var day10 = data.day10;
+
+
+					var html = '<div><div id="success-detail" style="width:25%;;height:500px;float:left;text-align: left;"></div>'
+						+ '<div style="width:75%;float:left;">起始日期：'
+						+ '耗时区间ms：<input style="width:300px;" value="3600000,3600000,3600000,3600000,3600000"/> '
+						+ '数据保存天数：<input style="width:30px;" value="10"/>'
+						+ '<div style="height:500px;" id="success-detail2"></div></div></div>';
+
 					layer.open({
-						title : 'Time cost of success tasks['
-							+ data.successCount + ']: min=' + data.minCost + 'ms, max='
-							+ data.maxCost + 'ms, avg=' + data.avgCost + 'ms',
+						title : 'Time cost of success task',
 						type : 1,
 						skin : 'layui-layer-demo',
-						area : [ '1200px', '600px' ],
+						area : [ '1400px', '650px' ],
 						maxmin : true,
 						closeBtn : 2,
 						anim : 2,
-						content : '<div id="success-detail" style="width:100%;height:400px"></div>'
+						content : html
 					});
 
 					var chart = Highcharts.chart('success-detail', {
@@ -780,28 +797,32 @@ img {
 							type : 'column'
 						},
 						title : {
-							text : '月平均降雨量'
+							text : ''
 						},
 						subtitle : {
-							text : '数据来源: WorldClimate.com'
+							text : 'statistics of all success task'
 						},
 						xAxis : {
 							categories : [
-								'一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'
+								'<table>'
+								+ 'task count = ' + all.successCount
+								+ '<br>min cost = ' + all.minCost
+								+ 'ms<br>max cost = ' + all.maxCost
+								+ 'ms<br>avg cost = ' + all.avgCost + 'ms'
 							],
 							crosshair : true
 						},
 						yAxis : {
 							min : 0,
 							title : {
-								text : '降雨量 (mm)'
+								text : '任务耗时区间统计'
 							}
 						},
 						tooltip : {
 							// head + 每个 point + footer 拼接成完整的 table
 							headerFormat : '<span style="font-size:10px">{point.key}</span><table>',
 							pointFormat : '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
-								'<td style="padding:0"><b>{point.y:.1f} mm</b></td></tr>',
+								'<td style="padding:0"><b>{point.y}</b></td></tr>',
 							footerFormat : '</table>',
 							shared : true,
 							useHTML : true
@@ -812,17 +833,108 @@ img {
 							}
 						},
 						series : [ {
-							name : '东京',
-							data : [ 49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4 ]
+							name : '0~1s',
+							data : [ all.level1 ]
 						}, {
-							name : '纽约',
-							data : [ 83.6, 78.8, 98.5, 93.4, 106.0, 84.5, 105.0, 104.3, 91.2, 83.5, 106.6, 92.3 ]
+							name : '1s~10s',
+							data : [ all.level2 ]
 						}, {
-							name : '伦敦',
-							data : [ 48.9, 38.8, 39.3, 41.4, 47.0, 48.3, 59.0, 59.6, 52.4, 65.2, 59.3, 51.2 ]
+							name : '10s~1min',
+							data : [ all.level3 ]
 						}, {
-							name : '柏林',
-							data : [ 42.4, 33.2, 34.5, 39.7, 52.6, 75.5, 57.4, 60.4, 47.6, 39.1, 46.8, 51.1 ]
+							name : '1min~10min',
+							data : [ all.level4 ]
+						}, {
+							name : '10min~1h',
+							data : [ all.level5 ]
+						}, {
+							name : '>1h',
+							data : [ all.level6 ]
+						} ]
+					});
+
+
+
+					var chart2 = Highcharts.chart('success-detail2', {
+						chart : {
+							type : 'column'
+						},
+						title : {
+							text : ''
+						},
+						subtitle : {
+							text : 'statistics of success tasks from - to -'
+						},
+						xAxis : {
+							categories : [
+								'20190210<br>task count = <br>min cost= <br>max cost= <br>avg cost=',
+								'20190211<br>task count = ' + day2.successCount + '<br>min cost = '
+								+ day2.minCost + '<br>max cost = ' + day2.maxCost + '<br>avg cost = ' + day2.avgCost,
+
+								'20190212<br>task count = ' + day3.successCount + '<br>min cost = '
+								+ day3.minCost + '<br>max cost = ' + day3.maxCost + '<br>avg cost = ' + day3.avgCost,
+
+								'20190213<br>task count = ' + day4.successCount + '<br>min cost = '
+								+ day4.minCost + '<br>max cost = ' + day4.maxCost + '<br>avg cost = ' + day4.avgCost,
+
+								'20190214<br>task count = ' + day5.successCount + '<br>min cost = ' 
+								+ day5.minCost + '<br>max cost = ' + day5.maxCost + '<br>avg cost = ' + day5.avgCost,
+								
+								'20190215<br>task count = ' + day6.successCount + '<br>min cost = ' 
+								+ day6.minCost + '<br>max cost = ' + day6.maxCost + '<br>avg cost = ' + day6.avgCost,
+								
+								'20190216<br>task count = ' + day7.successCount + '<br>min cost = ' 
+								+ day7.minCost + '<br>max cost = ' + day7.maxCost + '<br>avg cost = ' + day7.avgCost,
+								
+								'20190217<br>task count = ' + day8.successCount + '<br>min cost = ' 
+								+ day8.minCost + '<br>max cost = ' + day8.maxCost + '<br>avg cost = ' + day8.avgCost,
+								
+								'20190218<br>task count = ' + day9.successCount + '<br>min cost = ' 
+								+ day9.minCost + '<br>max cost = ' + day9.maxCost + '<br>avg cost = ' + day9.avgCost,
+								
+								'20190219<br>task count = ' + day10.successCount + '<br>min cost = ' 
+								+ day10.minCost + '<br>max cost = ' + day10.maxCost + '<br>avg cost = ' + day10.avgCost
+							],
+							crosshair : true
+						},
+						yAxis : {
+							min : 0,
+							title : {
+								text : '任务耗时区间统计'
+							}
+						},
+						tooltip : {
+							// head + 每个 point + footer 拼接成完整的 table
+							headerFormat : '<span style="font-size:10px">{point.key}</span><table>',
+							pointFormat : '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+								'<td style="padding:0"><b>{point.y}</b></td></tr>',
+							footerFormat : '</table>',
+							shared : true,
+							useHTML : true
+						},
+						plotOptions : {
+							column : {
+								borderWidth : 0
+							}
+						},
+						series : [ {
+							name : '0~1s',
+							data : [ 49.9, day2.level1, day3.level1, day4.level1, day5.level1, day6.level1, day7.level1, day8.level1, day9.level1, day10.level1 ]
+						}, {
+							name : '1s~10s',
+							data : [ 83.6, day2.level2, day3.level2, day4.level2, day5.level2, day6.level2, day7.level2, day8.level2, day9.level2, day10.level2 ]
+						}, {
+							name : '10s~1min',
+							data : [ 48.9, day2.level3, day3.level3, day4.level3, day5.level3, day6.level3, day7.level3, day8.level3, day9.level3, day10.level3 ]
+						}, {
+							name : '1min~10min',
+							data : [ 42.4, day2.level4, day3.level4, day4.level4, day5.level4, day6.level4, day7.level4, day8.level4, day9.level4, day10.level4 ]
+						}, {
+							name : '10min~1h',
+							data : [ 42.4, day2.level5, day3.level5, day4.level5, day5.level5, day6.level5, day7.level5, day8.level5, day9.level5, day10.level5 ]
+						}, {
+							name : '>1h',
+							data : [ 42.4, day2.level6, day3.level6, day4.level6, day5.level6, day6.level6, day7.level6, day8.level6, day9.level6, day10.level6 ]
 						} ]
 					});
 				},

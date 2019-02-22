@@ -33,7 +33,7 @@ public abstract class Task implements Callable<Result> {
 	protected ResultHandler resultHandler;
 	
 	private volatile Context context;
-
+	
 	/**
 	 * @param id 创建Executor的资源
 	 */
@@ -104,10 +104,10 @@ public abstract class Task implements Callable<Result> {
 		//这里算上resulthandler的结果和耗时
 		long cost = System.currentTimeMillis() - sTime;
 		if(result.success){
-			context.successIncrease(id, cost); 
+			context.statistics.successIncrease(id, cost); 
 			log.info("task success, cost=" + cost + "ms");
 		}else{
-			context.failedIncrease(id, result.throwable);
+			context.statistics.failedIncrease(id, result.throwable);
 			log.warn("task failed, cost=" + cost + "ms");
 		}
 		return result;

@@ -23,7 +23,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -52,26 +51,14 @@ public abstract class Context implements Serializable {
 	protected final String name;
 
 	protected transient Logger log;
-	
+
 	volatile transient long loadTime;
 
 	volatile transient long execTime;
 
 	private transient TimedExecutorPool pool;
 
-	transient Object successLock = new Object();
-
-	private transient long successCount = 0; 
-
-	private transient long totalCost = 0;
-
-	private transient long minCost = 0;
-
-	private transient long maxCost = 0;
-
-	private transient AtomicLong failedCount = new AtomicLong(0);
-	
-	transient Map<String, Object> failedMap = new ConcurrentHashMap<>();
+	transient ContextStatistics statistics;
 
 	public Context(){
 		Class<?> clazz = this.getClass();
@@ -158,6 +145,7 @@ public abstract class Context implements Serializable {
 			setCancellable(false);
 		}
 		initPool();
+		statistics = new ContextStatistics();
 		loadTime = System.currentTimeMillis();
 	}
 
@@ -199,9 +187,7 @@ public abstract class Context implements Serializable {
 			state = inited; 
 		}
 		initPool();
-		successLock = new Object();
-		failedCount = new AtomicLong(0);
-		failedMap = new ConcurrentHashMap<>();
+		statistics = new ContextStatistics();
 		loadTime = System.currentTimeMillis();
 	}
 
@@ -226,14 +212,14 @@ public abstract class Context implements Serializable {
 		}
 		return pool.getQueue().size();
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	Map<String, Object> waitingDetail(){
 		Map<String, Object> map = new HashMap<>();
 		if(pool == null){
 			return map;
 		}
-		
+
 		Object[] array = pool.getQueue().toArray();
 		if(ArrayUtils.isEmpty(array)){
 			return map;
@@ -275,9 +261,7 @@ public abstract class Context implements Serializable {
 	 * @return 成功的任务数
 	 */
 	public final long getSuccess(){
-		synchronized (successLock) {
-			return successCount;
-		}
+		return statistics.getSuccess();
 	}
 
 	/**
@@ -285,53 +269,7 @@ public abstract class Context implements Serializable {
 	 * @return 失败的任务数
 	 */
 	public final long getFailed(){
-		return failedCount.get();
-	}
-
-	//maintain by successLock 
-	Map<String, Object> successDetail(){
-		Map<String, Object> map = new HashMap<>();
-		synchronized (successLock) {
-			if(successCount == 0){
-				return map;
-			}
-			map.put("successCount", successCount);
-			map.put("totalCost", totalCost);
-			map.put("minCost", minCost);
-			map.put("maxCost", maxCost);
-			return map;
-		}
-	}
-	
-	String failedDetail(){
-		long fails = failedCount.get();
-		if(fails == 0){
-			return "0";
-		}
-		return fails + "(" + failedMap.size() + ")";
-	}
-
-	void successIncrease(String taskId, long cost){
-		failedMap.remove(taskId);
-		synchronized (successLock) {
-			successCount++;
-			totalCost += cost;
-			if(minCost == 0 || cost < minCost){
-				minCost = cost;
-			}
-			if(cost > maxCost){
-				maxCost = cost;
-			}
-		}
-	}
-
-	void failedIncrease(String taskId, Throwable throwable){
-		if(throwable == null){
-			failedMap.put(taskId, "null");
-		}else{
-			failedMap.put(taskId, throwable);
-		}
-		failedCount.incrementAndGet();
+		return statistics.getFailed();
 	}
 
 	@SuppressWarnings("unchecked")
