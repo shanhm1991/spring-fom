@@ -34,11 +34,16 @@ public abstract class Task implements Callable<Result> {
 	
 	private volatile Context context;
 	
+	private volatile long createTime;
+	
+	private volatile long startTime;
+	
 	/**
 	 * @param id 创建Executor的资源
 	 */
 	public Task(String id) { 
 		this.id = id;
+		this.createTime = System.currentTimeMillis();
 	}
 
 	/**
@@ -75,7 +80,9 @@ public abstract class Task implements Callable<Result> {
 		Thread.currentThread().setName(id);
 		Result result = new Result(id); 
 		long sTime = System.currentTimeMillis();
+		this.startTime = sTime;
 		result.startTime = sTime;
+		result.createTime = this.createTime;
 		
 		try {
 			result.success = beforeExec() && exec() && afterExec();
@@ -104,10 +111,10 @@ public abstract class Task implements Callable<Result> {
 		//这里算上resulthandler的结果和耗时
 		long cost = System.currentTimeMillis() - sTime;
 		if(result.success){
-			context.statistics.successIncrease(id, cost); 
+			context.statistics.successIncrease(id, cost, this.createTime, this.startTime); 
 			log.info("task success, cost=" + cost + "ms");
 		}else{
-			context.statistics.failedIncrease(id, result.throwable);
+			context.statistics.failedIncrease(id, result);
 			log.warn("task failed, cost=" + cost + "ms");
 		}
 		return result;
@@ -136,6 +143,22 @@ public abstract class Task implements Callable<Result> {
 	 */
 	protected boolean afterExec() throws Exception {
 		return true;
+	}
+	
+	/**
+	 * 获取任务创建时间
+	 * @return createTime
+	 */
+	public final long getCreateTime() {
+		return createTime;
+	}
+	
+	/**
+	 * 获取任务开始时间
+	 * @return startTime
+	 */
+	public final long getStartTime() {
+		return startTime;
 	}
 	
 	final void setContext(Context context){
@@ -206,5 +229,19 @@ public abstract class Task implements Callable<Result> {
 			return defaultValue;
 		}
 		return context.getBoolean(key, defaultValue);
+	}
+	
+	@Override
+	public final boolean equals(Object obj) {
+		if(!(obj instanceof Task)){
+			return false;
+		}
+		Task task = (Task)obj;
+		return this.id.equals(task.id);
+	}
+	
+	@Override
+	public final int hashCode() {
+		return this.id.hashCode();
 	}
 }

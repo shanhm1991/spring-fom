@@ -11,7 +11,6 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -24,7 +23,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
@@ -272,10 +270,9 @@ public abstract class Context implements Serializable {
 		return statistics.getFailed();
 	}
 
-	@SuppressWarnings("unchecked")
-	Collection<Thread> getActiveThreads() {
+	Map<Task, Thread> getActiveThreads() {
 		if(pool == null){
-			return CollectionUtils.EMPTY_COLLECTION;
+			return new HashMap<Task, Thread>();
 		}
 		return pool.getActiveThreads();
 	}
@@ -840,8 +837,8 @@ public abstract class Context implements Serializable {
 				continue;
 			}
 			String taskId = entry.getKey(); 
-			if(!future.isDone()){
-				long existTime = (System.currentTimeMillis() - future.getCreateTime()) / 1000;
+			if(future.getStartTime() > 0 && !future.isDone()){
+				long existTime = (System.currentTimeMillis() - future.getStartTime()) / 1000;
 				int threadOverTime = Integer.parseInt(valueMap.get(Constants.OVERTIME)); 
 				if(existTime > threadOverTime) {
 					log.warn("task overtime[" + taskId + "]," + existTime + "s");

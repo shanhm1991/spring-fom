@@ -10,38 +10,37 @@ import java.util.concurrent.FutureTask;
  * @param <T> 结果类型
  */
 class TimedFuture<T> extends FutureTask<T> {
-
-	private long createTime;
-
-	private String contextName;
 	
-	private String taskId;
+	private Task task;
 
 	public TimedFuture(Runnable runnable, T result) {
 		super(runnable, result);
-		createTime = System.currentTimeMillis();
 	}
 
 	public TimedFuture(Callable<T> callable){
 		super(callable);
-		createTime = System.currentTimeMillis();
 		if(callable instanceof Task){
-			Task task = ((Task)callable);
-			contextName = task.getContextName();
-			taskId = task.id;
+			 task = ((Task)callable);
 		}
 	}
 
 	public long getCreateTime() {
-		return createTime;
+		return task.getCreateTime();
+	}
+	
+	public long getStartTime() {
+		return task.getStartTime();
 	}
 
 	public String getContextName(){
-		return contextName;
+		return task.getContextName();
 	}
 
 	public String getTaskId() {
-		return taskId;
+		return task.id;
 	}
 
+	public Task getTask(){
+		return task;
+	}
 }

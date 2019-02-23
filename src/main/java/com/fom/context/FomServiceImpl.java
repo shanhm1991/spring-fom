@@ -3,6 +3,7 @@ package com.fom.context;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -13,7 +14,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +29,7 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.fom.context.ContextStatistics.CostDetail;
 import com.fom.util.IoUtil;
 
 /**
@@ -355,7 +360,7 @@ public class FomServiceImpl implements FomService {
 		}
 		logger.setLevel(Level.toLevel(level)); 
 	}
-	
+
 	@Override
 	public Map<String, Object> activeDetail(String name) throws Exception {
 		Map<String,Object> map = new HashMap<>();
@@ -365,12 +370,21 @@ public class FomServiceImpl implements FomService {
 			return map;
 		}
 
-		for(Thread thread : context.getActiveThreads()){
+		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss SSS");
+		for(Entry<Task, Thread> entry : context.getActiveThreads().entrySet()){
+			Task task = entry.getKey();
+			Thread thread = entry.getValue();
+
+			Map<String, String> subMap = new HashMap<>();
+			subMap.put("createTime", format.format(task.getCreateTime()));
+			subMap.put("startTime", format.format(task.getStartTime()));
+
 			StringBuilder builder = new StringBuilder();
 			for(StackTraceElement stack : thread.getStackTrace()){
 				builder.append(stack).append("<br>");
 			}
-			map.put(thread.getName(), builder.toString());
+			subMap.put("stack", builder.toString());
+			map.put(task.id, subMap);
 		}
 		map.put("size", map.size() - 1);
 		return map;
@@ -384,19 +398,27 @@ public class FomServiceImpl implements FomService {
 		if(context == null){
 			return map;
 		} 
-		
-		for(Entry<String, Object> entry : context.statistics.failedMap.entrySet()){
-			Object obj = entry.getValue();
-			if(obj instanceof Throwable) {
-				Throwable throwable = (Throwable)obj;
+
+		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss SSS");
+		for(Entry<String, Result> entry : context.statistics.failedMap.entrySet()){
+			Result result = entry.getValue();
+
+			Map<String, Object> subMap = new HashMap<>();
+			subMap.put("createTime", format.format(result.getCreateTime()));
+			subMap.put("startTime", format.format(result.getStartTime()));
+			subMap.put("costTime", result.getCostTime());
+
+			if(result.getThrowable() == null){
+				subMap.put("throwable", "null");
+			}else{
+				Throwable throwable = result.getThrowable();
 				StringBuilder builder = new StringBuilder("msg = " + throwable.getMessage() + "<br>stackTrace:<br>");
 				for(StackTraceElement stack : throwable.getStackTrace()){
 					builder.append(stack).append("<br>");
 				}
-				map.put(entry.getKey(), builder.toString());
-			}else{
-				map.put(entry.getKey(), obj.toString());
+				subMap.put("throwable", builder.toString());
 			}
+			map.put(entry.getKey(), subMap);
 		}
 		map.put("size", map.size() - 1);
 		return map;
@@ -416,14 +438,98 @@ public class FomServiceImpl implements FomService {
 	}
 
 	@Override
-	public Map<String, Map<String, Object>> successDetail(String name) throws Exception {
+	public Map<String, Object> successDetail(String name) throws Exception {
 		Context context = ContextManager.contextMap.get(name);
 		if(context == null){
-			return new HashMap<String, Map<String, Object>>(); 
+			return new HashMap<String, Object>(); 
 		}
-		
-		
 		return context.statistics.successDetail();
 	}
 
+	@Override
+	public Map<String, Object> saveCostLevel(String name, String levelStr, String saveDay, String date) throws Exception {
+		Map<String, Object> map = new HashMap<>();
+		Context context = ContextManager.contextMap.get(name);
+		if(context == null){
+			map.put("isSuccess", false);
+			return map;
+		} 
+
+		map.put("isSuccess", true);
+		int day = Integer.parseInt(saveDay);
+		if(day >= 10){
+			//认为页面请求只是辅助，几乎不存在并发，所有尽量不使用同步
+			context.statistics.saveDay = day; 
+		}
+		map.put("saveDay", context.statistics.saveDay);
+
+		String[] array = levelStr.split(",");
+		long v1 = Long.parseLong(array[0]);
+		long v2 = Long.parseLong(array[1]);
+		long v3 = Long.parseLong(array[2]);
+		long v4 = Long.parseLong(array[3]);
+		long v5 = Long.parseLong(array[4]);
+		if(v1 >= v2 && v2 >= v3 && v3 >= v4 && v4 >= v5){
+			map.put("isChange", false);
+			return map;
+		}
+
+		if(!context.statistics.levelChange(v1, v2, v3, v4, v5)){
+			map.put("isChange", false);
+			return map;
+		}
+
+		map.put("isChange", true);
+		context.statistics.dayDetail(map, date);
+		return map;
+	}
+
+	@Override
+	public Map<String, Object> changeDate(String name, String date) throws Exception {
+		Map<String, Object> map = new HashMap<>();
+		Context context = ContextManager.contextMap.get(name);
+		if(context == null){
+			map.put("isSuccess", false);
+			return map;
+		} 
+		context.statistics.dayDetail(map, date);
+		return map;
+	}
+
+	@Override
+	public void dataDownload(String name, HttpServletResponse resp) throws Exception {
+		Context context = ContextManager.contextMap.get(name);
+		if(context == null){
+			return;
+		} 
+		
+		StringBuilder builder = new StringBuilder("[");
+		for(Entry<String, Queue<CostDetail>> entry : context.statistics.successMap.entrySet()){
+			String date = entry.getKey();
+			builder.append("{\"date\":\"").append(date + "\",\"details\":[");
+			
+			Queue<CostDetail> queue = entry.getValue();
+			CostDetail[] array = new CostDetail[queue.size()];
+			array = queue.toArray(array);
+			for(int i = 0;i < array.length;i++){
+				builder.append("{\"id\":\"").append(array[i].id).append("\",");
+				builder.append("\"createTime\":\"").append(array[i].createTime).append("\",");
+				builder.append("\"startTime\":\"").append(array[i].startTime).append("\",");
+				builder.append("\"costTime\":\"").append(array[i].cost).append("\"}");
+				if(i != array.length - 1){
+					builder.append(",");
+				}
+			}
+			builder.append("]},");
+		}
+		String json = builder.toString();
+		json = json.substring(0, json.length() - 1) + "]";
+		
+		resp.reset();
+		resp.setContentType("application/octet-stream;charset=UTF-8");
+		resp.addHeader("Content-Disposition", "attachment;filename=\"" + name + "." + System.currentTimeMillis() +".json\"");
+		PrintWriter write = resp.getWriter();
+		write.write(json);
+		write.flush();
+	}
 }

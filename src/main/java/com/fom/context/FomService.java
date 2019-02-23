@@ -2,6 +2,8 @@ package com.fom.context;
 
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * fom提供运维页面接口
  * 
@@ -79,7 +81,7 @@ public interface FomService {
 	 * @return map结果
 	 * @throws Exception Exception
 	 */
-	Map<String,Map<String, Object>> successDetail(String name) throws Exception;
+	Map<String,Object> successDetail(String name) throws Exception;
 
 	/**
 	 * 获取context正在执行的任务线程的堆栈
@@ -125,5 +127,32 @@ public interface FomService {
 	 * @param level level
 	 */
 	void saveLevel(String logger, String level);
+	
+	/**
+	 * 保存耗时统计区间
+	 * @param name name
+	 * @param levelStr levelStr
+	 * @param saveDay saveDay
+	 * @param date date
+	 * @return map
+	 * @throws Exception Exception
+	 */
+	Map<String,Object> saveCostLevel(String name, String levelStr, String saveDay, String date) throws Exception;
+	
+	/**
+	 * 调整起止日期
+	 * @param name name
+	 * @param date date
+	 * @return map
+	 * @throws Exception Exception
+	 */
+	Map<String,Object> changeDate(String name, String date) throws Exception;
 
+	/**
+	 * 获取成功任务明细
+	 * @param name name
+	 * @param resp resp
+	 * @throws Exception Exception
+	 */
+	void dataDownload(String name, HttpServletResponse resp) throws Exception;
 }
