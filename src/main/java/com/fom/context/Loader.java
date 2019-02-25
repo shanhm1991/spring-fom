@@ -12,9 +12,11 @@ import java.util.List;
  *
  */
 class Loader {
-
+	
 	static URLClassLoader systemLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
 
+	private static String root = ClassLoader.getSystemResource("").getPath();
+	
 	private static Method method;
 
 	static{
@@ -37,6 +39,7 @@ class Loader {
 						continue;
 					}
 					method.invoke(systemLoader, new Object[] { file.toURI().toURL() });
+					file.renameTo(new File(root + File.separator + file.getName())); 
 				}
 			}
 		}
@@ -52,6 +55,7 @@ class Loader {
 				}
 			}
 			method.invoke(systemLoader, new Object[] { file.toURI().toURL() });
+			file.renameTo(new File(root + File.separator + file.getName())); 
 		}
 	}
 

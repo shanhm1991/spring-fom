@@ -6,7 +6,7 @@
 > 都可以使用fom来统一管理，而且fom也可以以servletListener的形式合并到web服务中去
 
 > fom本质上是基于线程池实现的功能模块管理，模块配置可以通过xml配置文件或者注解形式；同时提供了简单的
-> 运维（URL：http://ip:4040/fom/index.html），可以实时新增模块 ，也可以实时管理模块的状态和配置信息；
+> 运维（URL：http://ip:4040/fom/index.html），可以实时管理模块的状态和配置信息，新增模块，管理任务统计信息及所有日志级别；
 > 另外fom提供了一些常见的文件操作实现，因为一开始是针对文件操作写的（file operation manager），比如上传、下载（打包）、文件解析，实现方式有http、ftp、hdfs；
 > 对于数据库操作除了使用开源的mybatis/hibernate外，fom也提供了一个自定义实现的pool（配置对应上面的pool.xml，支持mysql和oracle以及elasticsearch(2.x)的操作）；
 > 所以即使不以fom的Context作为启动入口，同样可以将fom中的一些api当成工具包使用；

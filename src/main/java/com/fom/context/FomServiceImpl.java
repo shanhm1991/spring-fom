@@ -553,7 +553,7 @@ public class FomServiceImpl implements FomService {
 			
 			if(file.isDirectory()){
 				loop(file, list);
-			}else if(path.endsWith("zip") || path.endsWith("jar")){
+			}else if(path.endsWith("jar")){
 				list.add(file);
 			}else{
 				throw new IllegalArgumentException("file can only be zip or jar.");
@@ -572,7 +572,7 @@ public class FomServiceImpl implements FomService {
 			for (File sub : array) {
 				loop(sub, list);
 			}
-		}else if(path.endsWith("zip") || path.endsWith("jar")){
+		}else if(path.endsWith("jar")){
 			list.add(file);
 		}
 	}
