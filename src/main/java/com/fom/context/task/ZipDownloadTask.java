@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.text.DecimalFormat;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedOutputStream;
@@ -14,8 +13,8 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.fom.context.ExceptionHandler;
-import com.fom.context.Task;
 import com.fom.context.ResultHandler;
+import com.fom.context.Task;
 import com.fom.context.helper.ZipDownloadHelper;
 import com.fom.util.IoUtil;
 import com.fom.util.ZipUtil;
@@ -55,7 +54,7 @@ public class ZipDownloadTask extends Task {
 
 	private final ZipDownloadHelper helper;
 
-	private final List<String> uriList;
+	private final Set<String> uriSet;
 
 	private final String destPath;
 
@@ -76,7 +75,7 @@ public class ZipDownloadTask extends Task {
 	private Set<String> currentDownloadFiles;
 
 	/**
-	 * @param uriList 资源uri列表
+	 * @param uriSet 资源uri列表
 	 * @param zipName 打包zip的名称(不带后缀)
 	 * @param destPath 目标下载目录
 	 * @param zipEntryMax 打包zip的最大文件数(真实下载的文件)
@@ -84,14 +83,14 @@ public class ZipDownloadTask extends Task {
 	 * @param isDelSrc 下载结束是否删除资源文件
 	 * @param helper ZipDownloaderHelper下载方法实现
 	 */
-	public ZipDownloadTask(List<String> uriList, String zipName, String destPath, 
+	public ZipDownloadTask(Set<String> uriSet, String zipName, String destPath, 
 			int zipEntryMax, long zipSizeMax, boolean isDelSrc, ZipDownloadHelper helper) {
 		super(zipName);
-		if(uriList == null || uriList.isEmpty() || StringUtils.isBlank(zipName) || StringUtils.isBlank(destPath)
+		if(uriSet == null || uriSet.isEmpty() || StringUtils.isBlank(zipName) || StringUtils.isBlank(destPath)
 				|| zipEntryMax < 0 || zipSizeMax < 0 || helper == null) {
 			throw new IllegalArgumentException();
 		}
-		this.uriList = uriList;
+		this.uriSet = uriSet;
 		this.destPath = destPath;
 		this.zipEntryMax = zipEntryMax;
 		this.zipSizeMax = zipSizeMax;
@@ -100,7 +99,7 @@ public class ZipDownloadTask extends Task {
 	}
 
 	/**
-	 * @param uriList 资源uri列表
+	 * @param uriSet 资源uri列表
 	 * @param zipName 打包zip的名称(不带后缀)
 	 * @param destPath 目标下载目录
 	 * @param zipEntryMax 打包zip的最大文件数(真实下载的文件)
@@ -109,15 +108,15 @@ public class ZipDownloadTask extends Task {
 	 * @param helper ZipDownloaderHelper下载方法实现
 	 * @param exceptionHandler ExceptionHandler
 	 */
-	public ZipDownloadTask(List<String> uriList, String zipName, String destPath, 
+	public ZipDownloadTask(Set<String> uriSet, String zipName, String destPath, 
 			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
 			ZipDownloadHelper helper, ExceptionHandler exceptionHandler) {
-		this(uriList, zipName, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
+		this(uriSet, zipName, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
 		this.exceptionHandler = exceptionHandler;
 	}
 
 	/**
-	 * @param uriList 资源uri列表
+	 * @param uriSet 资源uri列表
 	 * @param zipName 打包zip的名称(不带后缀)
 	 * @param destPath 目标下载目录
 	 * @param zipEntryMax 打包zip的最大文件数(真实下载的文件)
@@ -126,15 +125,15 @@ public class ZipDownloadTask extends Task {
 	 * @param helper ZipDownloaderHelper下载方法实现
 	 * @param resultHandler ResultHandler
 	 */
-	public ZipDownloadTask(List<String> uriList, String zipName, String destPath, 
+	public ZipDownloadTask(Set<String> uriSet, String zipName, String destPath, 
 			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
 			ZipDownloadHelper helper, ResultHandler resultHandler) {
-		this(uriList, zipName, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
+		this(uriSet, zipName, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
 		this.resultHandler = resultHandler;
 	}
 
 	/**
-	 * @param uriList 资源uri列表
+	 * @param uriSet 资源uri列表
 	 * @param zipName 打包zip的名称(不带后缀)
 	 * @param destPath 目标下载目录
 	 * @param zipEntryMax 打包zip的最大文件数(真实下载的文件)
@@ -144,10 +143,10 @@ public class ZipDownloadTask extends Task {
 	 * @param exceptionHandler ExceptionHandler
 	 * @param resultHandler ResultHandler
 	 */
-	public ZipDownloadTask(List<String> uriList, String zipName, String destPath, 
+	public ZipDownloadTask(Set<String> uriSet, String zipName, String destPath, 
 			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
 			ZipDownloadHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
-		this(uriList, zipName, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
+		this(uriSet, zipName, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
 	}
@@ -209,7 +208,7 @@ public class ZipDownloadTask extends Task {
 		boolean isStreamClosed = true;
 		Set<String> historyDownloadFiles = getHistoryDownloadFiles();
 		try{
-			for(String uri : uriList){ 
+			for(String uri : uriSet){ 
 				if(isStreamClosed){
 					zipOutStream = new ZipOutputStream(
 							new CheckedOutputStream(new FileOutputStream(zip), new CRC32()));
@@ -285,7 +284,7 @@ public class ZipDownloadTask extends Task {
 
 		if(isDelSrc){ 
 			for(String entryName : currentDownloadFiles){
-				for(String uri : uriList){ 
+				for(String uri : uriSet){ 
 					String uriName = helper.getSourceName(uri); 
 					if(entryName.equals(uriName)){
 						int code = helper.delete(uri);

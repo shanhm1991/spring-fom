@@ -1,12 +1,12 @@
 package com.fom.examples;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.fom.context.Context;
-import com.fom.context.Task;
 import com.fom.context.FomContext;
+import com.fom.context.Task;
 import com.fom.context.helper.DownloadHelper;
 import com.fom.context.helper.impl.FtpHelper;
 import com.fom.context.task.DownloadTask;
@@ -31,12 +31,12 @@ public class DownloadFtpExample extends Context {
 	}
 
 	@Override
-	protected List<String> getTaskIdList() throws Exception {
+	protected Set<String> getTaskIdSet() throws Exception {
 		Thread.sleep(5000); 
 		
-		List<String> list = new ArrayList<String>();
-		list.add("/ftp/test.txt");
-		return list;
+		Set<String> set = new HashSet<String>();
+		set.add("/ftp/test.txt");
+		return set;
 	}
 
 	@Override

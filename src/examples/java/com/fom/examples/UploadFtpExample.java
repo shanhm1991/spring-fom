@@ -1,13 +1,13 @@
 package com.fom.examples;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.fom.context.Context;
 import com.fom.context.ContextUtil;
-import com.fom.context.Task;
 import com.fom.context.FomContext;
+import com.fom.context.Task;
 import com.fom.context.helper.UploadHelper;
 import com.fom.context.helper.impl.FtpHelper;
 import com.fom.context.task.UploadTask;
@@ -35,11 +35,11 @@ public class UploadFtpExample extends Context {
 	}
 	
 	@Override
-	protected List<String> getTaskIdList() throws Exception {
+	protected Set<String> getTaskIdSet() throws Exception {
 		String path = ContextUtil.getContextPath("/source");
-		List<String> list = new ArrayList<String>();
-		list.add(path + File.separator + "ftp.jpg");
-		return list;
+		Set<String> set = new HashSet<String>();
+		set.add(path + File.separator + "ftp.jpg");
+		return set;
 	}
  
 	@Override

@@ -1,6 +1,7 @@
 package com.fom.context;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -212,6 +214,9 @@ public class FomServiceImpl implements FomService {
 			resMap.put("msg", "class cann't be empty.");
 			return resMap;
 		}
+		
+		String classpath = map.get("classpath");
+		load(classpath);
 
 		Class<?> contextClass = null;
 		try {
@@ -531,5 +536,44 @@ public class FomServiceImpl implements FomService {
 		PrintWriter write = resp.getWriter();
 		write.write(json);
 		write.flush();
+	}
+	
+	private void load(String str) throws Exception{ 
+		if(StringUtils.isBlank(str)){
+			return;
+		}
+		
+		List<File> list = new LinkedList<>();
+		String[] array = str.split(",");
+		for(String path : array){
+			File file = new File(path);
+			if(!file.exists()){
+				throw new FileNotFoundException(path);
+			}
+			
+			if(file.isDirectory()){
+				loop(file, list);
+			}else if(path.endsWith("zip") || path.endsWith("jar")){
+				list.add(file);
+			}else{
+				throw new IllegalArgumentException("file can only be zip or jar.");
+			}
+		}
+		
+		if(!list.isEmpty()){ 
+			Loader.load(list);
+		}
+	}
+	
+	private void loop(File file, List<File> list) {
+		String path = file.getPath();
+		if (file.isDirectory()) {
+			File[] array = file.listFiles();
+			for (File sub : array) {
+				loop(sub, list);
+			}
+		}else if(path.endsWith("zip") || path.endsWith("jar")){
+			list.add(file);
+		}
 	}
 }

@@ -1,12 +1,12 @@
 package com.fom.examples;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.fom.context.Context;
-import com.fom.context.Task;
 import com.fom.context.FomContext;
+import com.fom.context.Task;
 import com.fom.context.helper.impl.HttpHelper;
 import com.fom.context.task.DownloadTask;
 
@@ -28,10 +28,10 @@ public class DownloadHttpExample extends Context {
 	}
 
 	@Override
-	protected List<String> getTaskIdList() throws Exception {
-		List<String> list = new ArrayList<String>();
-		list.add("http://localhost:4040/fom/index.html");
-		return list;
+	protected Set<String> getTaskIdSet() throws Exception {
+		Set<String> set = new HashSet<String>();
+		set.add("http://localhost:4040/fom/index.html");
+		return set;
 	}
  
 	@Override

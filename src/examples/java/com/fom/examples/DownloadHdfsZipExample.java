@@ -1,7 +1,7 @@
 package com.fom.examples;
 
 import java.io.File;
-import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -11,8 +11,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 
 import com.fom.context.Context;
-import com.fom.context.Task;
 import com.fom.context.FomContext;
+import com.fom.context.Task;
 import com.fom.context.helper.impl.HdfsHelper;
 import com.fom.context.task.ZipDownloadTask;
 import com.fom.util.HdfsUtil;
@@ -54,7 +54,7 @@ public class DownloadHdfsZipExample extends Context {
 	}
 
 	@Override
-	protected List<String> getTaskIdList() throws Exception {
+	protected Set<String> getTaskIdSet() throws Exception {
 		Thread.sleep(20000); 
 		
 		final FileSystem fs = HdfsUtil.getFileSystem(masterUrl, slaveUrl);
@@ -92,7 +92,7 @@ public class DownloadHdfsZipExample extends Context {
 	@Override
 	protected Task createTask(String taskId) throws Exception {
 		HdfsHelper helper = new HdfsHelper(masterUrl, slaveUrl);
-		List<String> pathList = HdfsUtil.list(masterUrl, slaveUrl, new Path(taskId), new PathFilter(){
+		Set<String> pathList = HdfsUtil.list(masterUrl, slaveUrl, new Path(taskId), new PathFilter(){
 			@Override
 			public boolean accept(Path path) {
 				if(StringUtils.isBlank(signalName)){

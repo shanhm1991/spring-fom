@@ -2,8 +2,8 @@ package com.fom.util;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -15,10 +15,10 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class FileUtil {
 
-	public static List<String> list(String srcUri, FileFilter filter) throws Exception {
-		List<String> list = new LinkedList<>();
+	public static Set<String> list(String srcUri, FileFilter filter) throws Exception {
+		Set<String> set = new HashSet<>();
 		if(StringUtils.isBlank(srcUri)){
-			return list;
+			return set;
 		}
 
 		File[] fileArray = null; 
@@ -29,11 +29,11 @@ public class FileUtil {
 		}
 
 		if(ArrayUtils.isEmpty(fileArray)){
-			return list;
+			return set;
 		}
 		for(File file : fileArray){
-			list.add(file.getPath());
+			set.add(file.getPath());
 		}
-		return list;
+		return set;
 	}
 }

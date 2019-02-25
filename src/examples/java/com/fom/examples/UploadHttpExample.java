@@ -1,13 +1,13 @@
 package com.fom.examples;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.fom.context.Context;
 import com.fom.context.ContextUtil;
-import com.fom.context.Task;
 import com.fom.context.FomContext;
+import com.fom.context.Task;
 import com.fom.context.helper.impl.HttpHelper;
 import com.fom.context.task.UploadTask;
 
@@ -22,11 +22,11 @@ public class UploadHttpExample extends Context {
 	private static final long serialVersionUID = -6676559884214726673L;
 
 	@Override
-	protected List<String> getTaskIdList() throws Exception {
+	protected Set<String> getTaskIdSet() throws Exception {
 		String path = ContextUtil.getContextPath("/source");
-		List<String> list = new ArrayList<String>();
-		list.add(path + File.separator + "http.jpg");
-		return list;
+		Set<String> set = new HashSet<String>();
+		set.add(path + File.separator + "http.jpg");
+		return set;
 	}
 
 	@Override

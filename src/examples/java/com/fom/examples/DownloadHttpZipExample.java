@@ -1,12 +1,12 @@
 package com.fom.examples;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.fom.context.Context;
-import com.fom.context.Task;
 import com.fom.context.FomContext;
+import com.fom.context.Task;
 import com.fom.context.helper.impl.HttpHelper;
 import com.fom.context.task.ZipDownloadTask;
 
@@ -28,35 +28,35 @@ public class DownloadHttpZipExample extends Context {
 	}
 
 	@Override
-	protected List<String> getTaskIdList() throws Exception {
-		List<String> list = new ArrayList<String>();
-		list.add("httpTest");
-		return list;
+	protected Set<String> getTaskIdSet() throws Exception {
+		Set<String> set = new HashSet<String>();
+		set.add("httpTest");
+		return set;
 	}
 
 	@Override
 	protected Task createTask(String taskId) throws Exception {
-		List<String> list = new ArrayList<String>();
-		list.add("http://localhost:4040/fom/index.html");
-		list.add("http://localhost:4040/fom/js/datatables.js");
-		list.add("http://localhost:4040/fom/js/datatables.css");
-		list.add("http://localhost:4040/fom/js/jquery-3.3.1.js");
-		list.add("http://localhost:4040/fom/js/tinybox.js");
-		list.add("http://localhost:4040/fom/images/details_close.png");
-		list.add("http://localhost:4040/fom/images/details_open.png");
-		list.add("http://localhost:4040/fom/images/edit.png");
-		list.add("http://localhost:4040/fom/images/exec.png");
-		list.add("http://localhost:4040/fom/images/load.gif");
-		list.add("http://localhost:4040/fom/images/save.png");
-		list.add("http://localhost:4040/fom/images/sort_asc_disabled.png");
-		list.add("http://localhost:4040/fom/images/sort_asc.png");
-		list.add("http://localhost:4040/fom/images/sort_both.png");
-		list.add("http://localhost:4040/fom/images/sort_desc_disabled.png");
-		list.add("http://localhost:4040/fom/images/sort_desc.png");
-		list.add("http://localhost:4040/fom/images/start.png");
-		list.add("http://localhost:4040/fom/images/stop.png");
+		Set<String> set = new HashSet<String>();
+		set.add("http://localhost:4040/fom/index.html");
+		set.add("http://localhost:4040/fom/js/datatables.js");
+		set.add("http://localhost:4040/fom/js/datatables.css");
+		set.add("http://localhost:4040/fom/js/jquery-3.3.1.js");
+		set.add("http://localhost:4040/fom/js/tinybox.js"); 
+		set.add("http://localhost:4040/fom/images/details_close.png");
+		set.add("http://localhost:4040/fom/images/details_open.png");
+		set.add("http://localhost:4040/fom/images/edit.png");
+		set.add("http://localhost:4040/fom/images/exec.png");
+		set.add("http://localhost:4040/fom/images/load.gif");
+		set.add("http://localhost:4040/fom/images/save.png");
+		set.add("http://localhost:4040/fom/images/sort_asc_disabled.png");
+		set.add("http://localhost:4040/fom/images/sort_asc.png");
+		set.add("http://localhost:4040/fom/images/sort_both.png");
+		set.add("http://localhost:4040/fom/images/sort_desc_disabled.png");
+		set.add("http://localhost:4040/fom/images/sort_desc.png");
+		set.add("http://localhost:4040/fom/images/start.png");
+		set.add("http://localhost:4040/fom/images/stop.png");
 		
-		return new ZipDownloadTask(list, taskId, dest, 10, 1024 * 1024, false, new HttpHelper());
+		return new ZipDownloadTask(set, taskId, dest, 10, 1024 * 1024, false, new HttpHelper());
 	}
 
 }

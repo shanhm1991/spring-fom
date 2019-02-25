@@ -2,7 +2,7 @@ package com.fom.examples;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.util.List;
+import java.util.Set;
 
 import com.fom.context.Context;
 import com.fom.context.ContextUtil;
@@ -36,7 +36,7 @@ public class ImportOracleExample1 extends Context {
 	}
 	
 	@Override
-	protected List<String> getTaskIdList() throws Exception {
+	protected Set<String> getTaskIdSet() throws Exception {
 		return FileUtil.list(srcPath, new FileFilter(){
 			@Override
 			public boolean accept(File file) {

@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -700,15 +701,15 @@ public abstract class Context implements Serializable {
 
 				cleanFutures();
 
-				List<String> taskIdList = null;
+				Set<String> idSet = null;
 				try {
-					taskIdList = getTaskIdList();
+					idSet = getTaskIdSet();
 				} catch (Exception e) {
 					log.error("", e); 
 				}
 
-				if(taskIdList != null){
-					for (String taskId : taskIdList){
+				if(idSet != null){
+					for (String taskId : idSet){
 						if(isExecutorAlive(taskId)){ 
 							if (log.isDebugEnabled()) {
 								log.debug("task[" + taskId + "] is still alive, create canceled"); 
@@ -815,10 +816,10 @@ public abstract class Context implements Serializable {
 
 	/**
 	 * 返回资源uri列表，context将根据每个uri创建一个Executor执行器提交到线程池
-	 * @return List taskId list
+	 * @return taskId set
 	 * @throws Exception Exception
 	 */
-	protected abstract List<String> getTaskIdList() throws Exception;
+	protected abstract Set<String> getTaskIdSet() throws Exception;
 
 	/**
 	 * 根据uri创建一个Executor的具体实例

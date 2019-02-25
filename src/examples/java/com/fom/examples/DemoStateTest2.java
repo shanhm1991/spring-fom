@@ -1,11 +1,11 @@
 package com.fom.examples;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.fom.context.Context;
-import com.fom.context.Task;
 import com.fom.context.FomContext;
+import com.fom.context.Task;
 
 /**
  * 
@@ -18,10 +18,10 @@ public class DemoStateTest2 extends Context {
 	private static final long serialVersionUID = -838223512003059760L;
 
 	@Override
-	protected List<String> getTaskIdList() throws Exception {
-		List<String> list = new ArrayList<String>();
-		list.add("task2");
-		return list;
+	protected Set<String> getTaskIdSet() throws Exception {
+		Set<String> set = new HashSet<String>();
+		set.add("task2");
+		return set;
 	}
 
 	@Override

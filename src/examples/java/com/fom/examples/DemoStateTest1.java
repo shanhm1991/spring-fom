@@ -1,8 +1,8 @@
 package com.fom.examples;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 import com.fom.context.Context;
 import com.fom.context.FomContext;
@@ -21,12 +21,12 @@ public class DemoStateTest1 extends Context {
 	private Random random = new Random(30000);
 
 	@Override
-	protected List<String> getTaskIdList() throws Exception {
-		List<String> list = new ArrayList<String>();
+	protected Set<String> getTaskIdSet() throws Exception {
+		Set<String> set = new HashSet<String>();
 		for(int i = 1; i < 50;i++){
-			list.add("task-" + i);
+			set.add("task-" + i);
 		}
-		return list;
+		return set;
 	}
 
 	@Override

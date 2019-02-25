@@ -1,14 +1,14 @@
 package com.fom.examples;
 
 import java.io.File;
-import java.util.List;
+import java.util.Set;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 
 import com.fom.context.Context;
-import com.fom.context.Task;
 import com.fom.context.FomContext;
+import com.fom.context.Task;
 import com.fom.context.helper.DownloadHelper;
 import com.fom.context.helper.impl.HdfsHelper;
 import com.fom.context.task.DownloadTask;
@@ -36,7 +36,7 @@ public class DownloadHdfsExample extends Context {
 	}
 
 	@Override
-	protected List<String> getTaskIdList() throws Exception { 
+	protected Set<String> getTaskIdSet() throws Exception { 
 		Thread.sleep(15000); 
 		
 		return HdfsUtil.list(masterUrl, slaveUrl, new Path("/test"), new PathFilter(){
