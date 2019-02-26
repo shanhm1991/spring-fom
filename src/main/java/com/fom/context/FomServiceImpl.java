@@ -115,19 +115,27 @@ public class FomServiceImpl implements FomService {
 			map.put("msg", "context[" + name + "] has nothing changed.");
 			return map;
 		}
+		
 		map.put("result", true);//已经更新成功
-
+		if(serialize(name, context)){
+			map.put("msg", "context[" + name + "] changed success.");
+		}else{
+			map.put("msg", "context[" + name + "] changed success, but save failed.");
+		}
+		return map;
+	}
+	
+	private boolean serialize(String name, Context context){
 		String cache = System.getProperty("cache.context");
 		String[] array = new File(cache).list();
 		if(!ArrayUtils.isEmpty(array)){//将已有的缓存文件移到history
 			for(String fname : array){
-				if(name.equals(fname.split("\\.")[0])){
+				if(name.equals(fname.substring(0, fname.lastIndexOf(".")))){
 					File source = new File(cache + File.separator + fname);
 					File dest = new File(cache + File.separator + "history" + File.separator + fname);
 					if(!source.renameTo(dest)){
-						LOG.error("context[" + name + "]移动文件失败:" + fname);
-						map.put("msg", "context[" + name + "] changed success, but failed when save update to cache");
-						return map;
+						LOG.error("context[" + name + "] move bak failed: " + fname);
+						return false;
 					}
 					break;
 				}
@@ -139,12 +147,10 @@ public class FomServiceImpl implements FomService {
 		try{
 			out = new ObjectOutputStream(new FileOutputStream(file));
 			out.writeObject(context);
-			map.put("msg", "context[" + name + "] changed success.");
-			return map;
+			return true;
 		}catch(Exception e){
-			LOG.error("context[" + name + "] save update failed.");
-			map.put("msg", "context[" + name + "] changed success, but failed when save update to cache");
-			return map;
+			LOG.error("context[" + name + "] serialize failed.");
+			return false;
 		}finally{
 			IoUtil.close(out);
 		}
@@ -260,7 +266,12 @@ public class FomServiceImpl implements FomService {
 		context.regist();
 		context.startup();
 		resMap.put("result", true);
-		resMap.put("msg", name + " created.");
+		
+		if(serialize(name, context)){
+			resMap.put("msg", "context[" + name + "] create success.");
+		}else{
+			resMap.put("msg", "context[" + name + "] create success, but save failed.");
+		}
 		return resMap;
 	}
 
