@@ -1,6 +1,8 @@
 package com.fom.context.reader;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -22,7 +24,7 @@ public class OrcReader implements Reader {
 
 	private VectorizedRowBatch batch;
 	
-	private StringBuilder builder;
+	private StringBuilder builder = new StringBuilder();
 	
 	/**
 	 * 
@@ -35,7 +37,6 @@ public class OrcReader implements Reader {
 				OrcFile.createReader(new Path(sourceUri), OrcFile.readerOptions(configuration));
 		recordReader = reader.rows();
 		batch = reader.getSchema().createRowBatch(1);
-		builder = new StringBuilder();
 	}
 	
 	/**
@@ -49,18 +50,18 @@ public class OrcReader implements Reader {
 				OrcFile.createReader(path, OrcFile.readerOptions(configuration));
 		recordReader = reader.rows();
 		batch = reader.getSchema().createRowBatch(1);
-		builder = new StringBuilder();
 	}
 
 	@Override
-	public String readLine() throws Exception { 
+	public List<String> readLine() throws Exception { 
 		if(recordReader.nextBatch(batch)){
-			builder.setLength(0); 
+			List<String> list = new ArrayList<>();
 			for(int i = 0;i < batch.numCols;i++){
 				batch.cols[i].stringifyValue(builder, 0);
-				builder.append("\t");
+				list.add(builder.toString());
+				builder.setLength(0); 
 			}
-			return builder.toString();
+			return list;
 		}
 		return null;
 	}

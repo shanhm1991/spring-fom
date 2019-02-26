@@ -1,6 +1,7 @@
 package com.fom.context.reader;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * 
@@ -9,10 +10,10 @@ import java.io.IOException;
  * @author shanhm
  *
  */
-public class ExcelReader implements Reader {
+public class ExcelSheetReader implements Reader {
 
 	@Override
-	public String readLine() {
+	public List<String> readLine() {
 		// TODO Auto-generated method stub
 		return null;
 	}

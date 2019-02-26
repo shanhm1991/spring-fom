@@ -3,7 +3,6 @@ package com.fom.examples;
 import java.io.File;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.fom.context.SpringContext;
@@ -28,20 +27,17 @@ public class ImportMysqlExample1Helper implements ParseHelper<ExampleBean> {
 
 	@Override
 	public Reader getReader(String sourceUri) throws Exception {
-		return new TextReader(sourceUri);
+		return new TextReader(sourceUri, "#");
 	}
 
 	@Override
-	public void praseLineData(List<ExampleBean> lineDatas, String line, long batchTime) throws Exception {
-		log.info("解析行数据:" + line);
-		if(StringUtils.isBlank(line)){
-			return;
-		}
-		ExampleBean bean = new ExampleBean(line);
+	public void praseLineData(List<String> columns, List<ExampleBean> batchData, long batchTime) throws Exception {
+		log.info("解析行数据:" + columns);
+		ExampleBean bean = new ExampleBean(columns);
 		bean.setSource("local");
 		bean.setFileType("txt");
 		bean.setImportWay("mybatis");
-		lineDatas.add(bean); 
+		batchData.add(bean); 
 	}
 	
 	@Override

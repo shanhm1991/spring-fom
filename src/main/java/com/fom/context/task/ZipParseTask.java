@@ -311,32 +311,32 @@ public class ZipParseTask extends Task {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void read(String uri, int StartLine) throws Exception {
 		int lineIndex = 0;
-		String line = "";
+		List<String> columns = null;
 		Reader reader = null;
 		try{
 			reader = helper.getReader(uri);
-			List lineDatas = new LinkedList<>(); 
+			List batchData = new LinkedList<>(); 
 			long batchTime = System.currentTimeMillis();
-			while ((line = reader.readLine()) != null) {
+			while ((columns = reader.readLine()) != null) {
 				lineIndex++;
 				if(lineIndex <= StartLine){
 					continue;
 				}
-				if(batch > 0 && lineDatas.size() >= batch && notInterruped()){
-					int size = lineDatas.size();
-					helper.batchProcessLineData(lineDatas, batchTime); 
+				if(batch > 0 && batchData.size() >= batch && notInterruped()){
+					int size = batchData.size();
+					helper.batchProcessLineData(batchData, batchTime); 
 					if (log.isDebugEnabled()) {
 						log.debug("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 					}
 					logProcess(uri, lineIndex);
-					lineDatas.clear();
+					batchData.clear();
 					batchTime = System.currentTimeMillis();
 				}
-				helper.praseLineData(lineDatas, line, batchTime);
+				helper.praseLineData(columns, batchData, batchTime);
 			}
-			if(!lineDatas.isEmpty() && notInterruped()){
-				int size = lineDatas.size();
-				helper.batchProcessLineData(lineDatas, batchTime); 
+			if(!batchData.isEmpty() && notInterruped()){
+				int size = batchData.size();
+				helper.batchProcessLineData(batchData, batchTime); 
 				if (log.isDebugEnabled()) {
 					log.debug("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 				}

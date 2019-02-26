@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.fom.context.helper.ParseHelper;
@@ -36,23 +35,19 @@ public class ImportEsExampleHelper implements ParseHelper<Map<String, Object>> {
 
 	@Override
 	public Reader getReader(String sourceUri) throws Exception {
-		return new TextReader(sourceUri);
+		return new TextReader(sourceUri, "#");
 	}
 
 	@Override
-	public void praseLineData(List<Map<String, Object>> lineDatas, String line, long batchTime) throws Exception {
-		log.info("解析行数据:" + line);
-		if(StringUtils.isBlank(line)){
-			return;
-		}
-		String[] array = line.split("#"); 
+	public void praseLineData(List<String> columns, List<Map<String, Object>> batchData, long batchTime) throws Exception {
+		log.info("解析行数据:" + columns);
 		Map<String,Object> map = new HashMap<>();
-		map.put("ID", array[0]);
-		map.put("NAME", array[1]);
+		map.put("ID", columns.get(0));
+		map.put("NAME", columns.get(1)); 
 		map.put("SOURCE", "local");
 		map.put("FILETYPE", "txt");
 		map.put("IMPORTWAY", "pool");
-		lineDatas.add(map);
+		batchData.add(map);
 	}
 	
 	@Override

@@ -1,5 +1,7 @@
 package com.fom.examples.bean;
 
+import java.util.List;
+
 /**
  * 
  * @author shanhm
@@ -17,10 +19,9 @@ public class ExampleBean {
 	
 	private String importWay;
 	
-	public ExampleBean(String data){
-		String[] array = data.split("#"); 
-		this.id = array[0];
-		this.name = array[1];
+	public ExampleBean(List<String> columns){
+		this.id = columns.get(0); 
+		this.name = columns.get(1);
 	}
 
 	public String getId() {
