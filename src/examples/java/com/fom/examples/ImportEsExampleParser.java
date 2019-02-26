@@ -1,11 +1,12 @@
 package com.fom.examples;
 
 import java.io.File;
+import java.util.Map;
 
 import com.fom.context.task.ParseTask;
 import com.fom.db.handler.EsHandler;
 
-public class ImportEsExampleParser extends ParseTask {
+public class ImportEsExampleParser extends ParseTask<Map<String, Object>> {
 	
 	private static final String POOL = "example_es";
 	

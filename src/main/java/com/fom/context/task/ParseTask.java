@@ -29,15 +29,16 @@ import com.fom.util.IoUtil;
  * 
  * @see ParseHelper
  * 
+ * @param <V> 行数据解析结果类型
+ * 
  * @author shanhm
  *
  */
-public class ParseTask extends Task {
+public class ParseTask<V> extends Task {
 
 	private int batch;
 	
-	@SuppressWarnings("rawtypes")
-	private ParseHelper helper;
+	private ParseHelper<V> helper;
 
 	private File logFile;
 
@@ -46,8 +47,7 @@ public class ParseTask extends Task {
 	 * @param batch 入库时的批处理数
 	 * @param helper ParserHelper
 	 */
-	@SuppressWarnings("rawtypes")
-	public ParseTask(String sourceUri, int batch, ParseHelper helper){
+	public ParseTask(String sourceUri, int batch, ParseHelper<V> helper){
 		super(sourceUri);
 		this.batch = batch;
 		this.helper = helper;
@@ -59,8 +59,7 @@ public class ParseTask extends Task {
 	 * @param helper ParserHelper
 	 * @param exceptionHandler ExceptionHandler
 	 */
-	@SuppressWarnings("rawtypes")
-	public ParseTask(String sourceUri, int batch, ParseHelper helper, ExceptionHandler exceptionHandler) {
+	public ParseTask(String sourceUri, int batch, ParseHelper<V> helper, ExceptionHandler exceptionHandler) {
 		this(sourceUri, batch, helper);
 		this.exceptionHandler = exceptionHandler;
 	}
@@ -71,8 +70,7 @@ public class ParseTask extends Task {
 	 * @param helper ParserHelper
 	 * @param resultHandler ResultHandler
 	 */
-	@SuppressWarnings("rawtypes")
-	public ParseTask(String sourceUri, int batch, ParseHelper helper, ResultHandler resultHandler) {
+	public ParseTask(String sourceUri, int batch, ParseHelper<V> helper, ResultHandler resultHandler) {
 		this(sourceUri, batch, helper);
 		this.resultHandler = resultHandler;
 	}
@@ -84,9 +82,8 @@ public class ParseTask extends Task {
 	 * @param exceptionHandler ExceptionHandler
 	 * @param resultHandler ResultHandler
 	 */
-	@SuppressWarnings("rawtypes")
 	public ParseTask(String sourceUri, int batch, 
-			ParseHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+			ParseHelper<V> helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
 		this(sourceUri, batch, helper);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
@@ -150,14 +147,13 @@ public class ParseTask extends Task {
 		return true;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void read(int StartLine) throws Exception {
 		int lineIndex = 0;
 		List<String> columns = null;
 		Reader reader = null;
 		try{
 			reader = helper.getReader(id);
-			List batchData = new LinkedList<>(); 
+			List<V> batchData = new LinkedList<>(); 
 			long batchTime = System.currentTimeMillis();
 			while ((columns = reader.readLine()) != null) {
 				lineIndex++;
@@ -174,7 +170,11 @@ public class ParseTask extends Task {
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
 				}
-				helper.praseLineData(batchData, columns, batchTime);
+				
+				List<V> dataList = helper.praseLineData(columns, batchTime);
+				if(dataList != null){
+					batchData.addAll(dataList);
+				}
 			}
 			if(!batchData.isEmpty() && notInterruped()){
 				int size = batchData.size();

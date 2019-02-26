@@ -8,6 +8,7 @@ import com.fom.context.Context;
 import com.fom.context.ContextUtil;
 import com.fom.context.Task;
 import com.fom.context.task.ParseTask;
+import com.fom.examples.bean.ExampleBean;
 import com.fom.util.FileUtil;
 import com.fom.util.PatternUtil;
 
@@ -54,6 +55,6 @@ public class ImportMysqlExample1 extends Context {
 	@Override
 	protected Task createTask(String taskId) throws Exception { 
 		ImportMysqlExample1Helper helper = new ImportMysqlExample1Helper(getName());
-		return new ParseTask(taskId, batch, helper);
+		return new ParseTask<ExampleBean>(taskId, batch, helper);
 	}
 }

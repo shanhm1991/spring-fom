@@ -43,15 +43,16 @@ import com.fom.util.ZipUtil;
  * @see ZipParseHelper
  * @see ParseTask
  * 
+ * @param <V> 行数据解析结果类型
+ * 
  * @author shanhm
  * 
  */
-public class ZipParseTask extends Task {
+public class ZipParseTask<V> extends Task {
 
 	private int batch;
 
-	@SuppressWarnings("rawtypes")
-	private ZipParseHelper helper;
+	private ZipParseHelper<V> helper;
 
 	private File logFile;
 
@@ -66,8 +67,7 @@ public class ZipParseTask extends Task {
 	 * @param batch 批处理数
 	 * @param helper LocalZipParserHelper
 	 */
-	@SuppressWarnings("rawtypes")
-	public ZipParseTask(String sourceUri, int batch, ZipParseHelper helper) {
+	public ZipParseTask(String sourceUri, int batch, ZipParseHelper<V> helper) {
 		super(sourceUri);
 		this.helper = helper;
 		String sourceName = new File(sourceUri).getName();
@@ -89,9 +89,8 @@ public class ZipParseTask extends Task {
 	 * @param helper LocalZipParserHelper
 	 * @param exceptionHandler ExceptionHandler
 	 */
-	@SuppressWarnings("rawtypes")
 	public ZipParseTask(String sourceUri, int batch, 
-			ZipParseHelper helper, ExceptionHandler exceptionHandler) { 
+			ZipParseHelper<V> helper, ExceptionHandler exceptionHandler) { 
 		this(sourceUri, batch, helper);
 		this.exceptionHandler = exceptionHandler;
 	}
@@ -102,9 +101,8 @@ public class ZipParseTask extends Task {
 	 * @param helper LocalZipParserHelper
 	 * @param resultHandler ResultHandler
 	 */
-	@SuppressWarnings("rawtypes")
 	public ZipParseTask(String sourceUri, int batch, 
-			ZipParseHelper helper, ResultHandler resultHandler) {
+			ZipParseHelper<V> helper, ResultHandler resultHandler) {
 		this(sourceUri, batch, helper);
 		this.resultHandler = resultHandler;
 	}
@@ -116,9 +114,8 @@ public class ZipParseTask extends Task {
 	 * @param exceptionHandler ExceptionHandler
 	 * @param resultHandler ResultHandler
 	 */
-	@SuppressWarnings("rawtypes")
 	public ZipParseTask(String sourceUri, int batch, 
-			ZipParseHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+			ZipParseHelper<V> helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
 		this(sourceUri, batch, helper);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
@@ -308,14 +305,13 @@ public class ZipParseTask extends Task {
 		return true;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void read(String uri, int StartLine) throws Exception {
 		int lineIndex = 0;
 		List<String> columns = null;
 		Reader reader = null;
 		try{
 			reader = helper.getReader(uri);
-			List batchData = new LinkedList<>(); 
+			List<V> batchData = new LinkedList<>(); 
 			long batchTime = System.currentTimeMillis();
 			while ((columns = reader.readLine()) != null) {
 				lineIndex++;
@@ -332,7 +328,11 @@ public class ZipParseTask extends Task {
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
 				}
-				helper.praseLineData(columns, batchData, batchTime);
+				
+				List<V> dataList = helper.praseLineData(columns, batchTime);
+				if(dataList != null){
+					batchData.addAll(dataList);
+				}
 			}
 			if(!batchData.isEmpty() && notInterruped()){
 				int size = batchData.size();

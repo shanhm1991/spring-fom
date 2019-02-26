@@ -2,6 +2,7 @@ package com.fom.examples;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.Map;
 import java.util.Set;
 
 import com.fom.context.Context;
@@ -56,6 +57,6 @@ public class ImportOracleExample2 extends Context{
 	protected Task createTask(String taskId) throws Exception { 
 		String subPettern = getString("zipEntryPattern", "");
 		ImportOracleExample2Helper helper = new ImportOracleExample2Helper(getName(), subPettern);
-		return new ZipParseTask(taskId, batch, helper);
+		return new ZipParseTask<Map<String, Object>>(taskId, batch, helper);
 	}
 }

@@ -1,6 +1,7 @@
 package com.fom.examples;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,7 @@ public class ImportMysqlExample2Helper implements ParseHelper<Map<String, Object
 	}
 
 	@Override
-	public void praseLineData(List<String> columns, List<Map<String, Object>> batchData, long batchTime) throws Exception {
+	public List<Map<String, Object>> praseLineData(List<String> columns, long batchTime) throws Exception {
 		log.info("解析行数据:" + columns);
 		Map<String,Object> map = new HashMap<>();
 		map.put("id", columns.get(0));
@@ -45,7 +46,7 @@ public class ImportMysqlExample2Helper implements ParseHelper<Map<String, Object
 		map.put("source", "local");
 		map.put("fileType", "txt");
 		map.put("importWay", "pool");
-		batchData.add(map);
+		return Arrays.asList(map);
 	}
 	
 	@Override

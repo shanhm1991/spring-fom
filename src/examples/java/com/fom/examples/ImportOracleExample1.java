@@ -8,6 +8,7 @@ import com.fom.context.Context;
 import com.fom.context.ContextUtil;
 import com.fom.context.Task;
 import com.fom.context.task.ZipParseTask;
+import com.fom.examples.bean.ExampleBean;
 import com.fom.util.FileUtil;
 import com.fom.util.PatternUtil;
 
@@ -55,6 +56,6 @@ public class ImportOracleExample1 extends Context {
 	protected Task createTask(String taskId) throws Exception { 
 		String subPettern = getString("zipEntryPattern", "");
 		ImportOracleExample1Helper helper = new ImportOracleExample1Helper(getName(), subPettern);
-		return new ZipParseTask(taskId, batch, helper);
+		return new ZipParseTask<ExampleBean>(taskId, batch, helper);
 	}
 }

@@ -2,6 +2,7 @@ package com.fom.examples;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.Map;
 import java.util.Set;
 
 import com.fom.context.Context;
@@ -55,6 +56,6 @@ public class ImportMysqlExample2 extends Context {
 	@Override
 	protected Task createTask(String taskId) throws Exception { 
 		ImportMysqlExample2Helper helper = new ImportMysqlExample2Helper(getName());
-		return new ParseTask(taskId, batch, helper);
+		return new ParseTask<Map<String, Object>>(taskId, batch, helper);
 	}
 }

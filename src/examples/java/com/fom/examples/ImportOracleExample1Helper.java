@@ -1,6 +1,7 @@
 package com.fom.examples;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -35,13 +36,13 @@ public class ImportOracleExample1Helper implements ZipParseHelper<ExampleBean> {
 	}
 
 	@Override
-	public void praseLineData(List<String> columns, List<ExampleBean> batchData, long batchTime) throws Exception {
+	public List<ExampleBean> praseLineData(List<String> columns, long batchTime) throws Exception {
 		log.info("解析行数据:" + columns);
 		ExampleBean bean = new ExampleBean(columns);
 		bean.setSource("local");
 		bean.setFileType("zip(txt)");
 		bean.setImportWay("mybatis");
-		batchData.add(bean); 
+		return Arrays.asList(bean);
 	}
 	
 	@Override

@@ -24,14 +24,13 @@ public interface ParseHelper<V> {
 	Reader getReader(String sourceUri) throws Exception;
 
 	/**
-	 * 将行字段数据映射成对应的java bean或者map,并添加到数据集batchData中<br>
-	 * 当batchData中数量达到阈值时，执行批处理操作
+	 * 将行字段数据映射成对应的bean或者map
 	 * @param columns 列字段值
-	 * @param batchData 批处理数据集
 	 * @param batchTime 批处理时间
+	 * @return 映射结果V列表
 	 * @throws Exception Exception
 	 */
-	void praseLineData(List<String> columns, List<V> batchData, long batchTime) throws Exception;
+	List<V> praseLineData(List<String> columns, long batchTime) throws Exception;
 
 	/**
 	 * 批处理行数据
