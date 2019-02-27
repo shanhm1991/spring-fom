@@ -710,16 +710,16 @@ public abstract class Context implements Serializable {
 
 				if(idSet != null){
 					for (String taskId : idSet){
-						if(isExecutorAlive(taskId)){ 
+						if(isTaskAlive(taskId)){ 
 							if (log.isDebugEnabled()) {
 								log.debug("task[" + taskId + "] is still alive, create canceled"); 
 							}
 							continue;
 						}
 						try {
-							Task executor = createTask(taskId);
-							executor.setContext(Context.this); 
-							FUTUREMAP.put(taskId, pool.submit(executor)); 
+							Task task = createTask(taskId);
+							task.setContext(Context.this); 
+							FUTUREMAP.put(taskId, pool.submit(task)); 
 							log.info("task[" + taskId + "] created"); 
 						} catch (RejectedExecutionException e) {
 							log.warn("task[" + taskId + "] submit rejected, will try in next time.");
@@ -815,19 +815,19 @@ public abstract class Context implements Serializable {
 	}
 
 	/**
-	 * 返回资源uri列表，context将根据每个uri创建一个Executor执行器提交到线程池
-	 * @return taskId set
+	 * 返回id列表，context将根据每个id创建一个Task提交到线程池
+	 * @return set
 	 * @throws Exception Exception
 	 */
 	protected abstract Set<String> getTaskIdSet() throws Exception;
 
 	/**
-	 * 根据uri创建一个Executor的具体实例
-	 * @param executorId 资源uri
-	 * @return Executor
+	 * 根据id创建一个Task的具体实例
+	 * @param taskId taskId
+	 * @return Task
 	 * @throws Exception Exception
 	 */
-	protected abstract Task createTask(String executorId) throws Exception;
+	protected abstract Task createTask(String taskId) throws Exception;
 
 	private void cleanFutures(){
 		Iterator<Map.Entry<String, TimedFuture<Result>>> it = FUTUREMAP.entrySet().iterator();
@@ -859,7 +859,7 @@ public abstract class Context implements Serializable {
 	 * done 创建过任务，但远程文件没删除
 	 * else 任务还没结束
 	 */
-	private boolean isExecutorAlive(String key){
+	private boolean isTaskAlive(String key){
 		Future<Result> future = FUTUREMAP.get(key);
 		return future != null && !future.isDone();
 	}

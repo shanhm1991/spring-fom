@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 
 import com.fom.context.SpringContext;
 import com.fom.context.helper.ZipParseHelper;
-import com.fom.context.reader.ReadRow;
+import com.fom.context.reader.RowData;
 import com.fom.context.reader.Reader;
 import com.fom.context.reader.TextReader;
 import com.fom.examples.bean.ExampleBean;
@@ -37,8 +37,8 @@ public class ImportOracleExample1Helper implements ZipParseHelper<ExampleBean> {
 	}
 
 	@Override
-	public List<ExampleBean> praseLineData(ReadRow readRow, long batchTime) throws Exception {
-		ExampleBean bean = new ExampleBean(readRow.getColumnDataList());
+	public List<ExampleBean> praseRowData(RowData rowData, long batchTime) throws Exception {
+		ExampleBean bean = new ExampleBean(rowData.getColumnList());
 		bean.setSource("local");
 		bean.setFileType("zip(txt)");
 		bean.setImportWay("mybatis");
@@ -46,7 +46,7 @@ public class ImportOracleExample1Helper implements ZipParseHelper<ExampleBean> {
 	}
 	
 	@Override
-	public void batchProcessLineData(List<ExampleBean> lineDatas, long batchTime) throws Exception {
+	public void batchProcess(List<ExampleBean> lineDatas, long batchTime) throws Exception {
 		ExamplesDao demoDao = SpringContext.getBean("oracleExampleDao", ExamplesDao.class);
 		demoDao.batchInsert(lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());

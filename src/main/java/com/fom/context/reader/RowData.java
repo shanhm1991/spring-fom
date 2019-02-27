@@ -7,20 +7,20 @@ import java.util.List;
  * @author shanhm
  *
  */
-public class ReadRow {
+public class RowData {
 
 	private int rowIndex;
 
-	private List<String> columnDataList;
+	private List<String> columnList;
 
 	private int sheetIndex;
 
 	private String sheetName;
 
 
-	public ReadRow(int rowIndex, List<String> rowData){
+	public RowData(int rowIndex, List<String> rowData){
 		this.rowIndex = rowIndex;
-		this.columnDataList = rowData;
+		this.columnList = rowData;
 	}
 	
 	public int getRowIndex() {
@@ -31,12 +31,12 @@ public class ReadRow {
 		this.rowIndex = rowIndex;
 	}
 
-	public List<String> getColumnDataList() {
-		return columnDataList;
+	public List<String> getColumnList() {
+		return columnList;
 	}
 
-	void setColumnDataList(List<String> columnDataList) { 
-		this.columnDataList = columnDataList;
+	void setColumnList(List<String> columnList) { 
+		this.columnList = columnList;
 	}
 
 	public int getSheetIndex() {

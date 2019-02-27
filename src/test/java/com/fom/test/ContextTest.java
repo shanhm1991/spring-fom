@@ -25,14 +25,14 @@ public class ContextTest extends Context {
 	}
 
 	@Override
-	protected Task createTask(String sourceUri) throws Exception {
-		return new SelfExecutor(sourceUri);
+	protected Task createTask(String taskId) throws Exception {
+		return new SelfTask(taskId);
 	}
 	
-	private static class SelfExecutor extends Task {
+	private static class SelfTask extends Task {
 
-		public SelfExecutor(String sourceUri) {
-			super(sourceUri);
+		public SelfTask(String taskId) {
+			super(taskId);
 		}
 
 		@Override

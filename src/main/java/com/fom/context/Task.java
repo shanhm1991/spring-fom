@@ -39,7 +39,7 @@ public abstract class Task implements Callable<Result> {
 	private volatile long startTime;
 	
 	/**
-	 * @param id 创建Executor的资源
+	 * @param id Task唯一标识
 	 */
 	public Task(String id) { 
 		this.id = id;

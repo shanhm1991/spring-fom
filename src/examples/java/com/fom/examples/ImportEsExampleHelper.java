@@ -9,7 +9,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.fom.context.helper.ParseHelper;
-import com.fom.context.reader.ReadRow;
+import com.fom.context.reader.RowData;
 import com.fom.context.reader.Reader;
 import com.fom.context.reader.TextReader;
 import com.fom.db.handler.EsHandler;
@@ -41,8 +41,8 @@ public class ImportEsExampleHelper implements ParseHelper<Map<String, Object>> {
 	}
 
 	@Override
-	public List<Map<String, Object>> praseLineData(ReadRow readRow, long batchTime) throws Exception {
-		List<String> columns = readRow.getColumnDataList();
+	public List<Map<String, Object>> praseRowData(RowData rowData, long batchTime) throws Exception {
+		List<String> columns = rowData.getColumnList();
 		Map<String,Object> map = new HashMap<>();
 		map.put("ID", columns.get(0));
 		map.put("NAME", columns.get(1)); 
@@ -53,7 +53,7 @@ public class ImportEsExampleHelper implements ParseHelper<Map<String, Object>> {
 	}
 	
 	@Override
-	public void batchProcessLineData(List<Map<String, Object>> lineDatas, long batchTime) throws Exception {
+	public void batchProcess(List<Map<String, Object>> lineDatas, long batchTime) throws Exception {
 		Map<String,Map<String,Object>> map = new HashMap<>();
 		for(Map<String, Object> m : lineDatas){
 			map.put(String.valueOf(m.get("ID")), m);

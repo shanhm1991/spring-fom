@@ -53,16 +53,16 @@ public class TextReader implements Reader {
 	}
 
 	@Override
-	public ReadRow readLine() throws Exception {
+	public RowData readRow() throws Exception {
 		String line = reader.readLine();
 		rowIndex++;
 		if(line == null){
 			return null;
 		}
 		if(regex == null){
-			return new ReadRow(rowIndex - 1, Arrays.asList(line));
+			return new RowData(rowIndex - 1, Arrays.asList(line));
 		}
-		return new ReadRow(rowIndex - 1, Arrays.asList(line.split(regex)));
+		return new RowData(rowIndex - 1, Arrays.asList(line.split(regex)));
 	}
 
 	@Override

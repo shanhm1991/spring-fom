@@ -68,7 +68,7 @@ public class ExcelReader implements Reader {
 	}
 
 	@Override
-	public ReadRow readLine() {
+	public RowData readRow() {
 		while(true){
 			if(!shouldSheetProcess(sheetIndex, sheetName)){
 				sheetIndex++;
@@ -87,19 +87,19 @@ public class ExcelReader implements Reader {
 						continue;
 					}
 				}else{
-					HSSFRow rowData = sheet.getRow(rowIndex);
+					HSSFRow row = sheet.getRow(rowIndex);
 					rowIndex++;
 					
-					int colCount = rowData.getPhysicalNumberOfCells();
+					int colCount = row.getPhysicalNumberOfCells();
 					List<String> list = new ArrayList<>();
 					for(int i = 0;i < colCount;i++){
-						list.add(rowData.getCell(i).getStringCellValue());
+						list.add(row.getCell(i).getStringCellValue());
 					}
 					
-					ReadRow readRow = new ReadRow(rowIndex - 1, list);
-					readRow.setSheetIndex(sheetIndex); 
-					readRow.setSheetName(sheetName); 
-					return readRow;
+					RowData rowData = new RowData(rowIndex - 1, list);
+					rowData.setSheetIndex(sheetIndex); 
+					rowData.setSheetName(sheetName); 
+					return rowData;
 				}
 			}
 		}

@@ -15,7 +15,7 @@ import com.fom.context.ExceptionHandler;
 import com.fom.context.Task;
 import com.fom.context.ResultHandler;
 import com.fom.context.helper.ZipParseHelper;
-import com.fom.context.reader.ReadRow;
+import com.fom.context.reader.RowData;
 import com.fom.context.reader.Reader;
 import com.fom.util.IoUtil;
 import com.fom.util.ZipUtil;
@@ -309,19 +309,19 @@ public class ZipParseTask<V> extends Task {
 	private void read(String uri, int StartLine) throws Exception {
 		int lineIndex = 0;
 		Reader reader = null;
-		ReadRow readRow = null;
+		RowData rowData = null;
 		try{
 			reader = helper.getReader(uri);
 			List<V> batchData = new LinkedList<>(); 
 			long batchTime = System.currentTimeMillis();
-			while ((readRow = reader.readLine()) != null) {
+			while ((rowData = reader.readRow()) != null) {
 				lineIndex++;
 				if(lineIndex <= StartLine){
 					continue;
 				}
 				if(batch > 0 && batchData.size() >= batch && notInterruped()){
 					int size = batchData.size();
-					helper.batchProcessLineData(batchData, batchTime); 
+					helper.batchProcess(batchData, batchTime); 
 					if (log.isDebugEnabled()) {
 						log.debug("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 					}
@@ -330,14 +330,14 @@ public class ZipParseTask<V> extends Task {
 					batchTime = System.currentTimeMillis();
 				}
 				
-				List<V> dataList = helper.praseLineData(readRow, batchTime);
+				List<V> dataList = helper.praseRowData(rowData, batchTime);
 				if(dataList != null){
 					batchData.addAll(dataList);
 				}
 			}
 			if(!batchData.isEmpty() && notInterruped()){
 				int size = batchData.size();
-				helper.batchProcessLineData(batchData, batchTime); 
+				helper.batchProcess(batchData, batchTime); 
 				if (log.isDebugEnabled()) {
 					log.debug("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 				}
