@@ -1,7 +1,6 @@
 package com.fom.context.reader;
 
 import java.io.Closeable;
-import java.util.List;
 
 /**
  * 
@@ -14,9 +13,9 @@ public interface Reader extends Closeable {
 	
 	/**
 	 * 读取下一行
-	 * @return 行字段内容
+	 * @return ReadRow
 	 * @throws Exception Exception
 	 */
-	List<String> readLine() throws Exception;
+	ReadRow readLine() throws Exception;
 	
 }

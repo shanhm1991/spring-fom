@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.fom.context.helper.ParseHelper;
+import com.fom.context.reader.ReadRow;
 import com.fom.context.reader.Reader;
 import com.fom.context.reader.TextReader;
 import com.fom.db.handler.JdbcHandler;
@@ -38,8 +39,8 @@ public class ImportMysqlExample2Helper implements ParseHelper<Map<String, Object
 	}
 
 	@Override
-	public List<Map<String, Object>> praseLineData(List<String> columns, long batchTime) throws Exception {
-		log.info("解析行数据:" + columns);
+	public List<Map<String, Object>> praseLineData(ReadRow readRow, long batchTime) throws Exception {
+		List<String> columns = readRow.getColumnDataList();
 		Map<String,Object> map = new HashMap<>();
 		map.put("id", columns.get(0));
 		map.put("name", columns.get(1));

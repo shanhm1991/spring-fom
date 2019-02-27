@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.fom.context.helper.ParseHelper;
+import com.fom.context.reader.ReadRow;
 import com.fom.context.reader.Reader;
 import com.fom.context.reader.TextReader;
 import com.fom.db.handler.EsHandler;
@@ -27,9 +28,9 @@ public class ImportEsExampleHelper implements ParseHelper<Map<String, Object>> {
 	private final String esType;
 	
 	private final Logger log;
-
+	
 	public ImportEsExampleHelper(String name, String esIndex, String esType) {
-		log = Logger.getLogger(name);
+		this.log = Logger.getLogger(name);
 		this.esIndex = esIndex;
 		this.esType = esType;
 	}
@@ -40,8 +41,8 @@ public class ImportEsExampleHelper implements ParseHelper<Map<String, Object>> {
 	}
 
 	@Override
-	public List<Map<String, Object>> praseLineData(List<String> columns, long batchTime) throws Exception {
-		log.info("解析行数据:" + columns);
+	public List<Map<String, Object>> praseLineData(ReadRow readRow, long batchTime) throws Exception {
+		List<String> columns = readRow.getColumnDataList();
 		Map<String,Object> map = new HashMap<>();
 		map.put("ID", columns.get(0));
 		map.put("NAME", columns.get(1)); 
@@ -58,6 +59,7 @@ public class ImportEsExampleHelper implements ParseHelper<Map<String, Object>> {
 			map.put(String.valueOf(m.get("ID")), m);
 		}
 		EsHandler.handler.bulkInsert(POOL, esIndex, esType, map); 
+		log.info("处理数据入库:" + map.size());
 	}
 
 	@Override

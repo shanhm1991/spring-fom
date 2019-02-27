@@ -24,6 +24,8 @@ public class OrcReader implements Reader {
 
 	private VectorizedRowBatch batch;
 	
+	private int rowIndex;
+	
 	private StringBuilder builder = new StringBuilder();
 	
 	/**
@@ -53,15 +55,16 @@ public class OrcReader implements Reader {
 	}
 
 	@Override
-	public List<String> readLine() throws Exception { 
+	public ReadRow readLine() throws Exception { 
 		if(recordReader.nextBatch(batch)){
+			rowIndex++;
 			List<String> list = new ArrayList<>();
 			for(int i = 0;i < batch.numCols;i++){
 				batch.cols[i].stringifyValue(builder, 0);
 				list.add(builder.toString());
 				builder.setLength(0); 
 			}
-			return list;
+			return new ReadRow(rowIndex - 1, list);
 		}
 		return null;
 	}

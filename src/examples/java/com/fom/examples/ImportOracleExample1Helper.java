@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 
 import com.fom.context.SpringContext;
 import com.fom.context.helper.ZipParseHelper;
+import com.fom.context.reader.ReadRow;
 import com.fom.context.reader.Reader;
 import com.fom.context.reader.TextReader;
 import com.fom.examples.bean.ExampleBean;
@@ -36,9 +37,8 @@ public class ImportOracleExample1Helper implements ZipParseHelper<ExampleBean> {
 	}
 
 	@Override
-	public List<ExampleBean> praseLineData(List<String> columns, long batchTime) throws Exception {
-		log.info("解析行数据:" + columns);
-		ExampleBean bean = new ExampleBean(columns);
+	public List<ExampleBean> praseLineData(ReadRow readRow, long batchTime) throws Exception {
+		ExampleBean bean = new ExampleBean(readRow.getColumnDataList());
 		bean.setSource("local");
 		bean.setFileType("zip(txt)");
 		bean.setImportWay("mybatis");

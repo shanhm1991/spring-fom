@@ -2,6 +2,7 @@ package com.fom.context.helper;
 
 import java.util.List;
 
+import com.fom.context.reader.ReadRow;
 import com.fom.context.reader.Reader;
 import com.fom.context.task.ParseTask;
 /**
@@ -25,12 +26,12 @@ public interface ParseHelper<V> {
 
 	/**
 	 * 将行字段数据映射成对应的bean或者map
-	 * @param columns 列字段值
+	 * @param readRow
 	 * @param batchTime 批处理时间
 	 * @return 映射结果V列表
 	 * @throws Exception Exception
 	 */
-	List<V> praseLineData(List<String> columns, long batchTime) throws Exception;
+	List<V> praseLineData(ReadRow readRow, long batchTime) throws Exception;
 
 	/**
 	 * 批处理行数据

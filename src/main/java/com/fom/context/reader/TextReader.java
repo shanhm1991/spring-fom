@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.List;
 
 import com.fom.util.IoUtil;
 
@@ -20,6 +19,8 @@ import com.fom.util.IoUtil;
 public class TextReader implements Reader {
 	
 	private BufferedReader reader;
+	
+	private int rowIndex;
 	
 	private String regex;
 	
@@ -52,15 +53,16 @@ public class TextReader implements Reader {
 	}
 
 	@Override
-	public List<String> readLine() throws Exception {
+	public ReadRow readLine() throws Exception {
 		String line = reader.readLine();
+		rowIndex++;
 		if(line == null){
 			return null;
 		}
 		if(regex == null){
-			return Arrays.asList(line);
+			return new ReadRow(rowIndex - 1, Arrays.asList(line));
 		}
-		return Arrays.asList(line.split(regex));
+		return new ReadRow(rowIndex - 1, Arrays.asList(line.split(regex)));
 	}
 
 	@Override

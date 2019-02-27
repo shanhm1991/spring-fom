@@ -15,6 +15,7 @@ import com.fom.context.ExceptionHandler;
 import com.fom.context.Task;
 import com.fom.context.ResultHandler;
 import com.fom.context.helper.ZipParseHelper;
+import com.fom.context.reader.ReadRow;
 import com.fom.context.reader.Reader;
 import com.fom.util.IoUtil;
 import com.fom.util.ZipUtil;
@@ -307,13 +308,13 @@ public class ZipParseTask<V> extends Task {
 
 	private void read(String uri, int StartLine) throws Exception {
 		int lineIndex = 0;
-		List<String> columns = null;
 		Reader reader = null;
+		ReadRow readRow = null;
 		try{
 			reader = helper.getReader(uri);
 			List<V> batchData = new LinkedList<>(); 
 			long batchTime = System.currentTimeMillis();
-			while ((columns = reader.readLine()) != null) {
+			while ((readRow = reader.readLine()) != null) {
 				lineIndex++;
 				if(lineIndex <= StartLine){
 					continue;
@@ -329,7 +330,7 @@ public class ZipParseTask<V> extends Task {
 					batchTime = System.currentTimeMillis();
 				}
 				
-				List<V> dataList = helper.praseLineData(columns, batchTime);
+				List<V> dataList = helper.praseLineData(readRow, batchTime);
 				if(dataList != null){
 					batchData.addAll(dataList);
 				}

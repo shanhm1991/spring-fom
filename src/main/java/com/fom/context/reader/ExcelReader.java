@@ -105,7 +105,7 @@ public class ExcelReader implements Reader {
 	}
 
 	@Override
-	public List<String> readLine() {
+	public ReadRow readLine() {
 		while(true){
 			if(!shouldSheetProcess(sheetIndex, sheetName)){
 				sheetIndex++;
@@ -140,7 +140,11 @@ public class ExcelReader implements Reader {
 					for(int i = 0;i < colCount;i++){
 						list.add(rowData.getCell(i).getStringCellValue());
 					}
-					return list;
+					
+					ReadRow readRow = new ReadRow(rowIndex - 1, list);
+					readRow.setSheetIndex(sheetIndex); 
+					readRow.setSheetName(sheetName); 
+					return readRow;
 				}
 			}
 		}
