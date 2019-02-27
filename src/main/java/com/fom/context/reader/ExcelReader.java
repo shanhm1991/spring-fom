@@ -24,8 +24,6 @@ public class ExcelReader implements Reader {
 
 	private HSSFWorkbook workbook = null;
 
-	private boolean withSheetInfo = false;
-
 	private int sheetCount;
 
 	private HSSFSheet sheet;
@@ -69,41 +67,6 @@ public class ExcelReader implements Reader {
 		rowCount = sheet.getPhysicalNumberOfRows();
 	}
 
-	/**
-	 * 
-	 * @param sourceUri sourceUri 
-	 * @param withSheetInfo 读取字段时是否带上sheet信息，在第0列为sheetIndex，第1列为sheetName
-	 * @throws IOException IOException
-	 */
-	public ExcelReader(String sourceUri, boolean withSheetInfo) throws IOException {
-		this(new FileInputStream(sourceUri), withSheetInfo);
-	}
-
-	/**
-	 *  
-	 * @param file
-	 * @param withSheetInfo 读取字段时是否带上sheet信息，在第0列为sheetIndex，第1列为sheetName
-	 * @throws IOException IOException
-	 */
-	public ExcelReader(File file, boolean withSheetInfo) throws IOException {
-		this(new FileInputStream(file), withSheetInfo);
-	}
-
-	/**
-	 *  
-	 * @param inputStream
-	 * @param withSheetInfo 读取字段时是否带上sheet信息，在第0列为sheetIndex，第1列为sheetName
-	 * @throws IOException IOException
-	 */
-	public ExcelReader(InputStream inputStream, boolean withSheetInfo) throws IOException {
-		this.withSheetInfo = withSheetInfo;
-		workbook = new HSSFWorkbook(inputStream);
-		sheetCount = workbook.getNumberOfSheets();
-		sheet = workbook.getSheetAt(sheetIndex);
-		sheetName = sheet.getSheetName();
-		rowCount = sheet.getPhysicalNumberOfRows();
-	}
-
 	@Override
 	public ReadRow readLine() {
 		while(true){
@@ -128,15 +91,7 @@ public class ExcelReader implements Reader {
 					rowIndex++;
 					
 					int colCount = rowData.getPhysicalNumberOfCells();
-					List<String> list = null;
-					if(withSheetInfo){
-						list = new ArrayList<>(colCount + 2);
-						list.add(String.valueOf(sheetIndex));
-						list.add(sheetName);
-					}else{
-						list = new ArrayList<>();
-					}
-					
+					List<String> list = new ArrayList<>();
 					for(int i = 0;i < colCount;i++){
 						list.add(rowData.getCell(i).getStringCellValue());
 					}
