@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -73,6 +74,8 @@ public class ExcelReader implements Reader {
 			workbook = new HSSFWorkbook(inputStream);
 		}else if(TYPE_XSLX.equals(type)){
 			workbook = new XSSFWorkbook(inputStream);
+		}else{
+			throw new UnsupportedOperationException("Excel type can only be xls or xlsx.");
 		}
 		sheetCount = workbook.getNumberOfSheets();
 		sheet = workbook.getSheetAt(sheetIndex);
@@ -88,26 +91,29 @@ public class ExcelReader implements Reader {
 				if(sheetIndex >= sheetCount){
 					return null;
 				}
-				
-				sheet = workbook.getSheetAt(sheetIndex);
-				sheetName = sheet.getSheetName();
-				rowIndex = 0;
-				rowCount = sheet.getPhysicalNumberOfRows();
+				initSheet();
 			}else{
 				if(rowIndex >= rowCount){
 					if(sheetIndex >= sheetCount - 1){
 						return null;
 					}else{
+						sheetIndex++;
+						initSheet();
 						continue;
 					}
 				}else{
 					Row row = sheet.getRow(rowIndex);
 					rowIndex++;
 					
-					int colCount = row.getPhysicalNumberOfCells();
+					int cellCount = row.getPhysicalNumberOfCells();
 					List<String> list = new ArrayList<>();
-					for(int i = 0;i < colCount;i++){
-						list.add(row.getCell(i).getStringCellValue());
+					for(int i = 0;i < cellCount;i++){
+						Cell cell = row.getCell(i);
+						if(cell == null){
+							list.add(null);
+						}else{
+							list.add(row.getCell(i).getStringCellValue());
+						}
 					}
 					
 					RowData rowData = new RowData(rowIndex - 1, list);
@@ -118,7 +124,14 @@ public class ExcelReader implements Reader {
 			}
 		}
 	}
-
+	
+	private void initSheet(){
+		sheet = workbook.getSheetAt(sheetIndex);
+		sheetName = sheet.getSheetName();
+		rowIndex = 0;
+		rowCount = sheet.getPhysicalNumberOfRows();
+	}
+	
 	@Override
 	public void close() throws IOException {
 		IoUtil.close(workbook); 
