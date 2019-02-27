@@ -29,8 +29,7 @@ public class TextReader implements Reader {
 	 * @throws Exception Exception
 	 */
 	public TextReader(String sourceUri, String regex) throws Exception {
-		this.regex = regex;
-		reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sourceUri)),"UTF-8"));
+		this(new FileInputStream(new File(sourceUri)), regex);
 	}
 	
 	/**
@@ -39,8 +38,7 @@ public class TextReader implements Reader {
 	 * @throws Exception Exception
 	 */
 	public TextReader(File file, String regex) throws Exception {
-		this.regex = regex;
-		reader = new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8"));
+		this(new FileInputStream(file), regex);
 	}
 	
 	/**
