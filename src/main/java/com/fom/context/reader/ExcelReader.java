@@ -7,9 +7,11 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.fom.util.IoUtil;
 
@@ -21,12 +23,16 @@ import com.fom.util.IoUtil;
  *
  */
 public class ExcelReader implements Reader {
-
-	private HSSFWorkbook workbook = null;
+	
+	public static final String TYPE_XSL = "xsl";
+	
+	public static final String TYPE_XSLX = "xslx";
+	
+	private Workbook workbook = null;
 
 	private int sheetCount;
 
-	private HSSFSheet sheet;
+	private Sheet sheet; 
 
 	private int sheetIndex = 0;
 
@@ -39,28 +45,35 @@ public class ExcelReader implements Reader {
 	/**
 	 * 
 	 * @param sourceUri sourceUri
+	 * @param type xls/xlsx
 	 * @throws IOException IOException
 	 */
-	public ExcelReader(String sourceUri) throws IOException { 
-		this(new FileInputStream(sourceUri));
+	public ExcelReader(String sourceUri, String type) throws IOException { 
+		this(new FileInputStream(sourceUri), type);
 	}
 
 	/**
 	 * 
 	 * @param file file 
+	 * @param type xls/xlsx
 	 * @throws IOException IOException
 	 */
-	public ExcelReader(File file) throws IOException { 
-		this(new FileInputStream(file));
+	public ExcelReader(File file, String type) throws IOException { 
+		this(new FileInputStream(file), type);
 	}
 
 	/**
-	 * 
+	 *  
 	 * @param inputStream inputStream 
+	 * @param type xls/xlsx
 	 * @throws IOException IOException
 	 */
-	public ExcelReader(InputStream inputStream) throws IOException {
-		workbook = new HSSFWorkbook(inputStream);
+	public ExcelReader(InputStream inputStream, String type) throws IOException {
+		if(TYPE_XSL.equals(type)){
+			workbook = new HSSFWorkbook(inputStream);
+		}else if(TYPE_XSLX.equals(type)){
+			workbook = new XSSFWorkbook(inputStream);
+		}
 		sheetCount = workbook.getNumberOfSheets();
 		sheet = workbook.getSheetAt(sheetIndex);
 		sheetName = sheet.getSheetName();
@@ -75,6 +88,7 @@ public class ExcelReader implements Reader {
 				if(sheetIndex >= sheetCount){
 					return null;
 				}
+				
 				sheet = workbook.getSheetAt(sheetIndex);
 				sheetName = sheet.getSheetName();
 				rowIndex = 0;
@@ -87,7 +101,7 @@ public class ExcelReader implements Reader {
 						continue;
 					}
 				}else{
-					HSSFRow row = sheet.getRow(rowIndex);
+					Row row = sheet.getRow(rowIndex);
 					rowIndex++;
 					
 					int colCount = row.getPhysicalNumberOfCells();
