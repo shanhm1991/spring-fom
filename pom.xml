@@ -170,6 +170,18 @@
 		</plugins>
 	</build>
 
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>Finchley.RELEASE</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -180,6 +192,32 @@
 					<artifactId>spring-boot-starter-logging</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-config</artifactId>
+		</dependency>
+		<!-- 服务提供者，eureka客户端需要使用 -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-eureka</artifactId>
+		</dependency>
+		<!-- 服务注册中心要使用，eureka客户端不用 -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-eureka-server</artifactId>
+			<version>1.4.6.RELEASE</version>
+		</dependency>
+		<!-- Feign远程调用，需要调用服务接口可以使用 -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-feign</artifactId>
+			<version>1.4.6.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-eureka</artifactId>
+			<version>1.4.6.RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -408,5 +446,28 @@
 			<version>1.2.0</version>
 		</dependency>
 	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>aliyun-maven</id>
+			<name>Ali Maven</name>
+			<url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+		</repository>
+		<repository>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>https://repo.spring.io/milestone</url>
+		</repository>
+		<repository>
+			<id>spring-releases</id>
+			<name>Spring Releases</name>
+			<url>https://repo.spring.io/libs-release</url>
+		</repository>
+		<repository>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>https://repo.spring.io/libs-milestone</url>
+		</repository>
+	</repositories>
 </project>
 
