@@ -7,7 +7,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.fom.context.SpringContext;
-import com.fom.context.helper.ZipParseHelper;
+import com.fom.context.helper.TextZipParseHelper;
 import com.fom.context.reader.RowData;
 import com.fom.context.reader.Reader;
 import com.fom.context.reader.TextReader;
@@ -20,7 +20,7 @@ import com.fom.util.PatternUtil;
  * @author shanhm
  *
  */
-public class ImportOracleExample1Helper implements ZipParseHelper<ExampleBean> {
+public class ImportOracleExample1Helper implements TextZipParseHelper<ExampleBean> {
 	
 	private final String pattern;
 	
@@ -37,7 +37,7 @@ public class ImportOracleExample1Helper implements ZipParseHelper<ExampleBean> {
 	}
 
 	@Override
-	public List<ExampleBean> praseRowData(RowData rowData, long batchTime) throws Exception {
+	public List<ExampleBean> parseRowData(RowData rowData, long batchTime) throws Exception {
 		ExampleBean bean = new ExampleBean(rowData.getColumnList());
 		bean.setSource("local");
 		bean.setFileType("zip(txt)");

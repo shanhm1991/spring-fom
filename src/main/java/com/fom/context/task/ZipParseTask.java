@@ -14,7 +14,7 @@ import org.apache.commons.lang.StringUtils;
 import com.fom.context.ExceptionHandler;
 import com.fom.context.Task;
 import com.fom.context.ResultHandler;
-import com.fom.context.helper.ZipParseHelper;
+import com.fom.context.helper.TextZipParseHelper;
 import com.fom.context.reader.RowData;
 import com.fom.context.reader.Reader;
 import com.fom.util.IoUtil;
@@ -41,7 +41,7 @@ import com.fom.util.ZipUtil;
  * <br>上述任何步骤失败或异常均会使任务提前失败结束
  * <br>单个文件处理的说明：同理于ParseTask中
  * 
- * @see ZipParseHelper
+ * @see TextZipParseHelper
  * @see ParseTask
  * 
  * @param <V> 行数据解析结果类型
@@ -53,7 +53,7 @@ public class ZipParseTask<V> extends Task {
 
 	private int batch;
 
-	private ZipParseHelper<V> helper;
+	private TextZipParseHelper<V> helper;
 
 	private File logFile;
 
@@ -63,12 +63,16 @@ public class ZipParseTask<V> extends Task {
 
 	private DecimalFormat numFormat  = new DecimalFormat("#.###");
 
+	private String currentFileName;
+
+	private int rowIndex = 0;
+
 	/**
 	 * @param sourceUri 资源uri
 	 * @param batch 批处理数
 	 * @param helper LocalZipParserHelper
 	 */
-	public ZipParseTask(String sourceUri, int batch, ZipParseHelper<V> helper) {
+	public ZipParseTask(String sourceUri, int batch, TextZipParseHelper<V> helper) {
 		super(sourceUri);
 		this.helper = helper;
 		String sourceName = new File(sourceUri).getName();
@@ -91,7 +95,7 @@ public class ZipParseTask<V> extends Task {
 	 * @param exceptionHandler ExceptionHandler
 	 */
 	public ZipParseTask(String sourceUri, int batch, 
-			ZipParseHelper<V> helper, ExceptionHandler exceptionHandler) { 
+			TextZipParseHelper<V> helper, ExceptionHandler exceptionHandler) { 
 		this(sourceUri, batch, helper);
 		this.exceptionHandler = exceptionHandler;
 	}
@@ -103,7 +107,7 @@ public class ZipParseTask<V> extends Task {
 	 * @param resultHandler ResultHandler
 	 */
 	public ZipParseTask(String sourceUri, int batch, 
-			ZipParseHelper<V> helper, ResultHandler resultHandler) {
+			TextZipParseHelper<V> helper, ResultHandler resultHandler) {
 		this(sourceUri, batch, helper);
 		this.resultHandler = resultHandler;
 	}
@@ -116,7 +120,7 @@ public class ZipParseTask<V> extends Task {
 	 * @param resultHandler ResultHandler
 	 */
 	public ZipParseTask(String sourceUri, int batch, 
-			ZipParseHelper<V> helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+			TextZipParseHelper<V> helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
 		this(sourceUri, batch, helper);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
@@ -160,7 +164,7 @@ public class ZipParseTask<V> extends Task {
 				return true;
 			}
 			//失败在第3步,继续处理未完成的文件
-			if(!processFailedFile()){
+			if(!parseFailedFile()){
 				return false;
 			}
 		} else {
@@ -207,7 +211,7 @@ public class ZipParseTask<V> extends Task {
 				return false;
 			}
 		}
-		return processFiles();
+		return parseFiles();
 	}
 
 	@Override
@@ -248,89 +252,86 @@ public class ZipParseTask<V> extends Task {
 		return list;
 	}
 
-	private boolean processFailedFile() throws Exception {  
+	private boolean parseFailedFile() throws Exception {  
 		List<String> lines = FileUtils.readLines(logFile);
 		if(lines.isEmpty()){
 			return true;
 		}
 
-		String name = lines.get(0); 
-		File file = new File(unzipDir + File.separator + name);
+		currentFileName = lines.get(0); 
+		File file = new File(unzipDir + File.separator + currentFileName);
 		if(!file.exists()){
-			log.warn("cann't find failed file: " + name);
+			log.warn("cann't find failed file: " + currentFileName);
 			return true;
 		}
 
 		long sTime = System.currentTimeMillis();
-		int lineIndex = 0;
 		try{
-			lineIndex = Integer.valueOf(lines.get(1));
-			log.info("get failed file processed progress[" + name + "]: " + lineIndex); 
+			rowIndex = Integer.valueOf(lines.get(1));
+			log.info("get history processed progress: file=" + currentFileName + ",rowIndex=" + rowIndex); 
 		}catch(Exception e){
-			log.warn("get failed file processed progress failed, will process from first line: " + name);
+			log.warn("get history processed progress failed, will process from scratch.");
 		}
 
-		read(file.getPath(), lineIndex); 
-		matchedEntrys.remove(name);
+		parse(); 
+		matchedEntrys.remove(currentFileName);
 
 		if (log.isDebugEnabled()) {
 			String size = numFormat.format(file.length() / 1024.0);
-			log.debug("finish parse[" + name + "(" + size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
+			log.debug("finish parse[" + currentFileName + "(" + size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
 		}
 		if(!file.delete()){
-			log.error("delete file failed: " + name); 
+			log.error("delete file failed: " + currentFileName); 
 			return false;
 		}
 		return true;
 	}
 
-	private boolean processFiles() throws Exception {
+	private boolean parseFiles() throws Exception {
 		Iterator<String> it = matchedEntrys.iterator();
 		while(it.hasNext()){
-			String name = it.next();
 			long sTime = System.currentTimeMillis();
-			File file = new File(unzipDir + File.separator + name);
-
-			read(file.getPath(), 0);
+			currentFileName = it.next();
+			rowIndex = 0;
+			parse();
 			it.remove();
 
+			File file = new File(unzipDir + File.separator + currentFileName);
 			if (log.isDebugEnabled()) {
 				String size = numFormat.format(file.length() / 1024.0);
-				log.debug("finish file[" + name + "(" + size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
+				log.debug("finish file[" + currentFileName + "(" + size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
 			}
-			if(!file.delete()){
-				log.error("delete file failed: " + file.getName()); 
+			if(!file.delete()){ 
+				log.error("delete file failed: " + currentFileName); 
 				return false;
 			}
 		}
 		return true;
 	}
 
-	private void read(String uri, int StartLine) throws Exception {
-		int lineIndex = 0;
+	private void parse() throws Exception {
 		Reader reader = null;
 		RowData rowData = null;
 		try{
-			reader = helper.getReader(uri);
+			reader = helper.getReader(unzipDir + File.separator + currentFileName);
 			List<V> batchData = new LinkedList<>(); 
 			long batchTime = System.currentTimeMillis();
 			while ((rowData = reader.readRow()) != null) {
-				lineIndex++;
-				if(lineIndex <= StartLine){
+				if(rowIndex > 0 && rowData.getRowIndex() <= rowIndex){
 					continue;
 				}
 				if(batch > 0 && batchData.size() >= batch && notInterruped()){
 					int size = batchData.size();
 					helper.batchProcess(batchData, batchTime); 
+					logProcess();
+					batchData.clear();
+					batchTime = System.currentTimeMillis();
 					if (log.isDebugEnabled()) {
 						log.debug("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 					}
-					logProcess(uri, lineIndex);
-					batchData.clear();
-					batchTime = System.currentTimeMillis();
 				}
-				
-				List<V> dataList = helper.praseRowData(rowData, batchTime);
+
+				List<V> dataList = helper.parseRowData(rowData, batchTime);
 				if(dataList != null){
 					batchData.addAll(dataList);
 				}
@@ -338,11 +339,11 @@ public class ZipParseTask<V> extends Task {
 			if(!batchData.isEmpty() && notInterruped()){
 				int size = batchData.size();
 				helper.batchProcess(batchData, batchTime); 
+				logProcess();
 				if (log.isDebugEnabled()) {
 					log.debug("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 				}
 			}
-			logProcess(uri, lineIndex);
 		}finally{
 			IoUtil.close(reader);
 		}
@@ -355,12 +356,11 @@ public class ZipParseTask<V> extends Task {
 		return true;
 	}
 
-	private void logProcess(String uri, int lineIndex) throws IOException{ 
-		String data = uri + "\n" + lineIndex;
+	private void logProcess() throws IOException{ 
 		if (log.isDebugEnabled()) {
-			log.debug("rows processed: " + lineIndex);
+			log.debug("process progress: file=" + currentFileName + ",rowIndex=" + rowIndex);
 		}
-		FileUtils.writeStringToFile(logFile, data, false);
+		FileUtils.writeStringToFile(logFile, currentFileName + "\n" + rowIndex, false);
 	}
 
 }

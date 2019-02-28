@@ -7,7 +7,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.fom.context.SpringContext;
-import com.fom.context.helper.ParseHelper;
+import com.fom.context.helper.TextParseHelper;
 import com.fom.context.reader.RowData;
 import com.fom.context.reader.Reader;
 import com.fom.context.reader.TextReader;
@@ -19,7 +19,7 @@ import com.fom.examples.dao.ExamplesDao;
  * @author shanhm
  *
  */
-public class ImportMysqlExample1Helper implements ParseHelper<ExampleBean> {
+public class ImportMysqlExample1Helper implements TextParseHelper<ExampleBean> {
 	
 	private final Logger log;
 
@@ -33,7 +33,7 @@ public class ImportMysqlExample1Helper implements ParseHelper<ExampleBean> {
 	}
 
 	@Override
-	public List<ExampleBean> praseRowData(RowData rowData, long batchTime) throws Exception {
+	public List<ExampleBean> parseRowData(RowData rowData, long batchTime) throws Exception {
 		ExampleBean bean = new ExampleBean(rowData.getColumnList());
 		bean.setSource("local");
 		bean.setFileType("txt");

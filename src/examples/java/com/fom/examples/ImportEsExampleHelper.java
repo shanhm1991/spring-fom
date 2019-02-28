@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.fom.context.helper.ParseHelper;
+import com.fom.context.helper.TextParseHelper;
 import com.fom.context.reader.RowData;
 import com.fom.context.reader.Reader;
 import com.fom.context.reader.TextReader;
@@ -19,7 +19,7 @@ import com.fom.db.handler.EsHandler;
  * @author shanhm
  *
  */
-public class ImportEsExampleHelper implements ParseHelper<Map<String, Object>> {
+public class ImportEsExampleHelper implements TextParseHelper<Map<String, Object>> {
 	
 	private static final String POOL = "example_es";
 	
@@ -41,7 +41,7 @@ public class ImportEsExampleHelper implements ParseHelper<Map<String, Object>> {
 	}
 
 	@Override
-	public List<Map<String, Object>> praseRowData(RowData rowData, long batchTime) throws Exception {
+	public List<Map<String, Object>> parseRowData(RowData rowData, long batchTime) throws Exception {
 		List<String> columns = rowData.getColumnList();
 		Map<String,Object> map = new HashMap<>();
 		map.put("ID", columns.get(0));

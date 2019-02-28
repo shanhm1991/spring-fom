@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.fom.context.helper.ZipParseHelper;
+import com.fom.context.helper.TextZipParseHelper;
 import com.fom.context.reader.RowData;
 import com.fom.context.reader.Reader;
 import com.fom.context.reader.TextReader;
@@ -20,7 +20,7 @@ import com.fom.util.PatternUtil;
  * @author shanhm
  *
  */
-public class ImportOracleExample2Helper implements ZipParseHelper<Map<String, Object>> {
+public class ImportOracleExample2Helper implements TextZipParseHelper<Map<String, Object>> {
 
 	private static final String POOL = "example_oracle";
 
@@ -43,7 +43,7 @@ public class ImportOracleExample2Helper implements ZipParseHelper<Map<String, Ob
 	}
 
 	@Override
-	public List<Map<String, Object>> praseRowData(RowData rowData, long batchTime) throws Exception {
+	public List<Map<String, Object>> parseRowData(RowData rowData, long batchTime) throws Exception {
 		List<String> columns = rowData.getColumnList();
 		Map<String,Object> map = new HashMap<>();
 		map.put("id", columns.get(0));

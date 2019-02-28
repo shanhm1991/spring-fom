@@ -7,12 +7,12 @@ import com.fom.context.task.ZipParseTask;
  * 
  * @author shanhm
  * 
- * @see ParseHelper
+ * @see TextParseHelper
  * @see ZipParseTask
  *
  * @param <V> 行数据解析结果类型
  */
-public interface ZipParseHelper<V> extends ParseHelper<V> {
+public interface TextZipParseHelper<V> extends TextParseHelper<V> {
 
 	/**
 	 * 匹配zip的entry名称

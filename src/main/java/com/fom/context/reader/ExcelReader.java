@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -24,11 +26,11 @@ import com.fom.util.IoUtil;
  *
  */
 public class ExcelReader implements Reader {
-	
-	public static final String TYPE_XSL = "xsl";
-	
-	public static final String TYPE_XSLX = "xslx";
-	
+
+	public static final String TYPE_XLS = "xls";
+
+	public static final String TYPE_XLSX = "xlsx";
+
 	private Workbook workbook = null;
 
 	private int sheetCount;
@@ -46,21 +48,30 @@ public class ExcelReader implements Reader {
 	/**
 	 * 
 	 * @param sourceUri sourceUri
-	 * @param type xls/xlsx
 	 * @throws IOException IOException
 	 */
-	public ExcelReader(String sourceUri, String type) throws IOException { 
-		this(new FileInputStream(sourceUri), type);
+	public ExcelReader(String sourceUri) throws IOException {
+		int index = sourceUri.lastIndexOf('.');
+		if(index == -1){
+			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx.");
+		}
+		String type = sourceUri.substring(index + 1);
+		init(new FileInputStream(sourceUri), type);
 	}
 
 	/**
 	 * 
 	 * @param file file 
-	 * @param type xls/xlsx
 	 * @throws IOException IOException
 	 */
-	public ExcelReader(File file, String type) throws IOException { 
-		this(new FileInputStream(file), type);
+	public ExcelReader(File file) throws IOException {
+		String name = file.getName();
+		int index = name.lastIndexOf('.');
+		if(index == -1){
+			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx");
+		}
+		String type = name.substring(index + 1);
+		init(new FileInputStream(file), type);
 	}
 
 	/**
@@ -70,12 +81,16 @@ public class ExcelReader implements Reader {
 	 * @throws IOException IOException
 	 */
 	public ExcelReader(InputStream inputStream, String type) throws IOException {
-		if(TYPE_XSL.equals(type)){
+		init(inputStream, type);
+	}
+
+	private void init(InputStream inputStream, String type) throws IOException{ 
+		if(TYPE_XLS.equals(type)){
 			workbook = new HSSFWorkbook(inputStream);
-		}else if(TYPE_XSLX.equals(type)){
+		}else if(TYPE_XLSX.equals(type)){
 			workbook = new XSSFWorkbook(inputStream);
 		}else{
-			throw new UnsupportedOperationException("Excel type can only be xls or xlsx.");
+			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx");
 		}
 		sheetCount = workbook.getNumberOfSheets();
 		sheet = workbook.getSheetAt(sheetIndex);
@@ -104,18 +119,13 @@ public class ExcelReader implements Reader {
 				}else{
 					Row row = sheet.getRow(rowIndex);
 					rowIndex++;
-					
+
 					int cellCount = row.getPhysicalNumberOfCells();
 					List<String> list = new ArrayList<>();
 					for(int i = 0;i < cellCount;i++){
-						Cell cell = row.getCell(i);
-						if(cell == null){
-							list.add(null);
-						}else{
-							list.add(row.getCell(i).getStringCellValue());
-						}
+						list.add(getCellValue(row.getCell(i)));
 					}
-					
+
 					RowData rowData = new RowData(rowIndex - 1, list);
 					rowData.setSheetIndex(sheetIndex); 
 					rowData.setSheetName(sheetName); 
@@ -124,19 +134,82 @@ public class ExcelReader implements Reader {
 			}
 		}
 	}
-	
+
 	private void initSheet(){
 		sheet = workbook.getSheetAt(sheetIndex);
 		sheetName = sheet.getSheetName();
 		rowIndex = 0;
 		rowCount = sheet.getPhysicalNumberOfRows();
 	}
-	
+
+	private String getCellValue(Cell cell) {
+		if (cell == null) {
+			return "null";
+		}
+
+		switch (cell.getCellType()) {
+		case NUMERIC:
+			return double2String(cell.getNumericCellValue());
+		case STRING:
+			return cell.getStringCellValue();
+		case BOOLEAN:
+			return String.valueOf(cell.getBooleanCellValue());
+		case FORMULA:
+			try {
+				return double2String(cell.getNumericCellValue());
+			} catch (IllegalStateException e) {
+				try {
+					return cell.getRichStringCellValue().toString();
+				} catch (IllegalStateException e2) {
+					return "error";
+				}
+			} catch (Exception e) {
+				return "error";
+			}
+		case BLANK:
+			return "";
+		case ERROR:
+			return "error";
+		default:
+			return "";
+		}
+	}
+
+	private static String double2String(Double d) {
+		String doubleStr = d.toString();
+		boolean b = doubleStr.contains("E");
+		int indexOfPoint = doubleStr.indexOf('.');
+		if (b) {
+			int indexOfE = doubleStr.indexOf('E');
+			// 小数部分
+			BigInteger xs = new BigInteger(doubleStr.substring(indexOfPoint
+					+ BigInteger.ONE.intValue(), indexOfE));
+			// 指数
+			int pow = Integer.parseInt(doubleStr.substring(indexOfE + BigInteger.ONE.intValue()));
+			int xsLen = xs.toByteArray().length;
+			int scale = xsLen - pow > 0 ? xsLen - pow : 0;
+			doubleStr = String.format("%." + scale + "f", d);
+		} else {
+			java.util.regex.Pattern p = Pattern.compile(".0$");
+			java.util.regex.Matcher m = p.matcher(doubleStr);
+			if (m.find()) {
+				doubleStr = doubleStr.replace(".0", "");
+			}
+		}
+		return doubleStr;
+	}
+
 	@Override
 	public void close() throws IOException {
 		IoUtil.close(workbook); 
 	}
 
+	/**
+	 * 
+	 * @param sheetIndex sheetIndex
+	 * @param sheetName sheetName
+	 * @return boolean
+	 */
 	protected boolean shouldSheetProcess(int sheetIndex, String sheetName) {
 		return true;
 	}
