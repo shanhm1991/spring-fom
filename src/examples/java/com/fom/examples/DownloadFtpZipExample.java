@@ -7,9 +7,9 @@ import java.util.Set;
 import com.fom.context.Context;
 import com.fom.context.FomContext;
 import com.fom.context.Task;
-import com.fom.context.helper.ZipDownloadHelper;
-import com.fom.context.helper.impl.FtpHelper;
-import com.fom.context.task.ZipDownloadTask;
+import com.fom.task.ZipDownloadTask;
+import com.fom.task.helper.ZipDownloadHelper;
+import com.fom.task.helper.impl.FtpHelper;
 
 /**
  * 

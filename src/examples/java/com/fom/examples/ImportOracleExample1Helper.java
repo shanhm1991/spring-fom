@@ -7,12 +7,12 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.fom.context.SpringContext;
-import com.fom.context.helper.TextZipParseHelper;
-import com.fom.context.reader.RowData;
-import com.fom.context.reader.Reader;
-import com.fom.context.reader.TextReader;
 import com.fom.examples.bean.ExampleBean;
 import com.fom.examples.dao.ExamplesDao;
+import com.fom.task.helper.TextZipParseHelper;
+import com.fom.task.reader.Reader;
+import com.fom.task.reader.RowData;
+import com.fom.task.reader.TextReader;
 import com.fom.util.PatternUtil;
 
 /**

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pools>
-	<!-- <pool name="example_es" class="com.fom.db.pool.EsPool">
+	<!-- <pool name="example_es" class="com.fom.pool.EsPool">
 		<clusterName>selfES</clusterName>
 		<nodes>
 			<node>192.168.141.21:9300</node>
 		</nodes>
 	</pool> -->
 
-	<!-- <pool name="example_oracle" class="com.fom.db.pool.JdbcPool">
+	<!-- <pool name="example_oracle" class="com.fom.pool.JdbcPool">
 		<core>20</core>
 		<max>20</max>
 		<waitTimeOut>120000</waitTimeOut>
@@ -18,7 +18,7 @@
 		<passwd>admin</passwd>
 	</pool> -->
 	
-	<!-- <pool name="example_mysql" class="com.fom.db.pool.JdbcPool">
+	<!-- <pool name="example_mysql" class="com.fom.pool.JdbcPool">
 		<core>20</core>
 		<max>20</max>
 		<waitTimeOut>120000</waitTimeOut>

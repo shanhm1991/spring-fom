@@ -3,8 +3,8 @@ package com.fom.examples;
 import java.io.File;
 import java.util.Map;
 
-import com.fom.context.task.ParseTask;
-import com.fom.db.handler.EsHandler;
+import com.fom.pool.handler.EsHandler;
+import com.fom.task.ParseTask;
 
 public class ImportEsExampleParser extends ParseTask<Map<String, Object>> {
 	

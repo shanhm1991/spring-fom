@@ -7,8 +7,8 @@ import java.util.Set;
 import com.fom.context.Context;
 import com.fom.context.ContextUtil;
 import com.fom.context.Task;
-import com.fom.context.task.ParseTask;
 import com.fom.examples.bean.ExampleBean;
+import com.fom.task.ParseTask;
 import com.fom.util.FileUtil;
 import com.fom.util.PatternUtil;
 

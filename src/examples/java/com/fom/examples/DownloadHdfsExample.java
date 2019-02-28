@@ -9,9 +9,9 @@ import org.apache.hadoop.fs.PathFilter;
 import com.fom.context.Context;
 import com.fom.context.FomContext;
 import com.fom.context.Task;
-import com.fom.context.helper.DownloadHelper;
-import com.fom.context.helper.impl.HdfsHelper;
-import com.fom.context.task.DownloadTask;
+import com.fom.task.DownloadTask;
+import com.fom.task.helper.DownloadHelper;
+import com.fom.task.helper.impl.HdfsHelper;
 import com.fom.util.HdfsUtil;
 import com.fom.util.PatternUtil;
 

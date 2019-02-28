@@ -2,7 +2,7 @@
 <pools>
 	<pool>
 		<name>es</name>
-		<class>com.fom.db.pool.EsPool</class>
+		<class>com.fom.pool.EsPool</class>
 		<clusterName>esName</clusterName>
 		<nodes>
 			<node>ip:port</node>
@@ -15,7 +15,7 @@
 		<max>20</max>
 		<waitTimeOut>120000</waitTimeOut>
 		<aliveTimeOut>120000</aliveTimeOut>
-		<class>com.fom.db.pool.JdbcPool</class>
+		<class>com.fom.pool.JdbcPool</class>
 		<driver>oracle.jdbc.driver.OracleDriver</driver>
 		<url>jdbc:oracle:thin:@ip:port:oracleName</url>
 		<user>user</user>
@@ -28,7 +28,7 @@
 		<max>20</max>
 		<waitTimeOut>120000</waitTimeOut>
 		<aliveTimeOut>120000</aliveTimeOut>
-		<class>com.fom.db.pool.JdbcPool</class>
+		<class>com.fom.pool.JdbcPool</class>
 		<driver>com.mysql.cj.jdbc.Driver</driver>
 		<url>jdbc:mysql://ip:port/mysqlName</url>
 		<user>user</user>

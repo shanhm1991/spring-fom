@@ -8,11 +8,11 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.fom.context.helper.TextZipParseHelper;
-import com.fom.context.reader.RowData;
-import com.fom.context.reader.Reader;
-import com.fom.context.reader.TextReader;
-import com.fom.db.handler.JdbcHandler;
+import com.fom.pool.handler.JdbcHandler;
+import com.fom.task.helper.TextZipParseHelper;
+import com.fom.task.reader.Reader;
+import com.fom.task.reader.RowData;
+import com.fom.task.reader.TextReader;
 import com.fom.util.PatternUtil;
 
 /**

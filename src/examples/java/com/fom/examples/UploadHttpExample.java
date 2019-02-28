@@ -8,8 +8,8 @@ import com.fom.context.Context;
 import com.fom.context.ContextUtil;
 import com.fom.context.FomContext;
 import com.fom.context.Task;
-import com.fom.context.helper.impl.HttpHelper;
-import com.fom.context.task.UploadTask;
+import com.fom.task.UploadTask;
+import com.fom.task.helper.impl.HttpHelper;
 
 /**
  * 

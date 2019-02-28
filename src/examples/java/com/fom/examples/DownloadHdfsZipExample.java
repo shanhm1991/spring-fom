@@ -13,8 +13,8 @@ import org.apache.hadoop.fs.PathFilter;
 import com.fom.context.Context;
 import com.fom.context.FomContext;
 import com.fom.context.Task;
-import com.fom.context.helper.impl.HdfsHelper;
-import com.fom.context.task.ZipDownloadTask;
+import com.fom.task.ZipDownloadTask;
+import com.fom.task.helper.impl.HdfsHelper;
 import com.fom.util.HdfsUtil;
 import com.fom.util.PatternUtil;
 
