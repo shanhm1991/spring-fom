@@ -111,10 +111,14 @@ public abstract class Task implements Callable<Result> {
 		//这里算上resulthandler的结果和耗时
 		long cost = System.currentTimeMillis() - sTime;
 		if(result.success){
-			context.statistics.successIncrease(id, cost, this.createTime, this.startTime); 
+			if(context != null){
+				context.statistics.successIncrease(id, cost, this.createTime, this.startTime); 
+			}
 			log.info("task success, cost=" + cost + "ms");
 		}else{
-			context.statistics.failedIncrease(id, result);
+			if(context != null){
+				context.statistics.failedIncrease(id, result);
+			}
 			log.warn("task failed, cost=" + cost + "ms");
 		}
 		return result;
