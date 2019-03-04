@@ -129,6 +129,7 @@ public class ExcelReader implements Reader {
 					RowData rowData = new RowData(rowIndex - 1, list);
 					rowData.setSheetIndex(sheetIndex); 
 					rowData.setSheetName(sheetName); 
+					rowData.setLastRow(rowIndex == rowCount - 1); 
 					return rowData;
 				}
 			}

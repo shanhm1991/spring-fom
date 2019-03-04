@@ -167,10 +167,11 @@ public class ParseTask<V> extends Task {
 					batchData.addAll(dataList);
 				}
 				
-				if(batch > 0 && batchData.size() >= batch && notInterruped()){
+				if(batch > 0 && batchData.size() >= batch){
+					TaskUtil.checkInterrupt();
 					int size = batchData.size();
 					helper.batchProcess(batchData, batchTime); 
-					logProcess();
+					log();
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
 					if (log.isDebugEnabled()) {
@@ -178,10 +179,11 @@ public class ParseTask<V> extends Task {
 					}
 				}
 			}
-			if(!batchData.isEmpty() && notInterruped()){
+			if(!batchData.isEmpty()){
+				TaskUtil.checkInterrupt();
 				int size = batchData.size();
 				helper.batchProcess(batchData, batchTime); 
-				logProcess();
+				log();
 				if (log.isDebugEnabled()) {
 					log.debug("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 				}
@@ -191,14 +193,7 @@ public class ParseTask<V> extends Task {
 		}
 	}
 	
-	private boolean notInterruped() throws InterruptedException{
-		if(Thread.interrupted()){
-			throw new InterruptedException("interrupted when batchProcessLineData");
-		}
-		return true;
-	}
-
-	private void logProcess() throws IOException{
+	private void log() throws IOException{
 		if (log.isDebugEnabled()) {
 			log.debug("process progress: rowIndex=" + rowIndex);
 		}

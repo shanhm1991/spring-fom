@@ -17,12 +17,14 @@ public class RowData {
 
 	private String sheetName;
 
+	private boolean isLastRow;
+
 
 	public RowData(int rowIndex, List<String> rowData){
 		this.rowIndex = rowIndex;
 		this.columnList = rowData;
 	}
-	
+
 	public int getRowIndex() {
 		return rowIndex;
 	}
@@ -55,6 +57,12 @@ public class RowData {
 		this.sheetName = sheetName;
 	}
 
+	public boolean isLastRow() {
+		return isLastRow;
+	}
 
+	void setLastRow(boolean isLastRow) {
+		this.isLastRow = isLastRow;
+	}
 
 }
