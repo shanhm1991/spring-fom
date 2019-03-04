@@ -163,11 +163,15 @@ public class ExcelParseTask<V> extends Task {
 			List<V> batchData = new LinkedList<>(); 
 			long batchTime = System.currentTimeMillis();
 			while ((rowData = reader.readRow()) != null) {
-				if((sheetIndex > 0 || rowIndex > 0) && rowData.getRowIndex() <= rowIndex){
+				if(sheetIndex < rowData.getSheetIndex()){
+					sheetIndex = rowData.getSheetIndex();
+					rowIndex = 0;
+				}
+				
+				if(rowIndex > 0 && rowData.getRowIndex() <= rowIndex){
 					continue;
 				}
 				rowIndex = rowData.getRowIndex();
-				sheetIndex = rowData.getSheetIndex();
 				
 				List<V> dataList = helper.parseRowData(rowData, batchTime);
 				if(dataList != null){
@@ -178,7 +182,7 @@ public class ExcelParseTask<V> extends Task {
 					TaskUtil.checkInterrupt();
 					int size = batchData.size();
 					helper.batchProcess(batchData, batchTime); 
-					log();
+					TaskUtil.log(log, logFile, String.valueOf(sheetIndex), size); 
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
 					if (log.isDebugEnabled()) {
@@ -190,7 +194,7 @@ public class ExcelParseTask<V> extends Task {
 				TaskUtil.checkInterrupt();
 				int size = batchData.size();
 				helper.batchProcess(batchData, batchTime); 
-				log();
+				TaskUtil.log(log, logFile, String.valueOf(sheetIndex), size); 
 				if (log.isDebugEnabled()) {
 					log.debug("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 				}
@@ -200,13 +204,6 @@ public class ExcelParseTask<V> extends Task {
 		}
 	}
 
-	private void log() throws IOException{
-		if (log.isDebugEnabled()) {
-			log.debug("process progress: sheetIndex=" + sheetIndex + ",rowIndex=" + rowIndex);
-		}
-		FileUtils.writeStringToFile(logFile, sheetIndex + "\n" + rowIndex, false);
-	}
-	
 	private class InnerReader extends ExcelReader { 
 
 		public InnerReader(InputStream inputStream, String type) throws IOException {

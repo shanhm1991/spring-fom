@@ -31,6 +31,10 @@ public class ExcelReader implements Reader {
 
 	public static final String TYPE_XLSX = "xlsx";
 
+	private InputStream inputStream;
+
+	private String type;
+
 	private Workbook workbook = null;
 
 	private int sheetCount;
@@ -55,8 +59,9 @@ public class ExcelReader implements Reader {
 		if(index == -1){
 			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx.");
 		}
-		String type = sourceUri.substring(index + 1);
-		init(new FileInputStream(sourceUri), type);
+		this.type = sourceUri.substring(index + 1);
+		this.inputStream = new FileInputStream(sourceUri);
+		init();
 	}
 
 	/**
@@ -70,8 +75,9 @@ public class ExcelReader implements Reader {
 		if(index == -1){
 			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx");
 		}
-		String type = name.substring(index + 1);
-		init(new FileInputStream(file), type);
+		this.type = name.substring(index + 1);
+		this.inputStream = new FileInputStream(file);
+		init();
 	}
 
 	/**
@@ -81,10 +87,12 @@ public class ExcelReader implements Reader {
 	 * @throws IOException IOException
 	 */
 	public ExcelReader(InputStream inputStream, String type) throws IOException {
-		init(inputStream, type);
+		this.type = type;
+		this.inputStream = inputStream;
+		init();
 	}
 
-	private void init(InputStream inputStream, String type) throws IOException{ 
+	private void init() throws IOException{ 
 		if(TYPE_XLS.equals(type)){
 			workbook = new HSSFWorkbook(inputStream);
 		}else if(TYPE_XLSX.equals(type)){
@@ -129,7 +137,7 @@ public class ExcelReader implements Reader {
 					RowData rowData = new RowData(rowIndex - 1, list);
 					rowData.setSheetIndex(sheetIndex); 
 					rowData.setSheetName(sheetName); 
-					rowData.setLastRow(rowIndex == rowCount - 1); 
+					rowData.setLastRow(rowIndex == rowCount); 
 					return rowData;
 				}
 			}
@@ -203,6 +211,7 @@ public class ExcelReader implements Reader {
 	@Override
 	public void close() throws IOException {
 		IoUtil.close(workbook); 
+		IoUtil.close(inputStream);
 	}
 
 	/**

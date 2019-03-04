@@ -1,7 +1,6 @@
 package com.fom.task;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -12,8 +11,8 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.fom.context.ExceptionHandler;
-import com.fom.context.Task;
 import com.fom.context.ResultHandler;
+import com.fom.context.Task;
 import com.fom.task.helper.TextZipParseHelper;
 import com.fom.task.reader.Reader;
 import com.fom.task.reader.RowData;
@@ -324,7 +323,7 @@ public class ZipParseTask<V> extends Task {
 					TaskUtil.checkInterrupt();
 					int size = batchData.size();
 					helper.batchProcess(batchData, batchTime); 
-					log();
+					TaskUtil.log(log, logFile, currentFileName, size); 
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
 					if (log.isDebugEnabled()) {
@@ -341,7 +340,7 @@ public class ZipParseTask<V> extends Task {
 				TaskUtil.checkInterrupt();
 				int size = batchData.size();
 				helper.batchProcess(batchData, batchTime); 
-				log();
+				TaskUtil.log(log, logFile, currentFileName, size); 
 				if (log.isDebugEnabled()) {
 					log.debug("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 				}
@@ -349,13 +348,6 @@ public class ZipParseTask<V> extends Task {
 		}finally{
 			IoUtil.close(reader);
 		}
-	}
-
-	private void log() throws IOException{ 
-		if (log.isDebugEnabled()) {
-			log.debug("process progress: file=" + currentFileName + ",rowIndex=" + rowIndex);
-		}
-		FileUtils.writeStringToFile(logFile, currentFileName + "\n" + rowIndex, false);
 	}
 
 }
