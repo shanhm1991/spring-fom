@@ -54,7 +54,7 @@ public class ZipParseTask<V> extends Task {
 
 	private TextZipParseHelper<V> helper;
 
-	private File logFile;
+	private File progressLog;
 
 	private File unzipDir;
 
@@ -78,11 +78,11 @@ public class ZipParseTask<V> extends Task {
 
 		if(StringUtils.isBlank(getContextName())){
 			this.unzipDir = new File(System.getProperty("cache.parse") + File.separator + sourceName);
-			this.logFile = new File(System.getProperty("cache.parse") + File.separator + sourceName + ".log");
+			this.progressLog = new File(System.getProperty("cache.parse") + File.separator + sourceName + ".log");
 		}else{
 			this.unzipDir = new File(System.getProperty("cache.parse")
 					+ File.separator + getContextName() + File.separator + sourceName);
-			this.logFile = new File(System.getProperty("cache.parse") 
+			this.progressLog = new File(System.getProperty("cache.parse") 
 					+ File.separator + getContextName() + File.separator + sourceName + ".log");
 		}
 	}
@@ -135,17 +135,13 @@ public class ZipParseTask<V> extends Task {
 			return false;
 		}
 
-		File parentFile = logFile.getParentFile();
+		File parentFile = progressLog.getParentFile();
 		if(!parentFile.exists() && !parentFile.mkdirs()){
 			log.error("directory create failed:" + parentFile);
 			return false;
 		}
-		return true;
-	}
 
-	@Override
-	protected boolean exec() throws Exception {
-		if(logFile.exists()){
+		if(progressLog.exists()){
 			log.warn("continue to deal with uncompleted task."); 
 			//失败在第5步
 			if(!unzipDir.exists()){ 
@@ -205,11 +201,17 @@ public class ZipParseTask<V> extends Task {
 				return true;
 			}
 
-			if(!logFile.createNewFile()){
-				log.warn("logFile create failed.");
+			if(!progressLog.createNewFile()){
+				log.warn("progress log create failed.");
 				return false;
 			}
 		}
+
+		return true;
+	}
+
+	@Override
+	protected boolean exec() throws Exception {
 		return parseFiles();
 	}
 
@@ -235,7 +237,7 @@ public class ZipParseTask<V> extends Task {
 			log.warn("clear src file failed."); 
 			return false;
 		}
-		if(logFile.exists() && !logFile.delete()){
+		if(progressLog.exists() && !progressLog.delete()){
 			log.warn("clear logFile failed.");
 		}
 		return true;
@@ -252,7 +254,7 @@ public class ZipParseTask<V> extends Task {
 	}
 
 	private boolean parseFailedFile() throws Exception {  
-		List<String> lines = FileUtils.readLines(logFile);
+		List<String> lines = FileUtils.readLines(progressLog);
 		if(lines.isEmpty()){
 			return true;
 		}
@@ -323,7 +325,7 @@ public class ZipParseTask<V> extends Task {
 					TaskUtil.checkInterrupt();
 					int size = batchData.size();
 					helper.batchProcess(batchData, batchTime); 
-					TaskUtil.log(log, logFile, currentFileName, size); 
+					TaskUtil.log(log, progressLog, currentFileName, size); 
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
 					if (log.isDebugEnabled()) {
@@ -340,7 +342,7 @@ public class ZipParseTask<V> extends Task {
 				TaskUtil.checkInterrupt();
 				int size = batchData.size();
 				helper.batchProcess(batchData, batchTime); 
-				TaskUtil.log(log, logFile, currentFileName, size); 
+				TaskUtil.log(log, progressLog, currentFileName, size); 
 				if (log.isDebugEnabled()) {
 					log.debug("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 				}

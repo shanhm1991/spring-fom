@@ -44,12 +44,12 @@ public class ExcelParseTask<V> extends Task {
 
 	private ExcelParseHelper<V> helper;
 
-	private File logFile;
+	protected int sheetIndex = 0;
 	
-	private int sheetIndex = 0;
-	
-	private int rowIndex = 0;
+	protected int rowIndex = 0;
 
+	protected File progressLog;
+	
 	/**
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
@@ -101,31 +101,26 @@ public class ExcelParseTask<V> extends Task {
 	protected boolean beforeExec() throws Exception { 
 		String logName = new File(id).getName();
 		if(StringUtils.isBlank(getContextName())){
-			this.logFile = new File(System.getProperty("cache.parse") + File.separator + logName + ".log");
+			this.progressLog = new File(System.getProperty("cache.parse") + File.separator + logName + ".log");
 		}else{
-			this.logFile = new File(System.getProperty("cache.parse") 
+			this.progressLog = new File(System.getProperty("cache.parse") 
 					+ File.separator + getContextName() + File.separator + logName + ".log");
 		}
 
-		File parentFile = logFile.getParentFile();
+		File parentFile = progressLog.getParentFile();
 		if(!parentFile.exists() && !parentFile.mkdirs()){
 			log.error("directory create failed: " + parentFile);
 			return false;
 		}
-		return true;
-	}
-
-	@Override
-	protected boolean exec() throws Exception {
-		long sTime = System.currentTimeMillis();
-		if(!logFile.exists()){ 
-			if(!logFile.createNewFile()){
-				log.error("directory create failed.");
+		
+		if(!progressLog.exists()){ 
+			if(!progressLog.createNewFile()){
+				log.error("progress log create failed.");
 				return false;
 			}
 		}else{
 			log.warn("continue to deal with uncompleted task."); 
-			List<String> lines = FileUtils.readLines(logFile);
+			List<String> lines = FileUtils.readLines(progressLog);
 			try{
 				sheetIndex = Integer.valueOf(lines.get(0));
 				rowIndex = Integer.valueOf(lines.get(1));
@@ -134,6 +129,14 @@ public class ExcelParseTask<V> extends Task {
 				log.warn("get history processed progress failed, will process from scratch.");
 			}
 		}
+		
+		return true;
+	}
+
+	@Override
+	protected boolean exec() throws Exception {
+		long sTime = System.currentTimeMillis();
+		
 		parse();
 		if (log.isDebugEnabled()) {
 			String size = new DecimalFormat("#.###").format(helper.getSourceSize(id));
@@ -148,7 +151,7 @@ public class ExcelParseTask<V> extends Task {
 			log.error("delete src file failed.");
 			return false;
 		}
-		if(!logFile.delete()){
+		if(!progressLog.delete()){
 			log.error("delete logFile failed.");
 			return false;
 		}
@@ -182,7 +185,7 @@ public class ExcelParseTask<V> extends Task {
 					TaskUtil.checkInterrupt();
 					int size = batchData.size();
 					helper.batchProcess(batchData, batchTime); 
-					TaskUtil.log(log, logFile, String.valueOf(sheetIndex), size); 
+					TaskUtil.log(log, progressLog, String.valueOf(sheetIndex), size); 
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
 					if (log.isDebugEnabled()) {
@@ -194,7 +197,7 @@ public class ExcelParseTask<V> extends Task {
 				TaskUtil.checkInterrupt();
 				int size = batchData.size();
 				helper.batchProcess(batchData, batchTime); 
-				TaskUtil.log(log, logFile, String.valueOf(sheetIndex), size); 
+				TaskUtil.log(log, progressLog, String.valueOf(sheetIndex), size); 
 				if (log.isDebugEnabled()) {
 					log.debug("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
 				}
