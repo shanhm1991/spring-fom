@@ -41,6 +41,8 @@ public class ExcelParseTask<V> extends Task {
 
 	private int batch;
 	
+	private boolean isBatchBySheet;
+	
 	protected DecimalFormat numFormat = new DecimalFormat("#.###");
 
 	protected ExcelParseHelper<V> helper;
@@ -54,33 +56,37 @@ public class ExcelParseTask<V> extends Task {
 	/**
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
+	 * @param isBatchBySheet isBatchBySheet
 	 * @param helper ExcelParseHelper
 	 */
-	public ExcelParseTask(String sourceUri, int batch, ExcelParseHelper<V> helper){
+	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet, ExcelParseHelper<V> helper){
 		super(sourceUri);
 		this.batch = batch;
+		this.isBatchBySheet = isBatchBySheet;
 		this.helper = helper;
 	}
 
 	/**
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
+	 * @param isBatchBySheet isBatchBySheet
 	 * @param helper ExcelParseHelper
 	 * @param exceptionHandler ExceptionHandler
 	 */
-	public ExcelParseTask(String sourceUri, int batch, ExcelParseHelper<V> helper, ExceptionHandler exceptionHandler) {
-		this(sourceUri, batch, helper);
+	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet, ExcelParseHelper<V> helper, ExceptionHandler exceptionHandler) {
+		this(sourceUri, batch, isBatchBySheet, helper);
 		this.exceptionHandler = exceptionHandler;
 	}
 
 	/**
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
+	 * @param isBatchBySheet isBatchBySheet
 	 * @param helper ExcelParseHelper
 	 * @param resultHandler ResultHandler
 	 */
-	public ExcelParseTask(String sourceUri, int batch, ExcelParseHelper<V> helper, ResultHandler resultHandler) {
-		this(sourceUri, batch, helper);
+	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet, ExcelParseHelper<V> helper, ResultHandler resultHandler) {
+		this(sourceUri, batch, isBatchBySheet, helper);
 		this.resultHandler = resultHandler;
 	}
 
@@ -88,12 +94,13 @@ public class ExcelParseTask<V> extends Task {
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
 	 * @param helper ExcelParseHelper
+	 * @param isBatchBySheet isBatchBySheet
 	 * @param exceptionHandler ExceptionHandler
 	 * @param resultHandler ResultHandler
 	 */
-	public ExcelParseTask(String sourceUri, int batch, 
+	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet, 
 			ExcelParseHelper<V> helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
-		this(sourceUri, batch, helper);
+		this(sourceUri, batch, isBatchBySheet, helper);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
 	}
@@ -186,11 +193,11 @@ public class ExcelParseTask<V> extends Task {
 					batchData.addAll(dataList);
 				}
 
-				if(rowData.isLastRow() || (batch > 0 && batchData.size() >= batch)){
+				if((isBatchBySheet && rowData.isLastRow()) || (batch > 0 && batchData.size() >= batch)){
 					TaskUtil.checkInterrupt();
 					int size = batchData.size();
 					helper.batchProcess(batchData, batchTime); 
-					TaskUtil.log(log, progressLog, String.valueOf(sheetIndex), size); 
+					TaskUtil.log(log, progressLog, String.valueOf(sheetIndex), rowIndex); 
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
 					log.info("finish batch[sheetName=" + sheetName + ",sheetIndex=" + sheetIndex 
@@ -201,7 +208,7 @@ public class ExcelParseTask<V> extends Task {
 				TaskUtil.checkInterrupt();
 				int size = batchData.size();
 				helper.batchProcess(batchData, batchTime); 
-				TaskUtil.log(log, progressLog, String.valueOf(sheetIndex), size); 
+				TaskUtil.log(log, progressLog, String.valueOf(sheetIndex), rowIndex); 
 				log.info("finish batch[sheetName=" + sheetName + ",sheetIndex=" + sheetIndex 
 						+ ",size=" + size + "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
 			}

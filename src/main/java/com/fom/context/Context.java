@@ -106,7 +106,12 @@ public abstract class Context implements Serializable {
 		if(element != null){
 			List<Element> list = element.elements();
 			for(Element e : list){
-				valueMap.put(e.getName(), e.getTextTrim());
+				String value = e.getTextTrim();
+				if(StringUtils.isBlank(value)){
+					valueMap.put(e.getName(), e.asXML());
+				}else{
+					valueMap.put(e.getName(), e.getTextTrim());
+				}
 			}
 			setThreadCore(XmlUtil.getInt(element, Constants.THREADCORE, 4, 1, 10));
 			setThreadMax(XmlUtil.getInt(element, Constants.THREADMAX, 20, 10, 100));

@@ -323,7 +323,7 @@ public class ZipParseTask<V> extends Task {
 					TaskUtil.checkInterrupt();
 					int size = batchData.size();
 					helper.batchProcess(batchData, batchTime); 
-					TaskUtil.log(log, progressLog, currentFileName, size); 
+					TaskUtil.log(log, progressLog, currentFileName, rowIndex); 
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
 					log.info("finish batch[file=" + currentFileName + ",size=" + size 
@@ -343,7 +343,7 @@ public class ZipParseTask<V> extends Task {
 				TaskUtil.checkInterrupt();
 				int size = batchData.size();
 				helper.batchProcess(batchData, batchTime); 
-				TaskUtil.log(log, progressLog, currentFileName, size); 
+				TaskUtil.log(log, progressLog, currentFileName, rowIndex); 
 				log.info("finish batch[file=" + currentFileName + ",size=" + size 
 						+ "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
 			}
