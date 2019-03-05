@@ -21,10 +21,10 @@ import com.fom.util.IoUtil;
  * <br>
  * <br>解析策略：
  * <br>1.检查缓存目录是否存在，没有则创建
- * <br>2.检查缓存目录下是否存在logFile（纪录任务处理进度），没有则从第0行开始读取，有则读取logFile中的处理进度n，从第n行开始
+ * <br>2.检查缓存目录下是否存在progressLog（纪录任务处理进度），没有则从第0行开始读取，有则读取progressLog中的处理进度n，从第n行开始
  * <br>3.逐行读取解析成指定的bean或者map，放入lineDatas中
- * <br>4.当lineDatas的size达到batch时（batch为0时则读取所有），进行批量处理，处理结束后纪录进度到logFile，然后重复步骤3
- * <br>5.删除源文件，删除logFile
+ * <br>4.当lineDatas的size达到batch时（batch为0时则读取所有），进行批量处理，处理结束后纪录进度到progressLog，然后重复步骤3
+ * <br>5.删除源文件，删除progressLog
  * <br>上述任何步骤失败或异常均会使任务提前失败结束
  * 
  * @see TextParseHelper
@@ -106,7 +106,7 @@ public class ParseTask<V> extends Task {
 			log.error("directory create failed: " + parentFile);
 			return false;
 		}
-		
+
 		if(!progressLog.exists()){ 
 			if(!progressLog.createNewFile()){
 				log.error("progress log create failed.");
@@ -122,7 +122,7 @@ public class ParseTask<V> extends Task {
 				log.warn("get history processed progress failed, will process from scratch.");
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -130,10 +130,8 @@ public class ParseTask<V> extends Task {
 	protected boolean exec() throws Exception {
 		long sTime = System.currentTimeMillis();
 		parse();
-		if (log.isDebugEnabled()) {
-			String size = new DecimalFormat("#.###").format(helper.getSourceSize(id));
-			log.debug("finish parse(" + size + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
-		}
+		String size = new DecimalFormat("#.###").format(helper.getSourceSize(id));
+		log.info("finish file(" + size + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
 		return true;
 	}
 
@@ -144,7 +142,7 @@ public class ParseTask<V> extends Task {
 			return false;
 		}
 		if(!progressLog.delete()){
-			log.error("delete logFile failed.");
+			log.error("delete progress log failed.");
 			return false;
 		}
 		return true;
@@ -163,6 +161,9 @@ public class ParseTask<V> extends Task {
 				}
 				rowIndex = rowData.getRowIndex();
 
+				if (log.isDebugEnabled()) {
+					log.debug("parse row[rowIndex= " + rowIndex + "],columns=" + rowData.getColumnList());
+				}
 				List<V> dataList = helper.parseRowData(rowData, batchTime);
 				if(dataList != null){
 					batchData.addAll(dataList);
@@ -175,9 +176,7 @@ public class ParseTask<V> extends Task {
 					TaskUtil.log(log, progressLog, rowIndex);
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
-					if (log.isDebugEnabled()) {
-						log.debug("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
-					}
+					log.info("finish batch[size=" + size + "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
 				}
 			}
 			if(!batchData.isEmpty()){
@@ -185,9 +184,7 @@ public class ParseTask<V> extends Task {
 				int size = batchData.size();
 				helper.batchProcess(batchData, batchTime);  
 				TaskUtil.log(log, progressLog, rowIndex);
-				if (log.isDebugEnabled()) {
-					log.debug("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
-				}
+				log.info("finish batch[size=" + size + "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
 			}
 		}finally{
 			IoUtil.close(reader);

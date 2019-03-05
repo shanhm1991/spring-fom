@@ -24,19 +24,19 @@ import com.fom.util.ZipUtil;
  * <br>
  * <br>解析策略：
  * <br>1.校验zip文件是否有效，如果无效则直接删除并且任务失败；检查缓存目录是否存在，没有则创建
- * <br>2.检查缓存目录下是否存在logFile（纪录任务处理进度）
+ * <br>2.检查缓存目录下是否存在progressLog（纪录任务处理进度）
  * <br>2.1如果存在，则判断解压目录是否存在
  * <br>2.1.1如果不存在，则进行步骤3
  * <br>2.1.2如果存在，则遍历过滤解压目录下的文件
  * <br>2.1.2.1如果过滤结果为空，则进行步骤3
- * <br>2.1.2.2如果过滤结果不为空，则先处理logFile中纪录的文件，然后逐个处理过滤的结果文件，最后进行步骤5
+ * <br>2.1.2.2如果过滤结果不为空，则先处理progressLog中纪录的文件，然后逐个处理过滤的结果文件，最后进行步骤5
  * <br>2.2如果不存在，则判读解压目录是否存在，如果不存在则直接解压，否则清空解压目录后再重新解压，然后遍历过滤解压目录下的文件
  * <br>2.2.1如果过滤结果为空，则进行步骤3
  * <br>2.2.2如果过滤结果不为空，则逐个处理过滤的结果文件，最后进行步骤5
  * <br>3.执行清除
  * <br>3.1如果解压目录存在，则清空并删除目录
  * <br>3.2删除源文件
- * <br>3.3删除logFile
+ * <br>3.3删除progressLog
  * <br>上述任何步骤失败或异常均会使任务提前失败结束
  * <br>单个文件处理的说明：同理于ParseTask中
  * 
@@ -238,7 +238,7 @@ public class ZipParseTask<V> extends Task {
 			return false;
 		}
 		if(progressLog.exists() && !progressLog.delete()){
-			log.warn("clear logFile failed.");
+			log.warn("clear progress log failed.");
 		}
 		return true;
 	}
@@ -279,7 +279,7 @@ public class ZipParseTask<V> extends Task {
 
 		if (log.isDebugEnabled()) {
 			String size = numFormat.format(file.length() / 1024.0);
-			log.debug("finish parse[" + currentFileName + "(" + size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
+			log.debug("finish file[" + currentFileName + "(" + size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
 		}
 		if(!file.delete()){
 			log.error("delete file failed: " + currentFileName); 
@@ -298,10 +298,8 @@ public class ZipParseTask<V> extends Task {
 			it.remove();
 
 			File file = new File(unzipDir + File.separator + currentFileName);
-			if (log.isDebugEnabled()) {
-				String size = numFormat.format(file.length() / 1024.0);
-				log.debug("finish file[" + currentFileName + "(" + size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
-			}
+			String size = numFormat.format(file.length() / 1024.0);
+			log.info("finish file[" + currentFileName + "(" + size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
 			if(!file.delete()){ 
 				log.error("delete file failed: " + currentFileName); 
 				return false;
@@ -328,11 +326,14 @@ public class ZipParseTask<V> extends Task {
 					TaskUtil.log(log, progressLog, currentFileName, size); 
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
-					if (log.isDebugEnabled()) {
-						log.debug("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
-					}
+					log.info("finish batch[file=" + currentFileName + ",size=" + size 
+							+ "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
 				}
 
+				if (log.isDebugEnabled()) {
+					log.debug("parse row[file=" + currentFileName + ",rowIndex= " 
+							+ rowIndex + "],columns=" + rowData.getColumnList());
+				}
 				List<V> dataList = helper.parseRowData(rowData, batchTime);
 				if(dataList != null){
 					batchData.addAll(dataList);
@@ -343,9 +344,8 @@ public class ZipParseTask<V> extends Task {
 				int size = batchData.size();
 				helper.batchProcess(batchData, batchTime); 
 				TaskUtil.log(log, progressLog, currentFileName, size); 
-				if (log.isDebugEnabled()) {
-					log.debug("批处理结束[" + size + "],耗时=" + (System.currentTimeMillis() - batchTime) + "ms");
-				}
+				log.info("finish batch[file=" + currentFileName + ",size=" + size 
+						+ "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
 			}
 		}finally{
 			IoUtil.close(reader);

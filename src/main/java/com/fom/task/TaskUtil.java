@@ -18,18 +18,14 @@ class TaskUtil {
 			throw new InterruptedException("interrupted when batchProcessLineData");
 		}
 	}
-	
-	public static void log(Logger log, File logFile, int rowIndex) throws IOException {
-		if (log.isDebugEnabled()) {
-			log.debug("process progress: rowIndex=" + rowIndex);
-		}
-		FileUtils.writeStringToFile(logFile, String.valueOf(rowIndex), false);
+
+	public static void log(Logger log, File progressLog, int rowIndex) throws IOException {
+		log.info("process progress: " + rowIndex);
+		FileUtils.writeStringToFile(progressLog, String.valueOf(rowIndex), false);
 	}
-	
-	public static void log(Logger log, File logFile, String name, int rowIndex) throws IOException {
-		if (log.isDebugEnabled()) {
-			log.debug("process progress: [" + name + "]rowIndex=" + rowIndex);
-		}
-		FileUtils.writeStringToFile(logFile, name + "\n" + rowIndex, false);
+
+	public static void log(Logger log, File progressLog, String name, int rowIndex) throws IOException {
+		log.info("process progress: " + name + ", " + rowIndex);
+		FileUtils.writeStringToFile(progressLog, name + "\n" + rowIndex, false);
 	}
 }
