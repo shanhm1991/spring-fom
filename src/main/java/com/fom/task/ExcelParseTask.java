@@ -42,7 +42,7 @@ public class ExcelParseTask<V> extends Task {
 
 	private int batch;
 
-	private ExcelParseHelper<V> helper;
+	protected ExcelParseHelper<V> helper;
 
 	protected int sheetIndex = 0;
 
