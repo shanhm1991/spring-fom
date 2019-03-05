@@ -39,8 +39,9 @@ import com.fom.util.IoUtil;
  */
 public class ExcelParseTask<V> extends Task {
 
-
 	private int batch;
+	
+	protected DecimalFormat numFormat = new DecimalFormat("#.###");
 
 	protected ExcelParseHelper<V> helper;
 
@@ -138,7 +139,7 @@ public class ExcelParseTask<V> extends Task {
 		long sTime = System.currentTimeMillis();
 
 		parse();
-		String size = new DecimalFormat("#.###").format(helper.getSourceSize(id));
+		String size = numFormat.format(helper.getSourceSize(id) / 1024.0);
 		log.info("finish excel(" + size + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
 		return true;
 	}

@@ -130,7 +130,7 @@ public class ParseTask<V> extends Task {
 	protected boolean exec() throws Exception {
 		long sTime = System.currentTimeMillis();
 		parse();
-		String size = new DecimalFormat("#.###").format(helper.getSourceSize(id));
+		String size = new DecimalFormat("#.###").format(helper.getSourceSize(id) / 1024.0);
 		log.info("finish file(" + size + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
 		return true;
 	}

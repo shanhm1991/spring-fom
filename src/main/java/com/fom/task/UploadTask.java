@@ -104,7 +104,7 @@ public class UploadTask extends Task {
 	@Override
 	protected boolean exec() throws Exception {
 		long sTime = System.currentTimeMillis();
-		String size = new DecimalFormat("#.###").format(file.length());
+		String size = new DecimalFormat("#.###").format(file.length() / 1024.0);
 		int code = helper.upload(file, destUri);
 		if(code < 200 || code > 207){
 			log.error("upload failed, code=" + code);
