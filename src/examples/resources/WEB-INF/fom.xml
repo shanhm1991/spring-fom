@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- 加载优先级 xml > 注解 > 默认值 -->
+<!-- 加载优先级：cache > xml > 注解 > 默认值 -->
 <fom>
 
 	<!-- 配置包名，多值逗号分隔，启动时加载所有包下面有@FomContext的context -->
