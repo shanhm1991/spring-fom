@@ -6,9 +6,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -27,10 +30,12 @@ import com.fom.util.IoUtil;
  */
 public class ExcelReader implements Reader {
 
+	private static final Logger LOG = Logger.getLogger(ExcelReader.class);
+
 	public static final String TYPE_XLS = "xls";
 
 	public static final String TYPE_XLSX = "xlsx";
-
+	
 	private InputStream inputStream;
 
 	private String type;
@@ -38,17 +43,21 @@ public class ExcelReader implements Reader {
 	private Workbook workbook = null;
 
 	private int sheetCount;
-
+	
+	private Map<String, Sheet> sheetMap = new HashMap<>();
+	
+	private List<String> sheetRangeList = new ArrayList<>();
+	
+	private int rangeIndex = 0;
+	
 	private Sheet sheet; 
-
-	private int sheetIndex = 0;
 
 	private String sheetName;
 
 	private int rowIndex = 0;
 
 	private int rowCount;
-
+	
 	/**
 	 * 
 	 * @param sourceUri sourceUri
@@ -101,26 +110,32 @@ public class ExcelReader implements Reader {
 			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx");
 		}
 		sheetCount = workbook.getNumberOfSheets();
-		sheet = workbook.getSheetAt(sheetIndex);
-		sheetName = sheet.getSheetName();
-		rowCount = sheet.getPhysicalNumberOfRows();
+		for(int i = 0;i < sheetCount;i++){
+			Sheet shee = workbook.getSheetAt(i);
+			sheetRangeList.add(shee.getSheetName());
+			sheetMap.put(shee.getSheetName(), shee);
+		}
+		sheetRangeList = reRangeSheet(sheetRangeList);
+		initSheet();
 	}
 
 	@Override
 	public RowData readRow() {
 		while(true){
-			if(!shouldSheetProcess(sheetIndex, sheetName)){
-				sheetIndex++;
-				if(sheetIndex >= sheetCount){
+			if(sheet == null){
+				return null;
+			}
+			if(!shouldSheetProcess(rangeIndex, sheetName)){
+				if(++rangeIndex >= sheetRangeList.size()){
 					return null;
 				}
 				initSheet();
 			}else{
 				if(rowIndex >= rowCount){
-					if(sheetIndex >= sheetCount - 1){
+					if(rangeIndex >= sheetRangeList.size() - 1){
 						return null;
 					}else{
-						sheetIndex++;
+						rangeIndex++;
 						initSheet();
 						continue;
 					}
@@ -133,9 +148,8 @@ public class ExcelReader implements Reader {
 					for(int i = 0;i < cellCount;i++){
 						list.add(getCellValue(row.getCell(i)));
 					}
-
 					RowData rowData = new RowData(rowIndex - 1, list);
-					rowData.setSheetIndex(sheetIndex); 
+					rowData.setSheetIndex(rangeIndex); 
 					rowData.setSheetName(sheetName); 
 					rowData.setLastRow(rowIndex == rowCount); 
 					return rowData;
@@ -145,15 +159,20 @@ public class ExcelReader implements Reader {
 	}
 
 	private void initSheet(){
-		sheet = workbook.getSheetAt(sheetIndex);
-		sheetName = sheet.getSheetName();
 		rowIndex = 0;
+		sheetName = sheetRangeList.get(rangeIndex); 
+		while((sheet = sheetMap.get(sheetName)) == null){
+			if(++rangeIndex >= sheetRangeList.size()){
+				sheet = null;
+				return;
+			}
+		}
 		rowCount = sheet.getPhysicalNumberOfRows();
 	}
 
 	private String getCellValue(Cell cell) {
 		if (cell == null) {
-			return "null";
+			return "";
 		}
 
 		switch (cell.getCellType()) {
@@ -170,15 +189,21 @@ public class ExcelReader implements Reader {
 				try {
 					return cell.getRichStringCellValue().toString();
 				} catch (IllegalStateException e2) {
+					LOG.error("Excel parse error: sheet=" + cell.getSheet().getSheetName() 
+							+ ",row=" + cell.getRowIndex() + ",column=" + cell.getColumnIndex(), e2);
 					return "error";
 				}
 			} catch (Exception e) {
-				return "error";
+				LOG.error("Excel parse error: sheet=" + cell.getSheet().getSheetName() 
+						+ ",row=" + cell.getRowIndex() + ",column=" + cell.getColumnIndex(), e);
+				return "";
 			}
 		case BLANK:
 			return "";
 		case ERROR:
-			return "error";
+			LOG.error("Excel parse error: sheet=" + cell.getSheet().getSheetName() 
+					+ ",row=" + cell.getRowIndex() + ",column=" + cell.getColumnIndex());
+			return "";
 		default:
 			return "";
 		}
@@ -216,11 +241,20 @@ public class ExcelReader implements Reader {
 
 	/**
 	 * 
-	 * @param sheetIndex sheetIndex
+	 * @param sheetRangeIndex sheetRangeIndex
 	 * @param sheetName sheetName
 	 * @return boolean
 	 */
-	protected boolean shouldSheetProcess(int sheetIndex, String sheetName) {
+	protected boolean shouldSheetProcess(int sheetRangeIndex, String sheetName) {
 		return true;
+	}
+	
+	/**
+	 * sheet重新排序
+	 * @param sheetRangeList 原始sheet顺序
+	 * @return 重排序后的sheetlist
+	 */
+	protected List<String> reRangeSheet(List<String> sheetRangeList) {
+		return sheetRangeList;
 	}
 }

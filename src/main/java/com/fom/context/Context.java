@@ -787,6 +787,7 @@ public abstract class Context implements Serializable {
 		pool.shutdown();
 
 		if(waitTask()){
+			onCompletion();
 			synchronized (name.intern()) {
 				state = stopped;
 			}
@@ -833,6 +834,13 @@ public abstract class Context implements Serializable {
 	 * @throws Exception Exception
 	 */
 	protected abstract Task createTask(String taskId) throws Exception;
+	
+	/**
+	 * 一次性批量任务全部完成时执行的操作
+	 */
+	protected void onCompletion() {
+		
+	}
 
 	private void cleanFutures(){
 		Iterator<Map.Entry<String, TimedFuture<Result>>> it = FUTUREMAP.entrySet().iterator();
