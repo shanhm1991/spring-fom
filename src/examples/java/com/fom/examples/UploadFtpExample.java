@@ -43,7 +43,7 @@ public class UploadFtpExample extends Context {
 	}
  
 	@Override
-	protected Task createTask(String taskId) throws Exception {
+	protected Task cronBatchSubmitTask(String taskId) throws Exception {
 		Thread.sleep(5000); 
 		
 		UploadHelper helper = new FtpHelper(hostname, port, user, passwd);

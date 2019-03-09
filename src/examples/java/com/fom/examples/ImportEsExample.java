@@ -71,7 +71,7 @@ public class ImportEsExample extends Context {
 	}
 
 	@Override
-	protected Task createTask(String taskId) throws Exception { 
+	protected Task cronBatchSubmitTask(String taskId) throws Exception { 
 		ImportEsExampleHelper helper = new ImportEsExampleHelper(getName(), esIndex, esType); 
 		return new ImportEsExampleParser(taskId, batch, helper, esIndex, esType,  esJson);
 	}

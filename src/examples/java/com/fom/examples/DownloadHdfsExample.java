@@ -48,7 +48,7 @@ public class DownloadHdfsExample extends Context {
 	}
 
 	@Override
-	protected Task createTask(String taskId) throws Exception {  
+	protected Task cronBatchSubmitTask(String taskId) throws Exception {  
 		DownloadHelper helper = new HdfsHelper(masterUrl, slaveUrl);
 		String sourceName = new File(taskId).getName();
 		return new DownloadTask(taskId, sourceName, dest, false, true, helper);

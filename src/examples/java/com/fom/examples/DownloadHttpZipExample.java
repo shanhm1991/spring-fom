@@ -35,7 +35,7 @@ public class DownloadHttpZipExample extends Context {
 	}
 
 	@Override
-	protected Task createTask(String taskId) throws Exception {
+	protected Task cronBatchSubmitTask(String taskId) throws Exception {
 		Set<String> set = new HashSet<String>();
 		set.add("http://localhost:4040/fom/index.html");
 		set.add("http://localhost:4040/fom/js/datatables.js");

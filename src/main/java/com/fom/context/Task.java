@@ -150,6 +150,14 @@ public abstract class Task implements Callable<Result> {
 	}
 	
 	/**
+	 * 获取任务id
+	 * @return id
+	 */
+	public final String getId() {
+		return id;
+	}
+	
+	/**
 	 * 获取任务创建时间
 	 * @return createTime
 	 */

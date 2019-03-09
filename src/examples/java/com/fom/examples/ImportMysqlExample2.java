@@ -54,7 +54,7 @@ public class ImportMysqlExample2 extends Context {
 	}
 
 	@Override
-	protected Task createTask(String taskId) throws Exception { 
+	protected Task cronBatchSubmitTask(String taskId) throws Exception { 
 		ImportMysqlExample2Helper helper = new ImportMysqlExample2Helper(getName());
 		return new ParseTask<Map<String, Object>>(taskId, batch, helper);
 	}

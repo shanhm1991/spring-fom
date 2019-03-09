@@ -53,7 +53,7 @@ public class ImportMysqlExample1 extends Context {
 	}
 
 	@Override
-	protected Task createTask(String taskId) throws Exception { 
+	protected Task cronBatchSubmitTask(String taskId) throws Exception { 
 		ImportMysqlExample1Helper helper = new ImportMysqlExample1Helper(getName());
 		return new ParseTask<ExampleBean>(taskId, batch, helper);
 	}

@@ -23,6 +23,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -620,7 +621,9 @@ public abstract class Context implements Serializable {
 				case waiting:
 				case sleeping:
 					state = stopping;
-					innerThread.interrupt();//尽快响应
+					if(innerThread.isAlive()){
+						innerThread.interrupt();//尽快响应
+					}
 					map.put("result", true);
 					map.put("msg", "context[" + name + "] is stopping.");
 					log.info("context[" + name + "] is stopping."); 
@@ -706,56 +709,53 @@ public abstract class Context implements Serializable {
 
 				cleanFutures();
 
-				Set<String> idSet = null;
 				try {
-					idSet = getTaskIdSet();
-				} catch (Exception e) {
-					log.error("", e); 
-				}
-
-				if(idSet != null){
-					for (String taskId : idSet){
-						if(isTaskAlive(taskId)){ 
-							if (log.isDebugEnabled()) {
-								log.debug("task[" + taskId + "] is still alive, create canceled"); 
+					Set<Task> tasks = schedulGetBatchTasks();
+					if(tasks != null){
+						for (Task task : tasks){
+							String taskId = task.getId();
+							if(isTaskAlive(taskId)){ 
+								if (log.isDebugEnabled()) {
+									log.debug("task[" + taskId + "] is still alive, create canceled"); 
+								}
+								continue;
 							}
-							continue;
-						}
-						try {
-							Task task = createTask(taskId);
+							
+							
 							task.setContext(Context.this); 
 							FUTUREMAP.put(taskId, pool.submit(task)); 
-							log.info("task[" + taskId + "] created"); 
-						} catch (RejectedExecutionException e) {
-							log.warn("task[" + taskId + "] submit rejected, will try in next time.");
-							break;
-						}catch (Exception e) {
-							log.error("task[" + taskId + "] create failed", e); 
+							log.info("task[" + taskId + "] submited."); 
 						}
 					}
+				} catch (RejectedExecutionException e) {
+					log.warn("task submit rejected.");
+				} catch (Exception e){
+					log.error("get task failed", e);
 				}
 
-				//默认只执行一次，提交后等待任务线程完成
-				if(cronExpression == null){
-					terminate();
+				if(cronExpression != null) {
+					Date nextTime = cronExpression.getTimeAfter(new Date(execTime)); 
+					long waitTime = nextTime.getTime() - System.currentTimeMillis();
+					//如果设定周期较短，而执行时间较长
+					if(waitTime > 0){
+						synchronized (name.intern()) {
+							state = sleeping;
+						}
+						synchronized (this) {
+							try {
+								wait(waitTime);
+							} catch (InterruptedException e) {
+								//借助interrupted标记来重启
+								log.info("sleep interrupted."); 
+							}
+						}
+					}
+				}else{
+					boolean stopWithNoCron = true; //TODO
+					if(stopWithNoCron){
+						terminate();
+					}
 					return;
-				}
-
-				Date nextTime = cronExpression.getTimeAfter(new Date(execTime)); 
-				long waitTime = nextTime.getTime() - System.currentTimeMillis();
-				//如果设定周期较短，而执行时间较长
-				if(waitTime > 0){
-					synchronized (name.intern()) {
-						state = sleeping;
-					}
-					synchronized (this) {
-						try {
-							wait(waitTime);
-						} catch (InterruptedException e) {
-							//借助interrupted标记来重启
-							log.info("sleep interrupted."); 
-						}
-					}
 				}
 			}
 		}
@@ -787,7 +787,7 @@ public abstract class Context implements Serializable {
 		pool.shutdown();
 
 		if(waitTask()){
-			onCompletion();
+			onBatchTaskComplete();
 			synchronized (name.intern()) {
 				state = stopped;
 			}
@@ -819,27 +819,42 @@ public abstract class Context implements Serializable {
 			}
 		}
 	}
-
-	/**
-	 * 返回id列表，context将根据每个id创建一个Task提交到线程池
-	 * @return set
-	 * @throws Exception Exception
-	 */
-	protected abstract Set<String> getTaskIdSet() throws Exception;
-
-	/**
-	 * 根据id创建一个Task的具体实例
-	 * @param taskId taskId
-	 * @return Task
-	 * @throws Exception Exception
-	 */
-	protected abstract Task createTask(String taskId) throws Exception;
 	
+	private AtomicInteger submits = new AtomicInteger(0); //TODO 不序列化
+	
+	/**
+	 * 提交任务
+	 * @param task task
+	 * @return TimedFuture
+	 * @throws Exception Exception
+	 */
+	public final TimedFuture<Result> submit(Task task) throws Exception {
+		if(submits.incrementAndGet() % 1000 == 0){
+			
+		}
+		
+		String taskId = task.getId();
+		task.setContext(Context.this); 
+		TimedFuture<Result> future = pool.submit(task);
+		FUTUREMAP.put(taskId, future); 
+		log.info("task[" + taskId + "] submited."); 
+		return future; 
+	}
+
+	/**
+	 * 周期性批量提交任务
+	 * @return task set
+	 * @throws Exception Exception
+	 */
+	protected Set<Task> schedulGetBatchTasks() throws Exception {
+		return null;
+	}
+
 	/**
 	 * 一次性批量任务全部完成时执行的操作
 	 */
-	protected void onCompletion() {
-		
+	protected void onBatchTaskComplete() {
+
 	}
 
 	private void cleanFutures(){

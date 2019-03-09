@@ -35,7 +35,7 @@ public class DownloadHttpExample extends Context {
 	}
  
 	@Override
-	protected Task createTask(String taskId) throws Exception {
+	protected Task cronBatchSubmitTask(String taskId) throws Exception {
 		String destName = new File(taskId).getName();
 		return new DownloadTask(taskId, destName, dest, false, true, new HttpHelper());
 	}

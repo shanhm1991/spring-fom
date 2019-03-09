@@ -37,7 +37,7 @@ public class UploadHdfsExample extends Context {
 	}
 
 	@Override
-	protected Task createTask(String taskId) throws Exception { 
+	protected Task cronBatchSubmitTask(String taskId) throws Exception { 
 		Thread.sleep(10000); 
 		
 		UploadHelper helper = new HdfsHelper(masterUrl, slaveUrl);

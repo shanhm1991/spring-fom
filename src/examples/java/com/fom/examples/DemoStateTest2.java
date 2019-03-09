@@ -25,7 +25,7 @@ public class DemoStateTest2 extends Context {
 	}
 
 	@Override
-	protected Task createTask(String taskId) throws Exception {
+	protected Task cronBatchSubmitTask(String taskId) throws Exception {
 		
 		return new Task(taskId){
 

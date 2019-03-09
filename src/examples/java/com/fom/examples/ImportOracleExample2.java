@@ -54,7 +54,7 @@ public class ImportOracleExample2 extends Context{
 	}
 
 	@Override
-	protected Task createTask(String taskId) throws Exception { 
+	protected Task cronBatchSubmitTask(String taskId) throws Exception { 
 		String subPettern = getString("zipEntryPattern", "");
 		ImportOracleExample2Helper helper = new ImportOracleExample2Helper(getName(), subPettern);
 		return new ZipParseTask<Map<String, Object>>(taskId, batch, helper);

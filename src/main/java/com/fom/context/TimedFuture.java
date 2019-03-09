@@ -9,7 +9,7 @@ import java.util.concurrent.FutureTask;
  *
  * @param <T> 结果类型
  */
-class TimedFuture<T> extends FutureTask<T> {
+public class TimedFuture<T> extends FutureTask<T> {
 	
 	private Task task;
 

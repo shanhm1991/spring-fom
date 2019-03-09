@@ -45,7 +45,7 @@ public class DownloadFtpZipExample extends Context {
 	}
 
 	@Override
-	protected Task createTask(String taskId) throws Exception {
+	protected Task cronBatchSubmitTask(String taskId) throws Exception {
 		ZipDownloadHelper helper = new FtpHelper(hostname, port, user, passwd);
 		Set<String> set = new HashSet<String>();
 		set.add("/ftp/test1.txt");

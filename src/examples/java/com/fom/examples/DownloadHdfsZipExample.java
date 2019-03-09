@@ -90,7 +90,7 @@ public class DownloadHdfsZipExample extends Context {
 	}
 
 	@Override
-	protected Task createTask(String taskId) throws Exception {
+	protected Task cronBatchSubmitTask(String taskId) throws Exception {
 		HdfsHelper helper = new HdfsHelper(masterUrl, slaveUrl);
 		Set<String> pathList = HdfsUtil.list(masterUrl, slaveUrl, new Path(taskId), new PathFilter(){
 			@Override

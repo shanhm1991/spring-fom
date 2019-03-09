@@ -40,7 +40,7 @@ public class DownloadFtpExample extends Context {
 	}
 
 	@Override
-	protected Task createTask(String taskId) throws Exception { 
+	protected Task cronBatchSubmitTask(String taskId) throws Exception { 
 		String hostname = getValue("hostname");
 		int port = getInt("port", 0);
 		String user = getValue("user");

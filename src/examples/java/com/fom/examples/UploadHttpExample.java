@@ -30,7 +30,7 @@ public class UploadHttpExample extends Context {
 	}
 
 	@Override
-	protected Task createTask(String taskId) throws Exception { 
+	protected Task cronBatchSubmitTask(String taskId) throws Exception { 
 		Thread.sleep(15000); 
 		
 		return new UploadTask(taskId, "http://localhost:4040/fom/", false, new HttpHelper());
