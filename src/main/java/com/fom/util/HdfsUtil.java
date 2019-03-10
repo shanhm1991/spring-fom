@@ -3,9 +3,9 @@ package com.fom.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -93,12 +93,12 @@ public class HdfsUtil {
 	 * @param slaveUrl  副节点的ip:port
 	 * @param path path
 	 * @param filter PathFilter
-	 * @return set 
+	 * @return list 
 	 * @throws Exception Exception
 	 */
-	public static Set<String> list(String masterUrl, String slaveUrl, Path path, PathFilter filter) throws Exception {
+	public static List<String> list(String masterUrl, String slaveUrl, Path path, PathFilter filter) throws Exception {
 		FileSystem fs = get(masterUrl, slaveUrl);
-		Set<String> set = new HashSet<>();
+		List<String> list = new LinkedList<>();
 		FileStatus[] statusArray = null;   
 		if(filter == null){
 			statusArray = fs.listStatus(path);
@@ -107,12 +107,12 @@ public class HdfsUtil {
 		}
 
 		if(ArrayUtils.isEmpty(statusArray)){
-			return set;
+			return list;
 		}
 		for(FileStatus status : statusArray){
-			set.add(status.getPath().toString());
+			list.add(status.getPath().toString());
 		}
-		return set;
+		return list;
 	}
 
 	/**

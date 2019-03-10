@@ -51,12 +51,12 @@ public class FomServiceImpl implements FomService {
 		for(Entry<String, Context> entry : ContextManager.contextMap.entrySet()){
 			Context context = entry.getValue();
 			Map<String,String> cmap = new HashMap<>();
-			cmap.putAll(context.valueMap); 
+			cmap.putAll(context.config.valueMap); 
 
 			cmap.put("name", context.name);
 			cmap.put("state", context.getState().name());
-			if(!cmap.containsKey(Constants.CRON)){
-				cmap.put(Constants.CRON, ""); 
+			if(!cmap.containsKey(ContextConfig.CRON)){
+				cmap.put(ContextConfig.CRON, ""); 
 			}
 			cmap.put("execTime", format.format(context.execTime));
 			cmap.put("loadTime", format.format(context.loadTime));
@@ -84,33 +84,33 @@ public class FomServiceImpl implements FomService {
 			return map;
 		} 
 		Map<String,String> bakMap = new HashMap<>();
-		bakMap.putAll(context.valueMap);
+		bakMap.putAll(context.config.valueMap);
 
 		JSONObject jsonObject = JSONObject.parseObject(json);  
 		for(Entry<String, Object> entry : jsonObject.entrySet()){
 			String key = entry.getKey();
 			String value = String.valueOf(entry.getValue());
 			switch(key){
-			case Constants.QUEUESIZE:
-				context.setQueueSize(Integer.parseInt(value)); break;
-			case Constants.THREADCORE:
-				context.setThreadCore(Integer.parseInt(value)); break;
-			case Constants.THREADMAX:
-				context.setThreadMax(Integer.parseInt(value)); break;
-			case Constants.ALIVETIME:
-				context.setAliveTime(Integer.parseInt(value)); break;
-			case Constants.OVERTIME:
-				context.setOverTime(Integer.parseInt(value)); break;
-			case Constants.CANCELLABLE:
-				context.setCancellable(Boolean.parseBoolean(value)); break;
-			case Constants.CRON:
-				context.setCron(value); break;
+			case ContextConfig.QUEUESIZE:
+				context.config.setQueueSize(Integer.parseInt(value)); break;
+			case ContextConfig.THREADCORE:
+				context.config.setThreadCore(Integer.parseInt(value)); break;
+			case ContextConfig.THREADMAX:
+				context.config.setThreadMax(Integer.parseInt(value)); break;
+			case ContextConfig.ALIVETIME:
+				context.config.setAliveTime(Integer.parseInt(value)); break;
+			case ContextConfig.OVERTIME:
+				context.config.setOverTime(Integer.parseInt(value)); break;
+			case ContextConfig.CANCELLABLE:
+				context.config.setCancellable(Boolean.parseBoolean(value)); break;
+			case ContextConfig.CRON:
+				context.config.setCron(value); break;
 			default:
-				context.setValue(key, value);
+				context.config.put(key, value);
 			}
 		}
 
-		if(context.valueMap.equals(bakMap)){ 
+		if(context.config.valueMap.equals(bakMap)){ 
 			map.put("result", false);
 			map.put("msg", "context[" + name + "] has nothing changed.");
 			return map;
@@ -445,7 +445,7 @@ public class FomServiceImpl implements FomService {
 			map.put("size", 0);
 			return map;
 		} 
-		Map<String,Object> map = context.waitingDetail();
+		Map<String,Object> map = context.getWaitingDetail();
 		map.put("size", map.size());
 		return map;
 	}
@@ -544,6 +544,14 @@ public class FomServiceImpl implements FomService {
 		PrintWriter write = resp.getWriter();
 		write.write(json);
 		write.flush();
+	}
+	
+	public TimedFuture<Result> submitTask(String contextName, Task task) throws Exception { 
+		Context context = ContextManager.contextMap.get(contextName);
+		if(context == null){
+			throw new IllegalArgumentException("context[" + contextName + "] not exist.");
+		} 
+		return context.submit(task);
 	}
 	
 }

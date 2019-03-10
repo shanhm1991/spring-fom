@@ -21,6 +21,8 @@ public @interface FomContext {
 	public String remark() default "";
 
 	public String cron() default "";
+	
+	public boolean stopWithNoCron() default false;
 
 	public int threadCore() default 4;
 

@@ -8,7 +8,7 @@
 	</settings>
 	
 	<typeAliases>
-		<typeAlias alias="exampleBean" type="com.fom.examples.bean.ExampleBean" />
+		<typeAlias alias="exampleBean" type="com.examples.bean.ExampleBean" />
 	</typeAliases>
 
 	<mappers>

@@ -25,7 +25,7 @@
 		<property name="configLocation" value="WEB-INF/dataSource/mysql_example_mybatis.xml" />
 	</bean>
 
-	<bean id="mysqlExampleDao" class="com.fom.examples.dao.MysqlExamplesDaoImpl">
+	<bean id="mysqlExampleDao" class="com.examples.dao.MysqlExamplesDaoImpl">
 		<property name="sqlSessionFactory" ref="mysqlExampleSqlSessionFactory" />
 	</bean>
 </beans>

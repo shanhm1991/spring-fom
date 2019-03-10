@@ -18,15 +18,10 @@ public class ContextTest extends Context {
 	private static final long serialVersionUID = -4648914163608513224L;
 	
 	@Override
-	protected Set<String> getTaskIdSet() throws Exception {
-		Set<String> set = new HashSet<String>();
-		set.add("demoTask");
+	protected Set<Task> scheduleBatchTasks() throws Exception {
+		Set<Task> set = new HashSet<>();
+		set.add(new SelfTask("demoTask"));
 		return set;
-	}
-
-	@Override
-	protected Task cronBatchSubmitTask(String taskId) throws Exception {
-		return new SelfTask(taskId);
 	}
 	
 	private static class SelfTask extends Task {

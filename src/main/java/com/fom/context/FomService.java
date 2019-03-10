@@ -155,4 +155,14 @@ public interface FomService {
 	 * @throws Exception Exception
 	 */
 	void dataDownload(String name, HttpServletResponse resp) throws Exception;
+	
+	/**
+	 * 提交task到对应的context
+	 * @param contextName contextName
+	 * @param task task
+	 * @return TimedFuture
+	 * @throws Exception Exception
+	 */
+	TimedFuture<Result> submitTask(String contextName, Task task) throws Exception;
+	
 }

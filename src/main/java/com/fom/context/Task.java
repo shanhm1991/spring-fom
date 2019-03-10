@@ -182,7 +182,7 @@ public abstract class Task implements Callable<Result> {
 	}
 	
 	/**
-	 * 只有在context中使用时才会赋值，否则将为null，
+	 * 只有在context中使用时才会赋值，否则将为null
 	 */
 	protected final String getContextName(){
 		if(context == null){
@@ -192,55 +192,14 @@ public abstract class Task implements Callable<Result> {
 	}
 	
 	/**
-	 * 获取context配置值
-	 * @param key key
-	 * @param defaultValue defaultValue
-	 * @return 配置值
+	 * 只有在context中使用时才会赋值，否则将为null
+	 * @return ContextConfig
 	 */
-	protected final String getContextValue(String key, String defaultValue){
+	protected final ContextConfig getContextConfig(){
 		if(context == null){
-			return defaultValue;
+			return null;
 		}
-		return context.getString(key, defaultValue);
-	}
-	
-	/**
-	 * 获取context配置int值
-	 * @param key key
-	 * @param defaultValue defaultValue
-	 * @return 配置值
-	 */
-	protected final int getContextIntValue(String key, int defaultValue){
-		if(context == null){
-			return defaultValue;
-		}
-		return context.getInt(key, defaultValue);
-	}
-	
-	/**
-	 * 获取context配置long值
-	 * @param key key
-	 * @param defaultValue defaultValue
-	 * @return 配置值
-	 */
-	protected final long getContextLongValue(String key, long defaultValue){
-		if(context == null){
-			return defaultValue;
-		}
-		return context.getLong(key, defaultValue);
-	}
-
-	/**
-	 * 获取context配置boolean值
-	 * @param key key
-	 * @param defaultValue defaultValue
-	 * @return 配置值
-	 */
-	protected final boolean getContextBooleanValue(String key, boolean defaultValue){
-		if(context == null){
-			return defaultValue;
-		}
-		return context.getBoolean(key, defaultValue);
+		return context.config;
 	}
 	
 	@Override

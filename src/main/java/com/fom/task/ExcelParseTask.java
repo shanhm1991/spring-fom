@@ -228,5 +228,10 @@ public class ExcelParseTask<V> extends Task {
 			return sheetIndex >= ExcelParseTask.this.sheetIndex
 					&& helper.sheetFilter(sheetIndex, sheetName); 
 		}
+		
+		@Override
+		protected List<String> reRangeSheet(List<String> sheetRangeList) {
+			return helper.reRangeSheet(sheetRangeList);
+		}
 	}
 }

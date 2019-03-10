@@ -1,6 +1,7 @@
 package com.fom.task.helper;
 
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * 
@@ -15,19 +16,26 @@ public interface ExcelParseHelper<V> extends ParseHelper<V> {
 	 * @return InputStream
 	 * @throws Exception Exception
 	 */
-	public InputStream getInputStream(String sourceUri) throws Exception;
-	
+	InputStream getInputStream(String sourceUri) throws Exception;
+
 	/**
 	 * Excel类型  xls or xlsx
 	 * @return  xls or xlsx
 	 */
-	public String getExcelType();
-	
+	String getExcelType();
+
 	/**
 	 * 过滤需要处理的sheet页
 	 * @param sheetIndex sheetIndex
 	 * @param sheetName sheetName
 	 * @return boolean
 	 */
-	public boolean sheetFilter(int sheetIndex, String sheetName);
+	boolean sheetFilter(int sheetIndex, String sheetName);
+
+	/**
+	 * 自定义sheet处理顺序
+	 * @param sheetRangeList 原sheet顺序
+	 * @return 重排序后sheet顺序
+	 */
+	List<String> reRangeSheet(List<String> sheetRangeList);
 }
