@@ -32,7 +32,7 @@ import com.fom.log.LoggerFactory;
  * @author shanhm
  *
  */
-public abstract class Context implements Serializable {
+public class Context implements Serializable {
 
 	private static final long serialVersionUID = 9154119563307298882L;
 

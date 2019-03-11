@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -143,7 +145,7 @@ public class ExcelReader implements Reader {
 					Row row = sheet.getRow(rowIndex);
 					rowIndex++;
 
-					int cellCount = row.getPhysicalNumberOfCells();
+					int cellCount = row.getLastCellNum();
 					List<String> list = new ArrayList<>();
 					for(int i = 0;i < cellCount;i++){
 						list.add(getCellValue(row.getCell(i)));
@@ -177,7 +179,13 @@ public class ExcelReader implements Reader {
 
 		switch (cell.getCellType()) {
 		case NUMERIC:
-			return double2String(cell.getNumericCellValue());
+			double value = cell.getNumericCellValue();
+			if(DateUtil.isCellDateFormatted(cell)){
+				Date date = DateUtil.getJavaDate(value);
+				return String.valueOf(date.getTime());
+			}else{
+				return double2String(value);
+			}
 		case STRING:
 			return cell.getStringCellValue();
 		case BOOLEAN:

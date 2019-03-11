@@ -119,7 +119,8 @@
 								<include>application.properties</include>
 							</includes>
 							<excludes>
-								<exclude>com/fom/examples/**</exclude>
+								<exclude>com/examples/**</exclude>
+								<exclude>com/demo/**</exclude>
 							</excludes>
 						</configuration>
 					</execution>

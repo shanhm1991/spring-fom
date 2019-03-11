@@ -74,6 +74,14 @@ public abstract class Task implements Callable<Result> {
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
 	}
+	
+	public void setExceptionHandler(ExceptionHandler exceptionHandler) {
+		this.exceptionHandler = exceptionHandler;
+	}
+
+	public void setResultHandler(ResultHandler resultHandler) {
+		this.resultHandler = resultHandler;
+	}
 
 	@Override
 	public final Result call() {  
