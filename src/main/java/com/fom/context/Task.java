@@ -103,9 +103,9 @@ public abstract class Task implements Callable<Result> {
 		try {
 			result.success = beforeExec() && exec() && afterExec();
 		} catch(Throwable e) {
+			log.error("", e); 
 			result.success = false;
 			result.throwable = e;
-			log.error(e); 
 			if(exceptionHandler != null){
 				exceptionHandler.handle(e); 
 			}
@@ -116,8 +116,8 @@ public abstract class Task implements Callable<Result> {
 			try{
 				resultHandler.handle(result);
 			}catch(Exception e){
+				log.error("", e); 
 				result.success = false;
-				log.error(e);
 				if(result.throwable == null){
 					result.throwable = e;
 				}

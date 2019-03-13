@@ -12,7 +12,7 @@ import com.fom.pool.handler.JdbcHandler;
 import com.fom.task.helper.TextZipParseHelper;
 import com.fom.task.reader.Reader;
 import com.fom.task.reader.RowData;
-import com.fom.task.reader.TextReader;
+import com.fom.task.reader.TxtReader;
 import com.fom.util.PatternUtil;
 
 /**
@@ -39,7 +39,7 @@ public class ImportOracleExample2Helper implements TextZipParseHelper<Map<String
 
 	@Override
 	public Reader getReader(String sourceUri) throws Exception {
-		return new TextReader(sourceUri, "#");
+		return new TxtReader(sourceUri, "#");
 	}
 
 	@Override

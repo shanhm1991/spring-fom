@@ -10,7 +10,7 @@ import java.util.Set;
 import com.fom.context.Context;
 import com.fom.context.ContextUtil;
 import com.fom.context.Task;
-import com.fom.task.ZipParseTask;
+import com.fom.task.TxtZipParseTask;
 import com.fom.util.FileUtil;
 import com.fom.util.PatternUtil;
 
@@ -58,7 +58,7 @@ public class ImportOracleExample2 extends Context{
 		String subPettern = config.getString("zipEntryPattern", "");
 		ImportOracleExample2Helper helper = new ImportOracleExample2Helper(getName(), subPettern);
 		for(String uri : list){
-			set.add(new ZipParseTask<Map<String, Object>>(uri, batch, helper));
+			set.add(new TxtZipParseTask<Map<String, Object>>(uri, batch, helper));
 		}
 		return set;
 	}

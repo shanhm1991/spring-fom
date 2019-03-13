@@ -1,7 +1,5 @@
 package com.fom.task;
 
-import java.io.File;
-import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -9,7 +7,6 @@ import org.apache.commons.io.FileUtils;
 
 import com.fom.context.ExceptionHandler;
 import com.fom.context.ResultHandler;
-import com.fom.task.helper.TxtParseHelper;
 import com.fom.task.reader.Reader;
 import com.fom.task.reader.RowData;
 import com.fom.util.IoUtil;
@@ -25,8 +22,6 @@ import com.fom.util.IoUtil;
  * <br>5.删除源文件，删除progressLog
  * <br>上述任何步骤失败或异常均会使任务提前失败结束
  * 
- * @see TxtParseHelper
- * 
  * @param <V> 行数据解析结果类型
  * 
  * @author shanhm
@@ -34,50 +29,45 @@ import com.fom.util.IoUtil;
  */
 public abstract class TxtParseTask<V> extends ParseTask<V> {
 
-	private TxtParseHelper helper;
+	private int rowIndex = 0;
 
 	/**
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
-	 * @param helper TxtParseHelper
 	 */
-	public TxtParseTask(String sourceUri, int batch, TxtParseHelper helper){
-		super(sourceUri, batch, helper);
-		this.helper = helper;
+	public TxtParseTask(String sourceUri, int batch){
+		super(sourceUri, batch);
 	}
 
 	/**
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
-	 * @param helper ParserHelper
 	 * @param exceptionHandler ExceptionHandler
 	 */
-	public TxtParseTask(String sourceUri, int batch, TxtParseHelper helper, ExceptionHandler exceptionHandler) {
-		this(sourceUri, batch, helper);
+	public TxtParseTask(String sourceUri, int batch, ExceptionHandler exceptionHandler) {
+		this(sourceUri, batch);
 		this.exceptionHandler = exceptionHandler;
 	}
 
 	/**
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
-	 * @param helper ParserHelper
 	 * @param resultHandler ResultHandler
 	 */
-	public TxtParseTask(String sourceUri, int batch, TxtParseHelper helper, ResultHandler resultHandler) {
-		this(sourceUri, batch, helper);
+	public TxtParseTask(String sourceUri, int batch, ResultHandler resultHandler) {
+		this(sourceUri, batch);
 		this.resultHandler = resultHandler;
 	}
 
 	/**
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
-	 * @param helper ParserHelper
 	 * @param exceptionHandler ExceptionHandler
 	 * @param resultHandler ResultHandler
 	 */
 	public TxtParseTask(String sourceUri, int batch, 
-			TxtParseHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
-		this(sourceUri, batch, helper);
+			ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+		this(sourceUri, batch);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
 	}
@@ -99,74 +89,66 @@ public abstract class TxtParseTask<V> extends ParseTask<V> {
 				log.warn("get history processed progress failed, will process from scratch.");
 			}
 		}
-
 		return true;
 	}
 
 	@Override
 	protected boolean exec() throws Exception {
 		long sTime = System.currentTimeMillis();
-		parseTxt(id);
-		String size = new DecimalFormat("#.###").format(helper.getSourceSize(id) / 1024.0);
-		log.info("finish file(" + size + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
+		parseTxt(id, getSourceName(id), rowIndex);
+		log.info("finish file(" 
+				+ formatSize(getSourceSize(id)) + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
 		return true;
 	}
 
-	protected final void parseTxt(String sourceUri, int rowIndex) throws Exception {
+	protected final void parseTxt(String sourceUri, String sourceName, int lineIndex) throws Exception {
 		Reader reader = null;
 		RowData rowData = null;
-		String name = new File(sourceUri).getName();
 		long batchTime = System.currentTimeMillis();
 		try{
-			reader = helper.getReader(sourceUri);
+			reader = getSourceReader(sourceUri); 
 			List<V> batchData = new LinkedList<>(); 
 			while ((rowData = reader.readRow()) != null) {
-				if(rowIndex > 0 && rowData.getRowIndex() <= rowIndex){
+				if(lineIndex > 0 && rowData.getRowIndex() <= lineIndex){
 					continue;
 				}
-				rowIndex = rowData.getRowIndex();
-
+				lineIndex = rowData.getRowIndex();
 				if (log.isDebugEnabled()) {
-					log.debug("parse row[rowIndex= " + rowIndex + "],columns=" + rowData.getColumnList());
+					log.debug("parse row[file=" 
+							+ sourceName + ",rowIndex= " + rowIndex + "],columns=" + rowData.getColumnList());
 				}
+
 				List<V> dataList = parseRowData(rowData, batchTime);
 				if(dataList != null){
 					batchData.addAll(dataList);
 				}
 
 				if(batch > 0 && batchData.size() >= batch){
-					TaskUtil.checkInterrupt();
+					checkInterrupt();
 					int size = batchData.size();
 					batchProcess(batchData, batchTime); 
-					TaskUtil.log(log, progressLog, rowIndex);
-					
+					logProgress(sourceName, lineIndex, false);
+					log.info("finish batch[file=" + sourceName 
+							+ ",size=" + size + "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
-					log.info("finish batch[size=" + size + "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
 				}
 			}
 			if(!batchData.isEmpty()){
-				TaskUtil.checkInterrupt();
+				checkInterrupt();
 				int size = batchData.size();
 				batchProcess(batchData, batchTime);  
-				TaskUtil.log(log, progressLog, rowIndex);
-				log.info("finish batch[size=" + size + "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
+				logProgress(sourceName, lineIndex, true);
+				log.info("finish batch[file=" + sourceName 
+						+ ",size=" + size + "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
 			}
 		}finally{
 			IoUtil.close(reader);
 		}
 	}
-	
+
 	@Override
 	protected boolean afterExec() throws Exception {
-		if(!helper.delete(id)){ 
-			log.error("delete src file failed.");
-			return false;
-		}
-		if(progressLog.exists() && !progressLog.delete()){
-			log.error("delete progress log failed.");
-			return false;
-		}
-		return true;
+		return deleteSource(id) && deleteProgressLog();
 	}
 }

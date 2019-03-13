@@ -12,7 +12,7 @@ import com.fom.pool.handler.JdbcHandler;
 import com.fom.task.helper.TxtParseHelper;
 import com.fom.task.reader.Reader;
 import com.fom.task.reader.RowData;
-import com.fom.task.reader.TextReader;
+import com.fom.task.reader.TxtReader;
 
 /**
  * 
@@ -35,7 +35,7 @@ public class ImportMysqlExample2Helper implements TxtParseHelper<Map<String, Obj
 
 	@Override
 	public Reader getReader(String sourceUri) throws Exception {
-		return new TextReader(sourceUri, "#");
+		return new TxtReader(sourceUri, "#");
 	}
 
 	@Override

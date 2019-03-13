@@ -1,7 +1,6 @@
 package com.fom.task;
 
 import java.io.File;
-import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,11 +11,6 @@ import org.apache.commons.lang.StringUtils;
 
 import com.fom.context.ExceptionHandler;
 import com.fom.context.ResultHandler;
-import com.fom.context.Task;
-import com.fom.task.helper.TextZipParseHelper;
-import com.fom.task.reader.Reader;
-import com.fom.task.reader.RowData;
-import com.fom.util.IoUtil;
 import com.fom.util.ZipUtil;
 
 /**
@@ -40,7 +34,6 @@ import com.fom.util.ZipUtil;
  * <br>上述任何步骤失败或异常均会使任务提前失败结束
  * <br>单个文件处理的说明：同理于ParseTask中
  * 
- * @see TextZipParseHelper
  * @see TxtParseTask
  * 
  * @param <V> 行数据解析结果类型
@@ -48,19 +41,11 @@ import com.fom.util.ZipUtil;
  * @author shanhm
  * 
  */
-public abstract class ZipParseTask<V> extends Task {
-
-	private int batch;
-
-	private TextZipParseHelper helper;
-
-	private File progressLog;
+public abstract class TxtZipParseTask<V> extends TxtParseTask<V> {
 
 	private File unzipDir;
 
 	private List<String> matchedEntrys;
-
-	private DecimalFormat numFormat  = new DecimalFormat("#.###");
 
 	private String currentFileName;
 
@@ -69,58 +54,47 @@ public abstract class ZipParseTask<V> extends Task {
 	/**
 	 * @param sourceUri 资源uri
 	 * @param batch 批处理数
-	 * @param helper LocalZipParserHelper
 	 */
-	public ZipParseTask(String sourceUri, int batch, TextZipParseHelper helper) {
-		super(sourceUri);
-		this.helper = helper;
-		String sourceName = new File(sourceUri).getName();
-
+	public TxtZipParseTask(String sourceUri, int batch) {
+		super(sourceUri, batch);
+		String sourceName = getSourceName(sourceUri);
 		if(StringUtils.isBlank(getContextName())){
 			this.unzipDir = new File(System.getProperty("cache.parse") + File.separator + sourceName);
-			this.progressLog = new File(System.getProperty("cache.parse") + File.separator + sourceName + ".log");
 		}else{
 			this.unzipDir = new File(System.getProperty("cache.parse")
 					+ File.separator + getContextName() + File.separator + sourceName);
-			this.progressLog = new File(System.getProperty("cache.parse") 
-					+ File.separator + getContextName() + File.separator + sourceName + ".log");
 		}
 	}
 
 	/**
 	 * @param sourceUri 资源uri
 	 * @param batch 批处理数
-	 * @param helper LocalZipParserHelper
 	 * @param exceptionHandler ExceptionHandler
 	 */
-	public ZipParseTask(String sourceUri, int batch, 
-			TextZipParseHelper helper, ExceptionHandler exceptionHandler) { 
-		this(sourceUri, batch, helper);
+	public TxtZipParseTask(String sourceUri, int batch, ExceptionHandler exceptionHandler) { 
+		this(sourceUri, batch);
 		this.exceptionHandler = exceptionHandler;
 	}
 
 	/**
 	 * @param sourceUri 资源uri
 	 * @param batch 批处理数
-	 * @param helper LocalZipParserHelper
 	 * @param resultHandler ResultHandler
 	 */
-	public ZipParseTask(String sourceUri, int batch, 
-			TextZipParseHelper helper, ResultHandler resultHandler) {
-		this(sourceUri, batch, helper);
+	public TxtZipParseTask(String sourceUri, int batch, ResultHandler resultHandler) {
+		this(sourceUri, batch);
 		this.resultHandler = resultHandler;
 	}
 
 	/**
 	 * @param sourceUri 资源uri
 	 * @param batch 批处理数
-	 * @param helper LocalZipParserHelper
 	 * @param exceptionHandler ExceptionHandler
 	 * @param resultHandler ResultHandler
 	 */
-	public ZipParseTask(String sourceUri, int batch, 
-			TextZipParseHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
-		this(sourceUri, batch, helper);
+	public TxtZipParseTask(String sourceUri, int batch, 
+			ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+		this(sourceUri, batch);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
 	}
@@ -185,8 +159,7 @@ public abstract class ZipParseTask<V> extends Task {
 
 			long cost = ZipUtil.unZip(id, unzipDir);
 			if (log.isDebugEnabled()) {
-				String size = numFormat.format(helper.getSourceSize(id));
-				log.debug("finish unzip(" + size + "KB), cost=" + cost + "ms");
+				log.debug("finish unzip(" + formatSize(getSourceSize(id)) + "KB), cost=" + cost + "ms");
 			}
 
 			String[] nameArray = unzipDir.list();
@@ -233,7 +206,7 @@ public abstract class ZipParseTask<V> extends Task {
 			}
 		}
 		//srcFile.exist = true
-		if(!helper.delete(id)){ 
+		if(!deleteSource(id)){ 
 			log.warn("clear src file failed."); 
 			return false;
 		}
@@ -242,11 +215,20 @@ public abstract class ZipParseTask<V> extends Task {
 		}
 		return true;
 	}
+	
+	/**
+	 * 匹配zip中的entry名称
+	 * @param entryName entryName
+	 * @return is matched 
+	 */
+	protected boolean matchEntryName(String entryName) {
+		return true;
+	}
 
 	private List<String> filterEntrys(String[] nameArray){
 		List<String> list = new LinkedList<>();
 		for(String name : nameArray){
-			if(helper.matchEntryName(name)){
+			if(matchEntryName(name)){
 				list.add(name);
 			}
 		}
@@ -274,12 +256,12 @@ public abstract class ZipParseTask<V> extends Task {
 			log.warn("get history processed progress failed, will process from scratch.");
 		}
 
-		parse(); 
+		parseTxt(unzipDir + File.separator + currentFileName, currentFileName, rowIndex); 
 		matchedEntrys.remove(currentFileName);
 
 		if (log.isDebugEnabled()) {
-			String size = numFormat.format(file.length() / 1024.0);
-			log.debug("finish file[" + currentFileName + "(" + size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
+			log.debug("finish file[" + currentFileName + "(" 
+					+ formatSize(getSourceSize(id)) + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
 		}
 		if(!file.delete()){
 			log.error("delete file failed: " + currentFileName); 
@@ -294,12 +276,12 @@ public abstract class ZipParseTask<V> extends Task {
 			long sTime = System.currentTimeMillis();
 			currentFileName = it.next();
 			rowIndex = 0;
-			parse();
+			parseTxt(unzipDir + File.separator + currentFileName, currentFileName, rowIndex); 
 			it.remove();
 
 			File file = new File(unzipDir + File.separator + currentFileName);
-			String size = numFormat.format(file.length() / 1024.0);
-			log.info("finish file[" + currentFileName + "(" + size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
+			log.info("finish file[" + currentFileName + "(" 
+					+ formatSize(getSourceSize(id)) + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
 			if(!file.delete()){ 
 				log.error("delete file failed: " + currentFileName); 
 				return false;
@@ -307,65 +289,5 @@ public abstract class ZipParseTask<V> extends Task {
 		}
 		return true;
 	}
-
-	private void parse() throws Exception {
-		Reader reader = null;
-		RowData rowData = null;
-		try{
-			reader = helper.getReader(unzipDir + File.separator + currentFileName);
-			List<V> batchData = new LinkedList<>(); 
-			long batchTime = System.currentTimeMillis();
-			while ((rowData = reader.readRow()) != null) {
-				if(rowIndex > 0 && rowData.getRowIndex() <= rowIndex){
-					continue;
-				}
-				if(batch > 0 && batchData.size() >= batch){
-					TaskUtil.checkInterrupt();
-					int size = batchData.size();
-					batchProcess(batchData, batchTime); 
-					TaskUtil.log(log, progressLog, currentFileName, rowIndex); 
-					batchData.clear();
-					batchTime = System.currentTimeMillis();
-					log.info("finish batch[file=" + currentFileName + ",size=" + size 
-							+ "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
-				}
-
-				if (log.isDebugEnabled()) {
-					log.debug("parse row[file=" + currentFileName + ",rowIndex= " 
-							+ rowIndex + "],columns=" + rowData.getColumnList());
-				}
-				List<V> dataList = parseRowData(rowData, batchTime);
-				if(dataList != null){
-					batchData.addAll(dataList);
-				}
-			}
-			if(!batchData.isEmpty()){
-				TaskUtil.checkInterrupt();
-				int size = batchData.size();
-				batchProcess(batchData, batchTime); 
-				TaskUtil.log(log, progressLog, currentFileName, rowIndex); 
-				log.info("finish batch[file=" + currentFileName + ",size=" + size 
-						+ "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
-			}
-		}finally{
-			IoUtil.close(reader);
-		}
-	}
-
-	/**
-	 * 将行字段数据映射成对应的bean或者map
-	 * @param rowData
-	 * @param batchTime 批处理时间
-	 * @return 映射结果V列表
-	 * @throws Exception Exception
-	 */
-	public abstract List<V> parseRowData(RowData rowData, long batchTime) throws Exception;
-
-	/**
-	 * 批处理行数据
-	 * @param batchData batchData
-	 * @param batchTime batchTime
-	 * @throws Exception Exception
-	 */
-	public abstract void batchProcess(List<V> batchData, long batchTime) throws Exception;
+	
 }

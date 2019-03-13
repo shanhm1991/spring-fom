@@ -30,51 +30,37 @@ import com.fom.util.IoUtil;
  * <br>5.删除源文件，删除progressLog
  * <br>上述任何步骤失败或异常均会使任务提前失败结束
  * 
- * @see ExcelParseHelper
- * 
  * @param <V> 行数据解析结果类型
  * 
  * @author shanhm
  *
  */
-public abstract class ExcelParseTask<V> extends Task {
+public abstract class ExcelParseTask<V> extends ParseTask<V> {
 
-	private int batch;
-	
 	private boolean isBatchBySheet;
 	
-	protected DecimalFormat numFormat = new DecimalFormat("#.###");
-
-	protected ExcelParseHelper helper;
-
 	protected int sheetIndex = 0;
 
 	protected int rowIndex = 0;
-
-	protected File progressLog;
 
 	/**
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
 	 * @param isBatchBySheet isBatchBySheet
-	 * @param helper ExcelParseHelper
 	 */
-	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet, ExcelParseHelper helper){
-		super(sourceUri);
-		this.batch = batch;
+	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet){
+		super(sourceUri, batch);
 		this.isBatchBySheet = isBatchBySheet;
-		this.helper = helper;
 	}
 
 	/**
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
 	 * @param isBatchBySheet isBatchBySheet
-	 * @param helper ExcelParseHelper
 	 * @param exceptionHandler ExceptionHandler
 	 */
-	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet, ExcelParseHelper helper, ExceptionHandler exceptionHandler) {
-		this(sourceUri, batch, isBatchBySheet, helper);
+	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet, ExceptionHandler exceptionHandler) {
+		this(sourceUri, batch, isBatchBySheet);
 		this.exceptionHandler = exceptionHandler;
 	}
 
@@ -82,44 +68,30 @@ public abstract class ExcelParseTask<V> extends Task {
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
 	 * @param isBatchBySheet isBatchBySheet
-	 * @param helper ExcelParseHelper
 	 * @param resultHandler ResultHandler
 	 */
-	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet, ExcelParseHelper helper, ResultHandler resultHandler) {
-		this(sourceUri, batch, isBatchBySheet, helper);
+	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet, ResultHandler resultHandler) {
+		this(sourceUri, batch, isBatchBySheet);
 		this.resultHandler = resultHandler;
 	}
 
 	/**
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
-	 * @param helper ExcelParseHelper
 	 * @param isBatchBySheet isBatchBySheet
 	 * @param exceptionHandler ExceptionHandler
 	 * @param resultHandler ResultHandler
 	 */
 	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet, 
-			ExcelParseHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
-		this(sourceUri, batch, isBatchBySheet, helper);
+			ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+		this(sourceUri, batch, isBatchBySheet);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
 	}
 
 	@Override
 	protected boolean beforeExec() throws Exception { 
-		String logName = new File(id).getName();
-		if(StringUtils.isBlank(getContextName())){
-			this.progressLog = new File(System.getProperty("cache.parse") + File.separator + logName + ".log");
-		}else{
-			this.progressLog = new File(System.getProperty("cache.parse") 
-					+ File.separator + getContextName() + File.separator + logName + ".log");
-		}
-
-		File parentFile = progressLog.getParentFile();
-		if(!parentFile.exists() && !parentFile.mkdirs()){
-			log.error("directory create failed: " + parentFile);
-			return false;
-		}
+		
 
 		if(!progressLog.exists()){ 
 			if(!progressLog.createNewFile()){

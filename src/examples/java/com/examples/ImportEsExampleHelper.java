@@ -12,7 +12,7 @@ import com.fom.pool.handler.EsHandler;
 import com.fom.task.helper.TxtParseHelper;
 import com.fom.task.reader.Reader;
 import com.fom.task.reader.RowData;
-import com.fom.task.reader.TextReader;
+import com.fom.task.reader.TxtReader;
 
 /**
  * 
@@ -37,7 +37,7 @@ public class ImportEsExampleHelper implements TxtParseHelper<Map<String, Object>
 
 	@Override
 	public Reader getReader(String sourceUri) throws Exception {
-		return new TextReader(sourceUri, "#");
+		return new TxtReader(sourceUri, "#");
 	}
 
 	@Override

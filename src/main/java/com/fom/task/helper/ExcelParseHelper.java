@@ -8,7 +8,7 @@ import java.util.List;
  * @author shanhm
  *
  */
-public interface ExcelParseHelper extends ParseHelper {
+public interface ExcelParseHelper {
 
 	/**
 	 * 获取对应文件的InputStream
