@@ -32,8 +32,7 @@ public class FomController {
 	@RequestMapping("/list")
 	@ResponseBody
 	public Map<String, Object> list() throws Exception{
-		Map<String, Object> a = service.list();
-		return a;
+		return service.list();
 	}
 
 	@RequestMapping("/save")
@@ -137,4 +136,5 @@ public class FomController {
 		service.dataDownload(name, resp); 
 		return null;
 	}
+
 }

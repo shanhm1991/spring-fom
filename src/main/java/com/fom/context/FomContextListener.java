@@ -53,6 +53,8 @@ public class FomContextListener implements ServletContextListener {
 
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
+		Monitor.start();
+		
 		ServletContext servlet = event.getServletContext(); 
 		setSystem(servlet);
 
