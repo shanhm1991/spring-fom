@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fom.pool.handler.JdbcHandler;
-import com.fom.task.TextZipParseTask;
+import com.fom.task.ParseTextZipTask;
 import com.fom.task.reader.Reader;
 import com.fom.task.reader.RowData;
 import com.fom.task.reader.TextReader;
@@ -17,7 +17,7 @@ import com.fom.util.PatternUtil;
  * @author shanhm
  *
  */
-public class ImportOracleExample2Task extends TextZipParseTask<Map<String, Object>> {
+public class ImportOracleExample2Task extends ParseTextZipTask<Map<String, Object>> {
 
 	private static final String POOL = "example_oracle";
 

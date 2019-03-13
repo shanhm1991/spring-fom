@@ -34,14 +34,14 @@ import com.fom.util.ZipUtil;
  * <br>上述任何步骤失败或异常均会使任务提前失败结束
  * <br>单个文件处理的说明：同理于ParseTask中
  * 
- * @see TextParseTask
+ * @see ParseTextTask
  * 
  * @param <V> 行数据解析结果类型
  * 
  * @author shanhm
  * 
  */
-public abstract class TextZipParseTask<V> extends TextParseTask<V> {
+public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
 
 	private File unzipDir;
 
@@ -55,7 +55,7 @@ public abstract class TextZipParseTask<V> extends TextParseTask<V> {
 	 * @param sourceUri 资源uri
 	 * @param batch 批处理数
 	 */
-	public TextZipParseTask(String sourceUri, int batch) {
+	public ParseTextZipTask(String sourceUri, int batch) {
 		super(sourceUri, batch);
 		String sourceName = getSourceName(sourceUri);
 		if(StringUtils.isBlank(getContextName())){
@@ -71,7 +71,7 @@ public abstract class TextZipParseTask<V> extends TextParseTask<V> {
 	 * @param batch 批处理数
 	 * @param exceptionHandler ExceptionHandler
 	 */
-	public TextZipParseTask(String sourceUri, int batch, ExceptionHandler exceptionHandler) { 
+	public ParseTextZipTask(String sourceUri, int batch, ExceptionHandler exceptionHandler) { 
 		this(sourceUri, batch);
 		this.exceptionHandler = exceptionHandler;
 	}
@@ -81,7 +81,7 @@ public abstract class TextZipParseTask<V> extends TextParseTask<V> {
 	 * @param batch 批处理数
 	 * @param resultHandler ResultHandler
 	 */
-	public TextZipParseTask(String sourceUri, int batch, ResultHandler resultHandler) {
+	public ParseTextZipTask(String sourceUri, int batch, ResultHandler resultHandler) {
 		this(sourceUri, batch);
 		this.resultHandler = resultHandler;
 	}
@@ -92,7 +92,7 @@ public abstract class TextZipParseTask<V> extends TextParseTask<V> {
 	 * @param exceptionHandler ExceptionHandler
 	 * @param resultHandler ResultHandler
 	 */
-	public TextZipParseTask(String sourceUri, int batch, 
+	public ParseTextZipTask(String sourceUri, int batch, 
 			ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
 		this(sourceUri, batch);
 		this.exceptionHandler = exceptionHandler;

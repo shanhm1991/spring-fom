@@ -28,7 +28,7 @@ import com.fom.util.IoUtil;
  * @author shanhm
  *
  */
-public abstract class TextParseTask<V> extends ParseTask<V> {
+public abstract class ParseTextTask<V> extends ParseTask<V> {
 
 	private int rowIndex = 0;
 
@@ -36,7 +36,7 @@ public abstract class TextParseTask<V> extends ParseTask<V> {
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
 	 */
-	public TextParseTask(String sourceUri, int batch){
+	public ParseTextTask(String sourceUri, int batch){
 		super(sourceUri, batch);
 	}
 
@@ -45,7 +45,7 @@ public abstract class TextParseTask<V> extends ParseTask<V> {
 	 * @param batch 入库时的批处理数
 	 * @param exceptionHandler ExceptionHandler
 	 */
-	public TextParseTask(String sourceUri, int batch, ExceptionHandler exceptionHandler) {
+	public ParseTextTask(String sourceUri, int batch, ExceptionHandler exceptionHandler) {
 		this(sourceUri, batch);
 		this.exceptionHandler = exceptionHandler;
 	}
@@ -55,7 +55,7 @@ public abstract class TextParseTask<V> extends ParseTask<V> {
 	 * @param batch 入库时的批处理数
 	 * @param resultHandler ResultHandler
 	 */
-	public TextParseTask(String sourceUri, int batch, ResultHandler resultHandler) {
+	public ParseTextTask(String sourceUri, int batch, ResultHandler resultHandler) {
 		this(sourceUri, batch);
 		this.resultHandler = resultHandler;
 	}
@@ -66,7 +66,7 @@ public abstract class TextParseTask<V> extends ParseTask<V> {
 	 * @param exceptionHandler ExceptionHandler
 	 * @param resultHandler ResultHandler
 	 */
-	public TextParseTask(String sourceUri, int batch, 
+	public ParseTextTask(String sourceUri, int batch, 
 			ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
 		this(sourceUri, batch);
 		this.exceptionHandler = exceptionHandler;
@@ -159,18 +159,23 @@ public abstract class TextParseTask<V> extends ParseTask<V> {
 				checkInterrupt();
 				int size = batchData.size();
 				batchProcess(batchData, batchTime);  
-				logProgress(sourceName, lineIndex, true);
 				log.info("finish batch[file=" + sourceName 
 						+ ",size=" + size + "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
 			}
 			
-			onTxtComplete(sourceUri, sourceName);
+			onTextComplete(sourceUri, sourceName);
+			logProgress(sourceName, lineIndex, true);
 		}finally{
 			IoUtil.close(reader);
 		}
 	}
 	
-	protected void onTxtComplete(String sourceUri, String sourceName) {
+	/**
+	 * 单个text文件解析完成时的动作
+	 * @param sourceUri sourceUri
+	 * @param sourceName sourceName
+	 */
+	protected void onTextComplete(String sourceUri, String sourceName) {
 		
 	}
 

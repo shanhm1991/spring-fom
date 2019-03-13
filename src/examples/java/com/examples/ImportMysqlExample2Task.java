@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fom.pool.handler.JdbcHandler;
-import com.fom.task.TextParseTask;
+import com.fom.task.ParseTextTask;
 import com.fom.task.reader.Reader;
 import com.fom.task.reader.RowData;
 import com.fom.task.reader.TextReader;
@@ -16,7 +16,7 @@ import com.fom.task.reader.TextReader;
  * @author shanhm
  *
  */
-public class ImportMysqlExample2Task extends TextParseTask<Map<String, Object>> {
+public class ImportMysqlExample2Task extends ParseTextTask<Map<String, Object>> {
 
 	private static final String POOL = "example_mysql";
 

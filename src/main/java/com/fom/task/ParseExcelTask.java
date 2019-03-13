@@ -30,7 +30,7 @@ import com.fom.util.IoUtil;
  * @author shanhm
  *
  */
-public abstract class ExcelParseTask<V> extends ParseTask<V> {
+public abstract class ParseExcelTask<V> extends ParseTask<V> {
 
 	private boolean isBatchBySheet;
 
@@ -43,7 +43,7 @@ public abstract class ExcelParseTask<V> extends ParseTask<V> {
 	 * @param batch 入库时的批处理数
 	 * @param isBatchBySheet isBatchBySheet
 	 */
-	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet){
+	public ParseExcelTask(String sourceUri, int batch, boolean isBatchBySheet){
 		super(sourceUri, batch);
 		this.isBatchBySheet = isBatchBySheet;
 	}
@@ -54,7 +54,7 @@ public abstract class ExcelParseTask<V> extends ParseTask<V> {
 	 * @param isBatchBySheet isBatchBySheet
 	 * @param exceptionHandler ExceptionHandler
 	 */
-	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet, ExceptionHandler exceptionHandler) {
+	public ParseExcelTask(String sourceUri, int batch, boolean isBatchBySheet, ExceptionHandler exceptionHandler) {
 		this(sourceUri, batch, isBatchBySheet);
 		this.exceptionHandler = exceptionHandler;
 	}
@@ -65,7 +65,7 @@ public abstract class ExcelParseTask<V> extends ParseTask<V> {
 	 * @param isBatchBySheet isBatchBySheet
 	 * @param resultHandler ResultHandler
 	 */
-	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet, ResultHandler resultHandler) {
+	public ParseExcelTask(String sourceUri, int batch, boolean isBatchBySheet, ResultHandler resultHandler) {
 		this(sourceUri, batch, isBatchBySheet);
 		this.resultHandler = resultHandler;
 	}
@@ -77,7 +77,7 @@ public abstract class ExcelParseTask<V> extends ParseTask<V> {
 	 * @param exceptionHandler ExceptionHandler
 	 * @param resultHandler ResultHandler
 	 */
-	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet, 
+	public ParseExcelTask(String sourceUri, int batch, boolean isBatchBySheet, 
 			ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
 		this(sourceUri, batch, isBatchBySheet);
 		this.exceptionHandler = exceptionHandler;
@@ -159,13 +159,24 @@ public abstract class ExcelParseTask<V> extends ParseTask<V> {
 				checkInterrupt();
 				int size = batchData.size();
 				batchProcess(batchData, batchTime); 
-				logProgress(sourceName, sheetIndex, sheetName, lineIndex, true); 
 				log.info("finish batch[file=" + sourceName + "sheet=" + sheetName 
 						+ ",size=" + size + "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
 			}
+			
+			onExcelComplete(sourceUri, sourceName);
+			logProgress(sourceName, sheetIndex, sheetName, lineIndex, true); 
 		}finally{
 			IoUtil.close(reader);
 		}
+	}
+	
+	/**
+	 * 单个Excel文件解析完成时的动作
+	 * @param sourceUri sourceUri
+	 * @param sourceName sourceName
+	 */
+	protected void onExcelComplete(String sourceUri, String sourceName) {
+		
 	}
 
 	/**
@@ -221,13 +232,13 @@ public abstract class ExcelParseTask<V> extends ParseTask<V> {
 
 			@Override
 			protected boolean shouldSheetProcess(int sheetIndex, String sheetName) {
-				return sheetIndex >= ExcelParseTask.this.sheetIndex
-						&& ExcelParseTask.this.sheetFilter(sheetIndex, sheetName); 
+				return sheetIndex >= ParseExcelTask.this.sheetIndex
+						&& ParseExcelTask.this.sheetFilter(sheetIndex, sheetName); 
 			}
 
 			@Override
 			protected List<String> reRangeSheet(List<String> sheetRangeList) {
-				return ExcelParseTask.this.reRangeSheet(sheetRangeList);
+				return ParseExcelTask.this.reRangeSheet(sheetRangeList);
 			}
 		};
 	}

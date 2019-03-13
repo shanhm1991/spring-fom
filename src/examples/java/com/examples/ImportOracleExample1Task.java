@@ -6,7 +6,7 @@ import java.util.List;
 import com.examples.bean.ExampleBean;
 import com.examples.dao.ExamplesDao;
 import com.fom.context.SpringContext;
-import com.fom.task.TextZipParseTask;
+import com.fom.task.ParseTextZipTask;
 import com.fom.task.reader.Reader;
 import com.fom.task.reader.RowData;
 import com.fom.task.reader.TextReader;
@@ -17,7 +17,7 @@ import com.fom.util.PatternUtil;
  * @author shanhm
  *
  */
-public class ImportOracleExample1Task extends TextZipParseTask<ExampleBean> {
+public class ImportOracleExample1Task extends ParseTextZipTask<ExampleBean> {
 	
 	private final String pattern;
 	

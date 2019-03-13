@@ -2,13 +2,13 @@ package com.fom.task.helper;
 
 import java.util.zip.ZipOutputStream;
 
-import com.fom.task.ZipDownloadTask;
+import com.fom.task.DownloadZipTask;
 
 /**
  * ZipDownloadTask中需要的具体操作方法
  * 
  * @see DownloadHelper
- * @see ZipDownloadTask
+ * @see DownloadZipTask
  * 
  * @author shanhm
  *

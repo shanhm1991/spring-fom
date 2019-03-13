@@ -49,7 +49,7 @@ import com.fom.util.ZipUtil;
  * @author shanhm
  *
  */
-public class ZipDownloadTask extends Task {
+public class DownloadZipTask extends Task {
 
 	private final DecimalFormat numFormat  = new DecimalFormat("#.###");
 
@@ -84,7 +84,7 @@ public class ZipDownloadTask extends Task {
 	 * @param isDelSrc 下载结束是否删除资源文件
 	 * @param helper ZipDownloaderHelper下载方法实现
 	 */
-	public ZipDownloadTask(List<String> uriList, String zipName, String destPath, 
+	public DownloadZipTask(List<String> uriList, String zipName, String destPath, 
 			int zipEntryMax, long zipSizeMax, boolean isDelSrc, ZipDownloadHelper helper) {
 		super(zipName);
 		if(uriList == null || uriList.isEmpty() || StringUtils.isBlank(zipName) || StringUtils.isBlank(destPath)
@@ -109,7 +109,7 @@ public class ZipDownloadTask extends Task {
 	 * @param helper ZipDownloaderHelper下载方法实现
 	 * @param exceptionHandler ExceptionHandler
 	 */
-	public ZipDownloadTask(List<String> uriList, String zipName, String destPath, 
+	public DownloadZipTask(List<String> uriList, String zipName, String destPath, 
 			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
 			ZipDownloadHelper helper, ExceptionHandler exceptionHandler) {
 		this(uriList, zipName, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
@@ -126,7 +126,7 @@ public class ZipDownloadTask extends Task {
 	 * @param helper ZipDownloaderHelper下载方法实现
 	 * @param resultHandler ResultHandler
 	 */
-	public ZipDownloadTask(List<String> uriList, String zipName, String destPath, 
+	public DownloadZipTask(List<String> uriList, String zipName, String destPath, 
 			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
 			ZipDownloadHelper helper, ResultHandler resultHandler) {
 		this(uriList, zipName, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
@@ -144,7 +144,7 @@ public class ZipDownloadTask extends Task {
 	 * @param exceptionHandler ExceptionHandler
 	 * @param resultHandler ResultHandler
 	 */
-	public ZipDownloadTask(List<String> uriList, String zipName, String destPath, 
+	public DownloadZipTask(List<String> uriList, String zipName, String destPath, 
 			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
 			ZipDownloadHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
 		this(uriList, zipName, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);

@@ -9,7 +9,7 @@ import java.util.Set;
 import com.fom.context.Context;
 import com.fom.context.FomContext;
 import com.fom.context.Task;
-import com.fom.task.ZipDownloadTask;
+import com.fom.task.DownloadZipTask;
 import com.fom.task.helper.impl.HttpHelper;
 
 /**
@@ -52,7 +52,7 @@ public class DownloadHttpZipExample extends Context {
 		list.add("http://localhost:4040/fom/images/stop.png");
 		
 		Set<Task> tasks = new HashSet<>();
-		tasks.add(new ZipDownloadTask(list, "httpTest", dest, 10, 1024 * 1024, false, new HttpHelper()));
+		tasks.add(new DownloadZipTask(list, "httpTest", dest, 10, 1024 * 1024, false, new HttpHelper()));
 		return tasks;
 	}
 

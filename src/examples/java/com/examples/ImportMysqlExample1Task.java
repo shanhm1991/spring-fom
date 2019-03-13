@@ -6,7 +6,7 @@ import java.util.List;
 import com.examples.bean.ExampleBean;
 import com.examples.dao.ExamplesDao;
 import com.fom.context.SpringContext;
-import com.fom.task.TextParseTask;
+import com.fom.task.ParseTextTask;
 import com.fom.task.reader.Reader;
 import com.fom.task.reader.RowData;
 import com.fom.task.reader.TextReader;
@@ -16,7 +16,7 @@ import com.fom.task.reader.TextReader;
  * @author shanhm
  *
  */
-public class ImportMysqlExample1Task extends TextParseTask<ExampleBean> {
+public class ImportMysqlExample1Task extends ParseTextTask<ExampleBean> {
 	
 	public ImportMysqlExample1Task(String sourceUri, int batch){
 		super(sourceUri, batch); 

@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.fom.pool.handler.EsHandler;
-import com.fom.task.TextParseTask;
+import com.fom.task.ParseTextTask;
 import com.fom.task.reader.Reader;
 import com.fom.task.reader.RowData;
 import com.fom.task.reader.TextReader;
 
-public class ImportEsExampleTask extends TextParseTask<Map<String, Object>> {
+public class ImportEsExampleTask extends ParseTextTask<Map<String, Object>> {
 	
 	private static final String POOL = "example_es";
 	
