@@ -90,7 +90,7 @@ public abstract class ParseTask<V> extends Task {
 	 * @return KB
 	 */
 	protected final String formatSize(long size) {
-		return sizeFormat.format(getSourceSize(id) / 1024.0);
+		return sizeFormat.format(size / 1024.0);
 	}
 	
 	/**
