@@ -6,7 +6,7 @@ import java.util.zip.ZipOutputStream;
 
 import com.fom.task.helper.DownloadHelper;
 import com.fom.task.helper.UploadHelper;
-import com.fom.task.helper.ZipDownloadHelper;
+import com.fom.task.helper.DownloadZipHelper;
 import com.fom.util.FtpUtil;
 import com.fom.util.FtpUtil.InputStreamStore;
 import com.fom.util.IoUtil;
@@ -18,7 +18,7 @@ import com.fom.util.ZipUtil;
  * @author shanhm
  *
  */
-public class FtpHelper implements DownloadHelper, ZipDownloadHelper, UploadHelper {
+public class FtpHelper implements DownloadHelper, DownloadZipHelper, UploadHelper {
 	
 	private String hostname;
 	

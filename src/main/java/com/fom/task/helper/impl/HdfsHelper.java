@@ -8,7 +8,7 @@ import org.apache.hadoop.fs.Path;
 
 import com.fom.task.helper.DownloadHelper;
 import com.fom.task.helper.UploadHelper;
-import com.fom.task.helper.ZipDownloadHelper;
+import com.fom.task.helper.DownloadZipHelper;
 import com.fom.util.HdfsUtil;
 import com.fom.util.ZipUtil;
 
@@ -18,7 +18,7 @@ import com.fom.util.ZipUtil;
  * @author shanhm
  *
  */
-public class HdfsHelper implements DownloadHelper, ZipDownloadHelper, UploadHelper {
+public class HdfsHelper implements DownloadHelper, DownloadZipHelper, UploadHelper {
 	
 	protected final String masterUrl;
 	

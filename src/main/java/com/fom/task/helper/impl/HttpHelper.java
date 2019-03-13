@@ -6,7 +6,7 @@ import java.util.zip.ZipOutputStream;
 
 import com.fom.task.helper.DownloadHelper;
 import com.fom.task.helper.UploadHelper;
-import com.fom.task.helper.ZipDownloadHelper;
+import com.fom.task.helper.DownloadZipHelper;
 import com.fom.util.HttpUtil;
 import com.fom.util.ZipUtil;
 
@@ -16,7 +16,7 @@ import com.fom.util.ZipUtil;
  * @author shanhm
  *
  */
-public class HttpHelper implements DownloadHelper, ZipDownloadHelper, UploadHelper {
+public class HttpHelper implements DownloadHelper, DownloadZipHelper, UploadHelper {
 
 	@Override
 	public InputStream open(String url) throws Exception {

@@ -101,7 +101,7 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 				+ formatSize(getSourceSize(id)) + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
 		return true;
 	}
-	
+
 	/**
 	 * 纪录处理进度
 	 * @param file file
@@ -111,9 +111,11 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 	 */
 	protected void logProgress(String file, long row, boolean completed) throws IOException {
 		log.info("process progress: file=" + file + ",row=" + row + ",completed=" + completed);
-		FileUtils.writeStringToFile(progressLog, file + "\n" + row + "\n" + completed, false);
+		if(progressLog.exists()){
+			FileUtils.writeStringToFile(progressLog, file + "\n" + row + "\n" + completed, false);
+		}
 	}
-	
+
 	/**
 	 * 获取对应sourceUri的资源的Reader
 	 * @param sourceUri sourceUri
@@ -162,21 +164,21 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 				log.info("finish batch[file=" + sourceName 
 						+ ",size=" + size + "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
 			}
-			
+
 			onTextComplete(sourceUri, sourceName);
 			logProgress(sourceName, lineIndex, true);
 		}finally{
 			IoUtil.close(reader);
 		}
 	}
-	
+
 	/**
 	 * 单个text文件解析完成时的动作
 	 * @param sourceUri sourceUri
 	 * @param sourceName sourceName
 	 */
 	protected void onTextComplete(String sourceUri, String sourceName) throws Exception {
-		
+
 	}
 
 	@Override

@@ -10,7 +10,7 @@ import com.fom.context.Context;
 import com.fom.context.FomContext;
 import com.fom.context.Task;
 import com.fom.task.DownloadZipTask;
-import com.fom.task.helper.ZipDownloadHelper;
+import com.fom.task.helper.DownloadZipHelper;
 import com.fom.task.helper.impl.FtpHelper;
 
 /**
@@ -48,7 +48,7 @@ public class DownloadFtpZipExample extends Context {
 		list.add("/ftp/test6.txt");
 		list.add("/ftp/test7.txt");
 		list.add("/ftp/test8.txt");
-		ZipDownloadHelper helper = new FtpHelper(hostname, port, user, passwd);
+		DownloadZipHelper helper = new FtpHelper(hostname, port, user, passwd);
 		
 		Set<Task> tasks = new HashSet<>();
 		tasks.add(new DownloadZipTask(list, "ftpTest", dest, 10, 1024 * 1024, false, helper));

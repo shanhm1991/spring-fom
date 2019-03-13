@@ -13,7 +13,7 @@ import com.fom.task.DownloadZipTask;
  * @author shanhm
  *
  */
-public interface ZipDownloadHelper extends DownloadHelper {
+public interface DownloadZipHelper extends DownloadHelper {
 
 	/**
 	 * 根据sourceUri获取资源名称
