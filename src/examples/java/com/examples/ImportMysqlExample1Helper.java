@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 import com.examples.bean.ExampleBean;
 import com.examples.dao.ExamplesDao;
 import com.fom.context.SpringContext;
-import com.fom.task.helper.TextParseHelper;
+import com.fom.task.helper.TxtParseHelper;
 import com.fom.task.reader.Reader;
 import com.fom.task.reader.RowData;
 import com.fom.task.reader.TextReader;
@@ -19,7 +19,7 @@ import com.fom.task.reader.TextReader;
  * @author shanhm
  *
  */
-public class ImportMysqlExample1Helper implements TextParseHelper<ExampleBean> {
+public class ImportMysqlExample1Helper implements TxtParseHelper<ExampleBean> {
 	
 	private final Logger log;
 

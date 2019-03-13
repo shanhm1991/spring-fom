@@ -10,7 +10,7 @@ import java.util.Set;
 import com.fom.context.Context;
 import com.fom.context.ContextUtil;
 import com.fom.context.Task;
-import com.fom.task.ParseTask;
+import com.fom.task.TxtParseTask;
 import com.fom.util.FileUtil;
 import com.fom.util.PatternUtil;
 
@@ -57,7 +57,7 @@ public class ImportMysqlExample2 extends Context {
 		Set<Task> set = new HashSet<>();
 		ImportMysqlExample2Helper helper = new ImportMysqlExample2Helper(getName());
 		for(String uri : list){
-			set.add(new ParseTask<Map<String, Object>>(uri, batch, helper));
+			set.add(new TxtParseTask<Map<String, Object>>(uri, batch, helper));
 		}
 		return set;
 	}

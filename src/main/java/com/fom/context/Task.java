@@ -75,10 +75,18 @@ public abstract class Task implements Callable<Result> {
 		this.resultHandler = resultHandler;
 	}
 	
+	/**
+	 * 设置异常处理器
+	 * @param exceptionHandler exceptionHandler
+	 */
 	public void setExceptionHandler(ExceptionHandler exceptionHandler) {
 		this.exceptionHandler = exceptionHandler;
 	}
 
+	/**
+	 * 结果处理器
+	 * @param resultHandler resultHandler
+	 */
 	public void setResultHandler(ResultHandler resultHandler) {
 		this.resultHandler = resultHandler;
 	}

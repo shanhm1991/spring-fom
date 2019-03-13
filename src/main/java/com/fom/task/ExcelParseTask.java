@@ -37,7 +37,7 @@ import com.fom.util.IoUtil;
  * @author shanhm
  *
  */
-public class ExcelParseTask<V> extends Task {
+public abstract class ExcelParseTask<V> extends Task {
 
 	private int batch;
 	
@@ -45,7 +45,7 @@ public class ExcelParseTask<V> extends Task {
 	
 	protected DecimalFormat numFormat = new DecimalFormat("#.###");
 
-	protected ExcelParseHelper<V> helper;
+	protected ExcelParseHelper helper;
 
 	protected int sheetIndex = 0;
 
@@ -59,7 +59,7 @@ public class ExcelParseTask<V> extends Task {
 	 * @param isBatchBySheet isBatchBySheet
 	 * @param helper ExcelParseHelper
 	 */
-	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet, ExcelParseHelper<V> helper){
+	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet, ExcelParseHelper helper){
 		super(sourceUri);
 		this.batch = batch;
 		this.isBatchBySheet = isBatchBySheet;
@@ -73,7 +73,7 @@ public class ExcelParseTask<V> extends Task {
 	 * @param helper ExcelParseHelper
 	 * @param exceptionHandler ExceptionHandler
 	 */
-	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet, ExcelParseHelper<V> helper, ExceptionHandler exceptionHandler) {
+	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet, ExcelParseHelper helper, ExceptionHandler exceptionHandler) {
 		this(sourceUri, batch, isBatchBySheet, helper);
 		this.exceptionHandler = exceptionHandler;
 	}
@@ -85,7 +85,7 @@ public class ExcelParseTask<V> extends Task {
 	 * @param helper ExcelParseHelper
 	 * @param resultHandler ResultHandler
 	 */
-	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet, ExcelParseHelper<V> helper, ResultHandler resultHandler) {
+	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet, ExcelParseHelper helper, ResultHandler resultHandler) {
 		this(sourceUri, batch, isBatchBySheet, helper);
 		this.resultHandler = resultHandler;
 	}
@@ -99,7 +99,7 @@ public class ExcelParseTask<V> extends Task {
 	 * @param resultHandler ResultHandler
 	 */
 	public ExcelParseTask(String sourceUri, int batch, boolean isBatchBySheet, 
-			ExcelParseHelper<V> helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+			ExcelParseHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
 		this(sourceUri, batch, isBatchBySheet, helper);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
@@ -188,7 +188,7 @@ public class ExcelParseTask<V> extends Task {
 					log.debug("parse row[sheetName=" + sheetName + ",sheetIndex=" + sheetIndex 
 							+ ",rowIndex=" + rowIndex + "],columns=" + rowData.getColumnList());
 				}
-				List<V> dataList = helper.parseRowData(rowData, batchTime);
+				List<V> dataList = parseRowData(rowData, batchTime);
 				if(dataList != null){
 					batchData.addAll(dataList);
 				}
@@ -196,7 +196,7 @@ public class ExcelParseTask<V> extends Task {
 				if((isBatchBySheet && rowData.isLastRow()) || (batch > 0 && batchData.size() >= batch)){
 					TaskUtil.checkInterrupt();
 					int size = batchData.size();
-					helper.batchProcess(batchData, batchTime); 
+					batchProcess(batchData, batchTime); 
 					TaskUtil.log(log, progressLog, String.valueOf(sheetIndex), rowIndex); 
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
@@ -207,7 +207,7 @@ public class ExcelParseTask<V> extends Task {
 			if(!batchData.isEmpty()){
 				TaskUtil.checkInterrupt();
 				int size = batchData.size();
-				helper.batchProcess(batchData, batchTime); 
+				batchProcess(batchData, batchTime); 
 				TaskUtil.log(log, progressLog, String.valueOf(sheetIndex), rowIndex); 
 				log.info("finish batch[sheetName=" + sheetName + ",sheetIndex=" + sheetIndex 
 						+ ",size=" + size + "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
@@ -234,4 +234,21 @@ public class ExcelParseTask<V> extends Task {
 			return helper.reRangeSheet(sheetRangeList);
 		}
 	}
+	
+	/**
+	 * 将行字段数据映射成对应的bean或者map
+	 * @param rowData
+	 * @param batchTime 批处理时间
+	 * @return 映射结果V列表
+	 * @throws Exception Exception
+	 */
+	public abstract List<V> parseRowData(RowData rowData, long batchTime) throws Exception;
+
+	/**
+	 * 批处理行数据
+	 * @param batchData batchData
+	 * @param batchTime batchTime
+	 * @throws Exception Exception
+	 */
+	public abstract void batchProcess(List<V> batchData, long batchTime) throws Exception;
 }

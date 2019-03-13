@@ -4,9 +4,9 @@ import java.io.File;
 import java.util.Map;
 
 import com.fom.pool.handler.EsHandler;
-import com.fom.task.ParseTask;
+import com.fom.task.TxtParseTask;
 
-public class ImportEsExampleParser extends ParseTask<Map<String, Object>> {
+public class ImportEsExampleParser extends TxtParseTask<Map<String, Object>> {
 	
 	private static final String POOL = "example_es";
 	

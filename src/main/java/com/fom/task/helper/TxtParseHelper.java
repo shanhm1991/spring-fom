@@ -1,17 +1,16 @@
 package com.fom.task.helper;
 
-import com.fom.task.ParseTask;
+import com.fom.task.TxtParseTask;
 import com.fom.task.reader.Reader;
 /**
  * ParseTask中需要的具体操作方法
  * 
  * @author shanhm
  * 
- * @see ParseTask
+ * @see TxtParseTask
  *
- * @param <V> 行数据解析结果类型
  */
-public interface TextParseHelper<V> extends ParseHelper<V> {
+public interface TxtParseHelper extends ParseHelper {
 	
 	/**
 	 * 获取对应文件的reader

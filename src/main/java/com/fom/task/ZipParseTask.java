@@ -41,18 +41,18 @@ import com.fom.util.ZipUtil;
  * <br>单个文件处理的说明：同理于ParseTask中
  * 
  * @see TextZipParseHelper
- * @see ParseTask
+ * @see TxtParseTask
  * 
  * @param <V> 行数据解析结果类型
  * 
  * @author shanhm
  * 
  */
-public class ZipParseTask<V> extends Task {
+public abstract class ZipParseTask<V> extends Task {
 
 	private int batch;
 
-	private TextZipParseHelper<V> helper;
+	private TextZipParseHelper helper;
 
 	private File progressLog;
 
@@ -71,7 +71,7 @@ public class ZipParseTask<V> extends Task {
 	 * @param batch 批处理数
 	 * @param helper LocalZipParserHelper
 	 */
-	public ZipParseTask(String sourceUri, int batch, TextZipParseHelper<V> helper) {
+	public ZipParseTask(String sourceUri, int batch, TextZipParseHelper helper) {
 		super(sourceUri);
 		this.helper = helper;
 		String sourceName = new File(sourceUri).getName();
@@ -94,7 +94,7 @@ public class ZipParseTask<V> extends Task {
 	 * @param exceptionHandler ExceptionHandler
 	 */
 	public ZipParseTask(String sourceUri, int batch, 
-			TextZipParseHelper<V> helper, ExceptionHandler exceptionHandler) { 
+			TextZipParseHelper helper, ExceptionHandler exceptionHandler) { 
 		this(sourceUri, batch, helper);
 		this.exceptionHandler = exceptionHandler;
 	}
@@ -106,7 +106,7 @@ public class ZipParseTask<V> extends Task {
 	 * @param resultHandler ResultHandler
 	 */
 	public ZipParseTask(String sourceUri, int batch, 
-			TextZipParseHelper<V> helper, ResultHandler resultHandler) {
+			TextZipParseHelper helper, ResultHandler resultHandler) {
 		this(sourceUri, batch, helper);
 		this.resultHandler = resultHandler;
 	}
@@ -119,7 +119,7 @@ public class ZipParseTask<V> extends Task {
 	 * @param resultHandler ResultHandler
 	 */
 	public ZipParseTask(String sourceUri, int batch, 
-			TextZipParseHelper<V> helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+			TextZipParseHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
 		this(sourceUri, batch, helper);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
@@ -322,7 +322,7 @@ public class ZipParseTask<V> extends Task {
 				if(batch > 0 && batchData.size() >= batch){
 					TaskUtil.checkInterrupt();
 					int size = batchData.size();
-					helper.batchProcess(batchData, batchTime); 
+					batchProcess(batchData, batchTime); 
 					TaskUtil.log(log, progressLog, currentFileName, rowIndex); 
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
@@ -334,7 +334,7 @@ public class ZipParseTask<V> extends Task {
 					log.debug("parse row[file=" + currentFileName + ",rowIndex= " 
 							+ rowIndex + "],columns=" + rowData.getColumnList());
 				}
-				List<V> dataList = helper.parseRowData(rowData, batchTime);
+				List<V> dataList = parseRowData(rowData, batchTime);
 				if(dataList != null){
 					batchData.addAll(dataList);
 				}
@@ -342,7 +342,7 @@ public class ZipParseTask<V> extends Task {
 			if(!batchData.isEmpty()){
 				TaskUtil.checkInterrupt();
 				int size = batchData.size();
-				helper.batchProcess(batchData, batchTime); 
+				batchProcess(batchData, batchTime); 
 				TaskUtil.log(log, progressLog, currentFileName, rowIndex); 
 				log.info("finish batch[file=" + currentFileName + ",size=" + size 
 						+ "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
@@ -352,4 +352,20 @@ public class ZipParseTask<V> extends Task {
 		}
 	}
 
+	/**
+	 * 将行字段数据映射成对应的bean或者map
+	 * @param rowData
+	 * @param batchTime 批处理时间
+	 * @return 映射结果V列表
+	 * @throws Exception Exception
+	 */
+	public abstract List<V> parseRowData(RowData rowData, long batchTime) throws Exception;
+
+	/**
+	 * 批处理行数据
+	 * @param batchData batchData
+	 * @param batchTime batchTime
+	 * @throws Exception Exception
+	 */
+	public abstract void batchProcess(List<V> batchData, long batchTime) throws Exception;
 }

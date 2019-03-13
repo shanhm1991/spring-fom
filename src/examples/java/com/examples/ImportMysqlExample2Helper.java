@@ -9,7 +9,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.fom.pool.handler.JdbcHandler;
-import com.fom.task.helper.TextParseHelper;
+import com.fom.task.helper.TxtParseHelper;
 import com.fom.task.reader.Reader;
 import com.fom.task.reader.RowData;
 import com.fom.task.reader.TextReader;
@@ -19,7 +19,7 @@ import com.fom.task.reader.TextReader;
  * @author shanhm
  *
  */
-public class ImportMysqlExample2Helper implements TextParseHelper<Map<String, Object>> {
+public class ImportMysqlExample2Helper implements TxtParseHelper<Map<String, Object>> {
 
 	private static final String POOL = "example_mysql";
 
