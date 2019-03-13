@@ -148,9 +148,9 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 					checkInterrupt();
 					int size = batchData.size();
 					batchProcess(batchData, batchTime); 
-					logProgress(sourceName, sheetIndex, sheetName, lineIndex, false); 
 					log.info("finish batch[file=" + sourceName + "sheet=" + sheetName 
 							+ ",size=" + size + "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
+					logProgress(sourceName, sheetIndex, sheetName, lineIndex, false); 
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
 				}
@@ -174,8 +174,9 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 	 * 单个Excel文件解析完成时的动作
 	 * @param sourceUri sourceUri
 	 * @param sourceName sourceName
+	 * @throws Exception Exception
 	 */
-	protected void onExcelComplete(String sourceUri, String sourceName) {
+	protected void onExcelComplete(String sourceUri, String sourceName) throws Exception {
 		
 	}
 

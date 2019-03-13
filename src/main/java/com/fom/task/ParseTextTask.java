@@ -148,9 +148,9 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 					checkInterrupt();
 					int size = batchData.size();
 					batchProcess(batchData, batchTime); 
-					logProgress(sourceName, lineIndex, false);
 					log.info("finish batch[file=" + sourceName 
 							+ ",size=" + size + "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
+					logProgress(sourceName, lineIndex, false);
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
 				}
@@ -175,7 +175,7 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 	 * @param sourceUri sourceUri
 	 * @param sourceName sourceName
 	 */
-	protected void onTextComplete(String sourceUri, String sourceName) {
+	protected void onTextComplete(String sourceUri, String sourceName) throws Exception {
 		
 	}
 
