@@ -16,7 +16,7 @@ import com.fom.util.IoUtil;
  * @author shanhm
  *
  */
-public class TxtReader implements Reader {
+public class TextReader implements Reader {
 	
 	private BufferedReader reader;
 	
@@ -25,29 +25,29 @@ public class TxtReader implements Reader {
 	private String regex;
 	
 	/**
-	 * @param regex
+	 * @param regex regex
 	 * @param sourceUri sourceUri
 	 * @throws Exception Exception
 	 */
-	public TxtReader(String sourceUri, String regex) throws Exception {
+	public TextReader(String sourceUri, String regex) throws Exception {
 		this(new FileInputStream(new File(sourceUri)), regex);
 	}
 	
 	/**
-	 * @param regex
+	 * @param regex regex
 	 * @param file file
 	 * @throws Exception Exception
 	 */
-	public TxtReader(File file, String regex) throws Exception {
+	public TextReader(File file, String regex) throws Exception {
 		this(new FileInputStream(file), regex);
 	}
 	
 	/**
-	 * @param regex
+	 * @param regex regex
 	 * @param inputStream inputStream
 	 * @throws Exception Exception
 	 */
-	public TxtReader(InputStream inputStream, String regex) throws Exception {
+	public TextReader(InputStream inputStream, String regex) throws Exception {
 		this.regex = regex;
 		reader = new BufferedReader(new InputStreamReader(inputStream,"UTF-8"));
 	}

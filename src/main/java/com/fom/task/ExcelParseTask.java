@@ -1,19 +1,14 @@
 package com.fom.task;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
 
 import com.fom.context.ExceptionHandler;
 import com.fom.context.ResultHandler;
-import com.fom.context.Task;
-import com.fom.task.helper.ExcelParseHelper;
 import com.fom.task.reader.ExcelReader;
 import com.fom.task.reader.Reader;
 import com.fom.task.reader.RowData;
@@ -38,7 +33,7 @@ import com.fom.util.IoUtil;
 public abstract class ExcelParseTask<V> extends ParseTask<V> {
 
 	private boolean isBatchBySheet;
-	
+
 	protected int sheetIndex = 0;
 
 	protected int rowIndex = 0;
@@ -91,8 +86,6 @@ public abstract class ExcelParseTask<V> extends ParseTask<V> {
 
 	@Override
 	protected boolean beforeExec() throws Exception { 
-		
-
 		if(!progressLog.exists()){ 
 			if(!progressLog.createNewFile()){
 				log.error("progress log create failed.");
@@ -116,49 +109,35 @@ public abstract class ExcelParseTask<V> extends ParseTask<V> {
 	@Override
 	protected boolean exec() throws Exception {
 		long sTime = System.currentTimeMillis();
-
-		parse();
-		String size = numFormat.format(helper.getSourceSize(id) / 1024.0);
-		log.info("finish excel(" + size + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
+		parseExcel(id, getSourceName(id), rowIndex);
+		log.info("finish excel(" 
+				+ formatSize(getSourceSize(id)) + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
 		return true;
 	}
 
-	@Override
-	protected boolean afterExec() throws Exception {
-		if(!helper.delete(id)){ 
-			log.error("delete src file failed.");
-			return false;
-		}
-		if(!progressLog.delete()){
-			log.error("delete progress log failed.");
-			return false;
-		}
-		return true;
-	}
-
-	private void parse() throws Exception {
+	protected void parseExcel(String sourceUri, String sourceName, int lineIndex) throws Exception {
 		Reader reader = null;
 		RowData rowData = null;
 		String sheetName = null;
 		try{
-			reader = new InnerReader(helper.getInputStream(id), helper.getExcelType());
+			reader = getExcelReader(sourceUri);
 			List<V> batchData = new LinkedList<>(); 
 			long batchTime = System.currentTimeMillis();
 			while ((rowData = reader.readRow()) != null) {
 				if(sheetIndex < rowData.getSheetIndex()){
 					sheetIndex = rowData.getSheetIndex();
-					rowIndex = 0;
+					lineIndex = 0;
 				}
 
-				if(rowIndex > 0 && rowData.getRowIndex() <= rowIndex){
+				if(lineIndex > 0 && rowData.getRowIndex() <= lineIndex){
 					continue;
 				}
-				rowIndex = rowData.getRowIndex();
+				lineIndex = rowData.getRowIndex();
 				sheetName = rowData.getSheetName();
 
 				if (log.isDebugEnabled()) {
-					log.debug("parse row[sheetName=" + sheetName + ",sheetIndex=" + sheetIndex 
-							+ ",rowIndex=" + rowIndex + "],columns=" + rowData.getColumnList());
+					log.debug("parse row[file=" + sourceName + ",sheet=" + sheetName 
+							+ ",row= " + rowIndex + "],columns=" + rowData.getColumnList());
 				}
 				List<V> dataList = parseRowData(rowData, batchTime);
 				if(dataList != null){
@@ -166,22 +145,22 @@ public abstract class ExcelParseTask<V> extends ParseTask<V> {
 				}
 
 				if((isBatchBySheet && rowData.isLastRow()) || (batch > 0 && batchData.size() >= batch)){
-					TaskUtil.checkInterrupt();
+					checkInterrupt();
 					int size = batchData.size();
 					batchProcess(batchData, batchTime); 
-					TaskUtil.log(log, progressLog, String.valueOf(sheetIndex), rowIndex); 
+					logProgress(sourceName, sheetIndex, sheetName, lineIndex, false); 
+					log.info("finish batch[file=" + sourceName + "sheet=" + sheetName 
+							+ ",size=" + size + "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
-					log.info("finish batch[sheetName=" + sheetName + ",sheetIndex=" + sheetIndex 
-							+ ",size=" + size + "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
 				}
 			}
 			if(!batchData.isEmpty()){
-				TaskUtil.checkInterrupt();
+				checkInterrupt();
 				int size = batchData.size();
 				batchProcess(batchData, batchTime); 
-				TaskUtil.log(log, progressLog, String.valueOf(sheetIndex), rowIndex); 
-				log.info("finish batch[sheetName=" + sheetName + ",sheetIndex=" + sheetIndex 
+				logProgress(sourceName, sheetIndex, sheetName, lineIndex, true); 
+				log.info("finish batch[file=" + sourceName + "sheet=" + sheetName 
 						+ ",size=" + size + "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
 			}
 		}finally{
@@ -189,38 +168,72 @@ public abstract class ExcelParseTask<V> extends ParseTask<V> {
 		}
 	}
 
-	private class InnerReader extends ExcelReader { 
-
-		public InnerReader(InputStream inputStream, String type) throws IOException {
-			super(inputStream, type);
-		}
-
-		@Override
-		protected boolean shouldSheetProcess(int sheetIndex, String sheetName) {
-			return sheetIndex >= ExcelParseTask.this.sheetIndex
-					&& helper.sheetFilter(sheetIndex, sheetName); 
-		}
-		
-		@Override
-		protected List<String> reRangeSheet(List<String> sheetRangeList) {
-			return helper.reRangeSheet(sheetRangeList);
-		}
+	/**
+	 * 纪录处理进度
+	 * @param file file
+	 * @param sheetIndex sheetIndex
+	 * @param sheetName sheetName
+	 * @param row row
+	 * @param completed completed
+	 * @throws IOException IOException
+	 */
+	protected void logProgress(String file, int sheetIndex, String sheetName, long row, boolean completed) throws IOException {
+		log.info("process progress: file=" + file + ",sheet=" + sheetName + ",row=" + row + ",completed=" + completed);
+		FileUtils.writeStringToFile(progressLog, file + "\n" + sheetIndex + "\n" + row + "\n" + completed, false);
 	}
-	
-	/**
-	 * 将行字段数据映射成对应的bean或者map
-	 * @param rowData
-	 * @param batchTime 批处理时间
-	 * @return 映射结果V列表
-	 * @throws Exception Exception
-	 */
-	public abstract List<V> parseRowData(RowData rowData, long batchTime) throws Exception;
 
 	/**
-	 * 批处理行数据
-	 * @param batchData batchData
-	 * @param batchTime batchTime
+	 * 获取对应文件的InputStream
+	 * @param sourceUri 资源uri
+	 * @return InputStream
 	 * @throws Exception Exception
 	 */
-	public abstract void batchProcess(List<V> batchData, long batchTime) throws Exception;
+	protected abstract InputStream getExcelInputStream(String sourceUri) throws Exception;
+
+	/**
+	 * Excel类型  xls or xlsx
+	 * @return  xls or xlsx
+	 */
+	protected abstract String getExcelType();
+
+	/**
+	 * 过滤需要处理的sheet页
+	 * @param sheetIndex sheetIndex
+	 * @param sheetName sheetName
+	 * @return boolean
+	 */
+	protected boolean sheetFilter(int sheetIndex, String sheetName) {
+		return true;
+	}
+
+	/**
+	 * 自定义sheet处理顺序
+	 * @param sheetRangeList 原sheet顺序
+	 * @return 重排序后sheet顺序
+	 */
+	protected List<String> reRangeSheet(List<String> sheetRangeList) {
+		return sheetRangeList;
+	}
+
+	private ExcelReader getExcelReader(String sourceUri) throws Exception {
+
+		return new ExcelReader(getExcelInputStream(sourceUri), getExcelType()) {
+
+			@Override
+			protected boolean shouldSheetProcess(int sheetIndex, String sheetName) {
+				return sheetIndex >= ExcelParseTask.this.sheetIndex
+						&& ExcelParseTask.this.sheetFilter(sheetIndex, sheetName); 
+			}
+
+			@Override
+			protected List<String> reRangeSheet(List<String> sheetRangeList) {
+				return ExcelParseTask.this.reRangeSheet(sheetRangeList);
+			}
+		};
+	}
+
+	@Override
+	protected boolean afterExec() throws Exception {
+		return deleteSource(id) && deleteProgressLog();
+	}
 }

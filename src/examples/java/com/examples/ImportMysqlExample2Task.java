@@ -1,45 +1,36 @@
 package com.examples;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-
 import com.fom.pool.handler.JdbcHandler;
-import com.fom.task.helper.TextZipParseHelper;
+import com.fom.task.TextParseTask;
 import com.fom.task.reader.Reader;
 import com.fom.task.reader.RowData;
-import com.fom.task.reader.TxtReader;
-import com.fom.util.PatternUtil;
+import com.fom.task.reader.TextReader;
 
 /**
  * 
  * @author shanhm
  *
  */
-public class ImportOracleExample2Helper implements TextZipParseHelper<Map<String, Object>> {
+public class ImportMysqlExample2Task extends TextParseTask<Map<String, Object>> {
 
-	private static final String POOL = "example_oracle";
+	private static final String POOL = "example_mysql";
 
 	private static final String SQL = 
 			"insert into demo(id,name,source,filetype,importway) "
 					+ "values (#id#,#name#,#source#,#fileType#,#importWay#)";
-
-	private final String pattern;
-
-	private final Logger log;
-
-	public ImportOracleExample2Helper(String name, String pattern) {
-		this.pattern = pattern;
-		this.log = Logger.getLogger(name);
+	
+	public ImportMysqlExample2Task(String sourceUri, int batch){
+		super(sourceUri, batch); 
 	}
 
 	@Override
 	public Reader getReader(String sourceUri) throws Exception {
-		return new TxtReader(sourceUri, "#");
+		return new TextReader(sourceUri, "#");
 	}
 
 	@Override
@@ -47,32 +38,18 @@ public class ImportOracleExample2Helper implements TextZipParseHelper<Map<String
 		List<String> columns = rowData.getColumnList();
 		Map<String,Object> map = new HashMap<>();
 		map.put("id", columns.get(0));
-		map.put("name", columns.get(1)); 
+		map.put("name", columns.get(1));
 		map.put("source", "local");
-		map.put("fileType", "zip(txt)");
+		map.put("fileType", "txt");
 		map.put("importWay", "pool");
 		return Arrays.asList(map);
 	}
-
+	
 	@Override
 	public void batchProcess(List<Map<String, Object>> lineDatas, long batchTime) throws Exception {
 		JdbcHandler.handler.batchExecute(POOL, SQL, lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());
-	}
-	
-	@Override
-	public boolean matchEntryName(String entryName) {
-		return PatternUtil.match(pattern, entryName);
+		
 	}
 
-	@Override
-	public boolean delete(String sourceUri) {
-		return new File(sourceUri).delete();
-	}
-
-	@Override
-	public long getSourceSize(String sourceUri) {
-		return new File(sourceUri).length();
-	}
-	
 }

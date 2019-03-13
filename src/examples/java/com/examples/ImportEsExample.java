@@ -72,9 +72,8 @@ public class ImportEsExample extends Context {
 		}); 
 		
 		Set<Task> set = new HashSet<>();
-		ImportEsExampleHelper helper = new ImportEsExampleHelper(getName(), esIndex, esType); 
 		for(String path : list){
-			set.add(new ImportEsExampleParser(path, batch, helper, esIndex, esType,  esJson));
+			set.add(new ImportEsExampleTask(path, batch, esIndex, esType,  esJson));
 		}
 		return set;
 	}

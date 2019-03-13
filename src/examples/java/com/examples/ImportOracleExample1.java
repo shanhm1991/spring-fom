@@ -6,11 +6,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.examples.bean.ExampleBean;
 import com.fom.context.Context;
 import com.fom.context.ContextUtil;
 import com.fom.context.Task;
-import com.fom.task.TxtZipParseTask;
 import com.fom.util.FileUtil;
 import com.fom.util.PatternUtil;
 
@@ -55,9 +53,8 @@ public class ImportOracleExample1 extends Context {
 		
 		Set<Task> set = new HashSet<>();
 		String subPettern = config.getString("zipEntryPattern", "");
-		ImportOracleExample1Helper helper = new ImportOracleExample1Helper(getName(), subPettern);
 		for(String uri : list){
-			set.add(new TxtZipParseTask<ExampleBean>(uri, batch, helper));
+			set.add(new ImportOracleExample1Task(uri, batch, subPettern));
 		}
 		return set;
 	}

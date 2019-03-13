@@ -29,7 +29,7 @@ public class Result {
 
 	/**
 	 * 获取任务id
-	 * @return
+	 * @return id
 	 */
 	public String getTaskId() {
 		return taskId;

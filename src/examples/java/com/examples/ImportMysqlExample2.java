@@ -4,13 +4,11 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.fom.context.Context;
 import com.fom.context.ContextUtil;
 import com.fom.context.Task;
-import com.fom.task.TxtParseTask;
 import com.fom.util.FileUtil;
 import com.fom.util.PatternUtil;
 
@@ -55,9 +53,8 @@ public class ImportMysqlExample2 extends Context {
 		}); 
 		
 		Set<Task> set = new HashSet<>();
-		ImportMysqlExample2Helper helper = new ImportMysqlExample2Helper(getName());
 		for(String uri : list){
-			set.add(new TxtParseTask<Map<String, Object>>(uri, batch, helper));
+			set.add(new ImportMysqlExample2Task(uri, batch));
 		}
 		return set;
 	}

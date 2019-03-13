@@ -1,15 +1,12 @@
 package com.fom.task;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.fom.context.Task;
-import com.fom.task.reader.Reader;
 import com.fom.task.reader.RowData;
 
 /**
@@ -29,7 +26,6 @@ public abstract class ParseTask<V> extends Task {
 	/**
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
-	 * @param helper ParserHelper
 	 */
 	public ParseTask(String sourceUri, int batch){
 		super(sourceUri);
@@ -77,18 +73,6 @@ public abstract class ParseTask<V> extends Task {
 	}
 	
 	/**
-	 * 纪录处理进度
-	 * @param file file
-	 * @param row row
-	 * @param completed completed
-	 * @throws IOException IOException
-	 */
-	protected final void logProgress(String file, long row, boolean completed) throws IOException {
-		log.info("process progress: file=" + file + ",row=" + row + ",completed=" + completed);
-		FileUtils.writeStringToFile(progressLog, file + "\n" + row + "\n" + completed, false);
-	}
-	
-	/**
 	 * 删除处理进度纪录日志
 	 * @return 是否删除成功
 	 */
@@ -120,16 +104,8 @@ public abstract class ParseTask<V> extends Task {
 	}
 	
 	/**
-	 * 获取对应sourceUri的资源的Reader
-	 * @param sourceUri sourceUri
-	 * @return Reader
-	 * @throws Exception Exception
-	 */
-	protected abstract Reader getSourceReader(String sourceUri) throws Exception;
-	
-	/**
 	 * 将行字段数据映射成对应的bean或者map
-	 * @param rowData
+	 * @param rowData rowData
 	 * @param batchTime 批处理时间
 	 * @return 映射结果V列表
 	 * @throws Exception Exception

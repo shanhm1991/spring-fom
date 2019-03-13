@@ -1,18 +1,15 @@
 package com.examples;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-
-import org.apache.log4j.Logger;
 
 import com.examples.bean.ExampleBean;
 import com.examples.dao.ExamplesDao;
 import com.fom.context.SpringContext;
-import com.fom.task.helper.TextZipParseHelper;
+import com.fom.task.TextZipParseTask;
 import com.fom.task.reader.Reader;
 import com.fom.task.reader.RowData;
-import com.fom.task.reader.TxtReader;
+import com.fom.task.reader.TextReader;
 import com.fom.util.PatternUtil;
 
 /**
@@ -20,20 +17,18 @@ import com.fom.util.PatternUtil;
  * @author shanhm
  *
  */
-public class ImportOracleExample1Helper implements TextZipParseHelper<ExampleBean> {
+public class ImportOracleExample1Task extends TextZipParseTask<ExampleBean> {
 	
 	private final String pattern;
 	
-	private final Logger log;
-
-	public ImportOracleExample1Helper(String name, String pattern) {
+	public ImportOracleExample1Task(String sourceUri, int batch, String pattern) {
+		super(sourceUri, batch); 
 		this.pattern = pattern;
-		this.log = Logger.getLogger(name);
 	}
 
 	@Override
 	public Reader getReader(String sourceUri) throws Exception {
-		return new TxtReader(sourceUri, "#");
+		return new TextReader(sourceUri, "#");
 	}
 
 	@Override
@@ -56,16 +51,6 @@ public class ImportOracleExample1Helper implements TextZipParseHelper<ExampleBea
 	@Override
 	public boolean matchEntryName(String entryName) {
 		return PatternUtil.match(pattern, entryName);
-	}
-
-	@Override
-	public boolean delete(String sourceUri) {
-		return new File(sourceUri).delete();
-	}
-
-	@Override
-	public long getSourceSize(String sourceUri) {
-		return new File(sourceUri).length();
 	}
 	
 }

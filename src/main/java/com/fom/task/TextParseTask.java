@@ -1,5 +1,6 @@
 package com.fom.task;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -27,7 +28,7 @@ import com.fom.util.IoUtil;
  * @author shanhm
  *
  */
-public abstract class TxtParseTask<V> extends ParseTask<V> {
+public abstract class TextParseTask<V> extends ParseTask<V> {
 
 	private int rowIndex = 0;
 
@@ -35,7 +36,7 @@ public abstract class TxtParseTask<V> extends ParseTask<V> {
 	 * @param sourceUri 资源uri
 	 * @param batch 入库时的批处理数
 	 */
-	public TxtParseTask(String sourceUri, int batch){
+	public TextParseTask(String sourceUri, int batch){
 		super(sourceUri, batch);
 	}
 
@@ -44,7 +45,7 @@ public abstract class TxtParseTask<V> extends ParseTask<V> {
 	 * @param batch 入库时的批处理数
 	 * @param exceptionHandler ExceptionHandler
 	 */
-	public TxtParseTask(String sourceUri, int batch, ExceptionHandler exceptionHandler) {
+	public TextParseTask(String sourceUri, int batch, ExceptionHandler exceptionHandler) {
 		this(sourceUri, batch);
 		this.exceptionHandler = exceptionHandler;
 	}
@@ -54,7 +55,7 @@ public abstract class TxtParseTask<V> extends ParseTask<V> {
 	 * @param batch 入库时的批处理数
 	 * @param resultHandler ResultHandler
 	 */
-	public TxtParseTask(String sourceUri, int batch, ResultHandler resultHandler) {
+	public TextParseTask(String sourceUri, int batch, ResultHandler resultHandler) {
 		this(sourceUri, batch);
 		this.resultHandler = resultHandler;
 	}
@@ -65,7 +66,7 @@ public abstract class TxtParseTask<V> extends ParseTask<V> {
 	 * @param exceptionHandler ExceptionHandler
 	 * @param resultHandler ResultHandler
 	 */
-	public TxtParseTask(String sourceUri, int batch, 
+	public TextParseTask(String sourceUri, int batch, 
 			ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
 		this(sourceUri, batch);
 		this.exceptionHandler = exceptionHandler;
@@ -83,7 +84,7 @@ public abstract class TxtParseTask<V> extends ParseTask<V> {
 			log.warn("continue to deal with uncompleted task."); 
 			List<String> lines = FileUtils.readLines(progressLog);
 			try{
-				rowIndex = Integer.valueOf(lines.get(0));
+				rowIndex = Integer.valueOf(lines.get(1));
 				log.info("get history processed progress: rowIndex=" + rowIndex); 
 			}catch(Exception e){
 				log.warn("get history processed progress failed, will process from scratch.");
@@ -100,13 +101,33 @@ public abstract class TxtParseTask<V> extends ParseTask<V> {
 				+ formatSize(getSourceSize(id)) + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
 		return true;
 	}
+	
+	/**
+	 * 纪录处理进度
+	 * @param file file
+	 * @param row row
+	 * @param completed completed
+	 * @throws IOException IOException
+	 */
+	protected void logProgress(String file, long row, boolean completed) throws IOException {
+		log.info("process progress: file=" + file + ",row=" + row + ",completed=" + completed);
+		FileUtils.writeStringToFile(progressLog, file + "\n" + row + "\n" + completed, false);
+	}
+	
+	/**
+	 * 获取对应sourceUri的资源的Reader
+	 * @param sourceUri sourceUri
+	 * @return Reader
+	 * @throws Exception Exception
+	 */
+	protected abstract Reader getReader(String sourceUri) throws Exception;
 
-	protected final void parseTxt(String sourceUri, String sourceName, int lineIndex) throws Exception {
+	protected void parseTxt(String sourceUri, String sourceName, int lineIndex) throws Exception {
 		Reader reader = null;
 		RowData rowData = null;
 		long batchTime = System.currentTimeMillis();
 		try{
-			reader = getSourceReader(sourceUri); 
+			reader = getReader(sourceUri); 
 			List<V> batchData = new LinkedList<>(); 
 			while ((rowData = reader.readRow()) != null) {
 				if(lineIndex > 0 && rowData.getRowIndex() <= lineIndex){
@@ -115,7 +136,7 @@ public abstract class TxtParseTask<V> extends ParseTask<V> {
 				lineIndex = rowData.getRowIndex();
 				if (log.isDebugEnabled()) {
 					log.debug("parse row[file=" 
-							+ sourceName + ",rowIndex= " + rowIndex + "],columns=" + rowData.getColumnList());
+							+ sourceName + ",row= " + rowIndex + "],columns=" + rowData.getColumnList());
 				}
 
 				List<V> dataList = parseRowData(rowData, batchTime);
@@ -142,9 +163,15 @@ public abstract class TxtParseTask<V> extends ParseTask<V> {
 				log.info("finish batch[file=" + sourceName 
 						+ ",size=" + size + "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
 			}
+			
+			onTxtComplete(sourceUri, sourceName);
 		}finally{
 			IoUtil.close(reader);
 		}
+	}
+	
+	protected void onTxtComplete(String sourceUri, String sourceName) {
+		
 	}
 
 	@Override

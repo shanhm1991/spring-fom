@@ -1,35 +1,30 @@
 package com.examples;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-
-import org.apache.log4j.Logger;
 
 import com.examples.bean.ExampleBean;
 import com.examples.dao.ExamplesDao;
 import com.fom.context.SpringContext;
-import com.fom.task.helper.TxtParseHelper;
+import com.fom.task.TextParseTask;
 import com.fom.task.reader.Reader;
 import com.fom.task.reader.RowData;
-import com.fom.task.reader.TxtReader;
+import com.fom.task.reader.TextReader;
 
 /**
  * 
  * @author shanhm
  *
  */
-public class ImportMysqlExample1Helper implements TxtParseHelper<ExampleBean> {
+public class ImportMysqlExample1Task extends TextParseTask<ExampleBean> {
 	
-	private final Logger log;
-
-	public ImportMysqlExample1Helper(String name) {
-		log = Logger.getLogger(name);
+	public ImportMysqlExample1Task(String sourceUri, int batch){
+		super(sourceUri, batch); 
 	}
 
 	@Override
 	public Reader getReader(String sourceUri) throws Exception {
-		return new TxtReader(sourceUri, "#");
+		return new TextReader(sourceUri, "#");
 	}
 
 	@Override
@@ -46,16 +41,6 @@ public class ImportMysqlExample1Helper implements TxtParseHelper<ExampleBean> {
 		ExamplesDao demoDao = SpringContext.getBean("mysqlExampleDao", ExamplesDao.class);
 		demoDao.batchInsert(lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());
-	}
-	
-	@Override
-	public boolean delete(String sourceUri) {
-		return new File(sourceUri).delete();
-	}
-
-	@Override
-	public long getSourceSize(String sourceUri) {
-		return new File(sourceUri).length();
 	}
 
 }

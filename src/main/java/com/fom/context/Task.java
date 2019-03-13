@@ -199,6 +199,7 @@ public abstract class Task implements Callable<Result> {
 	
 	/**
 	 * 只有在context中使用时才会赋值，否则将为null
+	 * @return context name
 	 */
 	protected final String getContextName(){
 		if(context == null){

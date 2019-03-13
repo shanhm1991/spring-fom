@@ -173,7 +173,7 @@ public class Context implements Serializable {
 
 	/**
 	 * 修改日志级别
-	 * @param level
+	 * @param level level
 	 */
 	public final void changeLogLevel(String level){
 		if(log == null){

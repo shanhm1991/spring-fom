@@ -6,11 +6,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.examples.bean.ExampleBean;
 import com.fom.context.Context;
 import com.fom.context.ContextUtil;
 import com.fom.context.Task;
-import com.fom.task.TxtParseTask;
 import com.fom.util.FileUtil;
 import com.fom.util.PatternUtil;
 
@@ -54,9 +52,8 @@ public class ImportMysqlExample1 extends Context {
 		}); 
 		
 		Set<Task> set = new HashSet<>();
-		ImportMysqlExample1Helper helper = new ImportMysqlExample1Helper(getName());
 		for(String uri : list){
-			set.add(new TxtParseTask<ExampleBean>(uri, batch, helper));
+			set.add(new ImportMysqlExample1Task(uri, batch));
 		}
 		return set;
 	}
