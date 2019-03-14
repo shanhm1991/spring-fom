@@ -1,19 +1,22 @@
 package com.fom.util;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.log4j.Logger;
 
 import net.lingala.zip4j.core.HeaderReader;
@@ -27,14 +30,14 @@ import net.lingala.zip4j.util.InternalZipConstants;
  *
  */
 public class ZipUtil {
-	
+
 	private static final Logger LOG = Logger.getLogger(ZipUtil.class);
-	
+
 	/**
 	 * 解压指定uri的zip文件到指定目录
 	 * @param uri String
 	 * @param destDir File
-	 * @return zip length
+	 * @return cost
 	 * @throws Exception Exception
 	 */
 	public static long unZip(String uri, File destDir) throws Exception {
@@ -43,38 +46,27 @@ public class ZipUtil {
 
 	/**
 	 * 解压zip文件到指定目录
-	 * @param file File
-	 * @param destDir File
-	 * @return zip length
+	 * @param zipFile zipFile
+	 * @param descDir descDir
+	 * @return cost
 	 * @throws Exception Exception
 	 */
-	public static long unZip(File file, File destDir) throws Exception{ 
-		long sTime = System.currentTimeMillis();
-		ZipFile zip = null;
-		try {
-			zip = new ZipFile(file);
-			for(Enumeration<? extends ZipEntry> entries = zip.entries(); entries.hasMoreElements();){
-				ZipEntry entry  = (ZipEntry)entries.nextElement();
-				String entryName = entry.getName();
-				InputStream inStream = null;
-				OutputStream outStream = null;
-				try{
-					inStream = zip.getInputStream(entry);
-					outStream = new FileOutputStream(new File(destDir + File.separator + entryName));
-					byte[] buff = new byte[1024];
-					int len = 0;
-					while((len = inStream.read(buff)) > 0){
-						outStream.write(buff,0,len); 
-					}
-				}finally{
-					IoUtil.close(inStream);
-					IoUtil.close(outStream);
-				}
+	public static long unZip(File zipFile, File descDir) throws Exception {
+		long stime = System.currentTimeMillis();
+		try (ZipArchiveInputStream inputStream = getZipFile(zipFile)) {
+			ZipArchiveEntry entry = null;
+			while ((entry = inputStream.getNextZipEntry()) != null) {
+				try(OutputStream os = 
+						new BufferedOutputStream(new FileOutputStream(new File(descDir, entry.getName())))){
+					IOUtils.copy(inputStream, os);
+				} 
 			}
-			return System.currentTimeMillis() - sTime;
-		} finally{
-			IoUtil.close(zip);
-		}
+		} 
+		return System.currentTimeMillis() - stime;
+	}
+
+	private static ZipArchiveInputStream getZipFile(File zipFile) throws Exception {
+		return new ZipArchiveInputStream(new BufferedInputStream(new FileInputStream(zipFile)));
 	}
 
 	/**
@@ -85,7 +77,7 @@ public class ZipUtil {
 	public static boolean valid(String uri){
 		return valid(new File(uri));
 	}
-	
+
 	/**
 	 * 校验zip文件是否合法
 	 * @param zip File
@@ -95,7 +87,7 @@ public class ZipUtil {
 		if(zip == null || !zip.exists() || !zip.canRead()){
 			return false;
 		}
-		
+
 		RandomAccessFile raf = null;
 		try{
 			raf = new RandomAccessFile(zip, InternalZipConstants.READ_MODE);
@@ -112,7 +104,7 @@ public class ZipUtil {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 将给定的InputStream写入给定的zipOutStream，并返回写入前InputStream的字节数
 	 * @param entryName entryName
@@ -131,7 +123,7 @@ public class ZipUtil {
 			int count;
 			int BUFFER = 8192;
 			byte[] data = new byte[BUFFER];
-			
+
 			long length = 0;
 			while((count=buffer.read(data, 0, BUFFER))!=-1){
 				length =+ count;
@@ -142,7 +134,7 @@ public class ZipUtil {
 			IoUtil.close(buffer);
 		}
 	}
-	
+
 	/**
 	 * 获取zip压缩包中的文件名称集合
 	 * @param file File
@@ -155,7 +147,7 @@ public class ZipUtil {
 		if(!valid(file)){
 			return set;
 		}
-		
+
 		net.lingala.zip4j.core.ZipFile zip = new net.lingala.zip4j.core.ZipFile(file);
 		List<FileHeader> headers =  zip.getFileHeaders();
 		for(FileHeader header : headers){
