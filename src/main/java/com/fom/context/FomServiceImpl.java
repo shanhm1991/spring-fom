@@ -413,8 +413,8 @@ public class FomServiceImpl implements FomService {
 		} 
 
 		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss SSS");
-		for(Entry<String, Result> entry : context.statistics.failedMap.entrySet()){
-			Result result = entry.getValue();
+		for(Entry<String, Result<?>> entry : context.statistics.failedMap.entrySet()){
+			Result<?> result = entry.getValue();
 
 			Map<String, Object> subMap = new HashMap<>();
 			subMap.put("createTime", format.format(result.getCreateTime()));
@@ -546,7 +546,7 @@ public class FomServiceImpl implements FomService {
 		write.flush();
 	}
 	
-	public TimedFuture<Result> submitTask(String contextName, Task task) throws Exception { 
+	public TimedFuture<Result<?>> submitTask(String contextName, Task task) throws Exception { 
 		Context context = ContextManager.contextMap.get(contextName);
 		if(context == null){
 			throw new IllegalArgumentException("context[" + contextName + "] not exist.");

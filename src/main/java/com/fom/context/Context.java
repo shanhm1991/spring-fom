@@ -37,7 +37,7 @@ public class Context implements Serializable {
 	private static final long serialVersionUID = 9154119563307298882L;
 
 	//所有的Context共用，防止两个Context创建针对同一个文件的任务
-	private static final Map<String,TimedFuture<Result>> FUTUREMAP = new ConcurrentHashMap<>(1000);
+	private static final Map<String,TimedFuture<Result<?>>> FUTUREMAP = new ConcurrentHashMap<>(1000);
 	
 	protected final ContextConfig config = new ContextConfig();
 
@@ -472,13 +472,13 @@ public class Context implements Serializable {
 	 * @return TimedFuture
 	 * @throws Exception Exception
 	 */
-	public final TimedFuture<Result> submit(Task task) throws Exception {
+	public final TimedFuture<Result<?>> submit(Task task) throws Exception {
 		if(submits.incrementAndGet() % 1000 == 0){
 			cleanFutures();
 		}
 		String taskId = task.getId();
 		task.setContext(Context.this); 
-		TimedFuture<Result> future = config.pool.submit(task);
+		TimedFuture<Result<?>> future = config.pool.submit(task);
 		FUTUREMAP.put(taskId, future); 
 		log.info("task[" + taskId + "] submited."); 
 		return future; 
@@ -506,7 +506,7 @@ public class Context implements Serializable {
 	 * else 任务还没结束
 	 */
 	private boolean isTaskAlive(String key){
-		Future<Result> future = FUTUREMAP.get(key);
+		Future<Result<?>> future = FUTUREMAP.get(key);
 		return future != null && !future.isDone();
 	}
 
@@ -514,10 +514,10 @@ public class Context implements Serializable {
 		new Thread(name + "-clean"){
 			@Override
 			public void run() {
-				Iterator<Map.Entry<String, TimedFuture<Result>>> it = FUTUREMAP.entrySet().iterator();
+				Iterator<Map.Entry<String, TimedFuture<Result<?>>>> it = FUTUREMAP.entrySet().iterator();
 				while(it.hasNext()){
-					Entry<String, TimedFuture<Result>> entry = it.next();
-					TimedFuture<Result> future = entry.getValue();
+					Entry<String, TimedFuture<Result<?>>> entry = it.next();
+					TimedFuture<Result<?>> future = entry.getValue();
 					if(!name.equals(future.getContextName())){   
 						continue;
 					}

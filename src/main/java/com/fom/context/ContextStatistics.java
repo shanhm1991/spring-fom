@@ -43,7 +43,7 @@ class ContextStatistics {
 
 	AtomicLong failedCount = new AtomicLong(0);
 
-	Map<String, Result> failedMap = new ConcurrentHashMap<>();
+	Map<String, Result<?>> failedMap = new ConcurrentHashMap<>();
 
 	Map<Long, AtomicLong> allCostMap = new LinkedHashMap<>();
 
@@ -131,7 +131,7 @@ class ContextStatistics {
 		}
 	}
 
-	public void failedIncrease(String taskId, Result result){
+	public void failedIncrease(String taskId, Result<?> result){
 		failedMap.put(taskId, result);
 		failedCount.incrementAndGet();
 	}

@@ -13,7 +13,7 @@ import com.fom.log.LoggerFactory;
  * @author shanhm
  *
  */
-public abstract class Task implements Callable<Result> {
+public abstract class Task implements Callable<Result<?>> {
 
 	protected volatile Logger log = Logger.getRootLogger();
 
@@ -92,9 +92,9 @@ public abstract class Task implements Callable<Result> {
 	}
 
 	@Override
-	public final Result call() {  
+	public final Result<?> call() {  
 		Thread.currentThread().setName(id);
-		Result result = new Result(id); 
+		Result<?> result = new Result<>(id); 
 		long sTime = System.currentTimeMillis();
 		this.startTime = sTime;
 		result.startTime = sTime;

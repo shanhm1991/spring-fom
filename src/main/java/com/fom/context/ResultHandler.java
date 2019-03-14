@@ -10,5 +10,5 @@ package com.fom.context;
  */
 public interface ResultHandler {
 
-	void handle(Result result) throws Exception;
+	void handle(Result<?> result) throws Exception;
 }

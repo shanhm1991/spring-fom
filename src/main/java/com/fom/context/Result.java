@@ -4,12 +4,14 @@ package com.fom.context;
  * 
  * Task执行结果
  * 
+ * @param <T> 自定义结果数据
+ * 
  * @see Task
  * 
  * @author shanhm
- *
+ * 
  */
-public class Result {
+public class Result<T> {
 
 	final String taskId;
 
@@ -20,6 +22,8 @@ public class Result {
 	long startTime;
 
 	long costTime;
+	
+	T content;
 
 	Throwable throwable;
 
@@ -75,4 +79,11 @@ public class Result {
 		return throwable;
 	}
 
+	public T getContent() {
+		return content;
+	}
+
+	public void setContent(T content) {
+		this.content = content;
+	}
 }
