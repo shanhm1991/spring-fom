@@ -53,8 +53,6 @@ public class FomContextListener implements ServletContextListener {
 
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
-		Monitor.start();
-		
 		ServletContext servlet = event.getServletContext(); 
 		setSystem(servlet);
 
@@ -65,22 +63,24 @@ public class FomContextListener implements ServletContextListener {
 		if(!xml.exists()){
 			LOG.error("cann't find fom config file: " + file); 
 			return;
+		}else{
+			LOG.info("load file: " + file); 
+			try{
+				SAXReader reader = new SAXReader();
+				reader.setEncoding("UTF-8");
+				Document doc = reader.read(new FileInputStream(xml));
+				Element fom = doc.getRootElement();
+				
+				loadXmlContexts(fom);
+				loadIncludeContexts(fom);
+				loadAnnotationContexts(fom);
+				ContextManager.startAll();
+			}catch(Exception e){
+				LOG.error("", e); 
+				return;
+			}
 		}
-		LOG.info("load file: " + file); 
-		Element fom = null;
-		try{
-			SAXReader reader = new SAXReader();
-			reader.setEncoding("UTF-8");
-			Document doc = reader.read(new FileInputStream(xml));
-			fom = doc.getRootElement();
-		}catch(Exception e){
-			LOG.error("", e); 
-			return;
-		}
-		loadXmlContexts(fom);
-		loadIncludeContexts(fom);
-		loadAnnotationContexts(fom);
-		ContextManager.startAll();
+		Monitor.start();
 	} 
 
 	private void setSystem(ServletContext servlet){
