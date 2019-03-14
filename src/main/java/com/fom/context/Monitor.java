@@ -30,10 +30,9 @@ class Monitor {
 			@Override
 			public void run(){
 				boolean support = true;
-				StringBuilder builder = new StringBuilder("monitor:");
+				StringBuilder builder = new StringBuilder();
 				while(true){
 					builder.setLength(0);
-					builder.append("monitor:");
 					jvm(builder);
 					if(support){
 						Sigar sigar = new Sigar();

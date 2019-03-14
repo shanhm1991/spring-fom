@@ -138,7 +138,7 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 				lineIndex = rowData.getRowIndex();
 				if (log.isDebugEnabled()) {
 					log.debug("parse row[file=" 
-							+ sourceName + ",row= " + rowIndex + "],columns=" + rowData.getColumnList());
+							+ sourceName + ", row= " + rowIndex + "], columns=" + rowData.getColumnList());
 				}
 
 				List<V> dataList = parseRowData(rowData, batchTime);
@@ -151,7 +151,7 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 					int size = batchData.size();
 					batchProcess(batchData, batchTime); 
 					log.info("finish batch[file=" + sourceName 
-							+ ",size=" + size + "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
+							+ ", size=" + size + "], cost=" + (System.currentTimeMillis() - batchTime) + "ms");
 					logProgress(sourceName, lineIndex, false);
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
@@ -162,7 +162,7 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 				int size = batchData.size();
 				batchProcess(batchData, batchTime);  
 				log.info("finish batch[file=" + sourceName 
-						+ ",size=" + size + "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
+						+ ", size=" + size + "], cost=" + (System.currentTimeMillis() - batchTime) + "ms");
 			}
 
 			onTextComplete(sourceUri, sourceName);

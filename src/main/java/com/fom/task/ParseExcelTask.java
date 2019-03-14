@@ -136,8 +136,8 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 				sheetName = rowData.getSheetName();
 
 				if (log.isDebugEnabled()) {
-					log.debug("parse row[file=" + sourceName + ",sheet=" + sheetName 
-							+ ",row= " + rowIndex + "],columns=" + rowData.getColumnList());
+					log.debug("parse row[file=" + sourceName + ", sheet=" + sheetName 
+							+ ", row= " + rowIndex + "], columns=" + rowData.getColumnList());
 				}
 				List<V> dataList = parseRowData(rowData, batchTime);
 				if(dataList != null){
@@ -148,8 +148,8 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 					checkInterrupt();
 					int size = batchData.size();
 					batchProcess(batchData, batchTime); 
-					log.info("finish batch[file=" + sourceName + "sheet=" + sheetName 
-							+ ",size=" + size + "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
+					log.info("finish batch[file=" + sourceName + ", sheet=" + sheetName 
+							+ ", size=" + size + "], cost=" + (System.currentTimeMillis() - batchTime) + "ms");
 					logProgress(sourceName, sheetIndex, sheetName, lineIndex, false); 
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
@@ -159,8 +159,8 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 				checkInterrupt();
 				int size = batchData.size();
 				batchProcess(batchData, batchTime); 
-				log.info("finish batch[file=" + sourceName + "sheet=" + sheetName 
-						+ ",size=" + size + "],cost=" + (System.currentTimeMillis() - batchTime) + "ms");
+				log.info("finish batch[file=" + sourceName + ", sheet=" + sheetName 
+						+ ", size=" + size + "], cost=" + (System.currentTimeMillis() - batchTime) + "ms");
 			}
 			
 			onExcelComplete(sourceUri, sourceName);
