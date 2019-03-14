@@ -23,23 +23,24 @@ import org.hyperic.sigar.Swap;
 class Monitor {
 
 	private static final Logger LOG = Logger.getLogger(Monitor.class);
-	
-	private static boolean osSupport = true;
 
 	public static void start(){
 		//no Exception
 		Thread monitor = new Thread("fom-monitor"){
 			@Override
 			public void run(){
+				boolean support = true;
+				StringBuilder builder = new StringBuilder("monitor:");
 				while(true){
-					jvm();
-					if(osSupport){
+					builder.setLength(0);
+					builder.append("monitor:");
+					jvm(builder);
+					if(support){
 						Sigar sigar = new Sigar();
-						cpu(sigar);
-						memory(sigar);
-						network(sigar);
-						disk(sigar); 
+						support = cpu(sigar, builder) && memory(sigar, builder)
+								&& network(sigar, builder) && disk(sigar, builder); 
 					}
+					LOG.info(builder.toString()); 
 					ThreadUtil.sleepAtLeastIgnoreInterrupts(15 * 60000);
 				}
 			}
@@ -48,8 +49,8 @@ class Monitor {
 		monitor.start();
 	}
 
-	private static void jvm(){
-		StringBuilder builder = new StringBuilder("jvm status:");
+	private static void jvm(StringBuilder builder){
+		builder.append("\n======= jvm status:");
 		String pid = ManagementFactory.getRuntimeMXBean().getName();
 		pid = pid.split("@")[0];
 		builder.append("\npid: ").append(pid);
@@ -66,7 +67,7 @@ class Monitor {
 		for(MemoryPoolMXBean mpm:mpmList){  
 			String name = mpm.getName();
 			MemoryUsage musage = mpm.getUsage();
-			builder.append("\nmemory pool[").append(name).append("]KB: init=").append(getKB(musage.getInit()))
+			builder.append("\nmemory[").append(name).append("]KB: init=").append(getKB(musage.getInit()))
 			.append(", used=").append(getKB(musage.getUsed())).append(", committed=")
 			.append(getKB(musage.getCommitted())).append(", max=").append(getKB(musage.getMax()));
 		}  
@@ -80,7 +81,6 @@ class Monitor {
 			builder.append("\nGC[").append(gc.getName())
 			.append("]: count=").append(gc.getCollectionCount()).append(", cost=").append(gc.getCollectionTime()).append("ms");
 		}  
-		LOG.info(builder.toString()); 
 	}
 
 	private static long getKB(long len){
@@ -90,8 +90,8 @@ class Monitor {
 		return len / 1024;
 	}
 
-	private static void disk(Sigar sigar) {
-		StringBuilder builder = new StringBuilder("os disk:");
+	private static boolean disk(Sigar sigar, StringBuilder builder) {
+		builder.append("\n======= os disk:");
 		try{
 			for (FileSystem fs : sigar.getFileSystemList()) {
 				if(fs.getType() != 2){ //本地硬盘
@@ -111,14 +111,14 @@ class Monitor {
 				builder.append("\n资源的利用率: ").append(usage.getUsePercent() * 100D).append("%");
 			}
 		}catch(Throwable e){
-			osSupport = false;
 			LOG.error("", e);
+			return false;
 		}
-		LOG.info(builder.toString()); 
+		return true;
 	}
 
-	private static void memory(Sigar sigar) {
-		StringBuilder builder = new StringBuilder("os memory:");
+	private static boolean memory(Sigar sigar, StringBuilder builder) {
+		builder.append("\n======= os memory:");
 		try{
 			Mem mem = sigar.getMem();
 			builder.append("\n内存总量MB: ").append(mem.getTotal() / 1024 /1024);
@@ -129,14 +129,14 @@ class Monitor {
 			builder.append("\n交换区使用量MB: ").append(swap.getUsed() / 1024 /1024);
 			builder.append("\n交换区剩余量MB: ").append(swap.getFree() / 1024 /1024);
 		}catch(Throwable e){
-			osSupport = false;
 			LOG.error("", e);
+			return false;
 		}
-		LOG.info(builder.toString()); 
+		return true;
 	}
 
-	private static void cpu(Sigar sigar) {
-		StringBuilder builder = new StringBuilder("os cpu:");
+	private static boolean cpu(Sigar sigar, StringBuilder builder) {
+		builder.append("\n======= os cpu:");
 		try{
 			CpuInfo infos[] = sigar.getCpuInfoList();
 			CpuPerc cpuList[] = sigar.getCpuPercList();
@@ -154,14 +154,14 @@ class Monitor {
 				builder.append("\ncpu当前空闲率: ").append(CpuPerc.format(perc.getIdle()));
 			}
 		}catch(Throwable e){
-			osSupport = false;
 			LOG.error("", e);
+			return false;
 		}
-		LOG.info(builder.toString()); 
+		return true;
 	}
 
-	private static void network(Sigar sigar) {
-		StringBuilder builder = new StringBuilder("os network:");
+	private static boolean network(Sigar sigar, StringBuilder builder) {
+		builder.append("\n======= os network:");
 		try{
 			for (String name : sigar.getNetInterfaceList()) {
 				NetInterfaceConfig ifconfig = sigar.getNetInterfaceConfig(name);
@@ -185,10 +185,10 @@ class Monitor {
 				builder.append("\n发送时丢弃的包裹数: ").append(ifstat.getTxDropped());
 			}
 		}catch(Throwable e){
-			osSupport = false;
 			LOG.error("", e);
+			return false;
 		}
-		LOG.info(builder.toString());
+		return true;
 	}
 
 }
