@@ -8,7 +8,6 @@ import java.util.Set;
 
 import com.fom.context.Context;
 import com.fom.context.FomContext;
-import com.fom.context.Task;
 import com.fom.task.DownloadZipTask;
 import com.fom.task.helper.impl.HttpHelper;
 
@@ -30,7 +29,7 @@ public class DownloadHttpZipExample extends Context {
 	}
 
 	@Override
-	protected Set<Task> scheduleBatchTasks() throws Exception {
+	protected Set<DownloadZipTask> scheduleBatchTasks() throws Exception {
 		List<String> list = new ArrayList<String>();
 		list.add("http://localhost:4040/fom/index.html");
 		list.add("http://localhost:4040/fom/js/datatables.js");
@@ -51,7 +50,7 @@ public class DownloadHttpZipExample extends Context {
 		list.add("http://localhost:4040/fom/images/start.png");
 		list.add("http://localhost:4040/fom/images/stop.png");
 		
-		Set<Task> tasks = new HashSet<>();
+		Set<DownloadZipTask> tasks = new HashSet<>();
 		tasks.add(new DownloadZipTask(list, "httpTest", dest, 10, 1024 * 1024, false, new HttpHelper()));
 		return tasks;
 	}

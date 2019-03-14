@@ -10,7 +10,6 @@ import org.apache.hadoop.fs.PathFilter;
 
 import com.fom.context.Context;
 import com.fom.context.FomContext;
-import com.fom.context.Task;
 import com.fom.task.DownloadTask;
 import com.fom.task.helper.DownloadHelper;
 import com.fom.task.helper.impl.HdfsHelper;
@@ -38,7 +37,7 @@ public class DownloadHdfsExample extends Context {
 	}
 
 	@Override
-	protected Set<Task> scheduleBatchTasks() throws Exception {  
+	protected Set<DownloadTask> scheduleBatchTasks() throws Exception {  
 		List<String> list = HdfsUtil.list(masterUrl, slaveUrl, new Path("/test"), new PathFilter(){
 			@Override
 			public boolean accept(Path path) {
@@ -46,7 +45,7 @@ public class DownloadHdfsExample extends Context {
 			}
 		});
 		
-		Set<Task> set = new HashSet<>();
+		Set<DownloadTask> set = new HashSet<>();
 		for(String uri : list){
 			DownloadHelper helper = new HdfsHelper(masterUrl, slaveUrl);
 			String sourceName = new File(uri).getName();

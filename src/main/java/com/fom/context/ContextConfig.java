@@ -214,9 +214,9 @@ public final class ContextConfig implements Serializable {
 		return pool.getCompletedTaskCount();
 	}
 
-	Map<Task, Thread> getActiveThreads() {
+	Map<Task<?>, Thread> getActiveThreads() {
 		if(pool == null){
-			return new HashMap<Task, Thread>();
+			return new HashMap<Task<?>, Thread>();
 		}
 		return pool.getActiveThreads();
 	}

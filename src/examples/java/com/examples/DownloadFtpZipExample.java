@@ -8,7 +8,6 @@ import java.util.Set;
 
 import com.fom.context.Context;
 import com.fom.context.FomContext;
-import com.fom.context.Task;
 import com.fom.task.DownloadZipTask;
 import com.fom.task.helper.DownloadZipHelper;
 import com.fom.task.helper.impl.FtpHelper;
@@ -38,7 +37,7 @@ public class DownloadFtpZipExample extends Context {
 	}
 
 	@Override
-	protected Set<Task> scheduleBatchTasks() throws Exception {
+	protected Set<DownloadZipTask> scheduleBatchTasks() throws Exception {
 		List<String> list = new ArrayList<String>();
 		list.add("/ftp/test1.txt");
 		list.add("/ftp/test2.txt");
@@ -50,7 +49,7 @@ public class DownloadFtpZipExample extends Context {
 		list.add("/ftp/test8.txt");
 		DownloadZipHelper helper = new FtpHelper(hostname, port, user, passwd);
 		
-		Set<Task> tasks = new HashSet<>();
+		Set<DownloadZipTask> tasks = new HashSet<>();
 		tasks.add(new DownloadZipTask(list, "ftpTest", dest, 10, 1024 * 1024, false, helper));
 		return tasks;
 	}

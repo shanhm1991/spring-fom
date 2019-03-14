@@ -7,7 +7,6 @@ import java.util.Set;
 import com.fom.context.Context;
 import com.fom.context.ContextUtil;
 import com.fom.context.FomContext;
-import com.fom.context.Task;
 import com.fom.task.UploadTask;
 import com.fom.task.helper.UploadHelper;
 import com.fom.task.helper.impl.HdfsHelper;
@@ -29,11 +28,11 @@ public class UploadHdfsExample extends Context {
 	private String destPath;
 
 	@Override
-	protected Set<Task> scheduleBatchTasks() throws Exception { 
+	protected Set<UploadTask> scheduleBatchTasks() throws Exception { 
 		String path = ContextUtil.getContextPath("/source") + File.separator + "hdfs.jpg";
 		UploadHelper helper = new HdfsHelper(masterUrl, slaveUrl);
 
-		Set<Task> set = new HashSet<>();
+		Set<UploadTask> set = new HashSet<>();
 		set.add(new UploadTask(path, destPath, false, helper));
 		return set;
 

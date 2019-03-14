@@ -6,7 +6,6 @@ import java.util.Set;
 
 import com.fom.context.Context;
 import com.fom.context.FomContext;
-import com.fom.context.Task;
 import com.fom.task.DownloadTask;
 import com.fom.task.helper.impl.HttpHelper;
 
@@ -28,11 +27,11 @@ public class DownloadHttpExample extends Context {
 	}
  
 	@Override
-	protected Set<Task> scheduleBatchTasks() throws Exception {
+	protected Set<DownloadTask> scheduleBatchTasks() throws Exception {
 		String uri = "http://localhost:4040/fom/index.html";
 		String destName = new File(uri).getName();
 		
-		Set<Task> set = new HashSet<>();
+		Set<DownloadTask> set = new HashSet<>();
 		set.add(new DownloadTask(uri, destName, dest, false, true, new HttpHelper()));
 		return set;
 	}

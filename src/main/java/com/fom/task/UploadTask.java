@@ -24,7 +24,7 @@ import com.fom.context.ResultHandler;
  * @author shanhm
  *
  */
-public class UploadTask extends Task {
+public class UploadTask extends Task<Object> {
 	
 	private File file;
 	
@@ -72,7 +72,7 @@ public class UploadTask extends Task {
 	 * @param resultHandler ResultHandler
 	 */
 	public UploadTask(String sourceUri, String destUri, 
-			boolean isDelSrc, UploadHelper helper, ResultHandler resultHandler) {
+			boolean isDelSrc, UploadHelper helper, ResultHandler<Object> resultHandler) {
 		this(sourceUri, destUri, isDelSrc, helper);
 		this.resultHandler = resultHandler;
 	}
@@ -86,7 +86,7 @@ public class UploadTask extends Task {
 	 * @param resultHandler ResultHandler
 	 */
 	public UploadTask(String sourceUri, String destUri, 
-			boolean isDelSrc, UploadHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+			boolean isDelSrc, UploadHelper helper, ExceptionHandler exceptionHandler, ResultHandler<Object> resultHandler) {
 		this(sourceUri, destUri, isDelSrc, helper);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;

@@ -81,7 +81,7 @@ public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
 	 * @param batch 批处理数
 	 * @param resultHandler ResultHandler
 	 */
-	public ParseTextZipTask(String sourceUri, int batch, ResultHandler resultHandler) {
+	public ParseTextZipTask(String sourceUri, int batch, ResultHandler<Object> resultHandler) {
 		this(sourceUri, batch);
 		this.resultHandler = resultHandler;
 	}
@@ -93,7 +93,7 @@ public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
 	 * @param resultHandler ResultHandler
 	 */
 	public ParseTextZipTask(String sourceUri, int batch, 
-			ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+			ExceptionHandler exceptionHandler, ResultHandler<Object> resultHandler) {
 		this(sourceUri, batch);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;

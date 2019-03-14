@@ -8,7 +8,6 @@ import java.util.Set;
 
 import com.fom.context.Context;
 import com.fom.context.ContextUtil;
-import com.fom.context.Task;
 import com.fom.util.FileUtil;
 import com.fom.util.PatternUtil;
 
@@ -57,7 +56,7 @@ public class ImportEsExample extends Context {
 	}
 
 	@Override
-	protected Set<Task> scheduleBatchTasks() throws Exception { 
+	protected Set<ImportEsExampleTask> scheduleBatchTasks() throws Exception { 
 		List<String> list = FileUtil.list(srcPath, new FileFilter(){
 			@Override
 			public boolean accept(File file) {
@@ -71,7 +70,7 @@ public class ImportEsExample extends Context {
 			}
 		}); 
 		
-		Set<Task> set = new HashSet<>();
+		Set<ImportEsExampleTask> set = new HashSet<>();
 		for(String path : list){
 			set.add(new ImportEsExampleTask(path, batch, esIndex, esType,  esJson));
 		}

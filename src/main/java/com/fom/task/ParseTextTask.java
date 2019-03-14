@@ -55,7 +55,7 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 	 * @param batch 入库时的批处理数
 	 * @param resultHandler ResultHandler
 	 */
-	public ParseTextTask(String sourceUri, int batch, ResultHandler resultHandler) {
+	public ParseTextTask(String sourceUri, int batch, ResultHandler<Object> resultHandler) {
 		this(sourceUri, batch);
 		this.resultHandler = resultHandler;
 	}
@@ -67,7 +67,7 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 	 * @param resultHandler ResultHandler
 	 */
 	public ParseTextTask(String sourceUri, int batch, 
-			ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+			ExceptionHandler exceptionHandler, ResultHandler<Object> resultHandler) {
 		this(sourceUri, batch);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;

@@ -20,6 +20,7 @@ public class DemoStateTest1 extends Context {
 	
 	private Random random = new Random(10000);
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	protected Set<Task> scheduleBatchTasks() throws Exception {
 		Set<Task> set = new HashSet<>();

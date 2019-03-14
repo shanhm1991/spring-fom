@@ -6,7 +6,6 @@ import java.util.Set;
 
 import com.fom.context.Context;
 import com.fom.context.FomContext;
-import com.fom.context.Task;
 import com.fom.task.DownloadTask;
 import com.fom.task.helper.DownloadHelper;
 import com.fom.task.helper.impl.FtpHelper;
@@ -31,7 +30,7 @@ public class DownloadFtpExample extends Context {
 	}
 
 	@Override
-	protected Set<Task> scheduleBatchTasks() throws Exception { 
+	protected Set<DownloadTask> scheduleBatchTasks() throws Exception { 
 		String hostname = config.get("hostname");
 		int port = config.getInt("port", 0);
 		String user = config.get("user");
@@ -42,7 +41,7 @@ public class DownloadFtpExample extends Context {
 		String uri = "/ftp/test.txt";
 		String sourceName = new File(uri).getName();
 		
-		Set<Task> set = new HashSet<>();
+		Set<DownloadTask> set = new HashSet<>();
 		set.add(new DownloadTask(uri, sourceName, dest, false, true, helper));
 		return set;
 	}

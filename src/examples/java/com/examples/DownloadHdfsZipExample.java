@@ -14,7 +14,6 @@ import org.apache.hadoop.fs.PathFilter;
 
 import com.fom.context.Context;
 import com.fom.context.FomContext;
-import com.fom.context.Task;
 import com.fom.task.DownloadZipTask;
 import com.fom.task.helper.impl.HdfsHelper;
 import com.fom.util.HdfsUtil;
@@ -56,7 +55,7 @@ public class DownloadHdfsZipExample extends Context {
 	}
 
 	@Override
-	protected Set<Task> scheduleBatchTasks() throws Exception {
+	protected Set<DownloadZipTask> scheduleBatchTasks() throws Exception {
 		final FileSystem fs = HdfsUtil.getFileSystem(masterUrl, slaveUrl);
 		List<String> dirList = HdfsUtil.list(masterUrl, slaveUrl, new Path(srPath), new PathFilter(){
 			@Override
@@ -88,7 +87,7 @@ public class DownloadHdfsZipExample extends Context {
 			}
 		});
 		
-		Set<Task> set = new HashSet<>();
+		Set<DownloadZipTask> set = new HashSet<>();
 		for(String dir : dirList){
 			List<String> pathList = HdfsUtil.list(masterUrl, slaveUrl, new Path(dir), new PathFilter(){
 				@Override

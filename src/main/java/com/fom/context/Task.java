@@ -10,10 +10,12 @@ import com.fom.log.LoggerFactory;
  * 任务
  * <br>Callable的抽象实现，在context中作为最小执行单位，也可以单独创建调用或者提交线程池
  * 
+ * @param <E> 任务结果数据类型
+ * 
  * @author shanhm
  *
  */
-public abstract class Task implements Callable<Result<?>> {
+public abstract class Task<E> implements Callable<Result<E>> {
 
 	protected volatile Logger log = Logger.getRootLogger();
 
@@ -30,7 +32,7 @@ public abstract class Task implements Callable<Result<?>> {
 	/**
 	 * 结果处理器
 	 */
-	protected ResultHandler resultHandler;
+	protected ResultHandler<E> resultHandler;
 	
 	private volatile Context context;
 	
@@ -59,7 +61,7 @@ public abstract class Task implements Callable<Result<?>> {
 	 * @param id 唯一标识
 	 * @param resultHandler 结果处理器
 	 */
-	public Task(String id, ResultHandler resultHandler) { 
+	public Task(String id, ResultHandler<E> resultHandler) { 
 		this(id);
 		this.resultHandler = resultHandler;
 	}
@@ -69,7 +71,7 @@ public abstract class Task implements Callable<Result<?>> {
 	 * @param exceptionHandler 异常处理器
 	 * @param resultHandler 结果处理器
 	 */
-	public Task(String id, ExceptionHandler exceptionHandler, ResultHandler resultHandler) { 
+	public Task(String id, ExceptionHandler exceptionHandler, ResultHandler<E> resultHandler) { 
 		this(id);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
@@ -87,14 +89,14 @@ public abstract class Task implements Callable<Result<?>> {
 	 * 结果处理器
 	 * @param resultHandler resultHandler
 	 */
-	public void setResultHandler(ResultHandler resultHandler) {
+	public void setResultHandler(ResultHandler<E> resultHandler) {
 		this.resultHandler = resultHandler;
 	}
 
 	@Override
-	public final Result<?> call() {  
+	public final Result<E> call() {  
 		Thread.currentThread().setName(id);
-		Result<?> result = new Result<>(id); 
+		Result<E> result = new Result<>(id); 
 		long sTime = System.currentTimeMillis();
 		this.startTime = sTime;
 		result.startTime = sTime;
@@ -219,12 +221,13 @@ public abstract class Task implements Callable<Result<?>> {
 		return context.config;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public final boolean equals(Object obj) {
 		if(!(obj instanceof Task)){
 			return false;
 		}
-		Task task = (Task)obj;
+		Task<E> task = (Task<E>)obj;
 		return this.id.equals(task.id);
 	}
 	

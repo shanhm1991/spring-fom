@@ -11,7 +11,7 @@ import java.util.concurrent.FutureTask;
  */
 public class TimedFuture<T> extends FutureTask<T> {
 	
-	private Task task;
+	private Task<?> task;
 
 	public TimedFuture(Runnable runnable, T result) {
 		super(runnable, result);
@@ -20,7 +20,7 @@ public class TimedFuture<T> extends FutureTask<T> {
 	public TimedFuture(Callable<T> callable){
 		super(callable);
 		if(callable instanceof Task){
-			 task = ((Task)callable);
+			 task = ((Task<?>)callable);
 		}
 	}
 
@@ -40,7 +40,7 @@ public class TimedFuture<T> extends FutureTask<T> {
 		return task.id;
 	}
 
-	public Task getTask(){
+	public Task<?> getTask(){
 		return task;
 	}
 }

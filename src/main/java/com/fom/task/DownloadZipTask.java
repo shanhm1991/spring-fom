@@ -49,7 +49,7 @@ import com.fom.util.ZipUtil;
  * @author shanhm
  *
  */
-public class DownloadZipTask extends Task {
+public class DownloadZipTask extends Task<Object> {
 
 	private final DecimalFormat numFormat  = new DecimalFormat("#.###");
 
@@ -128,7 +128,7 @@ public class DownloadZipTask extends Task {
 	 */
 	public DownloadZipTask(List<String> uriList, String zipName, String destPath, 
 			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
-			DownloadZipHelper helper, ResultHandler resultHandler) {
+			DownloadZipHelper helper, ResultHandler<Object> resultHandler) {
 		this(uriList, zipName, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
 		this.resultHandler = resultHandler;
 	}
@@ -146,7 +146,7 @@ public class DownloadZipTask extends Task {
 	 */
 	public DownloadZipTask(List<String> uriList, String zipName, String destPath, 
 			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
-			DownloadZipHelper helper, ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+			DownloadZipHelper helper, ExceptionHandler exceptionHandler, ResultHandler<Object> resultHandler) {
 		this(uriList, zipName, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;

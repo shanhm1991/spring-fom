@@ -25,7 +25,7 @@ import com.fom.task.helper.DownloadHelper;
  * @author shanhm
  *
  */
-public final class DownloadTask extends Task {
+public final class DownloadTask extends Task<Object> {
 
 	private final String destName;
 
@@ -87,7 +87,7 @@ public final class DownloadTask extends Task {
 	 * @param resultHandler 结果处理器
 	 */
 	public DownloadTask(String sourceUri, String destName, String destPath, 
-			boolean isDelSrc, boolean isWithTemp, DownloadHelper helper, ResultHandler resultHandler) {
+			boolean isDelSrc, boolean isWithTemp, DownloadHelper helper, ResultHandler<Object> resultHandler) {
 		this(sourceUri, destName, destPath, isDelSrc, isWithTemp, helper);
 		this.resultHandler = resultHandler;
 	}
@@ -104,7 +104,7 @@ public final class DownloadTask extends Task {
 	 */
 	public DownloadTask(String sourceUri, String destName, String destPath, 
 			boolean isDelSrc, boolean isWithTemp, DownloadHelper helper, 
-			ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+			ExceptionHandler exceptionHandler, ResultHandler<Object> resultHandler) {
 		this(sourceUri, destName, destPath, isDelSrc, isWithTemp, helper);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;

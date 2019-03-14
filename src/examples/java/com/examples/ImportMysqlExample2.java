@@ -8,7 +8,6 @@ import java.util.Set;
 
 import com.fom.context.Context;
 import com.fom.context.ContextUtil;
-import com.fom.context.Task;
 import com.fom.util.FileUtil;
 import com.fom.util.PatternUtil;
 
@@ -38,7 +37,7 @@ public class ImportMysqlExample2 extends Context {
 	}
 
 	@Override
-	protected Set<Task> scheduleBatchTasks() throws Exception { 
+	protected Set<ImportMysqlExample2Task> scheduleBatchTasks() throws Exception { 
 		List<String> list = FileUtil.list(srcPath, new FileFilter(){
 			@Override
 			public boolean accept(File file) {
@@ -52,7 +51,7 @@ public class ImportMysqlExample2 extends Context {
 			}
 		}); 
 		
-		Set<Task> set = new HashSet<>();
+		Set<ImportMysqlExample2Task> set = new HashSet<>();
 		for(String uri : list){
 			set.add(new ImportMysqlExample2Task(uri, batch));
 		}

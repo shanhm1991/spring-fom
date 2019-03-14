@@ -163,6 +163,6 @@ public interface FomService {
 	 * @return TimedFuture
 	 * @throws Exception Exception
 	 */
-	TimedFuture<Result<?>> submitTask(String contextName, Task task) throws Exception;
+	<E> TimedFuture<Result<E>> submitTask(String contextName, Task<E> task) throws Exception;
 	
 }

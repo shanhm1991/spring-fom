@@ -7,7 +7,6 @@ import java.util.Set;
 import com.fom.context.Context;
 import com.fom.context.ContextUtil;
 import com.fom.context.FomContext;
-import com.fom.context.Task;
 import com.fom.task.UploadTask;
 import com.fom.task.helper.UploadHelper;
 import com.fom.task.helper.impl.FtpHelper;
@@ -35,11 +34,11 @@ public class UploadFtpExample extends Context {
 	}
 	
 	@Override
-	protected Set<Task> scheduleBatchTasks() throws Exception {
+	protected Set<UploadTask> scheduleBatchTasks() throws Exception {
 		String path = ContextUtil.getContextPath("/source")  + File.separator + "ftp.jpg";
 		UploadHelper helper = new FtpHelper(hostname, port, user, passwd);
 		
-		Set<Task> set = new HashSet<>();
+		Set<UploadTask> set = new HashSet<>();
 		set.add(new UploadTask(path, "http://localhost:4040/fom/", false, helper));
 		return set;
 	}

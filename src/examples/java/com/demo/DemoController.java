@@ -23,6 +23,7 @@ public class DemoController {
 		this.service = service;
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@RequestMapping("/demo")
 	@ResponseBody
 	public Map<String,Object> demo() throws Exception{

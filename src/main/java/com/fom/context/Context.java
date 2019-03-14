@@ -151,7 +151,7 @@ public class Context implements Serializable {
 	 * 获取正在执行任务的Thead
 	 * @return taskId-Thread
 	 */
-	public final Map<Task, Thread> getActiveThreads() {
+	public final Map<Task<?>, Thread> getActiveThreads() {
 		return config.getActiveThreads();
 	}
 
@@ -350,6 +350,7 @@ public class Context implements Serializable {
 			this.setName("context[" + name + "]"); 
 		}
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public void run() {
 			while(true){
@@ -365,9 +366,9 @@ public class Context implements Serializable {
 				switchState(running);
 				execTime = System.currentTimeMillis();
 				try {
-					Set<Task> tasks = scheduleBatchTasks();
+					Set<? extends Task> tasks = scheduleBatchTasks();
 					if(tasks != null){
-						for (Task task : tasks){
+						for (Task<?> task : tasks){
 							String taskId = task.getId();
 							if(isTaskAlive(taskId)){ 
 								if (log.isDebugEnabled()) {
@@ -472,13 +473,14 @@ public class Context implements Serializable {
 	 * @return TimedFuture
 	 * @throws Exception Exception
 	 */
-	public final TimedFuture<Result<?>> submit(Task task) throws Exception {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public final <E> TimedFuture<Result<E>> submit(Task<E> task) throws Exception {
 		if(submits.incrementAndGet() % 1000 == 0){
 			cleanFutures();
 		}
 		String taskId = task.getId();
 		task.setContext(Context.this); 
-		TimedFuture<Result<?>> future = config.pool.submit(task);
+		TimedFuture future = config.pool.submit(task);
 		FUTUREMAP.put(taskId, future); 
 		log.info("task[" + taskId + "] submited."); 
 		return future; 
@@ -489,7 +491,7 @@ public class Context implements Serializable {
 	 * @return task set
 	 * @throws Exception Exception
 	 */
-	protected Set<Task> scheduleBatchTasks() throws Exception {
+	protected <E> Set<? extends Task<E>> scheduleBatchTasks() throws Exception {
 		return null;
 	}
 

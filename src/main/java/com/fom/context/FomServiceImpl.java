@@ -384,8 +384,8 @@ public class FomServiceImpl implements FomService {
 		}
 
 		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss SSS");
-		for(Entry<Task, Thread> entry : context.getActiveThreads().entrySet()){
-			Task task = entry.getKey();
+		for(Entry<Task<?>, Thread> entry : context.getActiveThreads().entrySet()){
+			Task<?> task = entry.getKey();
 			Thread thread = entry.getValue();
 
 			Map<String, String> subMap = new HashMap<>();
@@ -546,7 +546,7 @@ public class FomServiceImpl implements FomService {
 		write.flush();
 	}
 	
-	public TimedFuture<Result<?>> submitTask(String contextName, Task task) throws Exception { 
+	public <E> TimedFuture<Result<E>> submitTask(String contextName, Task<E> task) throws Exception { 
 		Context context = ContextManager.contextMap.get(contextName);
 		if(context == null){
 			throw new IllegalArgumentException("context[" + contextName + "] not exist.");

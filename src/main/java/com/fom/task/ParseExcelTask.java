@@ -65,7 +65,7 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 	 * @param isBatchBySheet isBatchBySheet
 	 * @param resultHandler ResultHandler
 	 */
-	public ParseExcelTask(String sourceUri, int batch, boolean isBatchBySheet, ResultHandler resultHandler) {
+	public ParseExcelTask(String sourceUri, int batch, boolean isBatchBySheet, ResultHandler<Object> resultHandler) {
 		this(sourceUri, batch, isBatchBySheet);
 		this.resultHandler = resultHandler;
 	}
@@ -78,7 +78,7 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 	 * @param resultHandler ResultHandler
 	 */
 	public ParseExcelTask(String sourceUri, int batch, boolean isBatchBySheet, 
-			ExceptionHandler exceptionHandler, ResultHandler resultHandler) {
+			ExceptionHandler exceptionHandler, ResultHandler<Object> resultHandler) {
 		this(sourceUri, batch, isBatchBySheet);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
