@@ -134,6 +134,11 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 				}
 				lineIndex = rowData.getRowIndex();
 				sheetName = rowData.getSheetName();
+				
+				if(rowData.isEmpty()){
+					log.warn("ignore empty row, sheet=" + sheetName + ", row=" + lineIndex);
+					continue;
+				}
 
 				if (log.isDebugEnabled()) {
 					log.debug("parse row[file=" + sourceName + ", sheet=" + sheetName 

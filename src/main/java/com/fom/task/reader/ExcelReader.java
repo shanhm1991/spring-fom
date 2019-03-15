@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -147,12 +148,19 @@ public class ExcelReader implements Reader {
 
 					int cellCount = row.getLastCellNum();
 					List<String> list = new ArrayList<>();
+					
+					boolean isEmpty = true;
 					for(int i = 0;i < cellCount;i++){
-						list.add(getCellValue(row.getCell(i)));
+						String value = getCellValue(row.getCell(i));
+						if(!StringUtils.isBlank(value)){
+							isEmpty = false;
+						}
+						list.add(value);
 					}
 					RowData rowData = new RowData(rowIndex - 1, list);
 					rowData.setSheetIndex(rangeIndex); 
 					rowData.setSheetName(sheetName); 
+					rowData.setEmpty(isEmpty); 
 					rowData.setLastRow(rowIndex == rowCount); 
 					return rowData;
 				}

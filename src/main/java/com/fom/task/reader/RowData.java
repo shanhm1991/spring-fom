@@ -19,6 +19,8 @@ public class RowData {
 
 	private boolean isLastRow;
 
+	private boolean isEmpty;
+
 
 	public RowData(int rowIndex, List<String> rowData){
 		this.rowIndex = rowIndex;
@@ -49,6 +51,14 @@ public class RowData {
 		this.sheetIndex = sheetIndex;
 	}
 
+	public boolean isEmpty() {
+		return isEmpty;
+	}
+
+	void setEmpty(boolean isEmpty) {
+		this.isEmpty = isEmpty;
+	}
+
 	public String getSheetName() {
 		return sheetName;
 	}
@@ -64,5 +74,6 @@ public class RowData {
 	void setLastRow(boolean isLastRow) {
 		this.isLastRow = isLastRow;
 	}
+
 
 }
