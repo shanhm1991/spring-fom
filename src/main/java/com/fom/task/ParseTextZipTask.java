@@ -81,7 +81,7 @@ public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
 	 * @param batch 批处理数
 	 * @param resultHandler ResultHandler
 	 */
-	public ParseTextZipTask(String sourceUri, int batch, ResultHandler<Object> resultHandler) {
+	public ParseTextZipTask(String sourceUri, int batch, ResultHandler<Boolean> resultHandler) {
 		this(sourceUri, batch);
 		this.resultHandler = resultHandler;
 	}
@@ -93,7 +93,7 @@ public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
 	 * @param resultHandler ResultHandler
 	 */
 	public ParseTextZipTask(String sourceUri, int batch, 
-			ExceptionHandler exceptionHandler, ResultHandler<Object> resultHandler) {
+			ExceptionHandler exceptionHandler, ResultHandler<Boolean> resultHandler) {
 		this(sourceUri, batch);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
@@ -184,12 +184,12 @@ public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
 	}
 
 	@Override
-	protected boolean exec() throws Exception {
+	protected Boolean exec() throws Exception {
 		return parseFiles();
 	}
 
 	@Override
-	protected boolean afterExec() throws Exception {
+	protected boolean afterExec(Boolean execResult) throws Exception {
 		if(unzipDir.exists()){ 
 			File[] fileArray = unzipDir.listFiles();
 			if(!ArrayUtils.isEmpty(fileArray)){

@@ -17,21 +17,22 @@ public class ContextTest extends Context {
 	
 	private static final long serialVersionUID = -4648914163608513224L;
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	protected Set<Task> scheduleBatchTasks() throws Exception {
-		Set<Task> set = new HashSet<>();
+	protected Set<SelfTask> scheduleBatchTasks() throws Exception {
+		Set<SelfTask> set = new HashSet<>();
 		set.add(new SelfTask("demoTask"));
 		return set;
 	}
 	
-	private static class SelfTask extends Task {
+	private static class SelfTask extends Task<Boolean> {
 
 		public SelfTask(String taskId) {
 			super(taskId);
 		}
 
 		@Override
-		protected boolean exec() throws Exception {
+		protected Boolean exec() throws Exception {
 			System.out.println("task executing...");
 			Thread.sleep(20000); 
 			return true;

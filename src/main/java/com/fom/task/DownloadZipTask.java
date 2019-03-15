@@ -49,7 +49,7 @@ import com.fom.util.ZipUtil;
  * @author shanhm
  *
  */
-public class DownloadZipTask extends Task<Object> {
+public class DownloadZipTask extends Task<Boolean> {
 
 	private final DecimalFormat numFormat  = new DecimalFormat("#.###");
 
@@ -128,7 +128,7 @@ public class DownloadZipTask extends Task<Object> {
 	 */
 	public DownloadZipTask(List<String> uriList, String zipName, String destPath, 
 			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
-			DownloadZipHelper helper, ResultHandler<Object> resultHandler) {
+			DownloadZipHelper helper, ResultHandler<Boolean> resultHandler) {
 		this(uriList, zipName, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
 		this.resultHandler = resultHandler;
 	}
@@ -146,7 +146,7 @@ public class DownloadZipTask extends Task<Object> {
 	 */
 	public DownloadZipTask(List<String> uriList, String zipName, String destPath, 
 			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
-			DownloadZipHelper helper, ExceptionHandler exceptionHandler, ResultHandler<Object> resultHandler) {
+			DownloadZipHelper helper, ExceptionHandler exceptionHandler, ResultHandler<Boolean> resultHandler) {
 		this(uriList, zipName, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
@@ -178,14 +178,14 @@ public class DownloadZipTask extends Task<Object> {
 	}
 
 	@Override
-	protected boolean exec() throws Exception {
+	protected Boolean exec() throws Exception {
 		return indexDownloadZip(zip.exists(), false) 
 				&& downloadIntoZip() 
 				&& indexDownloadZip(false, true);
 	}
 
 	@Override
-	protected boolean afterExec() throws Exception {
+	protected boolean afterExec(Boolean execResult) throws Exception {
 		File tempDir = new File(cachePath);
 		File[] files = tempDir.listFiles();
 		if(ArrayUtils.isEmpty(files)){

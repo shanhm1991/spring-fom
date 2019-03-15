@@ -54,6 +54,7 @@ public class DownloadHdfsZipExample extends Context {
 		dest = new File("").getAbsolutePath() + "/download/" + name;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected Set<DownloadZipTask> scheduleBatchTasks() throws Exception {
 		final FileSystem fs = HdfsUtil.getFileSystem(masterUrl, slaveUrl);

@@ -103,7 +103,12 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		result.createTime = this.createTime;
 		
 		try {
-			result.success = beforeExec() && exec() && afterExec();
+			result.success = beforeExec();
+			if(result.success){
+				E content = exec();
+				result.content = content;
+				result.success = afterExec(content);
+			}
 		} catch(Throwable e) {
 			log.error("", e); 
 			result.success = false;
@@ -143,13 +148,6 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	}
 
 	/**
-	 * 任务执行
-	 * @return isSuccess
-	 * @throws Exception Exception
-	 */
-	protected abstract boolean exec() throws Exception;
-
-	/**
 	 * 任务执行前的工作
 	 * @return isSuccess
 	 * @throws Exception Exception
@@ -159,11 +157,19 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	}
 	
 	/**
+	 * 任务执行
+	 * @return E
+	 * @throws Exception
+	 */
+	protected abstract E exec() throws Exception;
+	
+	/**
 	 * 任务执行后的工作
+	 * @param e exec返回结果
 	 * @return isSuccess
 	 * @throws Exception Exception
 	 */
-	protected boolean afterExec() throws Exception {
+	protected boolean afterExec(E e) throws Exception {
 		return true;
 	}
 	

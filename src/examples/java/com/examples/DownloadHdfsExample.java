@@ -36,6 +36,7 @@ public class DownloadHdfsExample extends Context {
 		dest = new File("").getAbsolutePath() + "/download/" + name;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected Set<DownloadTask> scheduleBatchTasks() throws Exception {  
 		List<String> list = HdfsUtil.list(masterUrl, slaveUrl, new Path("/test"), new PathFilter(){

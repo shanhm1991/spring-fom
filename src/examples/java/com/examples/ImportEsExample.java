@@ -55,6 +55,7 @@ public class ImportEsExample extends Context {
 		esJson = new File(ContextUtil.getContextPath((config.getString("esJson", "")))); 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected Set<ImportEsExampleTask> scheduleBatchTasks() throws Exception { 
 		List<String> list = FileUtil.list(srcPath, new FileFilter(){

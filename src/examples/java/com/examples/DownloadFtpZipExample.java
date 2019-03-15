@@ -36,6 +36,7 @@ public class DownloadFtpZipExample extends Context {
 		 dest = new File("").getAbsolutePath() + "/download/" + name;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected Set<DownloadZipTask> scheduleBatchTasks() throws Exception {
 		List<String> list = new ArrayList<String>();

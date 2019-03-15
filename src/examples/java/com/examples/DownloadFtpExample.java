@@ -29,6 +29,7 @@ public class DownloadFtpExample extends Context {
 		config.put("destpath", dest);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected Set<DownloadTask> scheduleBatchTasks() throws Exception { 
 		String hostname = config.get("hostname");

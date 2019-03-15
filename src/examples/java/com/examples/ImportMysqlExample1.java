@@ -35,6 +35,7 @@ public class ImportMysqlExample1 extends Context {
 		pattern = config.getString("pattern", "");
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected Set<ImportMysqlExample1Task> scheduleBatchTasks() throws Exception { 
 		List<String> list = FileUtil.list(srcPath, new FileFilter(){

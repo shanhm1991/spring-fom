@@ -26,6 +26,7 @@ public class DownloadHttpExample extends Context {
 				+ File.separator + "download" + File.separator + name;
 	}
  
+	@SuppressWarnings("unchecked")
 	@Override
 	protected Set<DownloadTask> scheduleBatchTasks() throws Exception {
 		String uri = "http://localhost:4040/fom/index.html";

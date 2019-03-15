@@ -20,6 +20,7 @@ public class UploadHttpExample extends Context {
 
 	private static final long serialVersionUID = -6676559884214726673L;
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected Set<UploadTask> scheduleBatchTasks() throws Exception { 
 		String path = ContextUtil.getContextPath("/source") + File.separator + "http.jpg";

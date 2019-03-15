@@ -25,7 +25,7 @@ import com.fom.task.helper.DownloadHelper;
  * @author shanhm
  *
  */
-public final class DownloadTask extends Task<Object> {
+public final class DownloadTask extends Task<Boolean> {
 
 	private final String destName;
 
@@ -87,7 +87,7 @@ public final class DownloadTask extends Task<Object> {
 	 * @param resultHandler 结果处理器
 	 */
 	public DownloadTask(String sourceUri, String destName, String destPath, 
-			boolean isDelSrc, boolean isWithTemp, DownloadHelper helper, ResultHandler<Object> resultHandler) {
+			boolean isDelSrc, boolean isWithTemp, DownloadHelper helper, ResultHandler<Boolean> resultHandler) {
 		this(sourceUri, destName, destPath, isDelSrc, isWithTemp, helper);
 		this.resultHandler = resultHandler;
 	}
@@ -104,7 +104,7 @@ public final class DownloadTask extends Task<Object> {
 	 */
 	public DownloadTask(String sourceUri, String destName, String destPath, 
 			boolean isDelSrc, boolean isWithTemp, DownloadHelper helper, 
-			ExceptionHandler exceptionHandler, ResultHandler<Object> resultHandler) {
+			ExceptionHandler exceptionHandler, ResultHandler<Boolean> resultHandler) {
 		this(sourceUri, destName, destPath, isDelSrc, isWithTemp, helper);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
@@ -146,7 +146,7 @@ public final class DownloadTask extends Task<Object> {
 	}
 
 	@Override
-	protected boolean exec() throws Exception {
+	protected Boolean exec() throws Exception {
 		long sTime = System.currentTimeMillis();
 		helper.download(id, downloadFile);
 		String size = new DecimalFormat("#.###").format(downloadFile.length() / 1024.0);
@@ -157,7 +157,7 @@ public final class DownloadTask extends Task<Object> {
 	}
 
 	@Override
-	protected boolean afterExec() throws Exception {
+	protected boolean afterExec(Boolean execResult) throws Exception {
 		if(isWithTemp && downloadFile.exists() 
 				&& !downloadFile.renameTo(new File(destPath + File.separator + downloadFile.getName()))){
 			log.error("move file failed:" + downloadFile.getName());

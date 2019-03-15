@@ -546,12 +546,4 @@ public class FomServiceImpl implements FomService {
 		write.flush();
 	}
 	
-	public <E> TimedFuture<Result<E>> submitTask(String contextName, Task<E> task) throws Exception { 
-		Context context = ContextManager.contextMap.get(contextName);
-		if(context == null){
-			throw new IllegalArgumentException("context[" + contextName + "] not exist.");
-		} 
-		return context.submit(task);
-	}
-	
 }

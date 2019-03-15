@@ -33,6 +33,7 @@ public class UploadFtpExample extends Context {
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	protected Set<UploadTask> scheduleBatchTasks() throws Exception {
 		String path = ContextUtil.getContextPath("/source")  + File.separator + "ftp.jpg";

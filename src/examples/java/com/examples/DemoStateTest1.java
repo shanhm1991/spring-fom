@@ -20,14 +20,14 @@ public class DemoStateTest1 extends Context {
 	
 	private Random random = new Random(10000);
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings("unchecked")
 	@Override
-	protected Set<Task> scheduleBatchTasks() throws Exception {
-		Set<Task> set = new HashSet<>();
+	protected Set<Task<Boolean>> scheduleBatchTasks() throws Exception {
+		Set<Task<Boolean>> set = new HashSet<>();
 		for(int i = 1; i < 50;i++){
-			set.add(new Task("task-" + i){
+			set.add(new Task<Boolean>("task-" + i){
 				@Override
-				protected boolean exec() throws Exception {
+				protected Boolean exec() throws Exception {
 					
 					Thread.sleep(random.nextInt(10000)); 
 					

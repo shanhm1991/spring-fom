@@ -24,7 +24,7 @@ import com.fom.context.ResultHandler;
  * @author shanhm
  *
  */
-public class UploadTask extends Task<Object> {
+public class UploadTask extends Task<Boolean> {
 	
 	private File file;
 	
@@ -72,7 +72,7 @@ public class UploadTask extends Task<Object> {
 	 * @param resultHandler ResultHandler
 	 */
 	public UploadTask(String sourceUri, String destUri, 
-			boolean isDelSrc, UploadHelper helper, ResultHandler<Object> resultHandler) {
+			boolean isDelSrc, UploadHelper helper, ResultHandler<Boolean> resultHandler) {
 		this(sourceUri, destUri, isDelSrc, helper);
 		this.resultHandler = resultHandler;
 	}
@@ -86,7 +86,7 @@ public class UploadTask extends Task<Object> {
 	 * @param resultHandler ResultHandler
 	 */
 	public UploadTask(String sourceUri, String destUri, 
-			boolean isDelSrc, UploadHelper helper, ExceptionHandler exceptionHandler, ResultHandler<Object> resultHandler) {
+			boolean isDelSrc, UploadHelper helper, ExceptionHandler exceptionHandler, ResultHandler<Boolean> resultHandler) {
 		this(sourceUri, destUri, isDelSrc, helper);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
@@ -102,7 +102,7 @@ public class UploadTask extends Task<Object> {
 	}
 
 	@Override
-	protected boolean exec() throws Exception {
+	protected Boolean exec() throws Exception {
 		long sTime = System.currentTimeMillis();
 		String size = new DecimalFormat("#.###").format(file.length() / 1024.0);
 		int code = helper.upload(file, destUri);
@@ -117,7 +117,7 @@ public class UploadTask extends Task<Object> {
 	}
 	
 	@Override
-	protected boolean afterExec() throws Exception {
+	protected boolean afterExec(Boolean execResult) throws Exception {
 		if(isDelSrc && !file.delete()){
 			log.warn("delete file failed.");
 			return false;

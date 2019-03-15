@@ -55,7 +55,7 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 	 * @param batch 入库时的批处理数
 	 * @param resultHandler ResultHandler
 	 */
-	public ParseTextTask(String sourceUri, int batch, ResultHandler<Object> resultHandler) {
+	public ParseTextTask(String sourceUri, int batch, ResultHandler<Boolean> resultHandler) {
 		this(sourceUri, batch);
 		this.resultHandler = resultHandler;
 	}
@@ -67,7 +67,7 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 	 * @param resultHandler ResultHandler
 	 */
 	public ParseTextTask(String sourceUri, int batch, 
-			ExceptionHandler exceptionHandler, ResultHandler<Object> resultHandler) {
+			ExceptionHandler exceptionHandler, ResultHandler<Boolean> resultHandler) {
 		this(sourceUri, batch);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
@@ -94,7 +94,7 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 	}
 
 	@Override
-	protected boolean exec() throws Exception {
+	protected Boolean exec() throws Exception {
 		long sTime = System.currentTimeMillis();
 		parseTxt(id, getSourceName(id), rowIndex);
 		log.info("finish file(" 
@@ -182,7 +182,7 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 	}
 
 	@Override
-	protected boolean afterExec() throws Exception {
+	protected boolean afterExec(Boolean execResult) throws Exception {
 		return deleteSource(id) && deleteProgressLog();
 	}
 }

@@ -27,6 +27,7 @@ public class UploadHdfsExample extends Context {
 
 	private String destPath;
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected Set<UploadTask> scheduleBatchTasks() throws Exception { 
 		String path = ContextUtil.getContextPath("/source") + File.separator + "hdfs.jpg";

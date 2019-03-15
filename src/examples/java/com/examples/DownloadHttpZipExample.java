@@ -28,6 +28,7 @@ public class DownloadHttpZipExample extends Context {
 				+ File.separator + "download" + File.separator + name;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected Set<DownloadZipTask> scheduleBatchTasks() throws Exception {
 		List<String> list = new ArrayList<String>();

@@ -15,7 +15,7 @@ import com.fom.task.reader.RowData;
  *
  * @param <V> 行数据解析结果类型
  */
-public abstract class ParseTask<V> extends Task<Object> {
+public abstract class ParseTask<V> extends Task<Boolean> {
 	
 	protected final int batch;
 	

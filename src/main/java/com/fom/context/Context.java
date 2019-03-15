@@ -474,7 +474,7 @@ public class Context implements Serializable {
 	 * @throws Exception Exception
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public final <E> TimedFuture<Result<E>> submit(Task<E> task) throws Exception {
+	private <E> TimedFuture<Result<E>> submit(Task<E> task) throws Exception {
 		if(submits.incrementAndGet() % 1000 == 0){
 			cleanFutures();
 		}
@@ -484,6 +484,21 @@ public class Context implements Serializable {
 		FUTUREMAP.put(taskId, future); 
 		log.info("task[" + taskId + "] submited."); 
 		return future; 
+	}
+	
+	/**
+	 * 提交task到对应的context
+	 * @param contextName contextName
+	 * @param task task
+	 * @return TimedFuture
+	 * @throws Exception Exception
+	 */
+	public static <E> TimedFuture<Result<E>> submitTask(String contextName, Task<E> task) throws Exception { 
+		Context context = ContextManager.contextMap.get(contextName);
+		if(context == null){
+			throw new IllegalArgumentException("context[" + contextName + "] not exist.");
+		} 
+		return context.submit(task);
 	}
 
 	/**

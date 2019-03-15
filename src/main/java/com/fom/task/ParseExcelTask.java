@@ -65,7 +65,7 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 	 * @param isBatchBySheet isBatchBySheet
 	 * @param resultHandler ResultHandler
 	 */
-	public ParseExcelTask(String sourceUri, int batch, boolean isBatchBySheet, ResultHandler<Object> resultHandler) {
+	public ParseExcelTask(String sourceUri, int batch, boolean isBatchBySheet, ResultHandler<Boolean> resultHandler) {
 		this(sourceUri, batch, isBatchBySheet);
 		this.resultHandler = resultHandler;
 	}
@@ -78,7 +78,7 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 	 * @param resultHandler ResultHandler
 	 */
 	public ParseExcelTask(String sourceUri, int batch, boolean isBatchBySheet, 
-			ExceptionHandler exceptionHandler, ResultHandler<Object> resultHandler) {
+			ExceptionHandler exceptionHandler, ResultHandler<Boolean> resultHandler) {
 		this(sourceUri, batch, isBatchBySheet);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
@@ -107,7 +107,7 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 	}
 
 	@Override
-	protected boolean exec() throws Exception {
+	protected Boolean exec() throws Exception {
 		long sTime = System.currentTimeMillis();
 		parseExcel(id, getSourceName(id), rowIndex);
 		log.info("finish excel(" 
@@ -247,7 +247,7 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 	}
 
 	@Override
-	protected boolean afterExec() throws Exception {
+	protected boolean afterExec(Boolean execResult) throws Exception {
 		return deleteSource(id) && deleteProgressLog();
 	}
 }

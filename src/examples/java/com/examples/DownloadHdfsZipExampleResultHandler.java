@@ -14,7 +14,7 @@ import com.fom.context.ResultHandler;
 import com.fom.log.LoggerAppender;
 import com.fom.util.HdfsUtil;
 
-public class DownloadHdfsZipExampleResultHandler implements ResultHandler<Object> {
+public class DownloadHdfsZipExampleResultHandler implements ResultHandler<Boolean> {
 	
 	private String name;
 	
@@ -36,7 +36,7 @@ public class DownloadHdfsZipExampleResultHandler implements ResultHandler<Object
 	}
 
 	@Override
-	public void handle(Result<Object> result) throws Exception {
+	public void handle(Result<Boolean> result) throws Exception {
 		log(name + ".record", result);
 		if(!result.isSuccess() || !isDelSrc){
 			return;
@@ -44,7 +44,7 @@ public class DownloadHdfsZipExampleResultHandler implements ResultHandler<Object
 		HdfsUtil.delete(masterUrl, slaveUrl, new Path(sourceUri));
 	}
 	
-	private static void log(String logName, Result<Object> result){
+	private static void log(String logName, Result<Boolean> result){
 		Logger logger = LogManager.exists(logName);
 		if(logger == null){
 			logger = Logger.getLogger(logName); 

@@ -17,13 +17,13 @@ public class DemoStateTest2 extends Context {
 
 	private static final long serialVersionUID = -838223512003059760L;
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings("unchecked")
 	@Override
-	protected Set<Task> scheduleBatchTasks() throws Exception {
-		Set<Task> set = new HashSet<>();
-		set.add(new Task<String>("task2"){
+	protected Set<Task<Boolean>> scheduleBatchTasks() throws Exception {
+		Set<Task<Boolean>> set = new HashSet<>();
+		set.add(new Task<Boolean>("task2"){
 			@Override
-			protected boolean exec() throws Exception {
+			protected Boolean exec() throws Exception {
 				while(true){
 					try{
 						Thread.sleep(30000); 

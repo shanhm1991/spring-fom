@@ -35,6 +35,7 @@ public class ImportOracleExample1 extends Context {
 		pattern = config.getString("pattern", "");
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected Set<ImportOracleExample1Task> scheduleBatchTasks() throws Exception { 
 		List<String> list = FileUtil.list(srcPath, new FileFilter(){
