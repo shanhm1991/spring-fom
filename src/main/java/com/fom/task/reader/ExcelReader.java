@@ -147,12 +147,12 @@ public class ExcelReader implements Reader {
 					rowIndex++;
 
 					int cellCount = row.getLastCellNum();
-					List<String> list = new ArrayList<>();
+					List<String> list = new ArrayList<>(cellCount);
 					
 					boolean isEmpty = true;
 					for(int i = 0;i < cellCount;i++){
 						String value = getCellValue(row.getCell(i));
-						if(!StringUtils.isBlank(value)){
+						if(isEmpty && !StringUtils.isBlank(value)){
 							isEmpty = false;
 						}
 						list.add(value);

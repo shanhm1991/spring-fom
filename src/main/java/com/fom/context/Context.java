@@ -37,8 +37,8 @@ public class Context implements Serializable {
 	private static final long serialVersionUID = 9154119563307298882L;
 
 	//所有的Context共用，防止两个Context创建针对同一个文件的任务
-	private static final Map<String,TimedFuture<Result<?>>> FUTUREMAP = new ConcurrentHashMap<>(1000);
-	
+	static final Map<String,TimedFuture<Result<?>>> FUTUREMAP = new ConcurrentHashMap<>(1000);
+
 	protected final ContextConfig config = new ContextConfig();
 
 	protected final String name;
@@ -106,7 +106,7 @@ public class Context implements Serializable {
 		statistics = new ContextStatistics();
 		loadTime = System.currentTimeMillis();
 	}
-	
+
 	/**
 	 * 获取正在执行的任务数
 	 * @return 正在执行的任务数
@@ -474,7 +474,7 @@ public class Context implements Serializable {
 	 * @throws Exception Exception
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private <E> TimedFuture<Result<E>> submit(Task<E> task) throws Exception {
+	public <E> TimedFuture<Result<E>> submit(Task<E> task) throws Exception {
 		if(submits.incrementAndGet() % 1000 == 0){
 			cleanFutures();
 		}
@@ -484,21 +484,6 @@ public class Context implements Serializable {
 		FUTUREMAP.put(taskId, future); 
 		log.info("task[" + taskId + "] submited."); 
 		return future; 
-	}
-	
-	/**
-	 * 提交task到对应的context
-	 * @param contextName contextName
-	 * @param task task
-	 * @return TimedFuture
-	 * @throws Exception Exception
-	 */
-	public static <E> TimedFuture<Result<E>> submitTask(String contextName, Task<E> task) throws Exception { 
-		Context context = ContextManager.contextMap.get(contextName);
-		if(context == null){
-			throw new IllegalArgumentException("context[" + contextName + "] not exist.");
-		} 
-		return context.submit(task);
 	}
 
 	/**

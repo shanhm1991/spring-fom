@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fom.context.Context;
+import com.fom.context.ContextUtil;
 import com.fom.context.Task;
 
 @RestController
@@ -25,7 +25,7 @@ public class DemoController {
 			}
 			
 		};
-		Context.submitTask("DemoStateTest1", task);
+		ContextUtil.submitTask("DemoStateTest1", task);
 		
 		Map<String,Object> map = new HashMap<>();
 		map.put("result", true);

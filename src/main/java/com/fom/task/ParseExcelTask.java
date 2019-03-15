@@ -114,7 +114,7 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 				+ formatSize(getSourceSize(id)) + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
 		return true;
 	}
-
+	
 	protected void parseExcel(String sourceUri, String sourceName, int lineIndex) throws Exception {
 		Reader reader = null;
 		RowData rowData = null;
@@ -135,18 +135,18 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 				lineIndex = rowData.getRowIndex();
 				sheetName = rowData.getSheetName();
 				
-				if(rowData.isEmpty()){
-					log.warn("ignore empty row, sheet=" + sheetName + ", row=" + lineIndex);
-					continue;
-				}
-
 				if (log.isDebugEnabled()) {
 					log.debug("parse row[file=" + sourceName + ", sheet=" + sheetName 
 							+ ", row= " + rowIndex + "], columns=" + rowData.getColumnList());
 				}
-				List<V> dataList = parseRowData(rowData, batchTime);
-				if(dataList != null){
-					batchData.addAll(dataList);
+				
+				if(rowData.isEmpty()){
+					log.warn("ignore empty row, sheet=" + sheetName + ", row=" + lineIndex);
+				}else{
+					List<V> dataList = parseRowData(rowData, batchTime);
+					if(dataList != null){
+						batchData.addAll(dataList);
+					}
 				}
 
 				if((isBatchBySheet && rowData.isLastRow()) || (batch > 0 && batchData.size() >= batch)){
