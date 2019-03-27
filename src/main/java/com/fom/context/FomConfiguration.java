@@ -71,7 +71,7 @@ public class FomConfiguration implements ServletContextInitializer {
 
 	@Bean
 	public ServletWebServerFactory servletContainer() {
-		TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory() {
+		return new TomcatServletWebServerFactory() {
 
 			@Override
 			protected void postProcessContext(Context context) {
@@ -95,7 +95,6 @@ public class FomConfiguration implements ServletContextInitializer {
 				}
 			}
 		};
-		return tomcat;
 	}
 
 	@Override

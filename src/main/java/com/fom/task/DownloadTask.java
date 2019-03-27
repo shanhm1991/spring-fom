@@ -37,8 +37,6 @@ public final class DownloadTask extends Task<Boolean> {
 
 	private final DownloadHelper helper;
 
-	private String downloadPath;
-
 	private File downloadFile;
 
 	/**
@@ -114,21 +112,22 @@ public final class DownloadTask extends Task<Boolean> {
 	protected boolean beforeExec() throws Exception {
 		File dest = new File(destPath);
 		if(!dest.exists() && !dest.mkdirs()){
-			log.error("directory create failed: " + dest); 
+			log.error("directory create failed: {}", dest); 
 			return false;
 		}
 
+		String downloadPath = null;
 		if(!isWithTemp){
-			this.downloadPath = destPath;
+			downloadPath = destPath;
 		}else{
 			if(StringUtils.isBlank(getContextName())){
-				this.downloadPath = System.getProperty("cache.download");
+				downloadPath = System.getProperty("cache.download");
 			}else{
-				this.downloadPath = System.getProperty("cache.download") + File.separator + getContextName();
+				downloadPath = System.getProperty("cache.download") + File.separator + getContextName();
 			}
 			File file = new File(downloadPath);
 			if(!file.exists() && !file.mkdirs()){
-				log.error("directory create failed: " + downloadPath); 
+				log.error("directory create failed: {}", downloadPath); 
 				return false;
 			}
 		}
@@ -136,9 +135,9 @@ public final class DownloadTask extends Task<Boolean> {
 		downloadFile = new File(downloadPath + File.separator + destName); 
 		if(downloadFile.exists()){
 			if(downloadFile.delete()){
-				log.info("delete exist file: " + downloadFile.getPath()); 
+				log.info("delete exist file: {}", downloadFile.getPath()); 
 			}else{
-				log.warn("delete exist file failed: " + downloadFile.getPath()); 
+				log.warn("delete exist file failed: {}", downloadFile.getPath()); 
 				return false;
 			}
 		}
@@ -151,7 +150,7 @@ public final class DownloadTask extends Task<Boolean> {
 		helper.download(id, downloadFile);
 		String size = new DecimalFormat("#.###").format(downloadFile.length() / 1024.0);
 		if (log.isDebugEnabled()) {
-			log.debug("finish downlod(" + size + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
+			log.debug("finish downlod({}KB), cost={}ms", size, System.currentTimeMillis() - sTime);
 		}
 		return true;
 	}
@@ -160,13 +159,13 @@ public final class DownloadTask extends Task<Boolean> {
 	protected boolean afterExec(Boolean execResult) throws Exception {
 		if(isWithTemp && downloadFile.exists() 
 				&& !downloadFile.renameTo(new File(destPath + File.separator + downloadFile.getName()))){
-			log.error("move file failed:" + downloadFile.getName());
+			log.error("move file failed: {}", downloadFile.getName());
 			return false;
 		}
 		if(isDelSrc){ 
 			int code = helper.delete(id);
 			if(code < 200 || code > 207){
-				log.error("delete file failed:" + id);
+				log.error("delete file failed: {}", id);
 				return false;
 			}
 		}

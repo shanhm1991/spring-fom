@@ -97,7 +97,7 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 			try{
 				sheetIndex = Integer.valueOf(lines.get(0));
 				rowIndex = Integer.valueOf(lines.get(1));
-				log.info("get failed file processed progress: sheet=" + sheetIndex + ",rowIndex=" +rowIndex); 
+				log.info("get failed file processed progress: sheetIndex={},rowIndex={}", sheetIndex, rowIndex); 
 			}catch(Exception e){
 				log.warn("get history processed progress failed, will process from scratch.");
 			}
@@ -110,11 +110,10 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 	protected Boolean exec() throws Exception {
 		long sTime = System.currentTimeMillis();
 		parseExcel(id, getSourceName(id), rowIndex);
-		log.info("finish excel(" 
-				+ formatSize(getSourceSize(id)) + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
+		log.info("finish excel({}KB), cost={}ms", formatSize(getSourceSize(id)), System.currentTimeMillis() - sTime);
 		return true;
 	}
-	
+
 	protected void parseExcel(String sourceUri, String sourceName, int lineIndex) throws Exception {
 		Reader reader = null;
 		RowData rowData = null;
@@ -134,14 +133,14 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 				}
 				lineIndex = rowData.getRowIndex();
 				sheetName = rowData.getSheetName();
-				
+
 				if (log.isDebugEnabled()) {
-					log.debug("parse row[file=" + sourceName + ", sheet=" + sheetName 
-							+ ", row= " + rowIndex + "], columns=" + rowData.getColumnList());
+					log.debug("parse row[file={}, sheet={}, row={}], columns={}",
+							sourceName, sheetName, rowIndex, rowData.getColumnList());
 				}
-				
+
 				if(rowData.isEmpty()){
-					log.warn("ignore empty row, sheet=" + sheetName + ", row=" + lineIndex);
+					log.warn("ignore empty row, sheet={}, row={}", sheetName, lineIndex);
 				}else{
 					List<V> dataList = parseRowData(rowData, batchTime);
 					if(dataList != null){
@@ -153,8 +152,8 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 					checkInterrupt();
 					int size = batchData.size();
 					batchProcess(batchData, batchTime); 
-					log.info("finish batch[file=" + sourceName + ", sheet=" + sheetName 
-							+ ", size=" + size + "], cost=" + (System.currentTimeMillis() - batchTime) + "ms");
+					log.info("finish batch[file={}, sheet={}, size={}], cost={}ms",
+							sourceName, sheetName, size, System.currentTimeMillis() - batchTime);
 					logProgress(sourceName, sheetIndex, sheetName, lineIndex, false); 
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
@@ -164,17 +163,18 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 				checkInterrupt();
 				int size = batchData.size();
 				batchProcess(batchData, batchTime); 
-				log.info("finish batch[file=" + sourceName + ", sheet=" + sheetName 
-						+ ", size=" + size + "], cost=" + (System.currentTimeMillis() - batchTime) + "ms");
+				log.info("finish batch[file={}, sheet={}, size={}], cost={}ms",
+						sourceName, sheetName, size, System.currentTimeMillis() - batchTime);
+				logProgress(sourceName, sheetIndex, sheetName, lineIndex, false); 
 			}
-			
+
 			onExcelComplete(sourceUri, sourceName);
 			logProgress(sourceName, sheetIndex, sheetName, lineIndex, true); 
 		}finally{
 			IoUtil.close(reader);
 		}
 	}
-	
+
 	/**
 	 * 单个Excel文件解析完成时的动作
 	 * @param sourceUri sourceUri
@@ -182,7 +182,7 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 	 * @throws Exception Exception
 	 */
 	protected void onExcelComplete(String sourceUri, String sourceName) throws Exception {
-		
+
 	}
 
 	/**
@@ -195,7 +195,7 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 	 * @throws IOException IOException
 	 */
 	protected void logProgress(String file, int sheetIndex, String sheetName, long row, boolean completed) throws IOException {
-		log.info("process progress: file=" + file + ",sheet=" + sheetName + ",row=" + row + ",completed=" + completed);
+		log.info("process progress: file={},sheet={},row={},completed={}", file, sheetName, row, completed);
 		if(progressLog.exists()){
 			FileUtils.writeStringToFile(progressLog, file + "\n" + sheetIndex + "\n" + row + "\n" + completed, false);
 		}

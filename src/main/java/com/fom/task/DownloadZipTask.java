@@ -156,7 +156,7 @@ public class DownloadZipTask extends Task<Boolean> {
 	protected boolean beforeExec() throws Exception {
 		File dest = new File(destPath);
 		if(!dest.exists() && !dest.mkdirs()){
-			log.error("directory create failed: " + dest); 
+			log.error("directory create failed: {}", dest); 
 			return false;
 		}
 
@@ -169,7 +169,7 @@ public class DownloadZipTask extends Task<Boolean> {
 
 		File file = new File(cachePath);
 		if(!file.exists() && !file.mkdirs()){
-			log.error("directory create failed: " + cachePath); 
+			log.error("directory create failed: {}", cachePath); 
 			return false;
 		}
 
@@ -193,12 +193,12 @@ public class DownloadZipTask extends Task<Boolean> {
 		}
 		for(File f : files){
 			if(!f.renameTo(new File(destPath + File.separator + f.getName()))){
-				log.error("file move failed: " + f.getName());
+				log.error("file move failed: {}", f.getName());
 				return false;
 			}
 		}
 		if(!tempDir.delete()){
-			log.error("directory delete failed: " + cachePath);
+			log.error("directory delete failed: {}", cachePath);
 			return false;
 		}
 		return true;
@@ -218,18 +218,13 @@ public class DownloadZipTask extends Task<Boolean> {
 				long sTime = System.currentTimeMillis();
 				String name = helper.getSourceName(uri);
 				if(historyDownloadFiles.contains(name)){
-					if (log.isDebugEnabled()) {
-						log.debug("ignore, file[" + name + "] was already downloaded."); 
-					}
+					log.warn("ignore, file[{}] was already downloaded.", name); 
 					continue;
 				}
 
 				currentDownloadFiles.add(name); 
 				String size = numFormat.format(helper.zipEntry(name, uri, zipOutStream) / 1024.0);
-				if (log.isDebugEnabled()) {
-					log.debug("finish download[" + name + "(" 
-							+ size + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
-				}
+				log.info("finish download[{}({}KB)], cost={}ms", name, size, System.currentTimeMillis() - sTime);
 				if(currentDownloadFiles.size() >= zipEntryMax || zip.length() >= zipSizeMax){
 					//流管道关闭，如果继续写文件需要重新打开
 					IoUtil.close(zipOutStream);
@@ -269,10 +264,10 @@ public class DownloadZipTask extends Task<Boolean> {
 	private boolean indexDownloadZip(boolean isRetry, boolean isLast) throws Exception{ 
 		if(!ZipUtil.valid(zip)){ 
 			if(zip.exists() && !zip.delete()){
-				log.error(zip.getName() + "was damaged, and delete failed."); 
+				log.error("{} was damaged, and delete failed.", zip.getName()); 
 				return false;
 			}
-			currentDownloadFiles = new HashSet<String>();
+			currentDownloadFiles = new HashSet<>();
 			return true;
 		}
 
@@ -290,7 +285,7 @@ public class DownloadZipTask extends Task<Boolean> {
 					if(entryName.equals(uriName)){
 						int code = helper.delete(uri);
 						if(code < 200 || code > 207){
-							log.error("delete src file failed: " + entryName); 
+							log.error("delete src file failed: {}", entryName); 
 							return false;
 						}
 						break;
@@ -309,17 +304,15 @@ public class DownloadZipTask extends Task<Boolean> {
 				return true;
 			}else{
 				//最后一次命名失败则直接结束，交给下次任务补偿
-				log.error("index zip failed: " + destName); 
+				log.error("index zip failed: {}", destName); 
 				return false;
 			}
 		}
 		index++;
 		currentDownloadFiles.clear();
 
-		if (log.isDebugEnabled()) {
-			String size = numFormat.format(destFile.length() / 1024.0);
-			log.debug("index zip: " + destName + "(" + size + "KB)");
-		}
+		String size = numFormat.format(destFile.length() / 1024.0);
+		log.info("index zip: {}({}KB)", destName, size);
 		return true;
 	}	
 
@@ -359,8 +352,8 @@ public class DownloadZipTask extends Task<Boolean> {
 				continue;
 			}
 			try{
-				String n = name.substring(0,name.lastIndexOf("_"));
-				n = n.substring(n.lastIndexOf("_") + 1,n.length());
+				String n = name.substring(0,name.lastIndexOf('_'));
+				n = n.substring(n.lastIndexOf('_') + 1,n.length());
 				int i = Integer.parseInt(n);
 				if(i > index){
 					index = i;

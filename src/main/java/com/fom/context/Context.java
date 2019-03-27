@@ -46,9 +46,9 @@ public class Context implements Serializable {
 
 	protected transient Logger log;
 
-	volatile transient long loadTime;
+	transient volatile long loadTime;
 
-	volatile transient long execTime;
+	transient volatile long execTime;
 
 	transient ContextStatistics statistics;
 
@@ -151,7 +151,7 @@ public class Context implements Serializable {
 	/**
 	 * 获取正在执行任务的Thead
 	 * @return taskId-Thread
-	 */
+	 */ 
 	public final Map<Task<?>, Thread> getActiveThreads() {
 		return config.getActiveThreads();
 	}
@@ -183,10 +183,10 @@ public class Context implements Serializable {
 		org.apache.log4j.Logger logger = LogManager.exists(name);
 		logger.setLevel(Level.toLevel(level));
 	}
-	
+
 	/**
 	 * 获取当前日志级别
-	 * @return
+	 * @return 级别
 	 */
 	public final String getLogLevel() {
 		if(log == null){
@@ -207,7 +207,7 @@ public class Context implements Serializable {
 	private transient State state = inited; 
 
 	private void switchState(State s) {
-		synchronized (name.intern()) {
+		synchronized (this) {
 			state = s;
 		}
 	}
@@ -217,7 +217,7 @@ public class Context implements Serializable {
 	 * @return state
 	 */
 	public final State getState(){
-		synchronized (name.intern()) {
+		synchronized (this) {
 			if(state == stopping && config.pool.isTerminated()){
 				state = stopped;
 			}
@@ -231,7 +231,7 @@ public class Context implements Serializable {
 	 */
 	public final Map<String,Object> startup(){
 		Map<String,Object> map = new HashMap<>();
-		synchronized (name.intern()) {
+		synchronized (this) {
 			switch(state){
 			case inited:
 			case stopped:
@@ -243,19 +243,19 @@ public class Context implements Serializable {
 				innerThread.start();
 				map.put("result", true);
 				map.put("msg", "context[" + name + "] started.");
-				log.info("context[" + name + "] started"); 
+				log.info("context[{}] started", name); 
 				return map;
 			case stopping:
 				map.put("result", false);
 				map.put("msg", "context[" + name + "] is stopping, cann't start.");
-				log.warn("context[" + name + "] is stopping, cann't start."); 
+				log.warn("context[{}] is stopping, cann't start.", name); 
 				return map;
 			case running:
 			case waiting:
 			case sleeping:
 				map.put("result", true);
 				map.put("msg", "context[" + name + "] was already started.");
-				log.warn("context[" + name + "] was already started."); 
+				log.warn("context[{}] was already started.", name); 
 				return map;
 			default:
 				map.put("result", false);
@@ -271,42 +271,40 @@ public class Context implements Serializable {
 	 */
 	public final Map<String,Object> shutDown(){
 		Map<String,Object> map = new HashMap<>();
-		synchronized (name.intern()) {
-			synchronized (name.intern()) {
-				switch(state){
-				case inited:
-				case stopped:
+		synchronized (this) {
+			switch(state){
+			case inited:
+			case stopped:
+				map.put("result", true);
+				map.put("msg", "context[" + name + "] was already stoped.");
+				log.warn("context[{}] was already stoped.", name); 
+				return map;
+			case stopping:
+				map.put("result", false);
+				map.put("msg", "context[" + name + "] is stopping, cann't stop.");
+				log.warn("context[{}] is stopping, cann't stop.", name); 
+				return map;
+			case running:
+			case waiting:
+			case sleeping:
+				state = stopping;
+				if(innerThread.isAlive()){
+					innerThread.interrupt();//尽快响应
 					map.put("result", true);
-					map.put("msg", "context[" + name + "] was already stoped.");
-					log.warn("context[" + name + "] was already stoped."); 
+					map.put("msg", "context[" + name + "] is stopping.");
+					log.info("context[{}] is stopping.", name); 
 					return map;
-				case stopping:
-					map.put("result", false);
-					map.put("msg", "context[" + name + "] is stopping, cann't stop.");
-					log.warn("context[" + name + "] is stopping, cann't stop."); 
-					return map;
-				case running:
-				case waiting:
-				case sleeping:
-					state = stopping;
-					if(innerThread.isAlive()){
-						innerThread.interrupt();//尽快响应
-						map.put("result", true);
-						map.put("msg", "context[" + name + "] is stopping.");
-						log.info("context[" + name + "] is stopping."); 
-						return map;
-					}else{
-						state = stopped;
-						map.put("result", true);
-						map.put("msg", "context[" + name + "] stopped.");
-						log.info("context[" + name + "] stopped."); 
-						return map;
-					}
-				default:
-					map.put("result", false);
-					map.put("msg", "invalid state.");
+				}else{
+					state = stopped;
+					map.put("result", true);
+					map.put("msg", "context[" + name + "] stopped.");
+					log.info("context[{}] stopped.", name); 
 					return map;
 				}
+			default:
+				map.put("result", false);
+				map.put("msg", "invalid state.");
+				return map;
 			}
 		}
 	}
@@ -317,34 +315,34 @@ public class Context implements Serializable {
 	 */
 	public final Map<String,Object> execNow(){
 		Map<String,Object> map = new HashMap<>();
-		synchronized (name.intern()) {
+		synchronized (this) {
 			switch(state){
 			case inited:
 			case stopped:
 				map.put("result", false);
 				map.put("msg", "context[" + name + "] was already stoped, cann't execut now.");
-				log.warn("context[" + name + "] isn't running, cann't execut now."); 
+				log.warn("context[{}] isn't running, cann't execut now.", name); 
 				return map;
 			case stopping:
 				map.put("result", false);
 				map.put("msg", "context[" + name + "] is stopping, cann't execut now.");
-				log.warn("context[" + name + "] is stopping, cann't execut now."); 
+				log.warn("context[{}] is stopping, cann't execut now.", name); 
 				return map;
 			case running:
 				map.put("result", false);
-				map.put("msg", "context[" + name + "] is already executing.");
-				log.info("context[" + name + "] is alrady executing."); 
+				map.put("msg", "context[" + name + "] is executing, and will re-executr immediately after completion .");
+				log.info("context[{}] is executing, and will re-executr immediately after completion .", name); 
 				return map;
 			case waiting:
 				map.put("result", false);
 				map.put("msg", "context[" + name + "] is waiting for task completion.");
-				log.info("context[" + name + "] is waiting for task completion."); 
+				log.info("context[{}] is waiting for task completion.", name); 
 				return map;
 			case sleeping:
 				innerThread.interrupt();
 				map.put("result", true);
 				map.put("msg", "context[" + name + "] execute now.");
-				log.info("context[" + name + "] execute now."); 
+				log.info("context[{}] execute now.", name); 
 				return map;
 			default:
 				map.put("result", false);
@@ -369,11 +367,11 @@ public class Context implements Serializable {
 		public void run() {
 			while(true){
 				boolean isStopping = false;
-				synchronized (name.intern()) {
+				synchronized (Context.this) {
 					isStopping = state == stopping;
 				}
 				if(isStopping){
-					Context.this.stop();
+					stopSelf();
 					return;
 				}
 
@@ -386,7 +384,7 @@ public class Context implements Serializable {
 							String taskId = task.getId();
 							if(isTaskAlive(taskId)){ 
 								if (log.isDebugEnabled()) {
-									log.debug("task[" + taskId + "] is still alive, create canceled"); 
+									log.debug("task[{}] is still alive, create canceled.", taskId); 
 								}
 								continue;
 							}
@@ -422,58 +420,68 @@ public class Context implements Serializable {
 				}
 			}
 		}
-	}
 
-	private void stop(){
-		config.pool.shutdownNow();
-		boolean stopSucc = false;
-		try {
-			stopSucc = config.pool.awaitTermination(1, TimeUnit.DAYS);
-		} catch (InterruptedException e) {
-			log.error("interrupted when stopping, which should never happened."); 
+		/**
+		 * null 没有创建过任务
+		 * done 创建过任务，但远程文件没删除
+		 * else 任务还没结束
+		 */
+		private boolean isTaskAlive(String key){
+			Future<Result<?>> future = FUTUREMAP.get(key);
+			return future != null && !future.isDone();
 		}
-		cleanFutures();
-		synchronized (name.intern()) {
-			if(stopSucc){
-				state = stopped;
-				log.info("context[" + name + "] stoped.");
-			}else{
-				log.warn("context[" + name + "] is still stopping, though has waiting for a day.");
+
+		private void terminate(){
+			switchState(waiting);
+			config.pool.shutdown();
+
+			if(waitTask()){
+				onScheduleTerminate();
+				switchState(stopped);
 			}
+
+			cleanFutures();
 		}
-	}
-
-	private void terminate(){
-		switchState(waiting);
-		config.pool.shutdown();
-
-		if(waitTask()){
-			onScheduleTerminate();
-			switchState(stopped);
-		}
-
-		cleanFutures();
-	}
-
-	private boolean waitTask(){
-		boolean isStopping = false;
-		while(true){
-			try {
-				if(config.pool.awaitTermination(1, TimeUnit.DAYS)){
-					log.info("context[" + name + "] stoped.");
-					return true;
-				}else if(isStopping){
-					log.warn("context[" + name + "] is still stopping, though has waiting for a day.");
-					return false;
+		
+		private boolean waitTask(){
+			boolean isStopping = false;
+			while(true){
+				try {
+					if(config.pool.awaitTermination(1, TimeUnit.DAYS)){
+						log.info("context[{}] stoped.", name);
+						return true;
+					}else if(isStopping){
+						log.warn("context[{}] is still stopping, though has waiting for a day.", name);
+						return false;
+					}
+				} catch (InterruptedException e) {
+					log.warn("interrupted when waiting executing task."); 
 				}
-			} catch (InterruptedException e) {
-				log.warn("interrupted when waiting executing task."); 
-			}
 
-			synchronized (name.intern()) {
-				if(state == stopping){
-					isStopping = true;
-					config.pool.shutdownNow();
+				synchronized (Context.this) {
+					if(state == stopping){
+						isStopping = true;
+						config.pool.shutdownNow();
+					}
+				}
+			}
+		}
+
+		private void stopSelf(){
+			config.pool.shutdownNow();
+			boolean stopSucc = false;
+			try {
+				stopSucc = config.pool.awaitTermination(1, TimeUnit.DAYS);
+			} catch (InterruptedException e) {
+				log.error("interrupted when stopping, which should never happened."); 
+			}
+			cleanFutures();
+			synchronized (Context.this) {
+				if(stopSucc){
+					state = stopped;
+					log.info("context[{}] stoped.", name);
+				}else{
+					log.warn("context[{}] is still stopping, though has waiting for a day.", name);
 				}
 			}
 		}
@@ -496,7 +504,7 @@ public class Context implements Serializable {
 		task.setContext(Context.this); 
 		TimedFuture future = config.pool.submit(task);
 		FUTUREMAP.put(taskId, future); 
-		log.info("task[" + taskId + "] submited."); 
+		log.info("task[{}] submited.", taskId); 
 		return future; 
 	}
 
@@ -516,16 +524,6 @@ public class Context implements Serializable {
 
 	}
 
-	/**
-	 * null 没有创建过任务
-	 * done 创建过任务，但远程文件没删除
-	 * else 任务还没结束
-	 */
-	private boolean isTaskAlive(String key){
-		Future<Result<?>> future = FUTUREMAP.get(key);
-		return future != null && !future.isDone();
-	}
-
 	private void cleanFutures(){
 		new Thread(name + "-clean"){
 			@Override
@@ -534,23 +532,21 @@ public class Context implements Serializable {
 				while(it.hasNext()){
 					Entry<String, TimedFuture<Result<?>>> entry = it.next();
 					TimedFuture<Result<?>> future = entry.getValue();
-					if(!name.equals(future.getContextName())){   
-						continue;
-					}
-					String taskId = entry.getKey(); 
-					if(future.getStartTime() > 0 && !future.isDone()){
-						long existTime = (System.currentTimeMillis() - future.getStartTime()) / 1000;
-						int threadOverTime = Integer.parseInt(config.get(ContextConfig.OVERTIME)); 
-						if(existTime > threadOverTime) {
-							log.warn("task overtime[" + taskId + "]," + existTime + "s");
-							if(Boolean.parseBoolean(config.get(ContextConfig.CANCELLABLE))) { 
-								future.cancel(true);
+					if(name.equals(future.getContextName())){   
+						String taskId = entry.getKey(); 
+						if(future.getStartTime() > 0 && !future.isDone()){
+							long existTime = (System.currentTimeMillis() - future.getStartTime()) / 1000;
+							int threadOverTime = Integer.parseInt(config.get(ContextConfig.OVERTIME)); 
+							if(existTime > threadOverTime) {
+								log.warn("task overtime[{}], {}s", taskId, existTime);
+								if(Boolean.parseBoolean(config.get(ContextConfig.CANCELLABLE))) { 
+									future.cancel(true);
+								}
 							}
+							continue;
 						}
-						continue;
+						it.remove();
 					}
-
-					it.remove();
 				}
 			}
 		}.start();

@@ -107,11 +107,11 @@ public class UploadTask extends Task<Boolean> {
 		String size = new DecimalFormat("#.###").format(file.length() / 1024.0);
 		int code = helper.upload(file, destUri);
 		if(code < 200 || code > 207){
-			log.error("upload failed, code=" + code);
+			log.error("upload failed, code={}", code);
 			return false;
 		}
 		if (log.isDebugEnabled()) {
-			log.debug("finish upload(" + size + "KB, code=" + code + "), cost=" + (System.currentTimeMillis() - sTime) + "ms");
+			log.debug("finish upload({}KB, code={}), cost={}ms", size, code, System.currentTimeMillis() - sTime);
 		}
 		return true;
 	}

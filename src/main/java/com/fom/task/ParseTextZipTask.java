@@ -111,7 +111,7 @@ public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
 
 		File parentFile = progressLog.getParentFile();
 		if(!parentFile.exists() && !parentFile.mkdirs()){
-			log.error("directory create failed:" + parentFile);
+			log.error("directory create failed:{}", parentFile);
 			return false;
 		}
 
@@ -144,7 +144,7 @@ public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
 					log.warn("clear files which unzip uncorrectly.");
 					for(File file : fileArray){
 						if(!file.delete()){
-							log.error("delete file failed: " + file.getName()); 
+							log.error("delete file failed: {}", file.getName()); 
 							return false;
 						}
 					}
@@ -152,14 +152,14 @@ public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
 			}else{
 				//首次任务处理
 				if(!unzipDir.mkdirs()){
-					log.error("directory create failed: " + unzipDir);
+					log.error("directory create failed: {}", unzipDir);
 					return false;
 				}
 			}
 
 			long cost = ZipUtil.unZip(id, unzipDir);
 			if (log.isDebugEnabled()) {
-				log.debug("finish unzip(" + formatSize(getSourceSize(id)) + "KB), cost=" + cost + "ms");
+				log.debug("finish unzip({}KB), cost={}ms", formatSize(getSourceSize(id)), cost);
 			}
 
 			String[] nameArray = unzipDir.list();
@@ -195,7 +195,7 @@ public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
 			if(!ArrayUtils.isEmpty(fileArray)){
 				for(File file : fileArray){
 					if(!file.delete()){
-						log.warn("clear temp file failed: " + file.getName()); 
+						log.warn("clear temp file failed: {}", file.getName()); 
 						return false;
 					}
 				}
@@ -215,7 +215,7 @@ public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * 匹配zip中的entry名称
 	 * @param entryName entryName
@@ -244,27 +244,25 @@ public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
 		currentFileName = lines.get(0); 
 		File file = new File(unzipDir + File.separator + currentFileName);
 		if(!file.exists()){
-			log.warn("cann't find failed file: " + currentFileName);
+			log.warn("cann't find failed file: {}", currentFileName);
 			return true;
 		}
 
 		long sTime = System.currentTimeMillis();
 		try{
 			rowIndex = Integer.valueOf(lines.get(1));
-			log.info("get history processed progress: file=" + currentFileName + ",rowIndex=" + rowIndex); 
+			log.info("get history processed progress: file={},rowIndex={}", currentFileName, rowIndex); 
 		}catch(Exception e){
 			log.warn("get history processed progress failed, will process from scratch.");
 		}
 
-		parseTxt(unzipDir + File.separator + currentFileName, currentFileName, rowIndex); 
+		String path = unzipDir + File.separator + currentFileName;
+		parseTxt(path, currentFileName, rowIndex); 
 		matchedEntrys.remove(currentFileName);
 
-		if (log.isDebugEnabled()) {
-			log.debug("finish file[" + currentFileName + "(" 
-					+ formatSize(getSourceSize(id)) + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
-		}
+		log.info("finish file[{}({}KB)], cost={}ms", currentFileName, formatSize(getSourceSize(path)), System.currentTimeMillis() - sTime);
 		if(!file.delete()){
-			log.error("delete file failed: " + currentFileName); 
+			log.error("delete file failed: {}", currentFileName); 
 			return false;
 		}
 		return true;
@@ -276,18 +274,19 @@ public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
 			long sTime = System.currentTimeMillis();
 			currentFileName = it.next();
 			rowIndex = 0;
-			parseTxt(unzipDir + File.separator + currentFileName, currentFileName, rowIndex); 
+
+			String path = unzipDir + File.separator + currentFileName;
+			parseTxt(path, currentFileName, rowIndex); 
 			it.remove();
 
 			File file = new File(unzipDir + File.separator + currentFileName);
-			log.info("finish file[" + currentFileName + "(" 
-					+ formatSize(getSourceSize(id)) + "KB)], cost=" + (System.currentTimeMillis() - sTime) + "ms");
+			log.info("finish file[{}({}KB)], cost={}ms", currentFileName, formatSize(getSourceSize(path)), System.currentTimeMillis() - sTime);
 			if(!file.delete()){ 
-				log.error("delete file failed: " + currentFileName); 
+				log.error("delete file failed: {}", currentFileName); 
 				return false;
 			}
 		}
 		return true;
 	}
-	
+
 }

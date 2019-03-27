@@ -60,18 +60,18 @@ public class ContextUtil {
 	 * 替换字符串中的系统变量
 	 * @param val string
 	 * @return string
-	 * @throws IllegalArgumentException IllegalArgumentException
 	 */
-	public static String replaceSystemProperty(String val) throws IllegalArgumentException {
-		String DELIM_START = "${";
-		char   DELIM_STOP  = '}';
-		int DELIM_START_LEN = 2;
-		int DELIM_STOP_LEN  = 1;
-		StringBuffer buffer = new StringBuffer();
+	public static String replaceSystemProperty(String val) {
+		String begin = "${";
+		char   end  = '}';
+		int beginLen = 2;
+		int endLen  = 1;
+		StringBuilder buffer = new StringBuilder();
 		int i = 0;
-		int j, k;
+		int j;
+		int k;
 		while(true) {
-			j = val.indexOf(DELIM_START, i);
+			j = val.indexOf(begin, i);
 			if(j == -1) {
 				if(i==0) {
 					return val;
@@ -81,19 +81,19 @@ public class ContextUtil {
 				}
 			} else {
 				buffer.append(val.substring(i, j));
-				k = val.indexOf(DELIM_STOP, j);
+				k = val.indexOf(end, j);
 				if(k == -1) {
 					throw new IllegalArgumentException('"' 
 							+ val + "\" has no closing brace. Opening brace at position " + j + '.');
 				} else {
-					j += DELIM_START_LEN;
+					j += beginLen;
 					String key = val.substring(j, k);
 					String replacement = System.getProperty(key);
 					if(replacement != null) {
 						String recursiveReplacement = replaceSystemProperty(replacement);
 						buffer.append(recursiveReplacement);
 					}
-					i = k + DELIM_STOP_LEN;
+					i = k + endLen;
 				}
 			}
 		}
@@ -153,7 +153,6 @@ public class ContextUtil {
 	/**
 	 * 获取Fom容器中所有的context统计信息
 	 * @return map结果
-	 * @throws Exception Exception
 	 */
 	public static List<Map<String, String>> list() {
 		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss SSS");
@@ -183,7 +182,7 @@ public class ContextUtil {
 	/**
 	 * 更新context的配置项
 	 * @param name context名称
-	 * @param data json数据
+	 * @param json json数据
 	 * @return map结果
 	 * @throws Exception Exception
 	 */
@@ -198,6 +197,8 @@ public class ContextUtil {
 		Map<String,String> bakMap = new HashMap<>();
 		bakMap.putAll(context.config.valueMap);
 
+		System.out.println(json); 
+		
 		JSONObject jsonObject = JSONObject.parseObject(json);  
 		for(Entry<String, Object> entry : jsonObject.entrySet()){
 			String key = entry.getKey();
@@ -272,9 +273,8 @@ public class ContextUtil {
 	 * 启动
 	 * @param name context名称
 	 * @return map结果
-	 * @throws Exception Exception
 	 */
-	public static Map<String,Object> startup(String name) throws Exception {
+	public static Map<String,Object> startup(String name) {
 		Map<String,Object> map = new HashMap<>();
 		Context context = ContextManager.contextMap.get(name);
 		if(context == null){
@@ -289,7 +289,6 @@ public class ContextUtil {
 	 * 停止
 	 * @param name context名称
 	 * @return map结果
-	 * @throws Exception Exception
 	 */
 	public static Map<String,Object> shutDown(String name){
 		Map<String,Object> map = new HashMap<>();
@@ -306,9 +305,8 @@ public class ContextUtil {
 	 * 立即运行
 	 * @param name context名称
 	 * @return map结果
-	 * @throws Exception Exception
 	 */
-	public static Map<String, Object> execNow(String name) throws Exception {
+	public static Map<String, Object> execNow(String name) {
 		Map<String,Object> map = new HashMap<>();
 		Context context = ContextManager.contextMap.get(name);
 		if(context == null){
@@ -323,9 +321,8 @@ public class ContextUtil {
 	 * 获取context状态
 	 * @param name context名称
 	 * @return map结果
-	 * @throws Exception Exception
 	 */
-	public static Map<String, Object> state(String name) throws Exception {
+	public static Map<String, Object> state(String name) {
 		Map<String,Object> map = new HashMap<>();
 		Context context = ContextManager.contextMap.get(name);
 		if(context == null){
@@ -428,10 +425,9 @@ public class ContextUtil {
 	/**
 	 * 获取context之外的log级别
 	 * @return log名称与级别
-	 * @throws Exception Exception
 	 */
 	@SuppressWarnings("rawtypes")
-	public static Map<String, String> listOtherLogs() throws Exception {
+	public static Map<String, String> listOtherLogs() {
 		Enumeration loggerEnumeration = LogManager.getLoggerRepository().getCurrentLoggers();
 		Map<String, String> map = new HashMap<>();
 		Set<String> listed = new HashSet<>();
@@ -458,10 +454,11 @@ public class ContextUtil {
 				return;
 			}else if(logger.getParent() == Logger.getRootLogger()){
 				appenderEnumeration = Logger.getRootLogger().getAllAppenders(); 
-				String append = "";
+				StringBuilder builder = new StringBuilder();
 				while(appenderEnumeration.hasMoreElements()){
-					append += ((Appender)appenderEnumeration.nextElement()).getName() + ",";
+					builder.append(((Appender)appenderEnumeration.nextElement()).getName() + ",");
 				}
+				String append = builder.toString();
 				append = append.substring(0, append.length() - 1);
 
 				Level level = logger.getLevel();
@@ -475,10 +472,11 @@ public class ContextUtil {
 			}
 			listLog(logger.getParent(), map, listed);
 		}else{
-			String append = "";
+			StringBuilder builder = new StringBuilder();
 			while(appenderEnumeration.hasMoreElements()){
-				append += ((Appender)appenderEnumeration.nextElement()).getName() + ",";
+				builder.append(((Appender)appenderEnumeration.nextElement()).getName() + ",");
 			}
+			String append = builder.toString();
 			append = append.substring(0, append.length() - 1);
 			Level level = logger.getLevel();
 
@@ -489,11 +487,11 @@ public class ContextUtil {
 	
 	/**
 	 * 查询日志级别
-	 * @param logger logger
+	 * @param loggerName loggerName
 	 * @return level
 	 */
 	@SuppressWarnings("rawtypes")
-	public static String queryLogLevel(String key) {
+	public static String queryLogLevel(String loggerName) {
 		Enumeration loggerEnumeration = LogManager.getLoggerRepository().getCurrentLoggers();
 		Map<String, String> map = new HashMap<>();
 		Set<String> listed = new HashSet<>();
@@ -504,7 +502,7 @@ public class ContextUtil {
 			}
 			listLog(logger, map, listed);
 		}
-		String level = map.get(key);
+		String level = map.get(loggerName);
 		if(level == null){
 			level = "NULL";
 		}
@@ -513,14 +511,14 @@ public class ContextUtil {
 	
 	/**
 	 * 保存日志级别
-	 * @param logger logger
+	 * @param loggerName loggerName
 	 * @param level level
 	 */
-	public static void saveLogLevel(String key, String level) {
+	public static void saveLogLevel(String loggerName, String level) {
 		if("NULL".equalsIgnoreCase(level)){
 			return;
 		}
-		String name = key.substring(0, key.indexOf("["));
+		String name = loggerName.substring(0, loggerName.indexOf("["));
 		Logger logger = LogManager.exists(name);
 		if(logger == null){
 			return;
@@ -532,9 +530,8 @@ public class ContextUtil {
 	 * 获取context正在执行的任务线程的堆栈
 	 * @param name context名称
 	 * @return map结果
-	 * @throws Exception Exception
 	 */
-	public static Map<String, Object> activeDetail(String name) throws Exception {
+	public static Map<String, Object> activeDetail(String name) {
 		Map<String,Object> map = new HashMap<>();
 		map.put("size", 0);
 		Context context = ContextManager.contextMap.get(name);
@@ -566,9 +563,8 @@ public class ContextUtil {
 	 * 获取失败的任务详情
 	 * @param name context名称
 	 * @return map结果
-	 * @throws Exception Exception
 	 */
-	public static Map<String, Object> failedDetail(String name) throws Exception {
+	public static Map<String, Object> failedDetail(String name) {
 		Map<String,Object> map = new HashMap<>();
 		map.put("size", 0);
 		Context context = ContextManager.contextMap.get(name);
@@ -605,9 +601,8 @@ public class ContextUtil {
 	 * 获取正在等待的任务详情
 	 * @param name context名称
 	 * @return map结果
-	 * @throws Exception Exception
 	 */
-	public static Map<String, Object> waitingdetail(String name) throws Exception {
+	public static Map<String, Object> waitingdetail(String name) {
 		Context context = ContextManager.contextMap.get(name);
 		if(context == null){
 			Map<String,Object> map = new HashMap<>();

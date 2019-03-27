@@ -41,7 +41,7 @@ public class DownloadHdfsZipExample extends Context {
 
 	private int entryMax = 10;
 
-	private long sizeMax = 100 * 1024 * 1024;
+	private long sizeMax = 100 * 1024 * 1024L;
 
 	private String signalName;
 

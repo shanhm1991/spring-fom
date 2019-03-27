@@ -85,7 +85,7 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 			List<String> lines = FileUtils.readLines(progressLog);
 			try{
 				rowIndex = Integer.valueOf(lines.get(1));
-				log.info("get history processed progress: rowIndex=" + rowIndex); 
+				log.info("get history processed progress: rowIndex={}", rowIndex); 
 			}catch(Exception e){
 				log.warn("get history processed progress failed, will process from scratch.");
 			}
@@ -97,8 +97,7 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 	protected Boolean exec() throws Exception {
 		long sTime = System.currentTimeMillis();
 		parseTxt(id, getSourceName(id), rowIndex);
-		log.info("finish file(" 
-				+ formatSize(getSourceSize(id)) + "KB), cost=" + (System.currentTimeMillis() - sTime) + "ms");
+		log.info("finish file({}KB), cost={}ms", formatSize(getSourceSize(id)), System.currentTimeMillis() - sTime);
 		return true;
 	}
 
@@ -110,7 +109,7 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 	 * @throws IOException IOException
 	 */
 	protected void logProgress(String file, long row, boolean completed) throws IOException {
-		log.info("process progress: file=" + file + ",row=" + row + ",completed=" + completed);
+		log.info("process progress: file={},row={},completed={}", file, row, completed);
 		if(progressLog.exists()){
 			FileUtils.writeStringToFile(progressLog, file + "\n" + row + "\n" + completed, false);
 		}
@@ -137,8 +136,7 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 				}
 				lineIndex = rowData.getRowIndex();
 				if (log.isDebugEnabled()) {
-					log.debug("parse row[file=" 
-							+ sourceName + ", row= " + rowIndex + "], columns=" + rowData.getColumnList());
+					log.debug("parse row[file={}, row={}], columns={}", sourceName, rowIndex, rowData.getColumnList());
 				}
 
 				List<V> dataList = parseRowData(rowData, batchTime);
@@ -150,8 +148,7 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 					checkInterrupt();
 					int size = batchData.size();
 					batchProcess(batchData, batchTime); 
-					log.info("finish batch[file=" + sourceName 
-							+ ", size=" + size + "], cost=" + (System.currentTimeMillis() - batchTime) + "ms");
+					log.info("finish batch[file={}, size={}], cost={}ms", sourceName, size, System.currentTimeMillis() - batchTime);
 					logProgress(sourceName, lineIndex, false);
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
@@ -161,8 +158,8 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 				checkInterrupt();
 				int size = batchData.size();
 				batchProcess(batchData, batchTime);  
-				log.info("finish batch[file=" + sourceName 
-						+ ", size=" + size + "], cost=" + (System.currentTimeMillis() - batchTime) + "ms");
+				log.info("finish batch[file={}, size={}], cost={}ms", sourceName, size, System.currentTimeMillis() - batchTime);
+				logProgress(sourceName, lineIndex, false);
 			}
 
 			onTextComplete(sourceUri, sourceName);

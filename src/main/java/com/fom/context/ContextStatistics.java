@@ -107,6 +107,8 @@ class ContextStatistics {
 						String day = daysHaveSaved.removeLast();
 						successMap.remove(day);
 					}
+				}else{
+					queue = successMap.get(today);
 				}
 			}
 		}
@@ -116,7 +118,7 @@ class ContextStatistics {
 		costDetail.cost = cost;
 		costDetail.createTime = createTime;
 		costDetail.startTime = startTime;
-		queue.offer(costDetail);
+		queue.offer(costDetail); 
 
 		failedMap.remove(taskId);
 		synchronized (lock_all) {

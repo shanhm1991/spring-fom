@@ -45,8 +45,6 @@ public class ExcelReader implements Reader {
 
 	private Workbook workbook = null;
 
-	private int sheetCount;
-	
 	private Map<String, Sheet> sheetMap = new HashMap<>();
 	
 	private List<String> sheetRangeList = new ArrayList<>();
@@ -112,7 +110,7 @@ public class ExcelReader implements Reader {
 		}else{
 			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx");
 		}
-		sheetCount = workbook.getNumberOfSheets();
+		int sheetCount = workbook.getNumberOfSheets();
 		for(int i = 0;i < sheetCount;i++){
 			Sheet shee = workbook.getSheetAt(i);
 			sheetRangeList.add(shee.getSheetName());

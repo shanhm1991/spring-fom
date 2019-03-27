@@ -138,12 +138,12 @@ public abstract class Task<E> implements Callable<Result<E>> {
 			if(context != null){
 				context.statistics.successIncrease(id, cost, this.createTime, this.startTime); 
 			}
-			log.info("task success, cost=" + cost + "ms");
+			log.info("task success, cost={}ms", cost);
 		}else{
 			if(context != null){
 				context.statistics.failedIncrease(id, result);
 			}
-			log.warn("task failed, cost=" + cost + "ms");
+			log.warn("task failed, cost={}ms", cost);
 		}
 		return result;
 	}
