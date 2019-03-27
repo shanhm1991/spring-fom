@@ -22,9 +22,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
+import org.slf4j.Logger;
 
-import com.fom.log.LoggerFactory;
+import com.fom.log.SlfLoggerFactory;
 
 /**
  * 模块最小单位，相当于一个组织者的角色，负责创建和组织Task的运行
@@ -74,7 +75,7 @@ public class Context implements Serializable {
 			throw new IllegalArgumentException("param name cann't be empty.");
 		}
 		this.name = name;
-		this.log = LoggerFactory.getLogger(name);
+		this.log = SlfLoggerFactory.getLogger(name);
 		Class<?> clazz = this.getClass();
 		FomContext fc = clazz.getAnnotation(FomContext.class);
 		initValue(name, fc);
@@ -86,7 +87,7 @@ public class Context implements Serializable {
 	 * @param fc
 	 */
 	private void initValue(String name,FomContext fc){
-		this.log = LoggerFactory.getLogger(name); 
+		this.log = SlfLoggerFactory.getLogger(name); 
 		config.init(ContextManager.elementMap.get(name),  ContextManager.createMap.get(name), fc);
 		statistics = new ContextStatistics();
 		loadTime = System.currentTimeMillis();
@@ -100,7 +101,7 @@ public class Context implements Serializable {
 	}
 
 	void unSerialize(){
-		this.log = LoggerFactory.getLogger(name); 
+		this.log = SlfLoggerFactory.getLogger(name); 
 		switchState(inited);
 		config.initPool();
 		statistics = new ContextStatistics();
@@ -179,7 +180,20 @@ public class Context implements Serializable {
 		if(log == null){
 			return;
 		}
-		log.setLevel(Level.toLevel(level));
+		org.apache.log4j.Logger logger = LogManager.exists(name);
+		logger.setLevel(Level.toLevel(level));
+	}
+	
+	/**
+	 * 获取当前日志级别
+	 * @return
+	 */
+	public final String getLogLevel() {
+		if(log == null){
+			throw new NullPointerException();
+		}
+		org.apache.log4j.Logger logger = LogManager.exists(name);
+		return logger.getLevel().toString();
 	}
 
 	/**

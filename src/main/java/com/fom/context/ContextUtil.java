@@ -170,7 +170,7 @@ public class ContextUtil {
 			}
 			cmap.put("execTime", format.format(context.execTime));
 			cmap.put("loadTime", format.format(context.loadTime));
-			cmap.put("level", context.log.getLevel().toString());
+			cmap.put("level", context.getLogLevel());
 			cmap.put("active", String.valueOf(context.getActives())); 
 			cmap.put("waiting", String.valueOf(context.getWaitings()));
 			cmap.put("failed", context.statistics.failedDetail());

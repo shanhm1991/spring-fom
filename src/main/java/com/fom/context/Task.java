@@ -2,9 +2,10 @@ package com.fom.context;
 
 import java.util.concurrent.Callable;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.fom.log.LoggerFactory;
+import com.fom.log.SlfLoggerFactory;
 
 /**
  * 任务
@@ -17,7 +18,7 @@ import com.fom.log.LoggerFactory;
  */
 public abstract class Task<E> implements Callable<Result<E>> {
 
-	protected volatile Logger log = Logger.getRootLogger();
+	protected volatile Logger log = LoggerFactory.getLogger("ROOT");
 
 	/**
 	 * 任务唯一标识
@@ -202,7 +203,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 			return;
 		}
 		this.context = context;
-		this.log = LoggerFactory.getLogger(context.name); 
+		this.log = SlfLoggerFactory.getLogger(context.name); 
 	}
 	
 	/**
