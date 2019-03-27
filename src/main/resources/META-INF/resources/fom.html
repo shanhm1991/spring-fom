@@ -401,11 +401,29 @@ img {
 				+ key
 				+ '</td>'
 				+ '<td><span>'
-				+ data[key]
-				+ '</span><input hidden=true value="' + data[key] + '" /></td></tr>';
+				+ br(escapeHtml(data[key]))
+				+ '</span><input hidden=true value="' + br(escapeHtml(data[key])) + '" /></td></tr>';
 		}
 		html = '<table id="' + name + '"' + html + '</table>';
 		return html;
+	}
+
+	function escapeHtml(string) {
+		var entityMap = {
+			"&" : "&amp;",
+			"<" : "&lt;",
+			">" : "&gt;",
+			'"' : '&quot;',
+			"'" : '&#39;',
+			"/" : '&#x2F;'
+		};
+		return String(string).replace(/[&<>"'\/]/g, function(s) {
+			return entityMap[s];
+		});
+	}
+
+	function br(str) {
+		return str.replace(/\r?\n/g, "<br />");
 	}
 
 	function operation(e, opid) {
@@ -548,7 +566,7 @@ img {
 		var html = '<table class="layui-table" id="layui-table">'
 			+ '<thead><tr><th>key</th><th>value</th><th>remark</th></tr></thead><tbody>'
 			+ '<tr><td><input type="text" value="name" readonly="readonly"/></td><td><input type="text"/></td><td>名称</td></tr>'
-			+ '<tr><td><input type="text" value="class" readonly="readonly"/></td><td>' 
+			+ '<tr><td><input type="text" value="class" readonly="readonly"/></td><td>'
 			+ '<input type="text"/></td><td>com.fom.context.Context的实现类,若有新的jar包，请先手动拷贝到classpath下的lib目录中</td></tr>'
 			+ '<tr><td><input type="text" value="remark" readonly="readonly"/></td><td><input type="text"/></td><td>备注</td></tr>'
 			+ '<tr><td><input type="text" value="cron" readonly="readonly"/></td><td><input type="text"/></td><td>执行周期(quartz定时表达式)</td></tr>'
@@ -645,7 +663,7 @@ img {
 						return;
 					}
 					var html = "<table width='100%' border='1' cellpadding='20px' style='height:100%;'>";
-					html +=  "<thead><tr><th>id</th><th>create Time</th><th>start Time</th><th>Thread Stack</th></tr></thead>";
+					html += "<thead><tr><th>id</th><th>create Time</th><th>start Time</th><th>Thread Stack</th></tr></thead>";
 					for (var key in data) {
 						if (key == "size") {
 							continue;
@@ -653,7 +671,7 @@ img {
 						var subdata = data[key];
 						html = html + "<tr><td>" + key
 							+ "</td><td>" + subdata.createTime
-							+ "</td><td>" + subdata.startTime 
+							+ "</td><td>" + subdata.startTime
 							+ "</td><td>" + subdata.stack + "</td></tr>"
 					}
 					html = html + "</table>";
@@ -689,7 +707,7 @@ img {
 						return;
 					}
 					var html = "<table width='100%' border='1' cellpadding='20px' style='height:100%;'>";
-					html +=  "<thead><tr><th>id</th><th>create Time</th><th>start Time</th><th>cost Time</th><th>Throwable</th></tr></thead>";
+					html += "<thead><tr><th>id</th><th>create Time</th><th>start Time</th><th>cost Time</th><th>Throwable</th></tr></thead>";
 					for (var key in data) {
 						if (key == "size") {
 							continue;
@@ -697,8 +715,8 @@ img {
 						var subdata = data[key];
 						html = html + "<tr><td>" + key
 							+ "</td><td>" + subdata.createTime
-							+ "</td><td>" + subdata.startTime 
-							+ "</td><td>" + subdata.costTime 
+							+ "</td><td>" + subdata.startTime
+							+ "</td><td>" + subdata.costTime
 							+ "ms</td><td>" + subdata.throwable + "</td></tr>"
 					}
 					html = html + "</table>";
@@ -734,7 +752,7 @@ img {
 						return;
 					}
 					var html = "<table width='100%' border='1' cellpadding='20px' style='height:100%;'>";
-					html +=  "<thead><tr><th>id</th><th>create Time</th></tr></thead>";
+					html += "<thead><tr><th>id</th><th>create Time</th></tr></thead>";
 					for (var key in data) {
 						if (key == "size") {
 							continue;
@@ -796,16 +814,16 @@ img {
 
 					$("#saveDay").val(data.saveDay);
 					$("#levelInput").val(data.level1 + "," + data.level2 + "," + data.level3 + "," + data.level4 + "," + data.level5);
-					
+
 					layui.laydate.render({
-					    elem: '#costDate',
-					    format: 'yyyyMMdd',
-					    value: data.day,
-					    isInitValue: true,
-					    showBottom: false,
-					    done: function(value, date){
-					    	var name = $("#costDate").attr("name");
-					        $.ajax({
+						elem : '#costDate',
+						format : 'yyyyMMdd',
+						value : data.day,
+						isInitValue : true,
+						showBottom : false,
+						done : function(value, date) {
+							var name = $("#costDate").attr("name");
+							$.ajax({
 								url : "/changeDate",
 								type : "POST",
 								dataType : "json",
@@ -820,9 +838,9 @@ img {
 									layer.msg(XMLHttpRequest.responseText);
 								}
 							});
-					      }
-					  });
-					
+						}
+					});
+
 					Highcharts.chart('HighchartsAll', {
 						chart : {
 							type : 'column'
@@ -883,7 +901,7 @@ img {
 							data : [ all.level6 ]
 						} ]
 					});
-					
+
 					day10Highcharts(data);
 				},
 				error : function(XMLHttpRequest, textStatus, errorThrown) {
@@ -891,8 +909,8 @@ img {
 				}
 			});
 	}
-	
-	function day10Highcharts(data){
+
+	function day10Highcharts(data) {
 		var day1 = data.day1;
 		var day2 = data.day2;
 		var day3 = data.day3;
@@ -903,7 +921,7 @@ img {
 		var day8 = data.day8;
 		var day9 = data.day9;
 		var day10 = data.day10;
-		
+
 		Highcharts.chart('HighchartsAll10day', {
 			chart : {
 				type : 'column'
@@ -980,8 +998,8 @@ img {
 			} ]
 		});
 	}
-	
-	function saveCostLevel(e){
+
+	function saveCostLevel(e) {
 		var levelStr = $("#levelInput").val();
 		var saveDay = $("#saveDay").val();
 		var date = $("#costDate").val();
@@ -997,12 +1015,12 @@ img {
 				"date" : date
 			},
 			success : function(data) {
-				if(!data.isSuccess){
+				if (!data.isSuccess) {
 					return
 				}
 				$("#saveDay").val(data.saveDay);
-				
-				if(!data.isChange){
+
+				if (!data.isChange) {
 					return
 				}
 				$("#levelInput").val(data.level1 + "," + data.level2 + "," + data.level3 + "," + data.level4 + "," + data.level5);
@@ -1013,7 +1031,7 @@ img {
 			}
 		});
 	}
-	
+
 	function dataDownload(e) {
 		var name = $(e).attr("id");
 		window.open("/dataDownload?name=" + name);
