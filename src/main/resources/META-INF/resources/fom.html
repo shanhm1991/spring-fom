@@ -383,47 +383,38 @@ img {
 	}
 
 	function format(data) {
-		var html = ' cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'
-			+ '<tr><td><i class="layui-icon layui-icon-ok detailbtn" title="save" onclick="save(this)"/></i></td>'
-			+ '<td><i class="layui-icon layui-icon-edit detailbtn" title="edit" onclick="edit(this)"/></i></td></tr>';
-		var name = "";
+		var Tb = $('<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px; width:100%;" />');
+		var row1 = $('<tr><td style="width:10%;"><i class="layui-icon layui-icon-ok detailbtn" title="save" onclick="save(this)"/></i></td>'
+			+ '<td style="width:90%;"><i class="layui-icon layui-icon-edit detailbtn" title="edit" onclick="edit(this)"/></i></td></tr>');
+		Tb.append(row1);
+
 		for (var key in data) {
 			if (key == "name") {
-				name = data[key];
+				Tb.attr("id", data[key]);
 				continue;
 			} else if (key == "execTime" || key == "state" || key == "level"
 				|| key == "loadTime" || key == "success"
 				|| key == "failed" || key == "active" || key == "waiting") {
 				continue;
 			}
-			html = html
-				+ '<tr><td>'
-				+ key
-				+ '</td>'
-				+ '<td><span>'
-				+ br(escapeHtml(data[key]))
-				+ '</span><input hidden=true value="' + br(escapeHtml(data[key])) + '" /></td></tr>';
+			
+			var value = data[key];
+			var r = (value.split('\r')).length - 1;
+			var n = (value.split('\n')).length - 1;
+			var rn = r + n +1;
+			
+			var textarea = $('<textarea disabled="disabled" rows=' + rn + ' style="width:100%;"/>');
+			textarea.text(value);
+			
+			var Td = $('<td/>');
+			Td.append(textarea);
+			
+			var Tr = $('<tr><td>' + key + '</td></tr>');
+			Tr.append(Td);
+			
+			Tb.append(Tr);
 		}
-		html = '<table id="' + name + '"' + html + '</table>';
-		return html;
-	}
-
-	function escapeHtml(string) {
-		var entityMap = {
-			"&" : "&amp;",
-			"<" : "&lt;",
-			">" : "&gt;",
-			'"' : '&quot;',
-			"'" : '&#39;',
-			"/" : '&#x2F;'
-		};
-		return String(string).replace(/[&<>"'\/]/g, function(s) {
-			return entityMap[s];
-		});
-	}
-
-	function br(str) {
-		return str.replace(/\r?\n/g, "<br />");
+		return Tb;
 	}
 
 	function operation(e, opid) {
@@ -498,31 +489,29 @@ img {
 
 	function edit(e) {
 		var Tb = $(e).parent().parent().parent();
-		Tb.find("input").attr("hidden", false);
-		Tb.find("span").attr("hidden", true);
+		Tb.find("textarea").attr("disabled", false);
 	}
 
 	function save(e) {
 		var Tb = $(e).parent().parent().parent();
-		var hidden = Tb.find("input").attr("hidden");
-		if (hidden == true || hidden == "hidden") {
+		var disabled = Tb.find("textarea").attr("disabled");
+		if (disabled == true || disabled == "disabled") {
 			return;
 		}
 
-		Tb.find("span").attr("hidden", false);
-		Tb.find("input").attr("hidden", true);
+		Tb.find("textarea").attr("disabled", true);
 		var json = '{';
 		Tb.find("tr").each(function(i) {
 			if (i == 0) {
 				return;
 			}
 			var key = $(this).find("td").eq(0).html();
-			var value = $(this).find("td").eq(1).find("input").val();
+			var value = $(this).find("td").eq(1).find("textarea").val();
 			json = json + '"' + key + '":"' + value + '",';
 		});
 		json = json.substr(0, json.length - 1) + '}';
 		//Tb = tbody
-		var name = Tb.parent().attr("id");
+		var name = Tb.attr("id");
 		$.ajax({
 			url : "/save",
 			type : "POST",
