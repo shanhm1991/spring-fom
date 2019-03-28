@@ -37,16 +37,24 @@ import org.codehaus.jettison.json.JSONObject;
 import com.fom.context.ContextStatistics.CostDetail;
 import com.fom.util.IoUtil;
 
+/**
+ * context的操作api
+ * 
+ * @author shanhm
+ *
+ */
 public class ContextUtil {
 
 	private static final Logger LOG = Logger.getLogger(ContextUtil.class);
 
-	private static volatile ServletContext scontext;
-
-	static void setContext(ServletContext context) {
-		if(scontext == null){
-			scontext = context;
+	//volatile只能保证引用的变化立即刷新，但系统对这个引用只有一次引用赋值操作
+	private static volatile ServletContext servlet;
+	
+	static void set(ServletContext context){
+		if(servlet != null){
+			throw new UnsupportedOperationException();
 		}
+		servlet = context;
 	}
 
 	/**
@@ -55,7 +63,7 @@ public class ContextUtil {
 	 * @return context location
 	 */
 	public static String getContextPath(String path) {
-		return scontext.getRealPath(path);
+		return servlet.getRealPath(path);
 	}
 
 	/**
@@ -252,7 +260,7 @@ public class ContextUtil {
 				return file.isFile();
 			}
 		});
-		
+
 		if(!ArrayUtils.isEmpty(array)){//将已有的缓存文件移到history
 			for(File file : array){
 				String fname = file.getName();

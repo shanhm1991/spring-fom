@@ -28,7 +28,7 @@ public class ImportMysqlExample1 extends Context {
 	
 	private String pattern;
 	
-	public ImportMysqlExample1(){
+	public ImportMysqlExample1() throws Exception{
 		srcPath = ContextUtil.getContextPath(config.getString("srcPath", ""));
 		batch = config.getInt("batch", 5000);
 		isDelMatchFail = config.getBoolean("isDelMatchFail", false);

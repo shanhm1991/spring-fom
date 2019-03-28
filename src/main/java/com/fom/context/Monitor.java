@@ -5,6 +5,9 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryPoolMXBean;
 import java.lang.management.MemoryUsage;
+import java.lang.management.OperatingSystemMXBean;
+import java.lang.management.RuntimeMXBean;
+import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.util.List;
 
@@ -26,21 +29,15 @@ class Monitor {
 
 	public static void start(){
 		//no Exception
-		Thread monitor = new Thread("fom-monitor"){
+		Thread monitor = new Thread("jvm-monitor"){
 			@Override
 			public void run(){
-				boolean support = true;
 				StringBuilder builder = new StringBuilder();
 				while(true){
 					builder.setLength(0);
 					jvm(builder);
-					if(support){
-						Sigar sigar = new Sigar();
-						support = cpu(sigar, builder) && memory(sigar, builder)
-								&& network(sigar, builder) && disk(sigar, builder); 
-					}
 					LOG.info(builder.toString()); 
-					ThreadUtil.sleepAtLeastIgnoreInterrupts(15 * 60000);
+					ThreadUtil.sleepAtLeastIgnoreInterrupts(600000);
 				}
 			}
 		};
@@ -50,7 +47,9 @@ class Monitor {
 
 	private static void jvm(StringBuilder builder){
 		builder.append("\n======= jvm status:");
-		String pid = ManagementFactory.getRuntimeMXBean().getName();
+		RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
+
+		String pid = runtime.getName();
 		pid = pid.split("@")[0];
 		builder.append("\npid: ").append(pid);
 
@@ -71,15 +70,28 @@ class Monitor {
 			.append(getKB(musage.getCommitted())).append(", max=").append(getKB(musage.getMax()));
 		}  
 
-		ThreadMXBean tm=(ThreadMXBean)ManagementFactory.getThreadMXBean();  
-		builder.append("\nThread[total]: ").append(tm.getThreadCount());
-		builder.append("\nThread[daemon]: ").append(tm.getDaemonThreadCount());
-
 		List<GarbageCollectorMXBean> gcList = ManagementFactory.getGarbageCollectorMXBeans();  
 		for(GarbageCollectorMXBean gc : gcList){  
 			builder.append("\nGC[").append(gc.getName())
 			.append("]: count=").append(gc.getCollectionCount()).append(", cost=").append(gc.getCollectionTime()).append("ms");
 		}  
+
+		ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();  
+		builder.append("\nThread[total]: ").append(threadBean.getThreadCount());
+		builder.append("\nThread[daemon]: ").append(threadBean.getDaemonThreadCount());
+
+		for (long id : threadBean.getAllThreadIds()) {
+			ThreadInfo info = threadBean.getThreadInfo(id);
+			String name = info.getThreadName();
+			String state = info.getThreadState().name();
+			long cpuTime = threadBean.getThreadCpuTime(id);
+			long userTime = threadBean.getThreadUserTime(id);
+			builder.append("\nThread[id=").append(id).append("]: name=").append(name)
+			.append(", state=").append(state).append(", cpuTime=").append(cpuTime).append(", userTime=").append(userTime);
+		}
+
+		OperatingSystemMXBean osMxBean = ManagementFactory.getOperatingSystemMXBean();
+		builder.append("\navailable processors=").append(osMxBean.getAvailableProcessors());
 	}
 
 	private static long getKB(long len){
@@ -89,7 +101,7 @@ class Monitor {
 		return len / 1024;
 	}
 
-	private static boolean disk(Sigar sigar, StringBuilder builder) {
+	static boolean disk(Sigar sigar, StringBuilder builder) {
 		builder.append("\n======= os disk:");
 		try{
 			for (FileSystem fs : sigar.getFileSystemList()) {
@@ -116,7 +128,7 @@ class Monitor {
 		return true;
 	}
 
-	private static boolean memory(Sigar sigar, StringBuilder builder) {
+	static boolean memory(Sigar sigar, StringBuilder builder) {
 		builder.append("\n======= os memory:");
 		try{
 			Mem mem = sigar.getMem();
@@ -134,7 +146,7 @@ class Monitor {
 		return true;
 	}
 
-	private static boolean cpu(Sigar sigar, StringBuilder builder) {
+	static boolean cpu(Sigar sigar, StringBuilder builder) {
 		builder.append("\n======= os cpu:");
 		try{
 			CpuInfo infos[] = sigar.getCpuInfoList();
@@ -159,7 +171,7 @@ class Monitor {
 		return true;
 	}
 
-	private static boolean network(Sigar sigar, StringBuilder builder) {
+	static boolean network(Sigar sigar, StringBuilder builder) {
 		builder.append("\n======= os network:");
 		try{
 			for (String name : sigar.getNetInterfaceList()) {

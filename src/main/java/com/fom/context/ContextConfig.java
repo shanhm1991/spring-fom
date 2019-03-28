@@ -19,6 +19,7 @@ import org.quartz.CronExpression;
 import com.fom.util.XmlUtil;
 
 /**
+ * context实例的配置管理
  * 
  * @author shanhm
  *

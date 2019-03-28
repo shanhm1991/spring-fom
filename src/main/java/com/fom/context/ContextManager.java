@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.dom4j.Element;
 
 /**
+ * context实例的管理
  * 
  * @author shanhm
  *
