@@ -1,6 +1,7 @@
 package com.fom.context;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
@@ -11,14 +12,15 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.Map.Entry;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
@@ -30,8 +32,8 @@ import org.apache.log4j.Category;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONObject;
 
-import com.alibaba.fastjson.JSONObject;
 import com.fom.context.ContextStatistics.CostDetail;
 import com.fom.util.IoUtil;
 
@@ -113,7 +115,7 @@ public class ContextUtil {
 		} 
 		return context.submit(task);
 	}
-	
+
 	/**
 	 * 获取任务结果
 	 * @param taskId taskId
@@ -130,7 +132,7 @@ public class ContextUtil {
 		}
 		return (E)future.get().getContent();
 	}
-	
+
 	/**
 	 * 获取任务结果
 	 * @param taskId taskId
@@ -149,7 +151,7 @@ public class ContextUtil {
 		}
 		return (E)future.get(overTime, TimeUnit.MILLISECONDS).getContent();
 	}
-	
+
 	/**
 	 * 获取Fom容器中所有的context统计信息
 	 * @return map结果
@@ -174,6 +176,8 @@ public class ContextUtil {
 			cmap.put("waiting", String.valueOf(context.getWaitings()));
 			cmap.put("failed", context.statistics.failedDetail());
 			cmap.put("success", String.valueOf(context.getSuccess()));
+
+			cmap.remove("stopWithNoCron");
 			list.add(cmap);
 		}
 		return list;
@@ -197,12 +201,14 @@ public class ContextUtil {
 		Map<String,String> bakMap = new HashMap<>();
 		bakMap.putAll(context.config.valueMap);
 
-		System.out.println(json); 
-		
-		JSONObject jsonObject = JSONObject.parseObject(json);  
-		for(Entry<String, Object> entry : jsonObject.entrySet()){
-			String key = entry.getKey();
-			String value = String.valueOf(entry.getValue());
+		json = json.replaceAll("\\\\", "\\\\\\\\");
+		JSONObject jsonObject = new JSONObject(json);
+
+		@SuppressWarnings("unchecked")
+		Iterator<String> it = jsonObject.keys();
+		while(it.hasNext()){
+			String key = it.next();
+			String value = jsonObject.getString(key);
 			switch(key){
 			case ContextConfig.QUEUESIZE:
 				context.config.setQueueSize(Integer.parseInt(value)); break;
@@ -240,10 +246,17 @@ public class ContextUtil {
 
 	private static boolean serialize(String name, Context context){
 		String cache = System.getProperty("cache.context");
-		String[] array = new File(cache).list();
+		File[] array = new File(cache).listFiles(new FileFilter(){
+			@Override
+			public boolean accept(File file) {
+				return file.isFile();
+			}
+		});
+		
 		if(!ArrayUtils.isEmpty(array)){//将已有的缓存文件移到history
-			for(String fname : array){
-				if(name.equals(fname.substring(0, fname.lastIndexOf(".")))){
+			for(File file : array){
+				String fname = file.getName();
+				if(name.equals(fname.substring(0, fname.lastIndexOf('.')))){ 
 					File source = new File(cache + File.separator + fname);
 					File dest = new File(cache + File.separator + "history" + File.separator + fname);
 					if(!source.renameTo(dest)){
@@ -300,7 +313,7 @@ public class ContextUtil {
 		}
 		return context.shutDown();
 	}
-	
+
 	/**
 	 * 立即运行
 	 * @param name context名称
@@ -316,7 +329,7 @@ public class ContextUtil {
 		}
 		return context.execNow();
 	}
-	
+
 	/**
 	 * 获取context状态
 	 * @param name context名称
@@ -334,7 +347,7 @@ public class ContextUtil {
 		map.put("state", context.getState().name());
 		return map;
 	}
-	
+
 	/**
 	 * 新建context模块
 	 * @param json json数据
@@ -345,14 +358,23 @@ public class ContextUtil {
 	public static Map<String, Object> create(String json) throws Exception {
 		Map<String, Object> resMap = new HashMap<>();
 
-		Map<String,String> map = (Map<String,String>)JSONObject.parse(json);
+		json = json.replaceAll("\\\\", "\\\\\\\\");
+		JSONObject jsonObject = new JSONObject(json);
+
+		Map<String,String> map = new HashMap<>();
+		Iterator<String> it = jsonObject.keys();
+		while(it.hasNext()){
+			String key = it.next();
+			map.put(key, jsonObject.getString(key));
+		}
+
 		String clazz = map.get("class");
 		if(StringUtils.isBlank(clazz)){
 			resMap.put("result", false);
 			resMap.put("msg", "class cann't be empty.");
 			return resMap;
 		}
-		
+
 		Loader.refreshClassPath();//如果有添加新的jar包，则先刷新下
 
 		Class<?> contextClass = null;
@@ -400,7 +422,7 @@ public class ContextUtil {
 		context.regist();
 		context.startup();
 		resMap.put("result", true);
-		
+
 		if(serialize(name, context)){
 			resMap.put("msg", "context[" + name + "] create success.");
 		}else{
@@ -408,7 +430,7 @@ public class ContextUtil {
 		}
 		return resMap;
 	}
-	
+
 	/**
 	 * 修改context日志级别
 	 * @param name context名称
@@ -421,7 +443,7 @@ public class ContextUtil {
 		}
 		context.changeLogLevel(level);
 	}
-	
+
 	/**
 	 * 获取context之外的log级别
 	 * @return log名称与级别
@@ -440,7 +462,7 @@ public class ContextUtil {
 		}
 		return map;
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	private static void listLog(Category logger, Map<String, String> map, Set<String> listed){
 		String loggerName = logger.getName();
@@ -484,7 +506,7 @@ public class ContextUtil {
 			listed.add(loggerName);
 		}
 	}
-	
+
 	/**
 	 * 查询日志级别
 	 * @param loggerName loggerName
@@ -508,7 +530,7 @@ public class ContextUtil {
 		}
 		return level;
 	}
-	
+
 	/**
 	 * 保存日志级别
 	 * @param loggerName loggerName
@@ -525,7 +547,7 @@ public class ContextUtil {
 		}
 		logger.setLevel(Level.toLevel(level)); 
 	}
-	
+
 	/**
 	 * 获取context正在执行的任务线程的堆栈
 	 * @param name context名称
@@ -558,7 +580,7 @@ public class ContextUtil {
 		map.put("size", map.size() - 1);
 		return map;
 	}
-	
+
 	/**
 	 * 获取失败的任务详情
 	 * @param name context名称
@@ -596,7 +618,7 @@ public class ContextUtil {
 		map.put("size", map.size() - 1);
 		return map;
 	}
-	
+
 	/**
 	 * 获取正在等待的任务详情
 	 * @param name context名称
@@ -613,7 +635,7 @@ public class ContextUtil {
 		map.put("size", map.size());
 		return map;
 	}
-	
+
 	/**
 	 * 获取成功的任务耗时详情
 	 * @param name context名称
@@ -627,7 +649,7 @@ public class ContextUtil {
 		}
 		return context.statistics.successDetail();
 	}
-	
+
 	/**
 	 * 保存耗时统计区间
 	 * @param name name
@@ -673,7 +695,7 @@ public class ContextUtil {
 		context.statistics.dayDetail(map, date);
 		return map;
 	}
-	
+
 	/**
 	 * 调整起止日期
 	 * @param name name
@@ -691,7 +713,7 @@ public class ContextUtil {
 		context.statistics.dayDetail(map, date);
 		return map;
 	}
-	
+
 	/**
 	 * 获取成功任务明细,json形式
 	 * @param name name
@@ -703,12 +725,12 @@ public class ContextUtil {
 		if(context == null){
 			return;
 		} 
-		
+
 		StringBuilder builder = new StringBuilder("[");
 		for(Entry<String, Queue<CostDetail>> entry : context.statistics.successMap.entrySet()){
 			String date = entry.getKey();
 			builder.append("{\"date\":\"").append(date + "\",\"details\":[");
-			
+
 			Queue<CostDetail> queue = entry.getValue();
 			CostDetail[] array = new CostDetail[queue.size()];
 			array = queue.toArray(array);
@@ -725,7 +747,7 @@ public class ContextUtil {
 		}
 		String json = builder.toString();
 		json = json.substring(0, json.length() - 1) + "]";
-		
+
 		resp.reset();
 		resp.setContentType("application/octet-stream;charset=UTF-8");
 		resp.addHeader("Content-Disposition", "attachment;filename=\"" + name + "." + System.currentTimeMillis() +".json\"");
