@@ -24,7 +24,7 @@ import org.hyperic.sigar.NetInterfaceStat;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.Swap;
 
-class Monitor {
+public class Monitor {
 
 	private static final Logger LOG = Logger.getLogger(Monitor.class);
 
@@ -42,14 +42,12 @@ class Monitor {
 
 	static final Monitor instance = new Monitor();
 
-	public void start(){
+	public void monitor(long delay){
 		Thread monitor = new Thread("jvm-monitor"){
 			@Override
 			public void run(){
-				while(true){
-					monitor();
-					ThreadUtil.sleepAtLeastIgnoreInterrupts(600000);
-				}
+				ThreadUtil.sleepAtLeastIgnoreInterrupts(delay);
+				jvm();
 			}
 		};
 		monitor.setDaemon(true); 
@@ -57,7 +55,7 @@ class Monitor {
 	}
 
 	//10分钟检测一次，每次检测取样1秒数据
-	private void monitor(){
+	private void jvm(){
 		long preTime = System.nanoTime();
 		long preUsedTime = 0;
 		for (long id : threadBean.getAllThreadIds()) {
