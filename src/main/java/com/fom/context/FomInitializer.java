@@ -91,7 +91,8 @@ class FomInitializer implements ApplicationRunner {
 				return;
 			}
 		}
-		Monitor.start();
+		
+		Monitor.instance.start();
 	}
 
 	private void initSysProperties(ServletContext servlet){

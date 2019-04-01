@@ -9,6 +9,7 @@ import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.text.DecimalFormat;
 import java.util.List;
 
 import org.apache.hadoop.util.ThreadUtil;
@@ -27,16 +28,26 @@ class Monitor {
 
 	private static final Logger LOG = Logger.getLogger(Monitor.class);
 
-	public static void start(){
-		//no Exception
+	private final RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
+
+	private final MemoryMXBean memorymbean = ManagementFactory.getMemoryMXBean();   
+
+	private final ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();  
+
+	private final OperatingSystemMXBean osMxBean = ManagementFactory.getOperatingSystemMXBean();
+
+	private final StringBuilder builder = new StringBuilder();
+
+	private final DecimalFormat format = new DecimalFormat("#.##%");
+
+	static final Monitor instance = new Monitor();
+
+	public void start(){
 		Thread monitor = new Thread("jvm-monitor"){
 			@Override
 			public void run(){
-				StringBuilder builder = new StringBuilder();
 				while(true){
-					builder.setLength(0);
-					jvm(builder);
-					LOG.info(builder.toString()); 
+					monitor();
 					ThreadUtil.sleepAtLeastIgnoreInterrupts(600000);
 				}
 			}
@@ -45,15 +56,25 @@ class Monitor {
 		monitor.start();
 	}
 
-	private static void jvm(StringBuilder builder){
-		builder.append("\n======= jvm status:");
-		RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
+	//10分钟检测一次，每次检测取样1秒数据
+	private void monitor(){
+		long preTime = System.nanoTime();
+		long preUsedTime = 0;
+		for (long id : threadBean.getAllThreadIds()) {
+			ThreadInfo info = threadBean.getThreadInfo(id);
+			if(info == null){
+				continue;
+			}
+			preUsedTime += threadBean.getThreadCpuTime(id);
+		}
 
-		String pid = runtime.getName();
-		pid = pid.split("@")[0];
-		builder.append("\npid: ").append(pid);
+		ThreadUtil.sleepAtLeastIgnoreInterrupts(1000);
+		builder.setLength(0);
 
-		MemoryMXBean memorymbean = ManagementFactory.getMemoryMXBean();   
+		builder.append("======= jvm status: ");
+		String pid = runtime.getName().split("@")[0];
+		builder.append("pid=").append(pid);
+
 		MemoryUsage usage = memorymbean.getHeapMemoryUsage(); 
 		builder.append("\nmemory[heap-init]MB: ").append(usage.getInit() / 1024 / 1024);
 		builder.append("\nmemory[heap-max]MB: ").append(usage.getMax() / 1024 / 1024);
@@ -76,22 +97,33 @@ class Monitor {
 			.append("]: count=").append(gc.getCollectionCount()).append(", cost=").append(gc.getCollectionTime()).append("ms");
 		}  
 
-		ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();  
 		builder.append("\nThread[total]: ").append(threadBean.getThreadCount());
 		builder.append("\nThread[daemon]: ").append(threadBean.getDaemonThreadCount());
-
+		long usedTime = 0;
 		for (long id : threadBean.getAllThreadIds()) {
 			ThreadInfo info = threadBean.getThreadInfo(id);
+			if(info == null){
+				continue;
+			}
 			String name = info.getThreadName();
 			String state = info.getThreadState().name();
 			long cpuTime = threadBean.getThreadCpuTime(id);
+			usedTime += cpuTime;
 			long userTime = threadBean.getThreadUserTime(id);
 			builder.append("\nThread[id=").append(id).append("]: name=").append(name)
 			.append(", state=").append(state).append(", cpuTime=").append(cpuTime).append(", userTime=").append(userTime);
 		}
 
-		OperatingSystemMXBean osMxBean = ManagementFactory.getOperatingSystemMXBean();
-		builder.append("\navailable processors=").append(osMxBean.getAvailableProcessors());
+		long currTime = System.nanoTime();
+		long passedTime = currTime - preTime;
+		long currUsedTime = usedTime - preUsedTime;
+
+		int processors = osMxBean.getAvailableProcessors();
+		builder.append("\nprocessors[available]: ").append(processors);
+
+		double rate = ((double) currUsedTime) / passedTime / processors;
+		builder.append("\nCPU[rate]: " + format.format(rate));
+		LOG.info(builder.toString()); 
 	}
 
 	private static long getKB(long len){
