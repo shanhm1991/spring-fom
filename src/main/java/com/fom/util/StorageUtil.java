@@ -2,6 +2,7 @@ package com.fom.util;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -62,13 +63,17 @@ public class StorageUtil {
 	public static String storageFile(File file, String zkAddress, boolean deleteOnComplete) throws Exception {
 		StorageClient client = get(zkAddress);
 		String url = null;
+		
+		InputStream input = null;
 		try{
+			input = new FileInputStream(file);
 			StorageEntity entity = new StorageEntity();
 			entity.setFileName(file.getName());
-			entity.setContent(IOUtils.toByteArray(new FileInputStream(file)));
+			entity.setContent(IOUtils.toByteArray(input));
 			url = client.sendFile(entity);
 		}finally{
-			offer(zkAddress, client);
+			offer(zkAddress, client); 
+			IoUtil.close(input);
 		}
 
 		if(LOG.isDebugEnabled()){
