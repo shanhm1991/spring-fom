@@ -36,25 +36,28 @@ public class Monitor {
 
 	private final OperatingSystemMXBean osMxBean = ManagementFactory.getOperatingSystemMXBean();
 
-	private final StringBuilder builder = new StringBuilder();
-
 	private final DecimalFormat format = new DecimalFormat("#.##%");
 
-	static final Monitor instance = new Monitor();
+	public static final Monitor INSTANCE = new Monitor();
 
-	public void monitor(long delay){
-		Thread monitor = new Thread("jvm-monitor"){
+	public void monitorJvm(long delay){
+		ThreadUtil.sleepAtLeastIgnoreInterrupts(delay);
+		monitorJvm();
+	}
+
+	//cpu占用率取样1秒数据
+	public void monitorJvm(){
+		String tName = Thread.currentThread().getName();
+		Thread monitor = new Thread("jvmMonitor-" + tName){
 			@Override
 			public void run(){
-				ThreadUtil.sleepAtLeastIgnoreInterrupts(delay);
 				jvm();
 			}
 		};
 		monitor.setDaemon(true); 
 		monitor.start();
 	}
-
-	//10分钟检测一次，每次检测取样1秒数据
+	
 	private void jvm(){
 		long preTime = System.nanoTime();
 		long preUsedTime = 0;
@@ -67,9 +70,7 @@ public class Monitor {
 		}
 
 		ThreadUtil.sleepAtLeastIgnoreInterrupts(1000);
-		builder.setLength(0);
-
-		builder.append("======= jvm status: ");
+		StringBuilder builder = new StringBuilder("======= jvm status: ");
 		String pid = runtime.getName().split("@")[0];
 		builder.append("pid=").append(pid);
 
@@ -124,14 +125,37 @@ public class Monitor {
 		LOG.info(builder.toString()); 
 	}
 
-	private static long getKB(long len){
+	private long getKB(long len){
 		if(len <= 0){
 			return 0;
 		}
 		return len / 1024;
 	}
+	
+	public void monitorOps(long delay){
+		ThreadUtil.sleepAtLeastIgnoreInterrupts(delay);
+		monitorOps();
+	}
 
-	static boolean disk(Sigar sigar, StringBuilder builder) {
+	public void monitorOps(){
+		String tName = Thread.currentThread().getName();
+		Thread monitor = new Thread("opsMonitor-" + tName){
+			@Override
+			public void run(){
+				Sigar sigar = new Sigar();
+				StringBuilder builder = new StringBuilder("======= ops status: ");
+				disk(sigar, builder);
+				memory(sigar, builder);
+				cpu(sigar, builder);
+				network(sigar, builder);
+				LOG.info(builder.toString()); 
+			}
+		};
+		monitor.setDaemon(true); 
+		monitor.start();
+	}
+	
+	private boolean disk(Sigar sigar, StringBuilder builder) {
 		builder.append("\n======= os disk:");
 		try{
 			for (FileSystem fs : sigar.getFileSystemList()) {
@@ -158,7 +182,7 @@ public class Monitor {
 		return true;
 	}
 
-	static boolean memory(Sigar sigar, StringBuilder builder) {
+	private boolean memory(Sigar sigar, StringBuilder builder) {
 		builder.append("\n======= os memory:");
 		try{
 			Mem mem = sigar.getMem();
@@ -176,7 +200,7 @@ public class Monitor {
 		return true;
 	}
 
-	static boolean cpu(Sigar sigar, StringBuilder builder) {
+	private boolean cpu(Sigar sigar, StringBuilder builder) {
 		builder.append("\n======= os cpu:");
 		try{
 			CpuInfo infos[] = sigar.getCpuInfoList();
@@ -201,7 +225,7 @@ public class Monitor {
 		return true;
 	}
 
-	static boolean network(Sigar sigar, StringBuilder builder) {
+	private boolean network(Sigar sigar, StringBuilder builder) {
 		builder.append("\n======= os network:");
 		try{
 			for (String name : sigar.getNetInterfaceList()) {

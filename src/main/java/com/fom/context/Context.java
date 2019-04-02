@@ -498,6 +498,7 @@ public class Context implements Serializable {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public <E> TimedFuture<Result<E>> submit(Task<E> task) throws Exception {
 		if(submits.incrementAndGet() % 1000 == 0){
+			Monitor.INSTANCE.monitorJvm();
 			cleanFutures();
 		}
 		String taskId = task.getId();
