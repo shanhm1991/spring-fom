@@ -143,6 +143,16 @@ public class ExcelReader implements Reader {
 				}else{
 					Row row = sheet.getRow(rowIndex);
 					rowIndex++;
+					
+					//row not exist, don't know why
+					if(row == null){
+						RowData rowData = new RowData(rowIndex - 1, new ArrayList<String>(0));
+						rowData.setSheetIndex(rangeIndex); 
+						rowData.setSheetName(sheetName); 
+						rowData.setEmpty(true); 
+						rowData.setLastRow(rowIndex == rowCount); 
+						return rowData;
+					}
 
 					int cellCount = row.getLastCellNum();
 					List<String> list = new ArrayList<>(cellCount);

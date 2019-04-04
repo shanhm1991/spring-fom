@@ -103,6 +103,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		result.startTime = sTime;
 		result.createTime = this.createTime;
 		
+		log.info("task started."); 
 		try {
 			result.success = beforeExec();
 			if(result.success){

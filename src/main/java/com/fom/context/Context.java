@@ -242,20 +242,20 @@ public class Context implements Serializable {
 				innerThread = new InnerThread();
 				innerThread.start();
 				map.put("result", true);
-				map.put("msg", "context[" + name + "] started.");
-				log.info("context[{}] started", name); 
+				map.put("msg", "context[" + name + "] startup.");
+				log.info("context[{}] startup", name); 
 				return map;
 			case stopping:
 				map.put("result", false);
-				map.put("msg", "context[" + name + "] is stopping, cann't start.");
-				log.warn("context[{}] is stopping, cann't start.", name); 
+				map.put("msg", "context[" + name + "] is stopping, cann't startup.");
+				log.warn("context[{}] is stopping, cann't startup.", name); 
 				return map;
 			case running:
 			case waiting:
 			case sleeping:
 				map.put("result", true);
-				map.put("msg", "context[" + name + "] was already started.");
-				log.warn("context[{}] was already started.", name); 
+				map.put("msg", "context[" + name + "] was already startup.");
+				log.warn("context[{}] was already startup.", name); 
 				return map;
 			default:
 				map.put("result", false);
@@ -407,8 +407,7 @@ public class Context implements Serializable {
 							try {
 								wait(waitTime);
 							} catch (InterruptedException e) {
-								//借助interrupted标记来重启
-								log.info("sleep interrupted."); 
+								//借助interrupted标记来中断睡眠，立即重新执行
 							}
 						}
 					}
@@ -505,7 +504,7 @@ public class Context implements Serializable {
 		task.setContext(Context.this); 
 		TimedFuture future = config.pool.submit(task);
 		FUTUREMAP.put(taskId, future); 
-		log.info("task[{}] submited.", taskId); 
+		log.info("task[{}] created.", taskId); 
 		return future; 
 	}
 
