@@ -57,13 +57,6 @@ public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
 	 */
 	public ParseTextZipTask(String sourceUri, int batch) {
 		super(sourceUri, batch);
-		String sourceName = getSourceName(sourceUri);
-		if(StringUtils.isBlank(getContextName())){
-			this.unzipDir = new File(System.getProperty("cache.parse") + File.separator + sourceName);
-		}else{
-			this.unzipDir = new File(System.getProperty("cache.parse")
-					+ File.separator + getContextName() + File.separator + sourceName);
-		}
 	}
 
 	/**
@@ -101,17 +94,30 @@ public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
 
 	@Override
 	protected boolean beforeExec() throws Exception {
+		String sourceName = new File(id).getName();
+		if(StringUtils.isBlank(getContextName())){
+			this.progressLog = new File(System.getProperty("cache.parse") + File.separator + sourceName + ".log");
+		}else{
+			this.progressLog = new File(System.getProperty("cache.parse") 
+					+ File.separator + getContextName() + File.separator + sourceName + ".log");
+		}
+		File parentFile = progressLog.getParentFile();
+		if(!parentFile.exists() && !parentFile.mkdirs()){
+			throw new RuntimeException("cache directory create failed: " + parentFile);
+		}
+
+		if(StringUtils.isBlank(getContextName())){
+			this.unzipDir = new File(System.getProperty("cache.parse") + File.separator + sourceName);
+		}else{
+			this.unzipDir = new File(System.getProperty("cache.parse")
+					+ File.separator + getContextName() + File.separator + sourceName);
+		}
+
 		if(!ZipUtil.valid(id)){ 
 			log.error("zip invalid."); 
 			if(!new File(id).delete()){
 				log.error("zip delete failed."); 
 			}
-			return false;
-		}
-
-		File parentFile = progressLog.getParentFile();
-		if(!parentFile.exists() && !parentFile.mkdirs()){
-			log.error("directory create failed:{}", parentFile);
 			return false;
 		}
 

@@ -103,9 +103,9 @@ public class ExcelReader implements Reader {
 	}
 
 	private void init() throws IOException{ 
-		if(TYPE_XLS.equals(type)){
+		if(TYPE_XLS.equalsIgnoreCase(type)){
 			workbook = new HSSFWorkbook(inputStream);
-		}else if(TYPE_XLSX.equals(type)){
+		}else if(TYPE_XLSX.equalsIgnoreCase(type)){
 			workbook = new XSSFWorkbook(inputStream);
 		}else{
 			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx");

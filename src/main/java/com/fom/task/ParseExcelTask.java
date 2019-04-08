@@ -1,11 +1,13 @@
 package com.fom.task;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.fom.context.ExceptionHandler;
 import com.fom.context.ResultHandler;
@@ -86,6 +88,19 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 
 	@Override
 	protected boolean beforeExec() throws Exception { 
+		String logName = new File(id).getName();
+		if(StringUtils.isBlank(getContextName())){
+			this.progressLog = new File(System.getProperty("cache.parse") + File.separator + logName + ".log");
+		}else{
+			this.progressLog = new File(System.getProperty("cache.parse") 
+					+ File.separator + getContextName() + File.separator + logName + ".log");
+		}
+
+		File parentFile = progressLog.getParentFile();
+		if(!parentFile.exists() && !parentFile.mkdirs()){
+			throw new RuntimeException("cache directory create failed: " + parentFile);
+		}
+		
 		if(!progressLog.exists()){ 
 			if(!progressLog.createNewFile()){
 				log.error("progress log create failed.");

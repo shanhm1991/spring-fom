@@ -4,8 +4,6 @@ import java.io.File;
 import java.text.DecimalFormat;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.fom.context.Task;
 import com.fom.task.reader.RowData;
 
@@ -19,9 +17,9 @@ public abstract class ParseTask<V> extends Task<Boolean> {
 	
 	protected final int batch;
 	
-	protected final File progressLog;
-	
 	protected final DecimalFormat sizeFormat = new DecimalFormat("#.###");
+	
+	protected File progressLog;
 	
 	/**
 	 * @param sourceUri 资源uri
@@ -30,18 +28,6 @@ public abstract class ParseTask<V> extends Task<Boolean> {
 	public ParseTask(String sourceUri, int batch){
 		super(sourceUri);
 		this.batch = batch;
-		String logName = new File(id).getName();
-		if(StringUtils.isBlank(getContextName())){
-			this.progressLog = new File(System.getProperty("cache.parse") + File.separator + logName + ".log");
-		}else{
-			this.progressLog = new File(System.getProperty("cache.parse") 
-					+ File.separator + getContextName() + File.separator + logName + ".log");
-		}
-
-		File parentFile = progressLog.getParentFile();
-		if(!parentFile.exists() && !parentFile.mkdirs()){
-			throw new RuntimeException("cache directory create failed: " + parentFile);
-		}
 	}
 	
 	/**
