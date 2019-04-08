@@ -211,7 +211,7 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 	 */
 	protected void logProgress(String file, int sheetIndex, String sheetName, long row, boolean completed) throws IOException {
 		log.info("process progress: file={},sheet={},row={},completed={}", file, sheetName, row, completed);
-		if(progressLog.exists()){
+		if(progressLog != null && progressLog.exists()){
 			FileUtils.writeStringToFile(progressLog, file + "\n" + sheetIndex + "\n" + row + "\n" + completed, false);
 		}
 	}

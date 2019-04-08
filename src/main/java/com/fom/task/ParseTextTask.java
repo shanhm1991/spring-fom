@@ -125,7 +125,7 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 	 */
 	protected void logProgress(String file, long row, boolean completed) throws IOException {
 		log.info("process progress: file={},row={},completed={}", file, row, completed);
-		if(progressLog.exists()){
+		if(progressLog != null && progressLog.exists()){
 			FileUtils.writeStringToFile(progressLog, file + "\n" + row + "\n" + completed, false);
 		}
 	}
