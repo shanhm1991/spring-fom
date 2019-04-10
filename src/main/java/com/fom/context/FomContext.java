@@ -22,6 +22,8 @@ public @interface FomContext {
 
 	public String cron() default "";
 	
+	public boolean execOnStart() default true;
+	
 	public boolean stopWithNoCron() default false;
 
 	public int threadCore() default 4;

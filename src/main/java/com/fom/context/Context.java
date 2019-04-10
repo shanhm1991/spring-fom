@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
@@ -23,6 +24,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
+import org.quartz.CronExpression;
 import org.slf4j.Logger;
 
 import com.fom.log.SlfLoggerFactory;
@@ -51,6 +53,8 @@ public class Context implements Serializable {
 	transient volatile long execTime;
 
 	transient ContextStatistics statistics;
+
+	private boolean firstRun = true;
 
 	public Context(){
 		Class<?> clazz = this.getClass();
@@ -376,30 +380,34 @@ public class Context implements Serializable {
 				}
 
 				switchState(running);
-				execTime = System.currentTimeMillis();
-				try {
-					Set<? extends Task> tasks = scheduleBatchTasks();
-					if(tasks != null){
-						for (Task<?> task : tasks){
-							String taskId = task.getId();
-							if(isTaskAlive(taskId)){ 
-								if (log.isDebugEnabled()) {
-									log.debug("task[{}] is still alive, create canceled.", taskId); 
+
+				if(firstRun && !config.getExecOnStart()){
+					firstRun = false;
+				}else{
+					execTime = System.currentTimeMillis();
+					try {
+						Set<? extends Task> tasks = scheduleBatchTasks();
+						if(tasks != null){
+							for (Task<?> task : tasks){
+								String taskId = task.getId();
+								if(isTaskAlive(taskId)){ 
+									if (log.isDebugEnabled()) {
+										log.debug("task[{}] is still alive, create canceled.", taskId); 
+									}
+									continue;
 								}
-								continue;
+								submit(task);
 							}
-							submit(task);
 						}
+					} catch (RejectedExecutionException e) {
+						log.warn("task submit rejected.");
+					} catch (Exception e){
+						log.error("get task failed", e);
 					}
-				} catch (RejectedExecutionException e) {
-					log.warn("task submit rejected.");
-				} catch (Exception e){
-					log.error("get task failed", e);
 				}
 
 				if(config.cronExpression != null) {
-					Date nextTime = config.cronExpression.getTimeAfter(new Date(execTime)); 
-					long waitTime = nextTime.getTime() - System.currentTimeMillis();
+					long waitTime = calculateWaitTime(config.cronExpression, execTime);
 					//如果设定周期较短，而执行时间较长
 					if(waitTime > 0){
 						switchState(sleeping);
@@ -417,6 +425,29 @@ public class Context implements Serializable {
 					}
 					return;
 				}
+			}
+		}
+
+		private long calculateWaitTime(CronExpression cronExpression, long exeTime){
+			String expression = cronExpression.getCronExpression();
+			StringTokenizer exprs = new StringTokenizer(expression, " \t", false);
+			int index = 0;
+			while(exprs.hasMoreTokens() && index <= 4){
+				index++;
+				String expr = exprs.nextToken().trim();
+				if(expr.indexOf('/') != -1){
+					break;
+				}
+			}
+
+			Date nextDate = cronExpression.getTimeAfter(new Date(exeTime));
+			long nextTime = nextDate.getTime();
+			if(index <= 4){
+				Date nextDate2 = cronExpression.getTimeAfter(nextDate);
+				long now = System.currentTimeMillis();
+				return (nextDate2.getTime() - nextTime) - (now - exeTime);
+			}else{
+				return nextTime - exeTime;
 			}
 		}
 
@@ -441,7 +472,7 @@ public class Context implements Serializable {
 
 			cleanFutures();
 		}
-		
+
 		private boolean waitTask(){
 			boolean isStopping = false;
 			while(true){

@@ -72,11 +72,17 @@ public final class ContextConfig implements Serializable {
 	 * 如果没有配置定时周期，是否在执行完批量任务后自行结束
 	 */
 	public static final String STOPWITHNOCRON = "stopWithNoCron";
+	
+	/** 
+	 * 启动时是否立即执行定时批量任务
+	 */
+	public static final String EXECONSTART = "execOnStart";
 
 
 	public static boolean validKey(String key){
 		return !THREADCORE.equals(key) && !THREADMAX.equals(key) && !ALIVETIME.equals(key) && !STOPWITHNOCRON.equals(key)
-				&& !OVERTIME.equals(key) && !QUEUESIZE.equals(key) && !CANCELLABLE.equals(key) && !CRON.equals(key) ;
+				&& !OVERTIME.equals(key) && !QUEUESIZE.equals(key) && !CANCELLABLE.equals(key) && !CRON.equals(key) 
+				&& !EXECONSTART.equals(key);
 	}
 
 	transient TimedExecutorPool pool;
@@ -107,6 +113,7 @@ public final class ContextConfig implements Serializable {
 			setCron(XmlUtil.getString(element, ContextConfig.CRON, ""));
 			setRemark(XmlUtil.getString(element, ContextConfig.REMARK, ""));
 			setStopWithNoCron(XmlUtil.getBoolean(element, ContextConfig.STOPWITHNOCRON, false));
+			setExecOnStart(XmlUtil.getBoolean(element, ContextConfig.EXECONSTART, true));
 		}else if(cMap != null){
 			valueMap.putAll(cMap);
 			setThreadCore(getInt(cMap, ContextConfig.THREADCORE));
@@ -118,6 +125,7 @@ public final class ContextConfig implements Serializable {
 			setCron(cMap.get(ContextConfig.CRON)); 
 			setRemark(cMap.get(ContextConfig.REMARK));
 			setStopWithNoCron(getBoolean(cMap,ContextConfig.STOPWITHNOCRON));
+			setExecOnStart(getBoolean(cMap,ContextConfig.EXECONSTART));
 		}else if(fc != null){
 			setThreadCore(fc.threadCore());
 			setThreadMax(fc.threadMax());
@@ -128,6 +136,7 @@ public final class ContextConfig implements Serializable {
 			setCron(fc.cron());
 			setRemark(fc.remark());
 			setStopWithNoCron(fc.stopWithNoCron());
+			setExecOnStart(fc.execOnStart());
 		}else{
 			setThreadCore(4);
 			setThreadMax(20);
@@ -136,6 +145,7 @@ public final class ContextConfig implements Serializable {
 			setQueueSize(200);
 			setCancellable(false);
 			setStopWithNoCron(false);
+			setExecOnStart(true);
 		}
 
 		initPool();
@@ -478,5 +488,21 @@ public final class ContextConfig implements Serializable {
 	 */
 	public boolean getStopWithNoCron() {
 		return getBoolean(valueMap, ContextConfig.STOPWITHNOCRON);
+	}
+	
+	/**
+	 * 设置启动时是否立即执行定时批量任务
+	 * @param execOnStart execOnStart
+	 */
+	public void setExecOnStart(boolean execOnStart) {
+		valueMap.put(ContextConfig.EXECONSTART, String.valueOf(execOnStart));
+	}
+	
+	/**
+	 * 获取配置，启动时是否立即执行定时批量任务
+	 * @return execOnStart
+	 */
+	public boolean getExecOnStart(){
+		return getBoolean(valueMap, ContextConfig.EXECONSTART);
 	}
 }

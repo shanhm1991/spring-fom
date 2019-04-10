@@ -177,7 +177,11 @@ public class ContextUtil {
 			if(!cmap.containsKey(ContextConfig.CRON)){
 				cmap.put(ContextConfig.CRON, ""); 
 			}
-			cmap.put("execTime", format.format(context.execTime));
+			String exec = "";
+			if(context.execTime > 0){
+				exec = format.format(context.execTime);
+			}
+			cmap.put("execTime", exec);
 			cmap.put("loadTime", format.format(context.loadTime));
 			cmap.put("level", context.getLogLevel());
 			cmap.put("active", String.valueOf(context.getActives())); 
