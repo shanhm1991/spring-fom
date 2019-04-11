@@ -272,21 +272,28 @@ img {
 								} else {
 									img = "<img src='images/inited.png' title='inited'>"
 								}
-								$('td', row).eq(10).html(img);
+								$('td', row).eq(10).css("text-align", "center").html(img);
 
 								if (success > 0) {
 									$('td', row)
 										.eq(6)
+										.css("text-align", "center")
 										.html(
 											"<a style='color:red;' id='"
 											+ name
 											+ "' onclick='successdetail(this)' href='#'>"
 											+ success
 											+ "</a>");
+								} else {
+									$('td', row)
+										.eq(6)
+										.css("text-align", "center")
+										.html(success);
 								}
 								if (failedDetails > 0) {
 									$('td', row)
 										.eq(7)
+										.css("text-align", "center")
 										.html(
 											"<a style='color:red;' id='"
 											+ name
@@ -296,31 +303,45 @@ img {
 								} else {
 									$('td', row)
 										.eq(7)
+										.css("text-align", "center")
 										.html(failed);
 								}
-								if (waiting > 0) {
+								if (waiting > 0) { //text-align:center;
 									$('td', row)
 										.eq(8)
+										.css("text-align", "center")
 										.html(
 											"<a style='color:red;' id='"
 											+ name
 											+ "' onclick='waitingdetail(this)' href='#'>"
 											+ waiting
 											+ "</a>");
+								} else {
+									$('td', row)
+										.eq(8)
+										.css("text-align", "center")
+										.html(waiting);
 								}
 								if (actives > 0) {
 									$('td', row)
 										.eq(9)
+										.css("text-align", "center")
 										.html(
 											"<a style='color:red;' id='"
 											+ name
 											+ "' onclick='activedetail(this)' href='#'>"
 											+ actives
 											+ "</a>");
+								} else {
+									$('td', row)
+										.eq(9)
+										.css("text-align", "center")
+										.html(actives);
 								}
 								if (executeExceptions > 0) {
 									$('td', row)
 										.eq(4)
+										.css("text-align", "center")
 										.html(
 											"<a style='color:red;' id='"
 											+ name
@@ -330,6 +351,7 @@ img {
 								} else {
 									$('td', row)
 										.eq(4)
+										.css("text-align", "center")
 										.html(executeTimes);
 								}
 
@@ -503,6 +525,7 @@ img {
 													.find(
 														'td')
 													.eq(10)
+													.css("text-align", "center")
 													.html(
 														img);
 											}
