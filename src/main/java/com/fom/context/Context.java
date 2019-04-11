@@ -444,17 +444,23 @@ public class Context implements Serializable {
 						}
 					}
 				}else{
+					synchronized(Context.this){
+						if(state == inited){
+							return;
+						}
+					}
+					
 					if(config.getStopWithNoCron()){
 						terminate();
 						return;
-					}
-					
-					switchState(sleeping);
-					synchronized (this) {
-						try {
-							wait();
-						} catch (InterruptedException e) {
-							//借助interrupted标记来中断睡眠，立即重新执行
+					}else{
+						switchState(sleeping);
+						synchronized (this) {
+							try {
+								wait();
+							} catch (InterruptedException e) {
+								//借助interrupted标记来中断睡眠，立即重新执行
+							}
 						}
 					}
 				}
