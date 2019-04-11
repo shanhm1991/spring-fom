@@ -6,8 +6,8 @@
 > 都可以使用fom来统一管理，另外fom可以以servletListener的形式合并到任何基于servlet实现的web服务中去，也可以以独立服务注册到springcloud中去
 
 > fom本质上是基于线程池实现的功能模块管理，模块配置可以通过xml配置文件或者注解形式；同时提供了简单的
-> 运维（URL：http://ip:4040/fom/index.html），可以实时管理模块的状态和配置信息，新增模块，查看任务统计信息，实时修改所有日志级别；
-> 另外fom提供了一些常见的文件操作实现，因为一开始是针对文件操作写的（file operation manager），比如上传、下载（打包）、文件解析，实现方式有http、ftp、hdfs；
+> 运维（URL：http://ip:4040/fom.html），可以实时管理模块的状态和配置信息，新增模块，查看任务统计信息，实时修改所有日志级别；
+> 另外fom提供了一些常见的文件操作实现，因为一开始是针对文件操作写的，比如上传、下载（打包）、文件解析，实现方式有http、ftp、hdfs；
 > 对于数据库操作除了使用开源的mybatis/hibernate外，fom也提供了一个自定义实现的pool（配置对应上面的pool.xml，支持mysql和oracle以及elasticsearch(2.x)的操作）；
 > 所以即使不以fom的Context作为启动入口，同样可以将fom中的一些api当成工具包使用；
 
@@ -24,15 +24,16 @@
 * -DpoolConfigLocation：设置pool配置文件路径，默认位置：${webapp.root}/WEB-INF/pool.xml
 
 2. 启动方式
-* 以springboot方式启动，启动类：com.fom.boot.Application
-> 只需将自己的业务功能实现为com.fom.Context便可以一键启动
-* 以tomcat方式部署（未测）
-> fom保留了web.xml和springmvc.xml，在main/resources/WEB-INF下面，对传统部署tomcat的方式作了兼容，可以以war包形式直接在tomcat中启动
-* 自定义main方法启动
+* 以springboot方式启动
+> 修改启动类的注解，在@Import中添加FomConfiguration.class，以及在@ComponentScan注解中添加"com.fom"，即可
+* 以tomcat方式部署
+> 需要做一些改动，  在main/resources/WEB-INF下保留了原先的web.xml和springmvc.xml
+* 自定义main方法
 > com.fom.Context提供了启停方法，可以直接在main方法中启动自己的Context实现
 
 ##存在问题
 * 利用CronExpression计算定时表达式，对于固定间隔的周期（表达式中含有/），为了解决首次执行时间问题，简单的计算等待时间为两次执行时间的间隔，有可能导致复杂表达式计算错误，只是暂未遇到；
+* 自定义pool的加载与context的加载没有做先后关系，如果context中使用自定义pool，在加载时立即执行依赖pool的操作，有可能失败
 * 复杂配置项保存失败问题，比如配置项的值为xml，原因是无法转成json形式
 * 其他问题，有待验证
 

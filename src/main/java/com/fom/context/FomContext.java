@@ -22,7 +22,7 @@ public @interface FomContext {
 
 	public String cron() default "";
 	
-	public boolean execOnStart() default true;
+	public boolean execOnLoad() default true;
 	
 	public boolean stopWithNoCron() default false;
 

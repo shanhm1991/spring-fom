@@ -245,7 +245,6 @@ public class Context implements Serializable {
 			switch(state){
 			case inited:
 			case stopped:
-				state = running;
 				if(config.pool.isShutdown()){
 					config.initPool();
 				}
@@ -286,8 +285,8 @@ public class Context implements Serializable {
 			case inited:
 			case stopped:
 				map.put("result", true);
-				map.put("msg", "context[" + name + "] was already stoped.");
-				log.warn("context[{}] was already stoped.", name); 
+				map.put("msg", "context[" + name + "] was not startup.");
+				log.warn("context[{}] was not startup.", name); 
 				return map;
 			case stopping:
 				map.put("result", false);
@@ -330,8 +329,8 @@ public class Context implements Serializable {
 			case inited:
 			case stopped:
 				map.put("result", false);
-				map.put("msg", "context[" + name + "] was already stoped, cann't execut now.");
-				log.warn("context[{}] isn't running, cann't execut now.", name); 
+				map.put("msg", "context[" + name + "] was not startup, cann't execut now.");
+				log.warn("context[{}] was not startup, cann't execut now.", name); 
 				return map;
 			case stopping:
 				map.put("result", false);
@@ -401,11 +400,10 @@ public class Context implements Serializable {
 					return;
 				}
 
-				switchState(running);
-
-				if(firstRun && !config.getExecOnStart()){
+				if(firstRun && !config.getExecOnLoad()){
 					firstRun = false;
 				}else{
+					switchState(running);
 					executeTimes++;
 					execTime = System.currentTimeMillis();
 					try {
@@ -448,8 +446,17 @@ public class Context implements Serializable {
 				}else{
 					if(config.getStopWithNoCron()){
 						terminate();
+						return;
 					}
-					return;
+					
+					switchState(sleeping);
+					synchronized (this) {
+						try {
+							wait();
+						} catch (InterruptedException e) {
+							//借助interrupted标记来中断睡眠，立即重新执行
+						}
+					}
 				}
 			}
 		}
