@@ -56,6 +56,12 @@ public class Context implements Serializable {
 
 	private boolean firstRun = true;
 
+	private transient volatile long executeTimes;
+
+	private transient volatile long executeExceptions;
+
+	transient Map<Long, Exception> lastException = new ConcurrentHashMap<>();
+
 	public Context(){
 		Class<?> clazz = this.getClass();
 		FomContext fc = clazz.getAnnotation(FomContext.class);
@@ -356,6 +362,22 @@ public class Context implements Serializable {
 		}
 	}
 
+	/**
+	 * 获取自程序启动以来模块定时任务的执行次数
+	 * @return executeTimes
+	 */
+	public long getExecuteTimes(){
+		return executeTimes;
+	}
+
+	/**
+	 * 获取自程序启动以来模块定时任务的执行异常次数
+	 * @return executeTimes
+	 */
+	public long getExecuteExceptions(){
+		return executeExceptions;
+	}
+
 	private transient InnerThread innerThread;
 
 	private class InnerThread extends Thread implements  Serializable {
@@ -384,6 +406,7 @@ public class Context implements Serializable {
 				if(firstRun && !config.getExecOnStart()){
 					firstRun = false;
 				}else{
+					executeTimes++;
 					execTime = System.currentTimeMillis();
 					try {
 						Set<? extends Task> tasks = scheduleBatchTasks();
@@ -402,6 +425,9 @@ public class Context implements Serializable {
 					} catch (RejectedExecutionException e) {
 						log.warn("task submit rejected.");
 					} catch (Exception e){
+						executeExceptions++;
+						lastException.clear();
+						lastException.put(execTime, e);
 						log.error("get task failed", e);
 					}
 				}

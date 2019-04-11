@@ -102,6 +102,12 @@ public class FomController {
 	public Map<String,Object> failedDetail(String name) throws Exception { 
 		return ContextUtil.failedDetail(name);
 	}
+	
+	@RequestMapping("/executedetail")
+	@ResponseBody
+	public Map<String,String> executedetail(String name) throws Exception { 
+		return  ContextUtil.getLastExceptions(name);
+	}
 
 	@RequestMapping("/activedetail")
 	@ResponseBody

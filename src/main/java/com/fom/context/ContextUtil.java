@@ -177,6 +177,10 @@ public class ContextUtil {
 			if(!cmap.containsKey(ContextConfig.CRON)){
 				cmap.put(ContextConfig.CRON, ""); 
 			}
+			
+			cmap.put("executeTimes", String.valueOf(context.getExecuteTimes()));
+			cmap.put("executeExceptions", String.valueOf(context.getExecuteExceptions()));
+			
 			String exec = "";
 			if(context.execTime > 0){
 				exec = format.format(context.execTime);
@@ -186,7 +190,8 @@ public class ContextUtil {
 			cmap.put("level", context.getLogLevel());
 			cmap.put("active", String.valueOf(context.getActives())); 
 			cmap.put("waiting", String.valueOf(context.getWaitings()));
-			cmap.put("failed", context.statistics.failedDetail());
+			cmap.put("failed", String.valueOf(context.statistics.getFailed()));
+			cmap.put("failedDetails", String.valueOf(context.statistics.getfailedDetails()));
 			cmap.put("success", String.valueOf(context.getSuccess()));
 
 			cmap.remove("stopWithNoCron");
@@ -766,5 +771,29 @@ public class ContextUtil {
 		PrintWriter write = resp.getWriter();
 		write.write(json);
 		write.flush();
+	}
+	
+	/**
+	 * 获取最近一次异常信息
+	 * @return map
+	 */
+	public static Map<String, String> getLastExceptions(String name){
+		Map<String,String> map = new HashMap<>();
+		Context context = ContextManager.contextMap.get(name);
+		if(context == null){
+			return map;
+		} 
+		
+		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss SSS");
+		for(Entry<Long, Exception> entry : context.lastException.entrySet()){
+			String key = format.format(entry.getKey());
+			Exception e = entry.getValue();
+			StringBuilder builder = new StringBuilder("msg = " + e.getMessage() + "<br>stackTrace:<br>");
+			for(StackTraceElement stack : e.getStackTrace()){
+				builder.append(stack).append("<br>");
+			}
+			map.put(key, builder.toString());
+		}
+		return map;
 	}
 }

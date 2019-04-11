@@ -149,6 +149,10 @@ class ContextStatistics {
 		return failedCount.get();
 	}
 
+	public int getfailedDetails(){
+		return failedMap.size();
+	}
+
 	public Map<String, Object> successDetail() throws Exception{ 
 		Map<String, Object> map = new HashMap<>();
 		Map<String, Object> all = new HashMap<>();
@@ -291,14 +295,6 @@ class ContextStatistics {
 			calendar.add(Calendar.DAY_OF_MONTH, -1);
 			day = format.format(calendar.getTime()); 
 		}
-	}
-
-	public String failedDetail(){
-		long fails = failedCount.get();
-		if(fails == 0){
-			return "0";
-		}
-		return fails + "(" + failedMap.size() + ")";
 	}
 
 	public static class CostDetail {

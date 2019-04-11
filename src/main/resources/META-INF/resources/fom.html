@@ -107,8 +107,9 @@ img {
 						<tr>
 							<th></th>
 							<th>name</th>
-							<th>cron</th>
 							<th>load time</th>
+							<th>cron</th>
+							<th>execute times(exceptions)</th>
 							<th>last execute time</th>
 							<th>task success</th>
 							<th>task failed</th>
@@ -148,11 +149,14 @@ img {
 									"data" : "name"
 								},
 								{
+									"data" : "loadTime"
+								},
+								{
 									"data" : "cron",
 									"orderable" : false,
 								},
 								{
-									"data" : "loadTime"
+									"data" : "executeTimes"
 								},
 								{
 									"data" : "execTime"
@@ -188,9 +192,12 @@ img {
 									level,
 									state,
 									actives = 0,
-									failed,
+									failed = 0,
+									failedDetails = 0,
 									waiting = 0,
-									success = 0;
+									success = 0,
+									executeTimes = 0,
+									executeExceptions = 0;
 								for (var key in data) {
 									if (key == "name") {
 										name = data[key];
@@ -202,10 +209,16 @@ img {
 										actives = data[key];
 									} else if (key == "failed") {
 										failed = data[key];
+									} else if (key == "failedDetails") {
+										failedDetails = data[key];
 									} else if (key == "waiting") {
 										waiting = data[key];
 									} else if (key == "success") {
 										success = data[key];
+									} else if (key == "executeTimes") {
+										executeTimes = data[key];
+									} else if (key == "executeExceptions") {
+										executeExceptions = data[key];
 									}
 								}
 								var select = "<select id='select_"
@@ -242,7 +255,7 @@ img {
 										+ "<option value='ERROR' selected='selected'>ERROR</option>"
 										+ "</select>"
 								}
-								$('td', row).eq(10)
+								$('td', row).eq(11)
 									.html(select);
 
 								var img;
@@ -259,11 +272,11 @@ img {
 								} else {
 									img = "<img src='images/unknown.png' title='unknown'>"
 								}
-								$('td', row).eq(9).html(img);
+								$('td', row).eq(10).html(img);
 
 								if (success > 0) {
 									$('td', row)
-										.eq(5)
+										.eq(6)
 										.html(
 											"<a style='color:red;' id='"
 											+ name
@@ -271,19 +284,23 @@ img {
 											+ success
 											+ "</a>");
 								}
-								if (failed != "0") {
+								if (failedDetails > 0) {
 									$('td', row)
-										.eq(6)
+										.eq(7)
 										.html(
 											"<a style='color:red;' id='"
 											+ name
 											+ "' onclick='faileddetail(this)' href='#'>"
-											+ failed
-											+ "</a>");
+											+ failed + "(" + failedDetails
+											+ ")</a>");
+								} else {
+									$('td', row)
+										.eq(7)
+										.html(failed);
 								}
 								if (waiting > 0) {
 									$('td', row)
-										.eq(7)
+										.eq(8)
 										.html(
 											"<a style='color:red;' id='"
 											+ name
@@ -293,7 +310,7 @@ img {
 								}
 								if (actives > 0) {
 									$('td', row)
-										.eq(8)
+										.eq(9)
 										.html(
 											"<a style='color:red;' id='"
 											+ name
@@ -301,6 +318,21 @@ img {
 											+ actives
 											+ "</a>");
 								}
+								if (executeExceptions > 0) {
+									$('td', row)
+										.eq(4)
+										.html(
+											"<a style='color:red;' id='"
+											+ name
+											+ "' onclick='executedetail(this)' href='#'>"
+											+ executeTimes + "(" + executeExceptions
+											+ ")</a>");
+								} else {
+									$('td', row)
+										.eq(4)
+										.html(executeTimes);
+								}
+
 							},
 							"order" : [ [ 1, 'asc' ] ]
 						});
@@ -392,26 +424,26 @@ img {
 			if (key == "name") {
 				Tb.attr("id", data[key]);
 				continue;
-			} else if (key == "execTime" || key == "state" || key == "level"
-				|| key == "loadTime" || key == "success" || key == "execOnStart"
-				|| key == "failed" || key == "active" || key == "waiting") {
+			} else if (key == "execTime" || key == "state" || key == "level" || key == "failedDetails"
+				|| key == "loadTime" || key == "success" || key == "execOnStart" || key == "executeExceptions"
+				|| key == "failed" || key == "active" || key == "waiting" || key == "executeTimes") {
 				continue;
 			}
-			
+
 			var value = data[key];
 			var r = (value.split('\r')).length - 1;
 			var n = (value.split('\n')).length - 1;
-			var rn = r + n +1;
-			
+			var rn = r + n + 1;
+
 			var textarea = $('<textarea disabled="disabled" rows=' + rn + ' style="width:100%;"/>');
 			textarea.text(value);
-			
+
 			var Td = $('<td/>');
 			Td.append(textarea);
-			
+
 			var Tr = $('<tr><td>' + key + '</td></tr>');
 			Tr.append(Td);
-			
+
 			Tb.append(Tr);
 		}
 		return Tb;
@@ -470,7 +502,7 @@ img {
 												Tr
 													.find(
 														'td')
-													.eq(9)
+													.eq(10)
 													.html(
 														img);
 											}
@@ -709,6 +741,7 @@ img {
 							+ "ms</td><td>" + subdata.throwable + "</td></tr>"
 					}
 					html = html + "</table>";
+
 					layer.open({
 						title : 'Throwable of failed tasks[' + data.size + ']',
 						type : 1,
@@ -724,6 +757,49 @@ img {
 					layer.msg(XMLHttpRequest.responseText);
 				}
 			});
+	}
+
+	function executedetail(e) {
+		var name = $(e).attr("id");
+		$
+			.ajax({
+				url : "/executedetail",
+				type : "POST",
+				dataType : "json",
+				data : {
+					"name" : name,
+				},
+				success : function(data) {
+					if (data.size == 0) {
+						return;
+					}
+					var html = "<table width='100%' border='1' cellpadding='20px' style='height:100%;'>";
+					html += "<thead><tr><th>execute Time</th><th>Exception</th></tr></thead>";
+					for (var key in data) {
+						var subdata = data[key];
+						html = html + "<tr><td>" + key
+							+ "</td><td>" + subdata
+							+ "</td></tr>"
+					}
+					html = html + "</table>";
+
+					layer.open({
+						title : 'Detail of last Exception',
+						type : 1,
+						skin : 'layui-layer-demo',
+						area : [ '1500px', '600px' ],
+						maxmin : true,
+						closeBtn : 2,
+						anim : 2,
+						content : html
+					});
+
+				},
+				error : function(XMLHttpRequest, textStatus, errorThrown) {
+					layer.msg(XMLHttpRequest.responseText);
+				}
+			});
+
 	}
 
 	function waitingdetail(e) {
