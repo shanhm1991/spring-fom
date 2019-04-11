@@ -497,39 +497,7 @@ img {
 								0,
 								4,
 								function() {
-									$
-										.ajax({
-											url : "/state",
-											type : "POST",
-											dataType : "json",
-											data : {
-												"name" : name
-											},
-											success : function(
-												data) {
-												var img;
-												if (data.state == "running") {
-													img = "<img src='images/running.png' title='running'>"
-												} else if (data.state == "waiting") {
-													img = "<img src='images/waiting.png' title='waiting for completion'>"
-												} else if (data.state == "sleeping") {
-													img = "<img src='images/sleeping.png' title='waiting for next time'>"
-												} else if (data.state == "stopping") {
-													img = "<img src='images/stopping.png' title='stopping'>"
-												} else if (data.state == "stopped") {
-													img = "<img src='images/stopped.png' title='stopped'>"
-												} else {
-													img = "<img src='images/unknown.png' title='unknown'>"
-												}
-												Tr
-													.find(
-														'td')
-													.eq(10)
-													.css("text-align", "center")
-													.html(
-														img);
-											}
-										});
+									table.ajax.reload();
 								});
 					} else {
 						TINY.box.show("failed, " + data.msg, 0, 0, 0, 0, 4);

@@ -283,10 +283,14 @@ public class Context implements Serializable {
 		synchronized (this) {
 			switch(state){
 			case inited:
-			case stopped:
-				map.put("result", true);
+				map.put("result", false);
 				map.put("msg", "context[" + name + "] was not startup.");
 				log.warn("context[{}] was not startup.", name); 
+				return map;
+			case stopped:
+				map.put("result", true);
+				map.put("msg", "context[" + name + "] was already stopped.");
+				log.warn("context[{}] was already stopped.", name); 
 				return map;
 			case stopping:
 				map.put("result", false);
