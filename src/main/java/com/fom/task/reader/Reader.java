@@ -13,9 +13,9 @@ public interface Reader extends Closeable {
 	
 	/**
 	 * 读取下一行
-	 * @return RowData
+	 * @return ReaderRow
 	 * @throws Exception Exception
 	 */
-	RowData readRow() throws Exception;
+	ReaderRow readRow() throws Exception;
 	
 }

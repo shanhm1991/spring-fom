@@ -55,7 +55,7 @@ public class OrcReader implements Reader {
 	}
 
 	@Override
-	public RowData readRow() throws Exception { 
+	public TextRow readRow() throws Exception { 
 		if(recordReader.nextBatch(batch)){
 			rowIndex++;
 			List<String> list = new ArrayList<>();
@@ -64,7 +64,9 @@ public class OrcReader implements Reader {
 				list.add(builder.toString());
 				builder.setLength(0); 
 			}
-			return new RowData(rowIndex - 1, list);
+			TextRow row = new TextRow(rowIndex - 1, list);
+			row.setEmpty(false);
+			return row;
 		}
 		return null;
 	}

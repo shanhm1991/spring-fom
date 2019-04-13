@@ -121,7 +121,7 @@ public class ExcelReader implements Reader {
 	}
 
 	@Override
-	public RowData readRow() {
+	public ExcelRow readRow() {
 		while(true){
 			if(sheet == null){
 				return null;
@@ -146,12 +146,12 @@ public class ExcelReader implements Reader {
 					
 					//row not exist, don't know why
 					if(row == null){
-						RowData rowData = new RowData(rowIndex - 1, new ArrayList<String>(0));
-						rowData.setSheetIndex(rangeIndex); 
-						rowData.setSheetName(sheetName); 
-						rowData.setEmpty(true); 
-						rowData.setLastRow(rowIndex == rowCount); 
-						return rowData;
+						ExcelRow data = new ExcelRow(rowIndex - 1, new ArrayList<String>(0));
+						data.setSheetIndex(rangeIndex); 
+						data.setSheetName(sheetName); 
+						data.setEmpty(true); 
+						data.setLastRow(rowIndex == rowCount); 
+						return data;
 					}
 
 					int cellCount = row.getLastCellNum();
@@ -165,7 +165,7 @@ public class ExcelReader implements Reader {
 						}
 						list.add(value);
 					}
-					RowData rowData = new RowData(rowIndex - 1, list);
+					ExcelRow rowData = new ExcelRow(rowIndex - 1, list);
 					rowData.setSheetIndex(rangeIndex); 
 					rowData.setSheetName(sheetName); 
 					rowData.setEmpty(isEmpty); 

@@ -11,7 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import com.fom.context.ExceptionHandler;
 import com.fom.context.ResultHandler;
 import com.fom.task.reader.Reader;
-import com.fom.task.reader.RowData;
+import com.fom.task.reader.ReaderRow;
 import com.fom.util.IoUtil;
 
 /**
@@ -140,21 +140,21 @@ public abstract class ParseTextTask<V> extends ParseTask<V> {
 
 	protected void parseTxt(String sourceUri, String sourceName, int lineIndex) throws Exception {
 		Reader reader = null;
-		RowData rowData = null;
+		ReaderRow row = null;
 		long batchTime = System.currentTimeMillis();
 		try{
 			reader = getReader(sourceUri); 
 			List<V> batchData = new LinkedList<>(); 
-			while ((rowData = reader.readRow()) != null) {
-				if(lineIndex > 0 && rowData.getRowIndex() <= lineIndex){
+			while ((row = reader.readRow()) != null) {
+				if(lineIndex > 0 && row.getRowIndex() <= lineIndex){
 					continue;
 				}
-				lineIndex = rowData.getRowIndex();
+				lineIndex = row.getRowIndex();
 				if (log.isDebugEnabled()) {
-					log.debug("parse row[file={}, row={}], columns={}", sourceName, rowIndex, rowData.getColumnList());
+					log.debug("parse row[file={}, row={}], columns={}", sourceName, rowIndex, row.getColumnList());
 				}
 
-				List<V> dataList = parseRowData(rowData, batchTime);
+				List<V> dataList = parseRowData(row, batchTime);
 				if(dataList != null){
 					batchData.addAll(dataList);
 				}

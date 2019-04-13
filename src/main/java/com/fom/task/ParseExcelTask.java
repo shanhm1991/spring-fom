@@ -13,7 +13,7 @@ import com.fom.context.ExceptionHandler;
 import com.fom.context.ResultHandler;
 import com.fom.task.reader.ExcelReader;
 import com.fom.task.reader.Reader;
-import com.fom.task.reader.RowData;
+import com.fom.task.reader.ReaderRow;
 import com.fom.util.IoUtil;
 
 /**
@@ -131,39 +131,39 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 
 	protected void parseExcel(String sourceUri, String sourceName, int lineIndex) throws Exception {
 		Reader reader = null;
-		RowData rowData = null;
+		ReaderRow row = null;
 		String sheetName = null;
 		try{
 			reader = getExcelReader(sourceUri);
 			List<V> batchData = new LinkedList<>(); 
 			long batchTime = System.currentTimeMillis();
-			while ((rowData = reader.readRow()) != null) {
-				if(sheetIndex < rowData.getSheetIndex()){
-					sheetIndex = rowData.getSheetIndex();
+			while ((row = reader.readRow()) != null) {
+				if(sheetIndex < row.getSheetIndex()){
+					sheetIndex = row.getSheetIndex();
 					lineIndex = 0;
 				}
 
-				if(lineIndex > 0 && rowData.getRowIndex() <= lineIndex){
+				if(lineIndex > 0 && row.getRowIndex() <= lineIndex){
 					continue;
 				}
-				lineIndex = rowData.getRowIndex();
-				sheetName = rowData.getSheetName();
+				lineIndex = row.getRowIndex();
+				sheetName = row.getSheetName();
 
 				if (log.isDebugEnabled()) {
 					log.debug("parse row[file={}, sheet={}, row={}], columns={}",
-							sourceName, sheetName, rowIndex, rowData.getColumnList());
+							sourceName, sheetName, rowIndex, row.getColumnList());
 				}
 
-				if(rowData.isEmpty()){
+				if(row.isEmpty()){
 					log.warn("ignore empty row, sheet={}, row={}", sheetName, lineIndex);
 				}else{
-					List<V> dataList = parseRowData(rowData, batchTime);
+					List<V> dataList = parseRowData(row, batchTime);
 					if(dataList != null){
 						batchData.addAll(dataList);
 					}
 				}
 
-				if((isBatchBySheet && rowData.isLastRow()) || (batch > 0 && batchData.size() >= batch)){
+				if((isBatchBySheet && row.isLastRow()) || (batch > 0 && batchData.size() >= batch)){
 					checkInterrupt();
 					int size = batchData.size();
 					batchProcess(batchData, batchTime); 

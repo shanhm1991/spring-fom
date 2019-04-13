@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fom.util.IoUtil;
 
 /**
@@ -53,16 +55,23 @@ public class TextReader implements Reader {
 	}
 
 	@Override
-	public RowData readRow() throws Exception {
+	public TextRow readRow() throws Exception {
 		String line = reader.readLine();
 		rowIndex++;
 		if(line == null){
 			return null;
 		}
+		
+		boolean isEmpty = StringUtils.isBlank(line);
+		
 		if(regex == null){
-			return new RowData(rowIndex - 1, Arrays.asList(line));
+			TextRow row = new TextRow(rowIndex - 1, Arrays.asList(line));
+			row.setEmpty(isEmpty);
+			return row;
 		}
-		return new RowData(rowIndex - 1, Arrays.asList(line.split(regex)));
+		TextRow row = new TextRow(rowIndex - 1, Arrays.asList(line.split(regex)));
+		row.setEmpty(isEmpty);
+		return row;
 	}
 
 	@Override

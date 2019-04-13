@@ -8,7 +8,7 @@ import java.util.Map;
 import com.fom.pool.handler.JdbcHandler;
 import com.fom.task.ParseTextZipTask;
 import com.fom.task.reader.Reader;
-import com.fom.task.reader.RowData;
+import com.fom.task.reader.ReaderRow;
 import com.fom.task.reader.TextReader;
 import com.fom.util.PatternUtil;
 
@@ -38,7 +38,7 @@ public class ImportOracleExample2Task extends ParseTextZipTask<Map<String, Objec
 	}
 
 	@Override
-	public List<Map<String, Object>> parseRowData(RowData rowData, long batchTime) throws Exception {
+	public List<Map<String, Object>> parseRowData(ReaderRow rowData, long batchTime) throws Exception {
 		List<String> columns = rowData.getColumnList();
 		Map<String,Object> map = new HashMap<>();
 		map.put("id", columns.get(0));

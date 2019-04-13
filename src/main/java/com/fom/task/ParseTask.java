@@ -5,7 +5,7 @@ import java.text.DecimalFormat;
 import java.util.List;
 
 import com.fom.context.Task;
-import com.fom.task.reader.RowData;
+import com.fom.task.reader.ReaderRow;
 
 /**
  * 
@@ -91,12 +91,12 @@ public abstract class ParseTask<V> extends Task<Boolean> {
 	
 	/**
 	 * 将行字段数据映射成对应的bean或者map
-	 * @param rowData rowData
+	 * @param row row
 	 * @param batchTime 批处理时间
 	 * @return 映射结果V列表
 	 * @throws Exception Exception
 	 */
-	protected abstract List<V> parseRowData(RowData rowData, long batchTime) throws Exception;
+	protected abstract List<V> parseRowData(ReaderRow row, long batchTime) throws Exception;
 
 	/**
 	 * 批处理行数据

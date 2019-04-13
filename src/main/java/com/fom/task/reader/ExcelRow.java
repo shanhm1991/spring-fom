@@ -7,8 +7,8 @@ import java.util.List;
  * @author shanhm
  *
  */
-public class RowData {
-
+public class ExcelRow implements ReaderRow{
+	
 	private int rowIndex;
 
 	private List<String> columnList;
@@ -20,45 +20,51 @@ public class RowData {
 	private boolean isLastRow;
 
 	private boolean isEmpty;
-
-
-	public RowData(int rowIndex, List<String> rowData){
+	
+	
+	public ExcelRow(int rowIndex, List<String> rowData){
 		this.rowIndex = rowIndex;
 		this.columnList = rowData;
 	}
 
+	@Override
 	public int getRowIndex() {
 		return rowIndex;
 	}
-
-	void setRowIndex(int rowIndex) {
-		this.rowIndex = rowIndex;
-	}
-
-	public List<String> getColumnList() {
-		return columnList;
-	}
-
-	void setColumnList(List<String> columnList) { 
-		this.columnList = columnList;
-	}
-
-	public int getSheetIndex() {
-		return sheetIndex;
-	}
-
-	void setSheetIndex(int sheetIndex) {
-		this.sheetIndex = sheetIndex;
-	}
-
+	
+	@Override
 	public boolean isEmpty() {
 		return isEmpty;
 	}
-
+	
 	void setEmpty(boolean isEmpty) {
 		this.isEmpty = isEmpty;
 	}
 
+	@Override
+	public boolean isLastRow() {
+		return isLastRow;
+	}
+	
+	void setLastRow(boolean isLastRow) {
+		this.isLastRow = isLastRow;
+	}
+
+	@Override
+	public List<String> getColumnList() {
+		return columnList;
+	}
+
+	@Override
+	public int getSheetIndex() {
+		return sheetIndex;
+	}
+	
+	void setSheetIndex(int sheetIndex) {
+		this.sheetIndex = sheetIndex;
+	}
+
+	@Override
 	public String getSheetName() {
 		return sheetName;
 	}
@@ -66,14 +72,4 @@ public class RowData {
 	void setSheetName(String sheetName) {
 		this.sheetName = sheetName;
 	}
-
-	public boolean isLastRow() {
-		return isLastRow;
-	}
-
-	void setLastRow(boolean isLastRow) {
-		this.isLastRow = isLastRow;
-	}
-
-
 }

@@ -8,7 +8,7 @@ import com.examples.dao.ExamplesDao;
 import com.fom.context.SpringContext;
 import com.fom.task.ParseTextTask;
 import com.fom.task.reader.Reader;
-import com.fom.task.reader.RowData;
+import com.fom.task.reader.ReaderRow;
 import com.fom.task.reader.TextReader;
 
 /**
@@ -28,7 +28,7 @@ public class ImportMysqlExample1Task extends ParseTextTask<ExampleBean> {
 	}
 
 	@Override
-	public List<ExampleBean> parseRowData(RowData rowData, long batchTime) throws Exception {
+	public List<ExampleBean> parseRowData(ReaderRow rowData, long batchTime) throws Exception {
 		ExampleBean bean = new ExampleBean(rowData.getColumnList());
 		bean.setSource("local");
 		bean.setFileType("txt");

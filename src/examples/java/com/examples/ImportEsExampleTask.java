@@ -9,7 +9,7 @@ import java.util.Map;
 import com.fom.pool.handler.EsHandler;
 import com.fom.task.ParseTextTask;
 import com.fom.task.reader.Reader;
-import com.fom.task.reader.RowData;
+import com.fom.task.reader.ReaderRow;
 import com.fom.task.reader.TextReader;
 
 public class ImportEsExampleTask extends ParseTextTask<Map<String, Object>> {
@@ -44,7 +44,7 @@ public class ImportEsExampleTask extends ParseTextTask<Map<String, Object>> {
 	}
 
 	@Override
-	protected List<Map<String, Object>> parseRowData(RowData rowData, long batchTime) throws Exception {
+	protected List<Map<String, Object>> parseRowData(ReaderRow rowData, long batchTime) throws Exception {
 		List<String> columns = rowData.getColumnList();
 		Map<String,Object> map = new HashMap<>();
 		map.put("ID", columns.get(0));
