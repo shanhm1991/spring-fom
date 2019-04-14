@@ -16,7 +16,7 @@ import com.fom.task.helper.impl.HdfsHelper;
  * @author shanhm
  *
  */
-@FomContext(remark="上传文件到Hdfs服务")
+@FomContext(remark="上传文件到Hdfs服务", stopWithNoCron=true)
 public class UploadHdfsExample extends Context {
 
 	private static final long serialVersionUID = -8054944958625990317L;

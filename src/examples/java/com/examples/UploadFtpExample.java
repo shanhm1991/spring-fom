@@ -16,7 +16,7 @@ import com.fom.task.helper.impl.FtpHelper;
  * @author shanhm
  *
  */
-@FomContext(remark="上传文件到Ftp服务")
+@FomContext(remark="上传文件到Ftp服务", stopWithNoCron=true)
 public class UploadFtpExample extends Context {
 
 	private static final long serialVersionUID = 3766945707309190003L;

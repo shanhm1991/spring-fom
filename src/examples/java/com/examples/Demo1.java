@@ -13,8 +13,8 @@ import com.fom.context.Task;
  * @author shanhm1991
  *
  */
-@FomContext(remark="状态测试")
-public class DemoStateTest1 extends Context {
+@FomContext(remark="测试")
+public class Demo1 extends Context {
 
 	private static final long serialVersionUID = -838223512003059760L;
 	
@@ -25,12 +25,10 @@ public class DemoStateTest1 extends Context {
 	protected Set<Task<Boolean>> scheduleBatchTasks() throws Exception {
 		Set<Task<Boolean>> set = new HashSet<>();
 		for(int i = 1; i < 50;i++){
-			set.add(new Task<Boolean>("task-" + i){
+			set.add(new Task<Boolean>("demo1-" + i){
 				@Override
 				protected Boolean exec() throws Exception {
-					
 					Thread.sleep(random.nextInt(10000)); 
-					
 					return true;
 				}
 				

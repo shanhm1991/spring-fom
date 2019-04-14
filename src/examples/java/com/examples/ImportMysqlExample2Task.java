@@ -1,22 +1,23 @@
 package com.examples;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.fom.pool.handler.JdbcHandler;
-import com.fom.task.ParseTextTask;
-import com.fom.task.reader.Reader;
+import com.fom.task.ParseExcelTask;
+import com.fom.task.reader.ExcelReader;
 import com.fom.task.reader.ReaderRow;
-import com.fom.task.reader.TextReader;
 
 /**
  * 
  * @author shanhm
  *
  */
-public class ImportMysqlExample2Task extends ParseTextTask<Map<String, Object>> {
+public class ImportMysqlExample2Task extends ParseExcelTask<Map<String, Object>> {
 
 	private static final String POOL = "example_mysql";
 
@@ -25,12 +26,7 @@ public class ImportMysqlExample2Task extends ParseTextTask<Map<String, Object>> 
 					+ "values (#id#,#name#,#source#,#fileType#,#importWay#)";
 	
 	public ImportMysqlExample2Task(String sourceUri, int batch){
-		super(sourceUri, batch); 
-	}
-
-	@Override
-	public Reader getReader(String sourceUri) throws Exception {
-		return new TextReader(sourceUri, "#");
+		super(sourceUri, batch, false); 
 	}
 
 	@Override
@@ -40,7 +36,7 @@ public class ImportMysqlExample2Task extends ParseTextTask<Map<String, Object>> 
 		map.put("id", columns.get(0));
 		map.put("name", columns.get(1));
 		map.put("source", "local");
-		map.put("fileType", "txt");
+		map.put("fileType", "Excel");
 		map.put("importWay", "pool");
 		return Arrays.asList(map);
 	}
@@ -50,6 +46,16 @@ public class ImportMysqlExample2Task extends ParseTextTask<Map<String, Object>> 
 		JdbcHandler.handler.batchExecute(POOL, SQL, lineDatas);
 		log.info("处理数据入库:" + lineDatas.size());
 		
+	}
+
+	@Override
+	protected InputStream getExcelInputStream(String sourceUri) throws Exception {
+		return new FileInputStream(sourceUri);
+	}
+
+	@Override
+	protected String getExcelType() {
+		return ExcelReader.TYPE_XLSX;
 	}
 
 }

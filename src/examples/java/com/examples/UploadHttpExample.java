@@ -15,7 +15,7 @@ import com.fom.task.helper.impl.HttpHelper;
  * @author shanhm
  *
  */
-@FomContext(remark="上传文件到Http服务")
+@FomContext(remark="上传文件到Http服务", stopWithNoCron=true)
 public class UploadHttpExample extends Context {
 
 	private static final long serialVersionUID = -6676559884214726673L;

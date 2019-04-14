@@ -24,7 +24,7 @@ import com.fom.util.PatternUtil;
  * @author shanhm
  *
  */
-@FomContext(remark="扫描下载Hdfs指定目录下的目录并打包成zip")
+@FomContext(remark="扫描下载Hdfs指定目录下的目录并打包成zip", stopWithNoCron=true)
 public class DownloadHdfsZipExample extends Context {
 
 	private static final long serialVersionUID = -6055805119506513553L;

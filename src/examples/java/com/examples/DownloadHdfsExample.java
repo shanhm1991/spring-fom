@@ -21,7 +21,7 @@ import com.fom.util.PatternUtil;
  * @author shanhm
  *
  */
-@FomContext(remark="扫描下载Hdfs指定目录下的文件")
+@FomContext(remark="扫描下载Hdfs指定目录下的文件", stopWithNoCron=true)
 public class DownloadHdfsExample extends Context {
 
 	private static final long serialVersionUID = -8950649337670940490L;

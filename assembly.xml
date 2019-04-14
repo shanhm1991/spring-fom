@@ -23,10 +23,6 @@
 	</fileSets>
 	<files>
 		<file>
-			<source>README.md</source>
-			<outputDirectory>/</outputDirectory>
-		</file>
-		<file>
 			<source>${project.build.directory}/${project.name}-${project.version}.jar</source>
 			<outputDirectory>/lib</outputDirectory>
 		</file>

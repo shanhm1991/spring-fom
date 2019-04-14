@@ -15,7 +15,7 @@ import com.fom.task.helper.impl.FtpHelper;
  * @author shanhm
  *
  */
-@FomContext(remark="下载Ftp服务指定文件")
+@FomContext(remark="下载Ftp服务指定文件", stopWithNoCron=true)
 public class DownloadFtpExample extends Context {
 
 	private static final long serialVersionUID = 9006928975258471271L;

@@ -10,43 +10,7 @@
 	<includes>
 		<include>WEB-INF/oracle/examples.xml</include>
 		<include>WEB-INF/mysql/examples.xml</include>
+		<include>WEB-INF/elasticsearch/examples.xml</include>
 	</includes>
-
-	<contexts>
-		<!-- context可以不配置name属性，则调用无参构造器，以类名作为name -->
-		<!-- 注意：如果配置name，则调用有参构造器（String），并需要在构造器中指明调用父类super(name) -->
-		<!-- 同一个context类可以配置多个不同name的context实例，分别配置(注解时不支持一个类多个name实例的配置 -->
-		<context class="com.examples.ImportEsExample">
-			<remark>使用自定义pool的方式将本地指定目录下text文本解析导入Es库</remark>
-			<cron>0/5 * * * * ?</cron>
-			<threadCore>4</threadCore>
-			<threadMax>20</threadMax>
-			<threadAliveTime>30</threadAliveTime>
-			<threadOverTime>3600</threadOverTime>
-			<queueSize>200</queueSize>
-			<cancellable>false</cancellable>
-			<!-- 以上为默认配置,可以在xml中覆盖默认值，以下为自定义配置 -->
-			<pattern>demo.bcp</pattern>
-			<srcPath>/source</srcPath>
-			<batch>5000</batch>
-			<isDelMatchFail>false</isDelMatchFail>
-			<esIndex>demo</esIndex>
-			<esType>demo</esType>
-			<esJson>WEB-INF/index/index_example.json</esJson>
-		</context>
-
-		<context name="ImportEsExample1" class="com.examples.ImportEsExample">
-			<remark>使用自定义pool的方式将本地指定目录下text文本解析导入Es库</remark>
-			<cron>0/10 * * * * ?</cron>
-			<pattern>demo1.bcp</pattern>
-			<srcPath>/source</srcPath>
-			<batch>3000</batch>
-			<isDelMatchFail>false</isDelMatchFail>
-			<esIndex>demo1</esIndex>
-			<esType>demo1</esType>
-			<esJson>WEB-INF/index/index_example.json</esJson>
-		</context>
-		
-	</contexts>
 </fom>
 

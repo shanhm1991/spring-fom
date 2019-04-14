@@ -14,6 +14,7 @@
 
 ##打包：
 * mvn clean package -Dmaven.test.skip=true
+> 打了示例包：fom-examples-1.0.tar.gz，提供在linux上的安装启动脚本
 
 ##使用说明
 1. 启动参数
@@ -29,7 +30,7 @@
 > 修改启动类的注解，在@Import中添加FomConfiguration.class，以及在@ComponentScan注解中添加"com.fom"，即可
 * 以tomcat方式部署
 > 一开始是springbooy和tomcat部署都可以的，后来越改越偏向springboot了，
-> 可能需要做一些改动，没有测过，在main/resources/WEB-INF下保留了原先的web.xml和springmvc.xml
+> 可能需要做一些改动，没有测过，在main/resources/WEB-INF下保留了原先的web.xml等文件
 * 自定义main方法
 > com.fom.Context提供了启停方法，可以直接在main方法中启动自己的Context实现
 
