@@ -8,7 +8,7 @@
 	<dependencySets>
 		<dependencySet>
 			<useProjectArtifact>false</useProjectArtifact>
-			<outputDirectory>WEB-INF/lib</outputDirectory>
+			<outputDirectory>/lib</outputDirectory>
 		</dependencySet>
 	</dependencySets>
 	<fileSets>
@@ -28,11 +28,11 @@
 		</file>
 		<file>
 			<source>${project.build.directory}/${project.name}-${project.version}.jar</source>
-			<outputDirectory>WEB-INF/lib</outputDirectory>
+			<outputDirectory>/lib</outputDirectory>
 		</file>
 		<file>
 			<source>${project.build.directory}/${project.name}-example-${project.version}.jar</source>
-			<outputDirectory>WEB-INF/lib</outputDirectory>
+			<outputDirectory>/lib</outputDirectory>
 		</file>
 	</files>
 </assembly>

@@ -8,8 +8,8 @@
 
 	<!-- 包含配置文件，路径为相对于servletContext根路径的相对路径 -->
 	<includes>
-		<include>examples/mysqlTextExamples.xml</include>
-		<include>examples/oracleZipExamples.xml</include>
+		<include>WEB-INF/oracle/examples.xml</include>
+		<include>WEB-INF/mysql/examples.xml</include>
 	</includes>
 
 	<contexts>

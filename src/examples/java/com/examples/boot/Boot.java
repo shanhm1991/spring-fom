@@ -1,4 +1,4 @@
-package com.demo;
+package com.examples.boot;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,11 +14,11 @@ import com.fom.context.FomConfiguration;
 @SpringBootApplication(exclude={DataSourceAutoConfiguration.class,HibernateJpaAutoConfiguration.class})
 @EnableDiscoveryClient
 @EnableEurekaClient
-@ComponentScan(basePackages = {"com.fom","com.demo"})
 @Import({FomConfiguration.class})
-public class Demo {
+@ComponentScan(basePackages = {"com.fom","com.demo.boot"})
+public class Boot {
 
 	public static void main(String[] args) {
-		SpringApplication.run(Demo.class, args);
+		SpringApplication.run(Boot.class, args);
 	}
 }

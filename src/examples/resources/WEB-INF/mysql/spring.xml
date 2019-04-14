@@ -22,7 +22,7 @@
 	
 	<bean id="mysqlExampleSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<property name="dataSource" ref="mysqlExampleDataSource" />
-		<property name="configLocation" value="WEB-INF/dataSource/mysql_example_mybatis.xml" />
+		<property name="configLocation" value="WEB-INF/mysql/mybatis.xml" />
 	</bean>
 
 	<bean id="mysqlExampleDao" class="com.examples.dao.MysqlExamplesDaoImpl">

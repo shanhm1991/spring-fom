@@ -22,7 +22,7 @@
 
 	<bean id="oracleExampleSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<property name="dataSource" ref="oracleExampleDataSource" />
-		<property name="configLocation" value="WEB-INF/dataSource/oracle_example_mybatis.xml" />
+		<property name="configLocation" value="WEB-INF/oracle/mybatis.xml" />
 	</bean>
 
 	<bean id="oracleExampleDao" class="com.examples.dao.OracleExamplesDaoImpl">

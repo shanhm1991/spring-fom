@@ -1,4 +1,4 @@
-package com.demo;
+package com.examples.boot;
 
 import java.util.HashMap;
 import java.util.Map;

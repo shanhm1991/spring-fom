@@ -134,7 +134,7 @@
 							<classifier>example-${project.version}</classifier>
 							<classesDirectory>${project.build.directory}/classes</classesDirectory>
 							<includes>
-								<include>com/fom/examples/**</include>
+								<include>com/examples/**</include>
 							</includes>
 						</configuration>
 					</execution>
