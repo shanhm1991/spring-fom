@@ -109,5 +109,6 @@ public class FomConfiguration implements ServletContextInitializer {
 		}
 		context.setInitParameter("fomConfigLocation", fomPath);
 		context.setInitParameter("poolConfigLocation", poolpath);	
+		ContextUtil.set(context); 
 	}
 }

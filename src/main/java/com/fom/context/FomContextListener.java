@@ -13,6 +13,5 @@ public class FomContextListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
 		FomInitializer.set(event.getServletContext()); 
-		ContextUtil.set(event.getServletContext()); 
 	} 
 }
