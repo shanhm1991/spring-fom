@@ -54,7 +54,6 @@ public abstract class ParseTask<V> extends Task<Boolean> {
 	 * @return 是否删除成功
 	 */
 	protected boolean deleteSource(String sourceUri) {
-		log.error("delete file failed, {}", sourceUri);
 		return new File(sourceUri).delete();
 	}
 	
