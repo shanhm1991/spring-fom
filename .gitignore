@@ -2,4 +2,4 @@
 /cache/
 /data/
 /log/
-logfile.log
+logfile.log*
