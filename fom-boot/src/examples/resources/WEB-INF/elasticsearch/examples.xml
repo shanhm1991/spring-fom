@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fom>
+	<contexts>
+		<context class="com.examples.task.input.InputEsExample">
+			<remark>使用自定义pool的方式将本地指定目录下text文本解析导入Es库</remark>
+			<cron>0/5 * * * * ?</cron>
+			<pattern>demo.bcp</pattern>
+			<srcPath>/source</srcPath>
+			<batch>5000</batch>
+			<isDelMatchFail>false</isDelMatchFail>
+			<esIndex>demo</esIndex>
+			<esType>demo</esType>
+			<esJson>WEB-INF/elasticsearch/index.json</esJson>
+		</context>
+	</contexts>
+</fom>

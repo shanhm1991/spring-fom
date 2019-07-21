@@ -1,0 +1,9 @@
+/.settings/
+/target/
+/cache/
+/data/
+/download/
+/log/
+.classpath
+.project
+logfile.log*
