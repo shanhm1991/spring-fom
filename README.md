@@ -44,7 +44,7 @@
 > 可以实时监控模块的状态、配置以及统计信息；也可以实时新增模块（也可以加载新增jar包中的context）
 
 ##Examples
-> 在fom-boot工程中，依赖springboot的方式，启动类：com.examples.boot.Boot，打了个简单的tar包
+> 在fom-boot工程中，依赖springboot的方式，启动类：com.examples.Boot，打了个简单的tar包
 
 ##存在问题
 * 利用CronExpression计算定时表达式，如果在秒分时天周中含有/，但表达的含义不是固定间隔的周期，将会被简单的误解成固定间隔周期；
