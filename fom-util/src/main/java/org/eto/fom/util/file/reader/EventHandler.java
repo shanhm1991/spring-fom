@@ -14,7 +14,9 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author shanhm
  *
  */
-class SAXHandler extends DefaultHandler {
+class EventHandler extends DefaultHandler {
+	
+	private int sheetIndex;
 
 	private SharedStringsTable sst;
 
@@ -38,31 +40,39 @@ class SAXHandler extends DefaultHandler {
 		return sheetData;
 	}
 
-	public SAXHandler(SharedStringsTable sst) {
+	public EventHandler(SharedStringsTable sst) {
 		this.sst = sst;
+	}
+	
+	public int getSheetIndex() {
+		return sheetIndex;
+	}
+
+	public void setSheetIndex(int sheetIndex) {
+		this.sheetIndex = sheetIndex;
 	}
 
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		if (qName.equals("dimension")) {
 			String dimension = attributes.getValue("ref");
 			if(dimension.contains(":")){
-				setMaxIndex(dimension.split(":")[1]);  
-			}else{
-				setMaxIndex(dimension); 
+				dimension = dimension.split(":")[1];
 			}
+			rowMax = getRowIndex(dimension);  
+			cellMax = getCellIndex(dimension);
 			sheetData = new ArrayList<>(rowMax);
 		}
 
 		if (qName.equals("row")) {
 			int currentRow = Integer.valueOf(attributes.getValue("r")) - 1;
-			while(rowIndex < currentRow){
+			while(rowIndex < currentRow - 1){
+				rowIndex++;
 				ExcelRow data = new ExcelRow(rowIndex, new ArrayList<String>(0));
-				//data.setSheetIndex(rangeIndex); 
+				data.setSheetIndex(sheetIndex); 
 				//data.setSheetName(sheetName); 
 				data.setEmpty(true); 
-				data.setLastRow(rowIndex == rowMax); 
+				data.setLastRow(rowIndex == rowMax - 1); 
 				sheetData.add(data);
-				rowIndex++;
 			}
 			rowIndex = currentRow;
 			columnList = new ArrayList<>(cellMax);
@@ -97,10 +107,10 @@ class SAXHandler extends DefaultHandler {
 
 		if (qName.equals("row")) {
 			ExcelRow data = new ExcelRow(rowIndex, columnList);
-			//data.setSheetIndex(rangeIndex); 
+			data.setSheetIndex(sheetIndex); 
 			//data.setSheetName(sheetName); 
-			data.setEmpty(true); 
-			data.setLastRow(rowIndex == rowMax); 
+			data.setEmpty(false); 
+			data.setLastRow(rowIndex == rowMax - 1); 
 			sheetData.add(data);
 		}
 	}
@@ -109,7 +119,7 @@ class SAXHandler extends DefaultHandler {
 		lastContents += new String(ch, start, length);
 	}
 
-	private void setMaxIndex(String dimension){
+	private int getRowIndex(String dimension){
 		int len = dimension.length();
 		int index = 0;
 		for(int i = len - 1; i >= 0; i--){
@@ -118,26 +128,35 @@ class SAXHandler extends DefaultHandler {
 				break;
 			}
 		}
-		rowMax = Integer.valueOf(dimension.substring(index + 1));
-		cellMax = Integer.valueOf(getCellIndex(dimension.substring(0, index + 1)));
+		return Integer.valueOf(dimension.substring(index + 1));
 	}
 
-	private int getCellIndex(String r){
+	private int getCellIndex(String dimension){
+		int len = dimension.length();
 		int index = 0;
-		int len = r.length();
+		for(int i = len - 1; i >= 0; i--){
+			if(dimension.charAt(i) > 64){//A
+				index = i;
+				break;
+			}
+		}
+		String cellstr = dimension.substring(0, index + 1);
+		
+		int cellIndex = 0;
+		int indexLen = cellstr.length();
 		int bitIndex = 0;
-		for(int i = len - 1; i >= 0; i--){ 
+		for(int i = indexLen - 1; i >= 0; i--){ 
 			int base = 1;
-			int c = r.charAt(i) - 65;
+			int c = cellstr.charAt(i) - 65;
 			if(bitIndex > 0){
 				c++;//相当于26进制，个位A当做0，进位A当做1
 				for(int j = 0; j < bitIndex; j++){
 					base *=  26;
 				}
 			}
-			index += c * base;
+			cellIndex += c * base;
 			bitIndex++;
 		}
-		return index;
+		return cellIndex;
 	}
 }
