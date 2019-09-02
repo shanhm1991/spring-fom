@@ -55,4 +55,9 @@ public class TextRow implements ReaderRow {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public String toString() {
+		return "{rowIndex=" + rowIndex + ", columnList=" + columnList + ", isEmpty=" + isEmpty + "}";
+	}
+	
 }

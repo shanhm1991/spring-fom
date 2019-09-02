@@ -8,7 +8,7 @@ import java.util.List;
  *
  */
 public class ExcelRow implements ReaderRow{
-	
+
 	private int rowIndex;
 
 	private List<String> columnList;
@@ -16,12 +16,12 @@ public class ExcelRow implements ReaderRow{
 	private int sheetIndex;
 
 	private String sheetName;
-	
+
 	private boolean isLastRow;
 
 	private boolean isEmpty;
-	
-	
+
+
 	public ExcelRow(int rowIndex, List<String> rowData){
 		this.rowIndex = rowIndex;
 		this.columnList = rowData;
@@ -31,12 +31,12 @@ public class ExcelRow implements ReaderRow{
 	public int getRowIndex() {
 		return rowIndex;
 	}
-	
+
 	@Override
 	public boolean isEmpty() {
 		return isEmpty;
 	}
-	
+
 	void setEmpty(boolean isEmpty) {
 		this.isEmpty = isEmpty;
 	}
@@ -45,7 +45,7 @@ public class ExcelRow implements ReaderRow{
 	public boolean isLastRow() {
 		return isLastRow;
 	}
-	
+
 	void setLastRow(boolean isLastRow) {
 		this.isLastRow = isLastRow;
 	}
@@ -59,7 +59,7 @@ public class ExcelRow implements ReaderRow{
 	public int getSheetIndex() {
 		return sheetIndex;
 	}
-	
+
 	void setSheetIndex(int sheetIndex) {
 		this.sheetIndex = sheetIndex;
 	}
@@ -71,5 +71,11 @@ public class ExcelRow implements ReaderRow{
 
 	void setSheetName(String sheetName) {
 		this.sheetName = sheetName;
+	}
+
+	@Override
+	public String toString() {
+		return "{rowIndex=" + rowIndex + ", columnList=" + columnList + ", sheetIndex=" + sheetIndex
+				+ ", sheetName=" + sheetName + ", isLastRow=" + isLastRow + ", isEmpty=" + isEmpty + "}";
 	}
 }
