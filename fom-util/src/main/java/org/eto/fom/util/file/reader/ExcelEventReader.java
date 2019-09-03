@@ -10,33 +10,26 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.poi.hssf.eventusermodel.FormatTrackingHSSFListener;
 import org.apache.poi.hssf.eventusermodel.HSSFEventFactory;
 import org.apache.poi.hssf.eventusermodel.HSSFListener;
 import org.apache.poi.hssf.eventusermodel.HSSFRequest;
-import org.apache.poi.hssf.eventusermodel.MissingRecordAwareHSSFListener;
-import org.apache.poi.hssf.eventusermodel.EventWorkbookBuilder.SheetRecordCollectingListener;
-import org.apache.poi.hssf.eventusermodel.dummyrecord.LastCellOfRowDummyRecord;
-import org.apache.poi.hssf.eventusermodel.dummyrecord.MissingCellDummyRecord;
-import org.apache.poi.hssf.model.HSSFFormulaParser;
 import org.apache.poi.hssf.record.BOFRecord;
-import org.apache.poi.hssf.record.BlankRecord;
-import org.apache.poi.hssf.record.BoolErrRecord;
 import org.apache.poi.hssf.record.BoundSheetRecord;
-import org.apache.poi.hssf.record.FormulaRecord;
-import org.apache.poi.hssf.record.LabelRecord;
 import org.apache.poi.hssf.record.LabelSSTRecord;
 import org.apache.poi.hssf.record.NumberRecord;
 import org.apache.poi.hssf.record.Record;
+import org.apache.poi.hssf.record.RowRecord;
 import org.apache.poi.hssf.record.SSTRecord;
-import org.apache.poi.hssf.record.StringRecord;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.BuiltinFormats;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.SharedStringsTable;
+import org.apache.poi.xssf.model.StylesTable;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -64,6 +57,8 @@ public class ExcelEventReader implements Reader {
 	private ExcelXSSFHandler xssfHandler;
 
 	private POIFSFileSystem pfs;  
+
+	private ExcelHSSFHandler hssfHandler;
 
 	public ExcelEventReader(String sourceUri) throws IOException, OpenXML4JException, SAXException, DocumentException {  
 		int index = sourceUri.lastIndexOf('.');
@@ -111,10 +106,17 @@ public class ExcelEventReader implements Reader {
 		}else{
 			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx");
 		}
-	}
+	} 
 
-	private void initHssf(){
+	private void initHssf() throws IOException {
+		hssfHandler = new ExcelHSSFHandler();
 
+		HSSFRequest hssfRequest = new HSSFRequest();
+		hssfRequest.addListenerForAllRecords(hssfHandler);
+
+		HSSFEventFactory factory = new HSSFEventFactory(); 
+		InputStream bookStream = pfs.createDocumentInputStream("Workbook");
+		factory.processEvents(hssfRequest, bookStream);
 	}
 
 	private void initXssf() throws IOException, OpenXML4JException, SAXException, DocumentException {  
@@ -122,12 +124,21 @@ public class ExcelEventReader implements Reader {
 		XMLReader parser = XMLReaderFactory.createXMLReader("com.sun.org.apache.xerces.internal.parsers.SAXParser");
 		xssfHandler = new ExcelXSSFHandler(reader, parser);
 		parser.setContentHandler(xssfHandler);
+		//		Iterator<InputStream> it = reader.getSheetsData();
+		//		while(it.hasNext()){
+		//			InputStream in = it.next();
+		//			byte[] buf = new byte[1024];
+		//			int len;
+		//			while ((len = in.read(buf)) != -1) {
+		//				System.out.write(buf, 0, len);
+		//			}
+		//		}
 	}
 
 	@Override
 	public ReaderRow readRow() throws Exception {
 		if(EXCEL_XLS.equalsIgnoreCase(type)){
-			return null;//TODO
+			return hssfHandler.readRow();
 		}else if(EXCEL_XLSX.equalsIgnoreCase(type)){
 			return xssfHandler.readRow();
 		}else{
@@ -160,12 +171,16 @@ public class ExcelEventReader implements Reader {
 		return sheetRangeList;
 	}
 
+	static enum CellDataType {
+		BOOL, ERROR, FORMULA, INLINESTR, SSTINDEX, FORMAT, NULL
+	}
+
 	/**
 	 * 
 	 * @author shanhm
 	 *
 	 */
-	private class ExcelXSSFHandler extends DefaultHandler {
+	class ExcelXSSFHandler extends DefaultHandler {
 
 		private XSSFReader xssfReader;
 
@@ -173,11 +188,17 @@ public class ExcelEventReader implements Reader {
 
 		private SharedStringsTable stringTable;
 
-		private boolean isInStringTable;
+		private StylesTable stylesTable;
+
+		//private boolean isInStringTable;
 
 		private List<String> sheetNameList = new ArrayList<>();
 
 		private Map<String, String> sheetNameRidMap = new LinkedHashMap<>();
+
+		private int rowMax;
+
+		private int cellMax;
 
 		private int sheetIndex = 0;
 
@@ -185,9 +206,13 @@ public class ExcelEventReader implements Reader {
 
 		private int cellIndex = 0;
 
-		private int rowMax;
+		private CellDataType dataType = CellDataType.NULL;
 
-		private int cellMax;
+		private DataFormatter formatter = new DataFormatter();
+
+		private String formatString;
+
+		private short formatIndex;
 
 		private String lastContents = ""; 
 
@@ -203,6 +228,7 @@ public class ExcelEventReader implements Reader {
 			this.xmlReader = xmlReader;
 			this.xssfReader = xssfReader;
 			this.stringTable = xssfReader.getSharedStringsTable();
+			this.stylesTable = xssfReader.getStylesTable();
 			InputStream bookStream = null;
 			try{
 				bookStream = xssfReader.getWorkbookData();
@@ -258,16 +284,51 @@ public class ExcelEventReader implements Reader {
 					columnList.add("");
 					cellIndex++;
 				}
-				isInStringTable = "s".equals(attributes.getValue("t"));
+
+				String cellType = attributes.getValue("t");
+				if ("b".equals(cellType)) {
+					dataType = CellDataType.BOOL;
+				} else if ("e".equals(cellType)) {
+					dataType = CellDataType.ERROR;
+				} else if ("inlineStr".equals(cellType)) {
+					dataType = CellDataType.INLINESTR;
+				} else if ("s".equals(cellType)) {
+					dataType = CellDataType.SSTINDEX;
+				} else if ("str".equals(cellType)) {
+					dataType = CellDataType.FORMULA;
+				}
+
+				String cellStyle = attributes.getValue("s");
+				if (cellStyle != null) {
+					dataType = CellDataType.FORMAT;
+					int styleIndex = Integer.parseInt(cellStyle);
+					XSSFCellStyle style = stylesTable.getStyleAt(styleIndex);
+					formatString = style.getDataFormatString();
+					formatIndex = style.getDataFormat();
+					if (formatString == null) {
+						formatString = BuiltinFormats.getBuiltinFormat(formatIndex);
+					}
+				}
 			}
 		}
 
 		@SuppressWarnings("deprecation")
 		public void endElement(String uri, String localName, String qName) throws SAXException {
 			if (qName.equals("v")) {
-				if (isInStringTable) {
+				System.out.println(formatString); 
+				switch (dataType){
+				case SSTINDEX:
 					int sharedIndex = Integer.valueOf(lastContents);
 					lastContents = new XSSFRichTextString(stringTable.getEntryAt(sharedIndex)).toString();
+					break;
+				case FORMAT:
+					if (formatString != null) {
+						lastContents = formatter.formatRawCellContents(
+								Double.parseDouble(lastContents), formatIndex, formatString).trim();
+					}
+					break;
+				default:
+
 				}
 			}
 
@@ -380,201 +441,58 @@ public class ExcelEventReader implements Reader {
 	 * @author shanhm
 	 *
 	 */
-	private class ExcelHSSFHandler implements HSSFListener {
+	class ExcelHSSFHandler implements HSSFListener {
 
-		private FormatTrackingHSSFListener formatListener;  
+		private SSTRecord sstrec;
 
-		private SheetRecordCollectingListener workbookBuildingListener; 
-
-		private boolean outputFormulaValues = true;  
-		
-		private ArrayList boundSheetRecords = new ArrayList();  
-		
-		private HSSFWorkbook stubWorkbook;  
-		
-		private SSTRecord sstRecord;  
-		
-		private int sheetIndex = -1;  
-
-		private BoundSheetRecord[] orderedBSRs;  
-		
-		private int nextRow;  
-
-		private int nextColumn;  
-
-		private boolean outputNextStringRecord; 
-		
-		private int minColumns = -1;  
-
-		private int lastRowNumber;  
-
-		private int lastColumnNumber;  
-		
-		// 当前行  
-		private int curRow = 0;  
-
-		// 存储行记录的容器  
-		private List<String> rowlist = new ArrayList<String>();;  
-
-		@SuppressWarnings("unused")  
 		private String sheetName;  
-
-		public ExcelHSSFHandler() throws IOException {
-			MissingRecordAwareHSSFListener listener = new MissingRecordAwareHSSFListener(this);  
-			formatListener = new FormatTrackingHSSFListener(listener);  
-			HSSFEventFactory factory = new HSSFEventFactory();  
-			HSSFRequest request = new HSSFRequest();  
-			if (outputFormulaValues) {  
-				request.addListenerForAllRecords(formatListener);  
-			} else {  
-				workbookBuildingListener = new SheetRecordCollectingListener(formatListener);  
-				request.addListenerForAllRecords(workbookBuildingListener);  
-			}  
-			factory.processWorkbookEvents(request, pfs);  
-		}
 
 		@Override
 		public void processRecord(Record record) {
-			int thisRow = -1;  
-			int thisColumn = -1;  
-			String thisStr = null;  
-			String value = null;  
+
 			switch (record.getSid()) {  
-			case BoundSheetRecord.sid:  
-				boundSheetRecords.add(record);  
-				break;  
 			case BOFRecord.sid:  
-				BOFRecord br = (BOFRecord) record;  
-				if (br.getType() == BOFRecord.TYPE_WORKSHEET) {  
-					// 如果有需要，则建立子工作薄  
-					if (workbookBuildingListener != null && stubWorkbook == null) {  
-						stubWorkbook = workbookBuildingListener.getStubHSSFWorkbook();  
-					}  
-
-					sheetIndex++;  
-					if (orderedBSRs == null) {  
-						orderedBSRs = BoundSheetRecord.orderByBofPosition(boundSheetRecords);  
-					}  
-					sheetName = orderedBSRs[sheetIndex].getSheetname();  
-				}  
+				BOFRecord bof = (BOFRecord) record;
+				if (bof.getType() == BOFRecord.TYPE_WORKBOOK) {
+					System.out.println("处理 workbook");
+				} else if (bof.getType() == BOFRecord.TYPE_WORKSHEET) {
+					System.out.println("处理sheet");
+				}
 				break;  
-
-			case SSTRecord.sid:  
-				sstRecord = (SSTRecord) record;  
-				break;  
-
-			case BlankRecord.sid:  
-				BlankRecord brec = (BlankRecord) record;  
-				thisRow = brec.getRow();  
-				thisColumn = brec.getColumn();  
-				thisStr = "";  
-				rowlist.add(thisColumn, thisStr);  
-				break;  
-			case BoolErrRecord.sid: // 单元格为布尔类型  
-				BoolErrRecord berec = (BoolErrRecord) record;  
-				thisRow = berec.getRow();  
-				thisColumn = berec.getColumn();  
-				thisStr = berec.getBooleanValue() + "";  
-				rowlist.add(thisColumn, thisStr);  
-				break;  
-
-			case FormulaRecord.sid: // 单元格为公式类型  
-				FormulaRecord frec = (FormulaRecord) record;  
-				thisRow = frec.getRow();  
-				thisColumn = frec.getColumn();  
-				if (outputFormulaValues) {  
-					if (Double.isNaN(frec.getValue())) {  
-						// Formula result is a string  
-						// This is stored in the next record  
-						outputNextStringRecord = true;  
-						nextRow = frec.getRow();  
-						nextColumn = frec.getColumn();  
-					} else {  
-						thisStr = formatListener.formatNumberDateCell(frec);  
-					}  
-				} else {  
-					thisStr = '"' + HSSFFormulaParser.toFormulaString(stubWorkbook, frec.getParsedExpression()) + '"';  
-				}  
-				rowlist.add(thisColumn, thisStr);  
-				break;  
-			case StringRecord.sid:// 单元格中公式的字符串  
-				if (outputNextStringRecord) {  
-					// String for formula  
-					StringRecord srec = (StringRecord) record;  
-					thisStr = srec.getString();  
-					thisRow = nextRow;  
-					thisColumn = nextColumn;  
-					outputNextStringRecord = false;  
-				}  
-				break;  
-			case LabelRecord.sid:  
-				LabelRecord lrec = (LabelRecord) record;  
-				curRow = thisRow = lrec.getRow();  
-				thisColumn = lrec.getColumn();  
-				value = lrec.getValue().trim();  
-				value = value.equals("") ? " " : value;  
-				this.rowlist.add(thisColumn, value);  
-				break;  
-			case LabelSSTRecord.sid: // 单元格为字符串类型  
-				LabelSSTRecord lsrec = (LabelSSTRecord) record;  
-				curRow = thisRow = lsrec.getRow();  
-				thisColumn = lsrec.getColumn();  
-				if (sstRecord == null) {  
-					rowlist.add(thisColumn, " ");  
-				} else {  
-					value = sstRecord.getString(lsrec.getSSTIndex()).toString().trim();  
-					value = value.equals("") ? " " : value;  
-					rowlist.add(thisColumn, value);  
-				}  
-				break;  
-			case NumberRecord.sid: // 单元格为数字类型  
-				NumberRecord numrec = (NumberRecord) record;  
-				curRow = thisRow = numrec.getRow();  
-				thisColumn = numrec.getColumn();  
-				value = formatListener.formatNumberDateCell(numrec).trim();  
-				value = value.equals("") ? " " : value;  
-				// 向容器加入列值  
-				rowlist.add(thisColumn, value);  
-				break;  
-			default:  
-				break;  
+			case BoundSheetRecord.sid:
+				BoundSheetRecord bsr = (BoundSheetRecord) record;
+				sheetName = bsr.getSheetname();
+				System.out.println(sheetName); 
+				break;
+			case RowRecord.sid:
+				RowRecord rowrec = (RowRecord) record;
+				System.out.println("Row found, first column at "
+						+ rowrec.getFirstCol() + " last column at " + rowrec.getLastCol());
+				break;
+			case NumberRecord.sid:
+				NumberRecord numrec = (NumberRecord) record;
+				System.out.println("Cell found with value " + numrec.getValue()
+				+ " at row " + numrec.getRow() + " and column " + numrec.getColumn());
+				break;
+				// SSTRecords store a array of unique strings used in Excel.
+			case SSTRecord.sid:
+				sstrec = (SSTRecord) record;
+				for (int k = 0; k < sstrec.getNumUniqueStrings(); k++) {
+					System.out.println("String table value " + k + " = " + sstrec.getString(k));
+				}
+				break;
+			case LabelSSTRecord.sid:
+				LabelSSTRecord lrec = (LabelSSTRecord) record;
+				System.out.println("String cell found with value "
+						+ sstrec.getString(lrec.getSSTIndex()));
+				break;
 			}  
 
-			// 遇到新行的操作  
-			if (thisRow != -1 && thisRow != lastRowNumber) {  
-				lastColumnNumber = -1;  
-			}  
+		}
 
-			// 空值的操作  
-			if (record instanceof MissingCellDummyRecord) {  
-				MissingCellDummyRecord mc = (MissingCellDummyRecord) record;  
-				curRow = thisRow = mc.getRow();  
-				thisColumn = mc.getColumn();  
-				rowlist.add(thisColumn, " ");  
-			}  
+		public ReaderRow readRow() throws Exception {
 
-			// 更新行和列的值  
-			if (thisRow > -1)  
-				lastRowNumber = thisRow;  
-			if (thisColumn > -1)  
-				lastColumnNumber = thisColumn;  
-
-			// 行结束时的操作  
-			if (record instanceof LastCellOfRowDummyRecord) {  
-				if (minColumns > 0) {  
-					// 列值重新置空  
-					if (lastColumnNumber == -1) {  
-						lastColumnNumber = 0;  
-					}  
-				}  
-				lastColumnNumber = -1;  
-
-				// 每行结束时， 调用getRows() 方法  
-				//rowReader.getRows(sheetIndex, curRow, rowlist);  
-				// 清空容器  
-				rowlist.clear();  
-			}  
-		}  
-
+			return null;
+		}
 	}
 }
