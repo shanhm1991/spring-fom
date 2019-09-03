@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eto.fom.task.parse.ParseExcelTask;
-import org.eto.fom.util.file.reader.ExcelReader;
+import org.eto.fom.util.file.reader.Reader;
 import org.eto.fom.util.file.reader.ReaderRow;
 import org.eto.fom.util.pool.handler.JdbcHandler;
 
@@ -55,7 +55,7 @@ public class InputMysqlExample2Task extends ParseExcelTask<Map<String, Object>> 
 
 	@Override
 	protected String getExcelType() {
-		return ExcelReader.TYPE_XLSX;
+		return Reader.EXCEL_XLSX;
 	}
 
 }

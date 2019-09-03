@@ -25,7 +25,7 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.eto.fom.util.PatternUtil;
 import org.eto.fom.util.file.ZipUtil;
-import org.eto.fom.util.file.reader.ExcelReader;
+import org.eto.fom.util.file.reader.Reader;
 import org.eto.fom.util.file.reader.ReaderRow;
 
 /**
@@ -118,7 +118,7 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 			@Override
 			public boolean accept(File file) {
 				String name = file.getName().toLowerCase();
-				return name.endsWith(ExcelReader.TYPE_XLSX) || name.endsWith(ExcelReader.TYPE_XLS);
+				return name.endsWith(Reader.EXCEL_XLSX) || name.endsWith(Reader.EXCEL_XLS);
 			}
 		});
 		if(array == null || array.length != 1  ){

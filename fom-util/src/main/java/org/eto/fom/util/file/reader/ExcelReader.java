@@ -34,10 +34,6 @@ public class ExcelReader implements Reader {
 
 	private static final Logger LOG = Logger.getLogger(ExcelReader.class);
 
-	public static final String TYPE_XLS = "xls";
-
-	public static final String TYPE_XLSX = "xlsx";
-	
 	private InputStream inputStream;
 
 	private String type;
@@ -102,9 +98,9 @@ public class ExcelReader implements Reader {
 	}
 
 	private void init() throws IOException{ 
-		if(TYPE_XLS.equalsIgnoreCase(type)){
+		if(EXCEL_XLS.equalsIgnoreCase(type)){
 			workbook = new HSSFWorkbook(inputStream);
-		}else if(TYPE_XLSX.equalsIgnoreCase(type)){
+		}else if(EXCEL_XLSX.equalsIgnoreCase(type)){
 			workbook = new XSSFWorkbook(inputStream);
 		}else{
 			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx");
