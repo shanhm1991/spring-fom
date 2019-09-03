@@ -1,6 +1,7 @@
 package org.eto.fom.util.file.reader;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -9,9 +10,31 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.hssf.eventusermodel.FormatTrackingHSSFListener;
+import org.apache.poi.hssf.eventusermodel.HSSFEventFactory;
+import org.apache.poi.hssf.eventusermodel.HSSFListener;
+import org.apache.poi.hssf.eventusermodel.HSSFRequest;
+import org.apache.poi.hssf.eventusermodel.MissingRecordAwareHSSFListener;
+import org.apache.poi.hssf.eventusermodel.EventWorkbookBuilder.SheetRecordCollectingListener;
+import org.apache.poi.hssf.eventusermodel.dummyrecord.LastCellOfRowDummyRecord;
+import org.apache.poi.hssf.eventusermodel.dummyrecord.MissingCellDummyRecord;
+import org.apache.poi.hssf.model.HSSFFormulaParser;
+import org.apache.poi.hssf.record.BOFRecord;
+import org.apache.poi.hssf.record.BlankRecord;
+import org.apache.poi.hssf.record.BoolErrRecord;
+import org.apache.poi.hssf.record.BoundSheetRecord;
+import org.apache.poi.hssf.record.FormulaRecord;
+import org.apache.poi.hssf.record.LabelRecord;
+import org.apache.poi.hssf.record.LabelSSTRecord;
+import org.apache.poi.hssf.record.NumberRecord;
+import org.apache.poi.hssf.record.Record;
+import org.apache.poi.hssf.record.SSTRecord;
+import org.apache.poi.hssf.record.StringRecord;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.SharedStringsTable;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
@@ -38,7 +61,9 @@ public class ExcelEventReader implements Reader {
 
 	private OPCPackage pkg;
 
-	private ExcelXssfHandler xssfHandler;
+	private ExcelXSSFHandler xssfHandler;
+
+	private POIFSFileSystem pfs;  
 
 	public ExcelEventReader(String sourceUri) throws IOException, OpenXML4JException, SAXException, DocumentException {  
 		int index = sourceUri.lastIndexOf('.');
@@ -46,8 +71,15 @@ public class ExcelEventReader implements Reader {
 			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx.");
 		}
 		this.type = sourceUri.substring(index + 1); 
-		this.pkg = OPCPackage.open(sourceUri); 
-		init();
+		if(EXCEL_XLS.equalsIgnoreCase(type)){
+			pfs = new POIFSFileSystem(new FileInputStream(sourceUri));  
+			initHssf();
+		}else if(EXCEL_XLSX.equalsIgnoreCase(type)){
+			pkg = OPCPackage.open(sourceUri); 
+			initXssf();
+		}else{
+			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx");
+		}
 	}
 
 	public ExcelEventReader(File file) throws IOException, OpenXML4JException, SAXException, DocumentException { 
@@ -57,27 +89,39 @@ public class ExcelEventReader implements Reader {
 			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx");
 		}
 		this.type = name.substring(index + 1);
-		this.pkg = OPCPackage.open(file);  
-		init();
+		if(EXCEL_XLS.equalsIgnoreCase(type)){
+			pfs = new POIFSFileSystem(new FileInputStream(file));  
+			initHssf();
+		}else if(EXCEL_XLSX.equalsIgnoreCase(type)){
+			pkg = OPCPackage.open(file); 
+			initXssf();
+		}else{
+			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx");
+		}
 	}
 
 	public ExcelEventReader(InputStream inputStream, String type) throws IOException, OpenXML4JException, SAXException, DocumentException { 
 		this.type = type;
-		this.pkg = OPCPackage.open(inputStream); 
-		init();
-	}
-
-	private void init() throws IOException, OpenXML4JException, SAXException, DocumentException {  
 		if(EXCEL_XLS.equalsIgnoreCase(type)){
-			throw new UnsupportedOperationException("xls not support"); //TODO
+			pfs = new POIFSFileSystem(inputStream);  
+			initHssf();
 		}else if(EXCEL_XLSX.equalsIgnoreCase(type)){
-			XSSFReader reader = new XSSFReader(pkg);
-			XMLReader parser = XMLReaderFactory.createXMLReader("com.sun.org.apache.xerces.internal.parsers.SAXParser");
-			xssfHandler = new ExcelXssfHandler(reader, parser);
-			parser.setContentHandler(xssfHandler);
+			pkg = OPCPackage.open(inputStream); 
+			initXssf();
 		}else{
 			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx");
 		}
+	}
+
+	private void initHssf(){
+
+	}
+
+	private void initXssf() throws IOException, OpenXML4JException, SAXException, DocumentException {  
+		XSSFReader reader = new XSSFReader(pkg);
+		XMLReader parser = XMLReaderFactory.createXMLReader("com.sun.org.apache.xerces.internal.parsers.SAXParser");
+		xssfHandler = new ExcelXSSFHandler(reader, parser);
+		parser.setContentHandler(xssfHandler);
 	}
 
 	@Override
@@ -94,6 +138,7 @@ public class ExcelEventReader implements Reader {
 	@Override
 	public void close() throws IOException {
 		IoUtil.close(pkg);
+		IoUtil.close(pfs);
 	}
 
 	/**
@@ -107,9 +152,9 @@ public class ExcelEventReader implements Reader {
 	}
 
 	/**
-	 * sheetÈáçÊñ∞ÊéíÂ∫è
-	 * @param sheetRangeList ÂéüÂßãsheetÈ°∫Â∫è
-	 * @return ÈáçÊéíÂ∫èÂêéÁöÑsheetlist
+	 * sheet÷ÿ–¬≈≈–Ú
+	 * @param sheetRangeList ‘≠ ºsheetÀ≥–Ú
+	 * @return ÷ÿ≈≈–Ú∫Ûµƒsheetlist
 	 */
 	protected List<String> reRangeSheet(List<String> sheetRangeList) {
 		return sheetRangeList;
@@ -120,7 +165,7 @@ public class ExcelEventReader implements Reader {
 	 * @author shanhm
 	 *
 	 */
-	private class ExcelXssfHandler extends DefaultHandler {
+	private class ExcelXSSFHandler extends DefaultHandler {
 
 		private XSSFReader xssfReader;
 
@@ -154,14 +199,14 @@ public class ExcelEventReader implements Reader {
 
 		private Iterator<ExcelRow> sheetDataIterator;
 
-		public ExcelXssfHandler(XSSFReader xssfReader, XMLReader xmlReader) throws InvalidFormatException, IOException, SAXException, DocumentException {  
+		public ExcelXSSFHandler(XSSFReader xssfReader, XMLReader xmlReader) throws InvalidFormatException, IOException, SAXException, DocumentException {  
 			this.xmlReader = xmlReader;
 			this.xssfReader = xssfReader;
 			this.stringTable = xssfReader.getSharedStringsTable();
 			InputStream bookStream = null;
 			try{
 				bookStream = xssfReader.getWorkbookData();
-				//xmlReader.parse(new InputSource(bookStream));Ê≤°ÊúâstartElement‰∫ã‰ª∂ÔºåÂè™Â•ΩËøôÈáåËá™ÂÆö‰πâËß£Êûê
+				//xmlReader.parse(new InputSource(bookStream));√ª”–startElement ¬º˛£¨÷ª∫√’‚¿Ô◊‘∂®“ÂΩ‚Œˆ
 				SAXReader reader = new SAXReader();
 				reader.setEncoding("UTF-8");
 				Document doc = reader.read(bookStream);
@@ -277,7 +322,7 @@ public class ExcelEventReader implements Reader {
 				int base = 1;
 				int c = cellstr.charAt(i) - 65;
 				if(bitIndex > 0){
-					c++;//Áõ∏ÂΩì‰∫é26ËøõÂà∂Ôºå‰∏™‰ΩçAÂΩìÂÅö0ÔºåËøõ‰ΩçAÂΩìÂÅö1
+					c++;//œ‡µ±”⁄26Ω¯÷∆£¨∏ˆŒªAµ±◊ˆ0£¨Ω¯ŒªAµ±◊ˆ1
 					for(int j = 0; j < bitIndex; j++){
 						base *=  26;
 					}
@@ -328,5 +373,208 @@ public class ExcelEventReader implements Reader {
 				isEnd = true;
 			}
 		}
+	}
+
+	/**
+	 * 
+	 * @author shanhm
+	 *
+	 */
+	private class ExcelHSSFHandler implements HSSFListener {
+
+		private FormatTrackingHSSFListener formatListener;  
+
+		private SheetRecordCollectingListener workbookBuildingListener; 
+
+		private boolean outputFormulaValues = true;  
+		
+		private ArrayList boundSheetRecords = new ArrayList();  
+		
+		private HSSFWorkbook stubWorkbook;  
+		
+		private SSTRecord sstRecord;  
+		
+		private int sheetIndex = -1;  
+
+		private BoundSheetRecord[] orderedBSRs;  
+		
+		private int nextRow;  
+
+		private int nextColumn;  
+
+		private boolean outputNextStringRecord; 
+		
+		private int minColumns = -1;  
+
+		private int lastRowNumber;  
+
+		private int lastColumnNumber;  
+		
+		// µ±«∞––  
+		private int curRow = 0;  
+
+		// ¥Ê¥¢––º«¬ºµƒ»›∆˜  
+		private List<String> rowlist = new ArrayList<String>();;  
+
+		@SuppressWarnings("unused")  
+		private String sheetName;  
+
+		public ExcelHSSFHandler() throws IOException {
+			MissingRecordAwareHSSFListener listener = new MissingRecordAwareHSSFListener(this);  
+			formatListener = new FormatTrackingHSSFListener(listener);  
+			HSSFEventFactory factory = new HSSFEventFactory();  
+			HSSFRequest request = new HSSFRequest();  
+			if (outputFormulaValues) {  
+				request.addListenerForAllRecords(formatListener);  
+			} else {  
+				workbookBuildingListener = new SheetRecordCollectingListener(formatListener);  
+				request.addListenerForAllRecords(workbookBuildingListener);  
+			}  
+			factory.processWorkbookEvents(request, pfs);  
+		}
+
+		@Override
+		public void processRecord(Record record) {
+			int thisRow = -1;  
+			int thisColumn = -1;  
+			String thisStr = null;  
+			String value = null;  
+			switch (record.getSid()) {  
+			case BoundSheetRecord.sid:  
+				boundSheetRecords.add(record);  
+				break;  
+			case BOFRecord.sid:  
+				BOFRecord br = (BOFRecord) record;  
+				if (br.getType() == BOFRecord.TYPE_WORKSHEET) {  
+					// »Áπ˚”––Ë“™£¨‘ÚΩ®¡¢◊”π§◊˜±°  
+					if (workbookBuildingListener != null && stubWorkbook == null) {  
+						stubWorkbook = workbookBuildingListener.getStubHSSFWorkbook();  
+					}  
+
+					sheetIndex++;  
+					if (orderedBSRs == null) {  
+						orderedBSRs = BoundSheetRecord.orderByBofPosition(boundSheetRecords);  
+					}  
+					sheetName = orderedBSRs[sheetIndex].getSheetname();  
+				}  
+				break;  
+
+			case SSTRecord.sid:  
+				sstRecord = (SSTRecord) record;  
+				break;  
+
+			case BlankRecord.sid:  
+				BlankRecord brec = (BlankRecord) record;  
+				thisRow = brec.getRow();  
+				thisColumn = brec.getColumn();  
+				thisStr = "";  
+				rowlist.add(thisColumn, thisStr);  
+				break;  
+			case BoolErrRecord.sid: // µ•‘™∏ÒŒ™≤º∂˚¿‡–Õ  
+				BoolErrRecord berec = (BoolErrRecord) record;  
+				thisRow = berec.getRow();  
+				thisColumn = berec.getColumn();  
+				thisStr = berec.getBooleanValue() + "";  
+				rowlist.add(thisColumn, thisStr);  
+				break;  
+
+			case FormulaRecord.sid: // µ•‘™∏ÒŒ™π´ Ω¿‡–Õ  
+				FormulaRecord frec = (FormulaRecord) record;  
+				thisRow = frec.getRow();  
+				thisColumn = frec.getColumn();  
+				if (outputFormulaValues) {  
+					if (Double.isNaN(frec.getValue())) {  
+						// Formula result is a string  
+						// This is stored in the next record  
+						outputNextStringRecord = true;  
+						nextRow = frec.getRow();  
+						nextColumn = frec.getColumn();  
+					} else {  
+						thisStr = formatListener.formatNumberDateCell(frec);  
+					}  
+				} else {  
+					thisStr = '"' + HSSFFormulaParser.toFormulaString(stubWorkbook, frec.getParsedExpression()) + '"';  
+				}  
+				rowlist.add(thisColumn, thisStr);  
+				break;  
+			case StringRecord.sid:// µ•‘™∏Ò÷–π´ Ωµƒ◊÷∑˚¥Æ  
+				if (outputNextStringRecord) {  
+					// String for formula  
+					StringRecord srec = (StringRecord) record;  
+					thisStr = srec.getString();  
+					thisRow = nextRow;  
+					thisColumn = nextColumn;  
+					outputNextStringRecord = false;  
+				}  
+				break;  
+			case LabelRecord.sid:  
+				LabelRecord lrec = (LabelRecord) record;  
+				curRow = thisRow = lrec.getRow();  
+				thisColumn = lrec.getColumn();  
+				value = lrec.getValue().trim();  
+				value = value.equals("") ? " " : value;  
+				this.rowlist.add(thisColumn, value);  
+				break;  
+			case LabelSSTRecord.sid: // µ•‘™∏ÒŒ™◊÷∑˚¥Æ¿‡–Õ  
+				LabelSSTRecord lsrec = (LabelSSTRecord) record;  
+				curRow = thisRow = lsrec.getRow();  
+				thisColumn = lsrec.getColumn();  
+				if (sstRecord == null) {  
+					rowlist.add(thisColumn, " ");  
+				} else {  
+					value = sstRecord.getString(lsrec.getSSTIndex()).toString().trim();  
+					value = value.equals("") ? " " : value;  
+					rowlist.add(thisColumn, value);  
+				}  
+				break;  
+			case NumberRecord.sid: // µ•‘™∏ÒŒ™ ˝◊÷¿‡–Õ  
+				NumberRecord numrec = (NumberRecord) record;  
+				curRow = thisRow = numrec.getRow();  
+				thisColumn = numrec.getColumn();  
+				value = formatListener.formatNumberDateCell(numrec).trim();  
+				value = value.equals("") ? " " : value;  
+				// œÚ»›∆˜º”»Î¡–÷µ  
+				rowlist.add(thisColumn, value);  
+				break;  
+			default:  
+				break;  
+			}  
+
+			// ”ˆµΩ–¬––µƒ≤Ÿ◊˜  
+			if (thisRow != -1 && thisRow != lastRowNumber) {  
+				lastColumnNumber = -1;  
+			}  
+
+			// ø’÷µµƒ≤Ÿ◊˜  
+			if (record instanceof MissingCellDummyRecord) {  
+				MissingCellDummyRecord mc = (MissingCellDummyRecord) record;  
+				curRow = thisRow = mc.getRow();  
+				thisColumn = mc.getColumn();  
+				rowlist.add(thisColumn, " ");  
+			}  
+
+			// ∏¸–¬––∫Õ¡–µƒ÷µ  
+			if (thisRow > -1)  
+				lastRowNumber = thisRow;  
+			if (thisColumn > -1)  
+				lastColumnNumber = thisColumn;  
+
+			// ––Ω· ¯ ±µƒ≤Ÿ◊˜  
+			if (record instanceof LastCellOfRowDummyRecord) {  
+				if (minColumns > 0) {  
+					// ¡–÷µ÷ÿ–¬÷√ø’  
+					if (lastColumnNumber == -1) {  
+						lastColumnNumber = 0;  
+					}  
+				}  
+				lastColumnNumber = -1;  
+
+				// √ø––Ω· ¯ ±£¨ µ˜”√getRows() ∑Ω∑®  
+				//rowReader.getRows(sheetIndex, curRow, rowlist);  
+				// «Âø’»›∆˜  
+				rowlist.clear();  
+			}  
+		}  
+
 	}
 }
