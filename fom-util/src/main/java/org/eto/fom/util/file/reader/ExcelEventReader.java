@@ -65,6 +65,8 @@ public class ExcelEventReader implements IReader {
 	private POIFSFileSystem pfs;  
 
 	private ExcelHSSFHandler hssfHandler;
+	
+	private ExcelSheetFilter sheetFilter;
 
 	public ExcelEventReader(String sourceUri) throws IOException, OpenXML4JException, SAXException, DocumentException {  
 		int index = sourceUri.lastIndexOf('.');
@@ -146,6 +148,14 @@ public class ExcelEventReader implements IReader {
 		IoUtil.close(pkg);
 		IoUtil.close(pfs);
 	}
+	
+	/**
+	 * 设置sheet的过滤器
+	 * @param sheetFilter
+	 */
+	public void setSheetFilter(ExcelSheetFilter sheetFilter) {
+		this.sheetFilter = sheetFilter;
+	}
 
 	/**
 	 * 通过sheet索引设置sheet的读取顺序
@@ -168,26 +178,6 @@ public class ExcelEventReader implements IReader {
 	 */
 	public void setSheetReadOrderByName(List<String> nameList){
 		xssfHandler.sheetNameGivenList = nameList;
-	}
-
-	/**
-	 * 根据sheet索引和sheet名称过滤需要处理的sheet
-	 * @param sheetIndex sheet索引  从1开始
-	 * @param sheetName sheet名称
-	 * @return boolean
-	 */
-	protected boolean shouldSheetProcess(int sheetIndex, String sheetName) {
-		return true;
-	}
-
-
-	/**
-	 * 重新设置sheet的读取顺序
-	 * @param nameList nameList
-	 * @return 
-	 */
-	protected List<String> resetSheetReadOrderByName(List<String> nameList) {
-		return nameList;
 	}
 
 	class ExcelXSSFHandler extends DefaultHandler {
@@ -263,7 +253,9 @@ public class ExcelEventReader implements IReader {
 				IoUtil.close(bookStream); 
 			}
 			sheetNameGivenList.addAll(sheetNameList);//禁止客户代码修改
-			sheetNameList = ExcelEventReader.this.resetSheetReadOrderByName(sheetNameGivenList); 
+			if(sheetFilter != null){
+				sheetFilter.resetSheetListForRead(sheetNameGivenList);
+			}
 		}
 
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
@@ -458,7 +450,7 @@ public class ExcelEventReader implements IReader {
 				}
 
 				sheetIndex++;
-				if(!shouldSheetProcess(sheetIndex, sheetName)){
+				if(sheetFilter != null && !sheetFilter.filter(sheetIndex, sheetName)){
 					sheetIndexReading++;
 					return;
 				}
