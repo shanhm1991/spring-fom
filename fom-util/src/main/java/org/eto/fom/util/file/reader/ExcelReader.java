@@ -28,7 +28,7 @@ import org.eto.fom.util.IoUtil;
  * @author shanhm
  *
  */
-public class ExcelReader implements IReader {
+public class ExcelReader implements IExcelReader {
 
 	private static final Logger LOG = Logger.getLogger(ExcelReader.class);
 
@@ -60,36 +60,6 @@ public class ExcelReader implements IReader {
 	
 	private boolean inited = false;
 
-	/**
-	 * @param sheetFilter
-	 */
-	public void setSheetFilter(ExcelSheetFilter sheetFilter) {
-		this.sheetFilter = sheetFilter;
-	}
-
-	/**
-	 * set the sheet list and order to be readed by sheetIndex
-	 * @param indexList start from 1
-	 */
-	public void setSheetListForReadByIndex(List<Integer> indexList){
-		List<String> nameList = new ArrayList<>();
-		for(int index : indexList){
-			if(index > sheetNameList.size()){
-				continue;
-			}
-			nameList.add(sheetNameList.get(index - 1));
-		}
-		sheetNameGivenList = nameList;
-	}
-
-	/**
-	 * set the sheet list and order to be readed by sheetName
-	 * @param nameList
-	 */
-	public void setSheetListForReadByName(List<String> nameList){
-		sheetNameGivenList = nameList;
-	}
-
 	public ExcelReader(String sourceUri) throws IOException {
 		int index = sourceUri.lastIndexOf('.');
 		if(index == -1){
@@ -116,6 +86,28 @@ public class ExcelReader implements IReader {
 		this.inputStream = inputStream;
 		init();
 	}
+	
+	@Override
+	public void setSheetFilter(ExcelSheetFilter sheetFilter) {
+		this.sheetFilter = sheetFilter;
+	}
+
+	@Override
+	public void setSheetListForReadByIndex(List<Integer> indexList){
+		List<String> nameList = new ArrayList<>();
+		for(int index : indexList){
+			if(index > sheetNameList.size()){
+				continue;
+			}
+			nameList.add(sheetNameList.get(index - 1));
+		}
+		sheetNameGivenList = nameList;
+	}
+
+	@Override
+	public void setSheetListForReadByName(List<String> nameList){
+		sheetNameGivenList = nameList;
+	}
 
 	private void init() throws IOException{ 
 		if(EXCEL_XLS.equalsIgnoreCase(type)){
@@ -136,6 +128,20 @@ public class ExcelReader implements IReader {
 		if(sheetFilter != null){
 			sheetFilter.resetSheetListForRead(sheetNameGivenList);
 		}
+	}
+	
+	@Override
+	public List<ExcelRow> readSheet() throws Exception {
+		List<ExcelRow> list = new ArrayList<>();
+		ExcelRow row = null;
+		while((row = readRow()) != null){
+			if(!row.isLastRow()){
+				list.add(row);
+			}else{
+				return list;
+			}
+		}
+		return null;
 	}
 
 	@Override

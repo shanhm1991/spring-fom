@@ -17,6 +17,8 @@ import org.apache.poi.hssf.eventusermodel.HSSFListener;
 import org.apache.poi.hssf.eventusermodel.HSSFRequest;
 import org.apache.poi.hssf.record.BOFRecord;
 import org.apache.poi.hssf.record.BoundSheetRecord;
+import org.apache.poi.hssf.record.DimensionsRecord;
+import org.apache.poi.hssf.record.FormatRecord;
 import org.apache.poi.hssf.record.LabelSSTRecord;
 import org.apache.poi.hssf.record.NumberRecord;
 import org.apache.poi.hssf.record.Record;
@@ -52,7 +54,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
  * @author shanhm
  *
  */
-public class ExcelEventReader implements IReader {
+public class ExcelEventReader implements IExcelReader {
 
 	private static final Logger LOG = Logger.getLogger(ExcelEventReader.class);
 
@@ -65,38 +67,8 @@ public class ExcelEventReader implements IReader {
 	private POIFSFileSystem pfs;  
 
 	private ExcelHSSFHandler hssfHandler;
-	
+
 	private ExcelSheetFilter sheetFilter;
-	
-	/**
-	 * @param sheetFilter
-	 */
-	public void setSheetFilter(ExcelSheetFilter sheetFilter) {
-		this.sheetFilter = sheetFilter;
-	}
-
-	/**
-	 * set the sheet list and order to be readed by sheetIndex
-	 * @param indexList start from 1
-	 */
-	public void setSheetListForReadByIndex(List<Integer> indexList){
-		List<String> nameList = new ArrayList<>();
-		for(int index : indexList){
-			if(index > xssfHandler.sheetNameList.size()){
-				continue;
-			}
-			nameList.add(xssfHandler.sheetNameList.get(index - 1));
-		}
-		xssfHandler.sheetNameGivenList = nameList;
-	}
-
-	/**
-	 * set the sheet list and order to be readed by sheetName
-	 * @param nameList
-	 */
-	public void setSheetListForReadByName(List<String> nameList){
-		xssfHandler.sheetNameGivenList = nameList;
-	}
 
 	public ExcelEventReader(String sourceUri) throws IOException, OpenXML4JException, SAXException, DocumentException {  
 		int index = sourceUri.lastIndexOf('.');
@@ -163,6 +135,17 @@ public class ExcelEventReader implements IReader {
 	}
 
 	@Override
+	public List<ExcelRow> readSheet() throws Exception { 
+		if(EXCEL_XLS.equalsIgnoreCase(type)){
+			return hssfHandler.readSheet();
+		}else if(EXCEL_XLSX.equalsIgnoreCase(type)){
+			return xssfHandler.readSheet();
+		}else{
+			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx");
+		}
+	}
+
+	@Override
 	public ExcelRow readRow() throws Exception {
 		if(EXCEL_XLS.equalsIgnoreCase(type)){
 			return hssfHandler.readRow();
@@ -178,8 +161,30 @@ public class ExcelEventReader implements IReader {
 		IoUtil.close(pkg);
 		IoUtil.close(pfs);
 	}
-	
-	class ExcelXSSFHandler extends DefaultHandler {
+
+	@Override
+	public void setSheetFilter(ExcelSheetFilter sheetFilter) {
+		this.sheetFilter = sheetFilter;
+	}
+
+	@Override
+	public void setSheetListForReadByIndex(List<Integer> indexList){
+		List<String> nameList = new ArrayList<>();
+		for(int index : indexList){
+			if(index > xssfHandler.sheetNameList.size()){
+				continue;
+			}
+			nameList.add(xssfHandler.sheetNameList.get(index - 1));
+		}
+		xssfHandler.sheetNameGivenList = nameList;
+	}
+
+	@Override
+	public void setSheetListForReadByName(List<String> nameList){
+		xssfHandler.sheetNameGivenList = nameList;
+	}
+
+	private class ExcelXSSFHandler extends DefaultHandler {
 
 		private XSSFReader xssfReader;
 
@@ -188,14 +193,14 @@ public class ExcelEventReader implements IReader {
 		private SharedStringsTable stringTable;
 
 		private StylesTable stylesTable;
-		
+
 		private Map<String, String> sheetNameRidMap = new LinkedHashMap<>();
 
 		private List<String> sheetNameList = new ArrayList<>();
 
 		private List<String> sheetNameGivenList = new ArrayList<>();
 
-		private int sheetIndexReading = 0;
+		private int sheetReadingIndex = 0;
 
 		private String sheetName;
 
@@ -219,7 +224,7 @@ public class ExcelEventReader implements IReader {
 
 		private List<ExcelRow> sheetData;
 
-		private Iterator<ExcelRow> sheetDataIterator;
+		private int rowReadingIndex = 0;
 
 		private DataFormatter formatter = new DataFormatter();
 
@@ -362,6 +367,7 @@ public class ExcelEventReader implements IReader {
 					}catch(Exception e){
 						LOG.error("Excel format error: sheetName=" + sheetName + ", rowIndex=" + (rowIndex + 1),  e);
 					}
+					formatString = null;
 				}
 			}
 
@@ -426,7 +432,31 @@ public class ExcelEventReader implements IReader {
 			return cellIndex;
 		}
 
-		public ExcelRow readRow() throws Exception {
+		private List<ExcelRow> readSheet() throws Exception{ 
+			while(true){
+				List<ExcelRow> list = new ArrayList<>();
+				if(isEnd){
+					return null;
+				}else if(sheetData == null){
+					read();
+					continue;
+				}else if(rowReadingIndex > 0 && rowReadingIndex < sheetData.size()){
+					while(rowReadingIndex < sheetData.size()){
+						ExcelRow row = sheetData.get(rowReadingIndex);
+						rowReadingIndex++;
+						list.add(row);
+					}
+					read();
+					return list;
+				}else{
+					list.addAll(sheetData);
+					read();
+					return list;
+				}
+			}
+		}
+
+		private ExcelRow readRow() throws Exception {
 			while(true){
 				if(isEnd){
 					return null;
@@ -435,8 +465,10 @@ public class ExcelEventReader implements IReader {
 					continue;
 				}
 
-				if(sheetDataIterator.hasNext()){
-					return sheetDataIterator.next();
+				if(rowReadingIndex < sheetData.size()){
+					ExcelRow row = sheetData.get(rowReadingIndex);
+					rowReadingIndex++;
+					return row;
 				}else{
 					read();
 				}
@@ -444,16 +476,18 @@ public class ExcelEventReader implements IReader {
 		}
 
 		private void read() throws Exception {
-			if(sheetIndexReading < sheetNameGivenList.size()) {
-				sheetName = sheetNameGivenList.get(sheetIndexReading);
+			if(sheetReadingIndex < sheetNameGivenList.size()) {
+				sheetName = sheetNameGivenList.get(sheetReadingIndex);
 				sheetIndex = sheetNameList.indexOf(sheetName) + 1;
 				if(sheetIndex == -1){
-					sheetIndexReading++;
+					rowReadingIndex = 0;
+					sheetReadingIndex++;
 					return;
 				}
 
 				if(sheetFilter != null && !sheetFilter.filter(sheetIndex, sheetName)){
-					sheetIndexReading++;
+					rowReadingIndex = 0;
+					sheetReadingIndex++;
 					return;
 				}
 
@@ -463,63 +497,86 @@ public class ExcelEventReader implements IReader {
 				try{
 					sheetStream = xssfReader.getSheet(relId);
 					xmlReader.parse(new InputSource(sheetStream));
-					sheetDataIterator = sheetData.iterator();
 				}finally{
 					IoUtil.close(sheetStream);
 				}
-				sheetIndexReading++;
+				rowReadingIndex = 0;
+				sheetReadingIndex++;
 			}else{
 				isEnd = true;
 			}
 		}
 	}
 
-	class ExcelHSSFHandler implements HSSFListener {
+	private class ExcelHSSFHandler implements HSSFListener {
 
-		private SSTRecord sstrec;
+		private SSTRecord sst;
 
 		private String sheetName;  
 
+		private int sheetIndex = 0;
+
+		private int rowIndex = 0;
+
+		private String formatString;
+
+		private int formatIndex;
+
+		private List<String> sheetNameList = new ArrayList<>();
+
 		@Override
 		public void processRecord(Record record) {
-
 			switch (record.getSid()) {  
 			case BOFRecord.sid:  
-				BOFRecord bof = (BOFRecord) record;
-				if (bof.getType() == BOFRecord.TYPE_WORKBOOK) {
-
-				} else if (bof.getType() == BOFRecord.TYPE_WORKSHEET) {
-
+				BOFRecord bof = (BOFRecord)record;
+				if (bof.getType() == BOFRecord.TYPE_WORKSHEET) {
+					sheetIndex++;
+					System.out.println("sheetIndex=" + sheetIndex); 
 				}
 				break;  
 			case BoundSheetRecord.sid:
-				BoundSheetRecord bsr = (BoundSheetRecord) record;
-				sheetName = bsr.getSheetname();
-				System.out.println(sheetName); 
-				break;
-			case RowRecord.sid:
-				RowRecord rowrec = (RowRecord) record;
-				System.out.println("Row found, first column at "
-						+ rowrec.getFirstCol() + " last column at " + rowrec.getLastCol());
-				break;
-			case NumberRecord.sid:
-				NumberRecord numrec = (NumberRecord) record;
-				System.out.println("Cell found with value " + numrec.getValue()
-				+ " at row " + numrec.getRow() + " and column " + numrec.getColumn());
-				break;
-			case SSTRecord.sid:
-				sstrec = (SSTRecord) record;
-				for (int k = 0; k < sstrec.getNumUniqueStrings(); k++) {
-					System.out.println("String table value " + k + " = " + sstrec.getString(k));
+				BoundSheetRecord boundSheet = (BoundSheetRecord)record;
+				String name = boundSheet.getSheetname();
+				if(!name.equals(sheetName)){
+					sheetNameList.add(name);
+					sheetName = name;
 				}
 				break;
+			case DimensionsRecord.sid:
+				//DimensionsRecord dimensions = (DimensionsRecord)record;
+				break;
+			case RowRecord.sid: 
+				RowRecord row = (RowRecord)record;
+				rowIndex = row.getRowNumber();
+				System.out.println("rowIndex=" + rowIndex); 
+				break;
+			case NumberRecord.sid:
+				NumberRecord number = (NumberRecord) record;
+				System.out.println("row=" 
+						+ number.getRow() + ", column=" + number.getColumn() + ", value=" + number.getValue());
+				break;
+			case SSTRecord.sid:
+				sst = (SSTRecord)record;
+				break;
 			case LabelSSTRecord.sid:
-				LabelSSTRecord lrec = (LabelSSTRecord) record;
-				System.out.println("String cell found with value "
-						+ sstrec.getString(lrec.getSSTIndex()));
+				LabelSSTRecord labelSST = (LabelSSTRecord)record;
+				System.out.println("row=" 
+						+ labelSST.getRow() + ", column=" + labelSST.getColumn() + ", value=" + sst.getString(labelSST.getSSTIndex()));
+				break;
+			case FormatRecord.sid:
+				FormatRecord format = (FormatRecord)record;
+				formatString = format.getFormatString();
+				formatIndex = format.getIndexCode();
+				if (formatString == null) {
+					formatString = BuiltinFormats.getBuiltinFormat(formatIndex);
+				}
 				break;
 			}  
 
+		}
+
+		private List<ExcelRow> readSheet() throws Exception{ 
+			return null;
 		}
 
 		public ExcelRow readRow() throws Exception {

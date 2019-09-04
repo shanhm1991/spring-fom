@@ -14,6 +14,7 @@ import org.eto.fom.util.IoUtil;
 import org.eto.fom.util.file.reader.ExcelReader;
 import org.eto.fom.util.file.reader.ExcelRow;
 import org.eto.fom.util.file.reader.ExcelSheetFilter;
+import org.eto.fom.util.file.reader.IExcelReader;
 
 /**
  * 根据sourceUri解析单个Excel文件的任务实现
@@ -129,7 +130,7 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 	}
 
 	protected void parseExcel(String sourceUri, String sourceName, int lineIndex) throws Exception {
-		ExcelReader reader = null;
+		IExcelReader reader = null;
 		ExcelRow row = null;
 		String sheetName = null;
 		try{

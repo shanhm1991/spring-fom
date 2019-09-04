@@ -9,30 +9,45 @@ import java.util.List;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
+import org.eto.fom.util.file.reader.ExcelEventReader;
 import org.eto.fom.util.file.reader.ExcelReader;
-import org.eto.fom.util.file.reader.IRow;
+import org.eto.fom.util.file.reader.ExcelRow;
 import org.xml.sax.SAXException;
 
 public class ExcelTest {
 
 	public static void main(String[] args) throws Exception {
-		ExcelReader reader = new ExcelReader("D:/1.xlsx");
-		
-		//ExcelEventReader reader = new ExcelEventReader("D:/1.xlsx");
-		
+		ExcelEventReader reader = new ExcelEventReader("D:/2.xls");
+	}
+	
+	public static void test2() throws Exception{
+		ExcelEventReader reader = new ExcelEventReader("D:/1.xlsx");
 		List<Integer> list = new ArrayList<>();
 		list.add(2);
 		list.add(1);
 		reader.setSheetListForReadByIndex(list);
-
-		IRow row = null;
+		
+		ExcelRow row = null;
 		while((row = reader.readRow()) != null){
 			System.out.println(row);
 		}
 		reader.close();
-
 	}
-
+	
+	public static void test1() throws Exception{
+		ExcelReader reader = new ExcelReader("D:/1.xlsx");
+		List<Integer> list = new ArrayList<>();
+		list.add(2);
+		list.add(1);
+		reader.setSheetListForReadByIndex(list);
+		
+		ExcelRow row = null;
+		while((row = reader.readRow()) != null){
+			System.out.println(row);
+		}
+		reader.close();
+	}
+	
 	public static void printStruct() throws IOException, OpenXML4JException, SAXException{
 		OPCPackage pkg = OPCPackage.open("D:/1.xlsx");
 		XSSFReader reader = new XSSFReader(pkg);
