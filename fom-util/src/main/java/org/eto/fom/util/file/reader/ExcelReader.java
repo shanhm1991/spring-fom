@@ -25,8 +25,6 @@ import org.eto.fom.util.IoUtil;
 
 /**
  * 
- * Excel适配，读取excel文件
- * 
  * @author shanhm
  *
  */
@@ -54,11 +52,6 @@ public class ExcelReader implements IReader {
 
 	private int rowCount;
 	
-	/**
-	 * 
-	 * @param sourceUri sourceUri
-	 * @throws IOException IOException
-	 */
 	public ExcelReader(String sourceUri) throws IOException {
 		int index = sourceUri.lastIndexOf('.');
 		if(index == -1){
@@ -69,11 +62,6 @@ public class ExcelReader implements IReader {
 		init();
 	}
 
-	/**
-	 * 
-	 * @param file file 
-	 * @throws IOException IOException
-	 */
 	public ExcelReader(File file) throws IOException {
 		String name = file.getName();
 		int index = name.lastIndexOf('.');
@@ -85,12 +73,6 @@ public class ExcelReader implements IReader {
 		init();
 	}
 
-	/**
-	 *  
-	 * @param inputStream inputStream 
-	 * @param type xls/xlsx
-	 * @throws IOException IOException
-	 */
 	public ExcelReader(InputStream inputStream, String type) throws IOException {
 		this.type = type;
 		this.inputStream = inputStream;

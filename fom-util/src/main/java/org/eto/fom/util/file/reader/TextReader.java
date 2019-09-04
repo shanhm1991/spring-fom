@@ -12,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.eto.fom.util.IoUtil;
 
 /**
- * BufferedReader适配，读取普通文本文件
  * 
  * @author shanhm
  *

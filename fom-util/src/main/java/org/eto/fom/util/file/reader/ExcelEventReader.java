@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.apache.poi.hssf.eventusermodel.HSSFEventFactory;
 import org.apache.poi.hssf.eventusermodel.HSSFListener;
 import org.apache.poi.hssf.eventusermodel.HSSFRequest;
@@ -52,6 +53,8 @@ import org.xml.sax.helpers.XMLReaderFactory;
  *
  */
 public class ExcelEventReader implements IReader {
+
+	private static final Logger LOG = Logger.getLogger(ExcelEventReader.class);
 
 	private String type;
 
@@ -290,6 +293,7 @@ public class ExcelEventReader implements IReader {
 			}
 
 			if(qName.equals("c")) {
+				lastContents = "";
 				int currentCellIndex = getCellIndex(attributes.getValue("r"));
 				while(cellIndex < currentCellIndex){
 					columnList.add("");
@@ -332,6 +336,7 @@ public class ExcelEventReader implements IReader {
 
 		@SuppressWarnings("deprecation")
 		public void endElement(String uri, String localName, String qName) throws SAXException {
+			//所有的值统一读成string，时间日期类型先转成毫秒数
 			if (qName.equals("v")) {
 				switch (cellType){
 				case STRING:
@@ -349,21 +354,24 @@ public class ExcelEventReader implements IReader {
 				}
 
 				if (formatString != null) {
-					double value = Double.valueOf(lastContents);
-					if(DateUtil.isADateFormat(formatIndex,formatString)) {
-						if(DateUtil.isValidExcelDate(value)) {
-							Date date = DateUtil.getJavaDate(value, false);
-							lastContents = String.valueOf(date.getTime());
+					try{
+						double value = Double.valueOf(lastContents);
+						if(DateUtil.isADateFormat(formatIndex,formatString)) {
+							if(DateUtil.isValidExcelDate(value)) {
+								Date date = DateUtil.getJavaDate(value, false);
+								lastContents = String.valueOf(date.getTime());
+							}
+						}else{
+							lastContents = formatter.formatRawCellContents(value, formatIndex, formatString).trim();
 						}
-					}else{
-						lastContents = formatter.formatRawCellContents(value, formatIndex, formatString).trim();
+					}catch(Exception e){
+						LOG.error("excel format error, sheetName=" + sheetName + "rowIndex=" + (rowIndex + 1),  e);
 					}
 				}
 			}
 
 			if (qName.equals("c")) {
 				columnList.add(lastContents);
-				lastContents = "";
 				cellIndex++;
 			}
 
@@ -429,6 +437,7 @@ public class ExcelEventReader implements IReader {
 					return null;
 				}else if(sheetData == null){
 					read();
+					continue;
 				}
 
 				if(sheetDataIterator.hasNext()){
@@ -444,9 +453,10 @@ public class ExcelEventReader implements IReader {
 				sheetName = sheetNameGivenList.get(sheetIndexReading);
 				sheetIndex = sheetNameList.indexOf(sheetName);
 				if(sheetIndex == -1){
+					sheetIndexReading++;
 					return;
 				}
-				
+
 				sheetIndex++;
 				if(!shouldSheetProcess(sheetIndex, sheetName)){
 					sheetIndexReading++;
@@ -464,7 +474,6 @@ public class ExcelEventReader implements IReader {
 					IoUtil.close(sheetStream);
 				}
 				sheetIndexReading++;
-				return;
 			}else{
 				isEnd = true;
 			}
@@ -484,9 +493,9 @@ public class ExcelEventReader implements IReader {
 			case BOFRecord.sid:  
 				BOFRecord bof = (BOFRecord) record;
 				if (bof.getType() == BOFRecord.TYPE_WORKBOOK) {
-					
+
 				} else if (bof.getType() == BOFRecord.TYPE_WORKSHEET) {
-					
+
 				}
 				break;  
 			case BoundSheetRecord.sid:
