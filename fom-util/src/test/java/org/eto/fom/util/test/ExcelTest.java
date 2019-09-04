@@ -9,27 +9,28 @@ import java.util.List;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
-import org.eto.fom.util.file.reader.ExcelEventReader;
+import org.eto.fom.util.file.reader.ExcelReader;
 import org.eto.fom.util.file.reader.IRow;
 import org.xml.sax.SAXException;
 
 public class ExcelTest {
 
 	public static void main(String[] args) throws Exception {
-//		//ExcelReader reader = new ExcelReader("D:/1.xlsx");
-//
-		ExcelEventReader reader = new ExcelEventReader("D:/1.xlsx");
+		ExcelReader reader = new ExcelReader("D:/1.xlsx");
 		
-		List<String> list = new ArrayList<String>();
-		list.add("Sheet2");
-		reader.setSheetReadOrderByName(list);
+		//ExcelEventReader reader = new ExcelEventReader("D:/1.xlsx");
+		
+		List<Integer> list = new ArrayList<>();
+		list.add(2);
+		list.add(1);
+		reader.setSheetListForReadByIndex(list);
 
 		IRow row = null;
 		while((row = reader.readRow()) != null){
 			System.out.println(row);
 		}
 		reader.close();
-		
+
 	}
 
 	public static void printStruct() throws IOException, OpenXML4JException, SAXException{
@@ -41,7 +42,7 @@ public class ExcelTest {
 		while ((len = bookStream.read(buf)) != -1) {
 			System.out.write(buf, 0, len);
 		}
-		
+
 		Iterator<InputStream> it = reader.getSheetsData();
 		while(it.hasNext()){
 			InputStream in = it.next();

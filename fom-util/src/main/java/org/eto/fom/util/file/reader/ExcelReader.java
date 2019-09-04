@@ -39,19 +39,57 @@ public class ExcelReader implements IReader {
 	private Workbook workbook = null;
 
 	private Map<String, Sheet> sheetMap = new HashMap<>();
+
+	private List<String> sheetNameList = new ArrayList<>();
 	
-	private List<String> sheetRangeList = new ArrayList<>();
+	private List<String> sheetNameGivenList = new ArrayList<>();
 	
-	private int rangeIndex = 0;
-	
+	private int sheetIndexReading = 0;
+
 	private Sheet sheet; 
+	
+	private int sheetIndex = 0;
 
 	private String sheetName;
 
 	private int rowIndex = 0;
 
 	private int rowCount;
+
+	private ExcelSheetFilter sheetFilter;
 	
+	private boolean inited = false;
+
+	/**
+	 * @param sheetFilter
+	 */
+	public void setSheetFilter(ExcelSheetFilter sheetFilter) {
+		this.sheetFilter = sheetFilter;
+	}
+
+	/**
+	 * set the sheet list and order to be readed by sheetIndex
+	 * @param indexList start from 1
+	 */
+	public void setSheetListForReadByIndex(List<Integer> indexList){
+		List<String> nameList = new ArrayList<>();
+		for(int index : indexList){
+			if(index > sheetNameList.size()){
+				continue;
+			}
+			nameList.add(sheetNameList.get(index - 1));
+		}
+		sheetNameGivenList = nameList;
+	}
+
+	/**
+	 * set the sheet list and order to be readed by sheetName
+	 * @param nameList
+	 */
+	public void setSheetListForReadByName(List<String> nameList){
+		sheetNameGivenList = nameList;
+	}
+
 	public ExcelReader(String sourceUri) throws IOException {
 		int index = sourceUri.lastIndexOf('.');
 		if(index == -1){
@@ -90,41 +128,48 @@ public class ExcelReader implements IReader {
 		int sheetCount = workbook.getNumberOfSheets();
 		for(int i = 0;i < sheetCount;i++){
 			Sheet shee = workbook.getSheetAt(i);
-			sheetRangeList.add(shee.getSheetName());
+			sheetNameList.add(shee.getSheetName());
 			sheetMap.put(shee.getSheetName(), shee);
 		}
-		sheetRangeList = reRangeSheet(sheetRangeList);
-		initSheet();
+		//cann't let the customer code to directly modify sheetNameList
+		sheetNameGivenList.addAll(sheetNameList);
+		if(sheetFilter != null){
+			sheetFilter.resetSheetListForRead(sheetNameGivenList);
+		}
 	}
 
 	@Override
 	public ExcelRow readRow() {
+		if(!inited){
+			inited = true;
+			initSheet();
+		}
 		while(true){
 			if(sheet == null){
 				return null;
 			}
-			if(!shouldSheetProcess(rangeIndex, sheetName)){
-				if(++rangeIndex >= sheetRangeList.size()){
+			if(sheetFilter != null && !sheetFilter.filter(sheetIndex, sheetName)){
+				if(++sheetIndexReading >= sheetNameGivenList.size()){
 					return null;
 				}
 				initSheet();
 			}else{
 				if(rowIndex >= rowCount){
-					if(rangeIndex >= sheetRangeList.size() - 1){
+					if(sheetIndexReading >= sheetNameGivenList.size() - 1){
 						return null;
 					}else{
-						rangeIndex++;
+						sheetIndexReading++;
 						initSheet();
 						continue;
 					}
 				}else{
 					Row row = sheet.getRow(rowIndex);
 					rowIndex++;
-					
+
 					//row not exist, don't know why
 					if(row == null){
-						ExcelRow data = new ExcelRow(rowIndex - 1, new ArrayList<String>(0));
-						data.setSheetIndex(rangeIndex); 
+						ExcelRow data = new ExcelRow(rowIndex, new ArrayList<String>(0));
+						data.setSheetIndex(sheetIndex); 
 						data.setSheetName(sheetName); 
 						data.setEmpty(true); 
 						data.setLastRow(rowIndex == rowCount); 
@@ -134,15 +179,15 @@ public class ExcelReader implements IReader {
 					int cellCount = row.getLastCellNum();
 					//Illegal Capacity: -1
 					if(cellCount <= 0){
-						ExcelRow data = new ExcelRow(rowIndex - 1, new ArrayList<String>(0));
-						data.setSheetIndex(rangeIndex); 
+						ExcelRow data = new ExcelRow(rowIndex, new ArrayList<String>(0));
+						data.setSheetIndex(sheetIndex); 
 						data.setSheetName(sheetName); 
 						data.setEmpty(true); 
 						data.setLastRow(rowIndex == rowCount); 
 						return data;
 					}
 					List<String> list = new ArrayList<>(cellCount);
-					
+
 					boolean isEmpty = true;
 					for(int i = 0;i < cellCount;i++){
 						String value = getCellValue(row.getCell(i));
@@ -151,8 +196,8 @@ public class ExcelReader implements IReader {
 						}
 						list.add(value);
 					}
-					ExcelRow rowData = new ExcelRow(rowIndex - 1, list);
-					rowData.setSheetIndex(rangeIndex); 
+					ExcelRow rowData = new ExcelRow(rowIndex, list);
+					rowData.setSheetIndex(sheetIndex); 
 					rowData.setSheetName(sheetName); 
 					rowData.setEmpty(isEmpty); 
 					rowData.setLastRow(rowIndex == rowCount); 
@@ -164,14 +209,19 @@ public class ExcelReader implements IReader {
 
 	private void initSheet(){
 		rowIndex = 0;
-		sheetName = sheetRangeList.get(rangeIndex); 
+		sheetName = sheetNameGivenList.get(sheetIndexReading); 
+		sheetIndex = sheetNameList.indexOf(sheetName) + 1;
 		while((sheet = sheetMap.get(sheetName)) == null){
-			if(++rangeIndex >= sheetRangeList.size()){
+			sheetIndexReading++;
+			if(sheetIndexReading >= sheetNameGivenList.size()){
 				sheet = null;
 				return;
+			}else{
+				sheetName = sheetNameGivenList.get(sheetIndexReading); 
+				sheetIndex = sheetNameList.indexOf(sheetName);
 			}
 		}
-		rowCount = sheet.getPhysicalNumberOfRows();
+		rowCount = sheet.getLastRowNum() + 1;//poi row num start with 0
 	}
 
 	private String getCellValue(Cell cell) {
@@ -225,11 +275,10 @@ public class ExcelReader implements IReader {
 		int indexOfPoint = doubleStr.indexOf('.');
 		if (b) {
 			int indexOfE = doubleStr.indexOf('E');
-			// 小数部分
-			BigInteger xs = new BigInteger(doubleStr.substring(indexOfPoint
-					+ BigInteger.ONE.intValue(), indexOfE));
-			// 指数
-			int pow = Integer.parseInt(doubleStr.substring(indexOfE + BigInteger.ONE.intValue()));
+			BigInteger xs = 
+					new BigInteger(doubleStr.substring(indexOfPoint + BigInteger.ONE.intValue(), indexOfE));
+			int pow = 
+					Integer.parseInt(doubleStr.substring(indexOfE + BigInteger.ONE.intValue()));
 			int xsLen = xs.toByteArray().length;
 			int scale = xsLen - pow > 0 ? xsLen - pow : 0;
 			doubleStr = String.format("%." + scale + "f", d);
@@ -249,22 +298,4 @@ public class ExcelReader implements IReader {
 		IoUtil.close(inputStream);
 	}
 
-	/**
-	 * 
-	 * @param sheetRangeIndex sheetRangeIndex
-	 * @param sheetName sheetName
-	 * @return boolean
-	 */
-	protected boolean shouldSheetProcess(int sheetRangeIndex, String sheetName) {
-		return true;
-	}
-	
-	/**
-	 * sheet重新排序
-	 * @param sheetRangeList 原始sheet顺序
-	 * @return 重排序后的sheetlist
-	 */
-	protected List<String> reRangeSheet(List<String> sheetRangeList) {
-		return sheetRangeList;
-	}
 }

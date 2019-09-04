@@ -67,6 +67,36 @@ public class ExcelEventReader implements IReader {
 	private ExcelHSSFHandler hssfHandler;
 	
 	private ExcelSheetFilter sheetFilter;
+	
+	/**
+	 * @param sheetFilter
+	 */
+	public void setSheetFilter(ExcelSheetFilter sheetFilter) {
+		this.sheetFilter = sheetFilter;
+	}
+
+	/**
+	 * set the sheet list and order to be readed by sheetIndex
+	 * @param indexList start from 1
+	 */
+	public void setSheetListForReadByIndex(List<Integer> indexList){
+		List<String> nameList = new ArrayList<>();
+		for(int index : indexList){
+			if(index > xssfHandler.sheetNameList.size()){
+				continue;
+			}
+			nameList.add(xssfHandler.sheetNameList.get(index - 1));
+		}
+		xssfHandler.sheetNameGivenList = nameList;
+	}
+
+	/**
+	 * set the sheet list and order to be readed by sheetName
+	 * @param nameList
+	 */
+	public void setSheetListForReadByName(List<String> nameList){
+		xssfHandler.sheetNameGivenList = nameList;
+	}
 
 	public ExcelEventReader(String sourceUri) throws IOException, OpenXML4JException, SAXException, DocumentException {  
 		int index = sourceUri.lastIndexOf('.');
@@ -149,37 +179,6 @@ public class ExcelEventReader implements IReader {
 		IoUtil.close(pfs);
 	}
 	
-	/**
-	 * 设置sheet的过滤器
-	 * @param sheetFilter
-	 */
-	public void setSheetFilter(ExcelSheetFilter sheetFilter) {
-		this.sheetFilter = sheetFilter;
-	}
-
-	/**
-	 * 通过sheet索引设置sheet的读取顺序
-	 * @param indexList 索引从1开始
-	 */
-	public void setSheetReadOrderByIndex(List<Integer> indexList){
-		List<String> nameList = new ArrayList<>();
-		for(int index : indexList){
-			if(index > xssfHandler.sheetNameList.size()){
-				continue;
-			}
-			nameList.add(xssfHandler.sheetNameList.get(index - 1));
-		}
-		xssfHandler.sheetNameGivenList = nameList;
-	}
-
-	/**
-	 * 通过sheet名称设置sheet的读取顺序
-	 * @param nameList
-	 */
-	public void setSheetReadOrderByName(List<String> nameList){
-		xssfHandler.sheetNameGivenList = nameList;
-	}
-
 	class ExcelXSSFHandler extends DefaultHandler {
 
 		private XSSFReader xssfReader;
@@ -189,10 +188,10 @@ public class ExcelEventReader implements IReader {
 		private SharedStringsTable stringTable;
 
 		private StylesTable stylesTable;
+		
+		private Map<String, String> sheetNameRidMap = new LinkedHashMap<>();
 
 		private List<String> sheetNameList = new ArrayList<>();
-
-		private Map<String, String> sheetNameRidMap = new LinkedHashMap<>();
 
 		private List<String> sheetNameGivenList = new ArrayList<>();
 
@@ -252,7 +251,8 @@ public class ExcelEventReader implements IReader {
 			}finally{
 				IoUtil.close(bookStream); 
 			}
-			sheetNameGivenList.addAll(sheetNameList);//禁止客户代码修改
+			//cann't let the customer code to directly modify sheetNameList
+			sheetNameGivenList.addAll(sheetNameList);
 			if(sheetFilter != null){
 				sheetFilter.resetSheetListForRead(sheetNameGivenList);
 			}
@@ -302,7 +302,7 @@ public class ExcelEventReader implements IReader {
 					case "e":
 						cellType = CellType.ERROR; break;
 					case "inlineStr":
-						//语义不是数字，只是用NUMERIC来区分下inlineStr和s
+						//just use CellType.NUMERIC to represent inlineStr
 						cellType = CellType.NUMERIC; break; 
 					case "s":
 						cellType = CellType.STRING; break;
@@ -328,7 +328,10 @@ public class ExcelEventReader implements IReader {
 
 		@SuppressWarnings("deprecation")
 		public void endElement(String uri, String localName, String qName) throws SAXException {
-			//所有的值统一读成string，时间日期类型先转成毫秒数
+			/**
+			 * All fields are uniformly read into string,
+			 * and the date type will be first converted to milliseconds.
+			 */
 			if (qName.equals("v")) {
 				switch (cellType){
 				case STRING:
@@ -357,7 +360,7 @@ public class ExcelEventReader implements IReader {
 							lastContents = formatter.formatRawCellContents(value, formatIndex, formatString).trim();
 						}
 					}catch(Exception e){
-						LOG.error("excel format error, sheetName=" + sheetName + "rowIndex=" + (rowIndex + 1),  e);
+						LOG.error("Excel format error: sheetName=" + sheetName + ", rowIndex=" + (rowIndex + 1),  e);
 					}
 				}
 			}
@@ -412,7 +415,7 @@ public class ExcelEventReader implements IReader {
 				int base = 1;
 				int c = cellstr.charAt(i) - 65;
 				if(bitIndex > 0){
-					c++;//列数相当于26进制，个位A当做0，进位A当做1
+					c++;//number of columns used 26 jinzhi
 					for(int j = 0; j < bitIndex; j++){
 						base *=  26;
 					}
@@ -443,13 +446,12 @@ public class ExcelEventReader implements IReader {
 		private void read() throws Exception {
 			if(sheetIndexReading < sheetNameGivenList.size()) {
 				sheetName = sheetNameGivenList.get(sheetIndexReading);
-				sheetIndex = sheetNameList.indexOf(sheetName);
+				sheetIndex = sheetNameList.indexOf(sheetName) + 1;
 				if(sheetIndex == -1){
 					sheetIndexReading++;
 					return;
 				}
 
-				sheetIndex++;
 				if(sheetFilter != null && !sheetFilter.filter(sheetIndex, sheetName)){
 					sheetIndexReading++;
 					return;

@@ -13,6 +13,7 @@ import org.eto.fom.context.ResultHandler;
 import org.eto.fom.util.IoUtil;
 import org.eto.fom.util.file.reader.ExcelReader;
 import org.eto.fom.util.file.reader.ExcelRow;
+import org.eto.fom.util.file.reader.ExcelSheetFilter;
 
 /**
  * 根据sourceUri解析单个Excel文件的任务实现
@@ -132,7 +133,20 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 		ExcelRow row = null;
 		String sheetName = null;
 		try{
-			reader = getExcelReader(sourceUri);
+			reader = new ExcelReader(sourceUri);
+			reader.setSheetFilter(new ExcelSheetFilter() {
+				@Override
+				public void resetSheetListForRead(List<String> nameList) {
+					ParseExcelTask.this.reRangeSheet(nameList);
+				}
+				
+				@Override
+				public boolean filter(int sheetIndex2, String sheetName) {
+					return sheetIndex2 >= ParseExcelTask.this.sheetIndex
+							&& ParseExcelTask.this.sheetFilter(sheetIndex2, sheetName); 
+				}
+			});
+			
 			List<V> batchData = new LinkedList<>(); 
 			long batchTime = System.currentTimeMillis();
 			while ((row = reader.readRow()) != null) {
@@ -241,29 +255,12 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 	/**
 	 * 自定义sheet处理顺序
 	 * @param sheetRangeList 原sheet顺序
-	 * @return 重排序后sheet顺序
+	 * @return 
 	 */
-	protected List<String> reRangeSheet(List<String> sheetRangeList) {
-		return sheetRangeList;
+	protected void reRangeSheet(List<String> sheetRangeList) {
+
 	}
 
-	private ExcelReader getExcelReader(String sourceUri) throws Exception {
-
-		return new ExcelReader(getExcelInputStream(sourceUri), getExcelType()) {
-
-			@Override
-			protected boolean shouldSheetProcess(int sheetIndex, String sheetName) {
-				return sheetIndex >= ParseExcelTask.this.sheetIndex
-						&& ParseExcelTask.this.sheetFilter(sheetIndex, sheetName); 
-			}
-
-			@Override
-			protected List<String> reRangeSheet(List<String> sheetRangeList) {
-				return ParseExcelTask.this.reRangeSheet(sheetRangeList);
-			}
-		};
-	}
-	
 	/**
 	 * 将行字段数据映射成对应的bean或者map
 	 * @param row row
