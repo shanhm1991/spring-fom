@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eto.fom.task.parse.ParseExcelTask;
-import org.eto.fom.util.file.reader.Reader;
-import org.eto.fom.util.file.reader.ReaderRow;
+import org.eto.fom.util.file.reader.ExcelRow;
+import org.eto.fom.util.file.reader.IReader;
 import org.eto.fom.util.pool.handler.JdbcHandler;
 
 /**
@@ -30,7 +30,7 @@ public class InputMysqlExample2Task extends ParseExcelTask<Map<String, Object>> 
 	}
 
 	@Override
-	public List<Map<String, Object>> parseRowData(ReaderRow rowData, long batchTime) throws Exception {
+	public List<Map<String, Object>> parseRowData(ExcelRow rowData, long batchTime) throws Exception {
 		List<String> columns = rowData.getColumnList();
 		Map<String,Object> map = new HashMap<>();
 		map.put("id", columns.get(0));
@@ -55,7 +55,7 @@ public class InputMysqlExample2Task extends ParseExcelTask<Map<String, Object>> 
 
 	@Override
 	protected String getExcelType() {
-		return Reader.EXCEL_XLSX;
+		return IReader.EXCEL_XLSX;
 	}
 
 }

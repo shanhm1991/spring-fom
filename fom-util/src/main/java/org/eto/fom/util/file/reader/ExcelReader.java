@@ -30,7 +30,7 @@ import org.eto.fom.util.IoUtil;
  * @author shanhm
  *
  */
-public class ExcelReader implements Reader {
+public class ExcelReader implements IReader {
 
 	private static final Logger LOG = Logger.getLogger(ExcelReader.class);
 

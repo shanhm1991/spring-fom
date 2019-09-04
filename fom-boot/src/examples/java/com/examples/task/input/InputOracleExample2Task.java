@@ -7,8 +7,8 @@ import java.util.Map;
 
 import org.eto.fom.task.parse.ParseTextZipTask;
 import org.eto.fom.util.PatternUtil;
-import org.eto.fom.util.file.reader.Reader;
-import org.eto.fom.util.file.reader.ReaderRow;
+import org.eto.fom.util.file.reader.IReader;
+import org.eto.fom.util.file.reader.IRow;
 import org.eto.fom.util.file.reader.TextReader;
 import org.eto.fom.util.pool.handler.JdbcHandler;
 
@@ -33,12 +33,12 @@ public class InputOracleExample2Task extends ParseTextZipTask<Map<String, Object
 	}
 
 	@Override
-	public Reader getReader(String sourceUri) throws Exception {
+	public IReader getReader(String sourceUri) throws Exception {
 		return new TextReader(sourceUri, "#");
 	}
 
 	@Override
-	public List<Map<String, Object>> parseRowData(ReaderRow rowData, long batchTime) throws Exception {
+	public List<Map<String, Object>> parseRowData(IRow rowData, long batchTime) throws Exception {
 		List<String> columns = rowData.getColumnList();
 		Map<String,Object> map = new HashMap<>();
 		map.put("id", columns.get(0));

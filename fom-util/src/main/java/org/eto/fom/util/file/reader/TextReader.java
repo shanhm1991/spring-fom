@@ -17,7 +17,7 @@ import org.eto.fom.util.IoUtil;
  * @author shanhm
  *
  */
-public class TextReader implements Reader {
+public class TextReader implements IReader {
 	
 	private BufferedReader reader;
 	

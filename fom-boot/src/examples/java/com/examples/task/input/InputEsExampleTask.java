@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eto.fom.task.parse.ParseTextTask;
-import org.eto.fom.util.file.reader.Reader;
-import org.eto.fom.util.file.reader.ReaderRow;
+import org.eto.fom.util.file.reader.IReader;
+import org.eto.fom.util.file.reader.IRow;
 import org.eto.fom.util.file.reader.TextReader;
 import org.eto.fom.util.pool.handler.EsHandler;
 
@@ -39,12 +39,12 @@ public class InputEsExampleTask extends ParseTextTask<Map<String, Object>> {
 	}
 
 	@Override
-	protected Reader getReader(String sourceUri) throws Exception {
+	protected IReader getReader(String sourceUri) throws Exception {
 		return new TextReader(sourceUri, "#");
 	}
 
 	@Override
-	protected List<Map<String, Object>> parseRowData(ReaderRow rowData, long batchTime) throws Exception {
+	protected List<Map<String, Object>> parseRowData(IRow rowData, long batchTime) throws Exception {
 		List<String> columns = rowData.getColumnList();
 		Map<String,Object> map = new HashMap<>();
 		map.put("ID", columns.get(0));

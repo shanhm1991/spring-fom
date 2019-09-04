@@ -25,8 +25,8 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.eto.fom.util.PatternUtil;
 import org.eto.fom.util.file.ZipUtil;
-import org.eto.fom.util.file.reader.Reader;
-import org.eto.fom.util.file.reader.ReaderRow;
+import org.eto.fom.util.file.reader.ExcelRow;
+import org.eto.fom.util.file.reader.IReader;
 
 /**
  * 根据配置规则按sheet解析excel
@@ -118,7 +118,7 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 			@Override
 			public boolean accept(File file) {
 				String name = file.getName().toLowerCase();
-				return name.endsWith(Reader.EXCEL_XLSX) || name.endsWith(Reader.EXCEL_XLS);
+				return name.endsWith(IReader.EXCEL_XLSX) || name.endsWith(IReader.EXCEL_XLS);
 			}
 		});
 		if(array == null || array.length != 1  ){
@@ -219,7 +219,7 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 	 * 3. 规则有配置,Excel也有对应列，但当读取目标行时没有这一列（通常在行尾），此时如果有配置默认值，则取默认值
 	 */
 	@Override
-	protected List<Map<String, Object>> parseRowData(ReaderRow row, long batchTime) throws Exception {
+	protected List<Map<String, Object>> parseRowData(ExcelRow row, long batchTime) throws Exception {
 		String sheet = row.getSheetName();
 		List<String> columns = row.getColumnList();
 

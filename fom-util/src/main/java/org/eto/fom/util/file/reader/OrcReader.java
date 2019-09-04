@@ -17,7 +17,7 @@ import org.eto.fom.util.IoUtil;
  * @author shanhm
  *
  */
-public class OrcReader implements Reader {
+public class OrcReader implements IReader {
 	
 	private RecordReader recordReader;
 

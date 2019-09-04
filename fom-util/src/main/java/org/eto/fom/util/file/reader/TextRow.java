@@ -7,7 +7,7 @@ import java.util.List;
  * @author shanhm
  *
  */
-public class TextRow implements ReaderRow {
+public class TextRow implements IRow {
 	
 	private int rowIndex;
 
@@ -43,16 +43,6 @@ public class TextRow implements ReaderRow {
 	@Override
 	public List<String> getColumnList() {
 		return columnList;
-	}
-
-	@Override
-	public int getSheetIndex() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public String getSheetName() {
-		throw new UnsupportedOperationException();
 	}
 
 	@Override

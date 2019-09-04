@@ -2,10 +2,8 @@ package org.eto.fom.task.parse;
 
 import java.io.File;
 import java.text.DecimalFormat;
-import java.util.List;
 
 import org.eto.fom.context.Task;
-import org.eto.fom.util.file.reader.ReaderRow;
 
 /**
  * 
@@ -87,22 +85,5 @@ public abstract class ParseTask<V> extends Task<Boolean> {
 			throw new InterruptedException("interrupted when batchProcessLineData");
 		}
 	}
-	
-	/**
-	 * 将行字段数据映射成对应的bean或者map
-	 * @param row row
-	 * @param batchTime 批处理时间
-	 * @return 映射结果V列表
-	 * @throws Exception Exception
-	 */
-	protected abstract List<V> parseRowData(ReaderRow row, long batchTime) throws Exception;
-
-	/**
-	 * 批处理行数据
-	 * @param batchData batchData
-	 * @param batchTime batchTime
-	 * @throws Exception Exception
-	 */
-	protected abstract void batchProcess(List<V> batchData, long batchTime) throws Exception;
 	
 }

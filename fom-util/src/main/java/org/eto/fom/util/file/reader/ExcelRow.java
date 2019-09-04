@@ -7,7 +7,7 @@ import java.util.List;
  * @author shanhm
  *
  */
-public class ExcelRow implements ReaderRow{
+public class ExcelRow implements IRow{
 
 	private int rowIndex;
 
@@ -37,17 +37,9 @@ public class ExcelRow implements ReaderRow{
 		return isEmpty;
 	}
 
-	void setEmpty(boolean isEmpty) {
-		this.isEmpty = isEmpty;
-	}
-
 	@Override
 	public boolean isLastRow() {
 		return isLastRow;
-	}
-
-	void setLastRow(boolean isLastRow) {
-		this.isLastRow = isLastRow;
 	}
 
 	@Override
@@ -55,18 +47,32 @@ public class ExcelRow implements ReaderRow{
 		return columnList;
 	}
 
-	@Override
+	/**
+	 * 获取Excel的sheet索引
+	 * @return
+	 */
 	public int getSheetIndex() {
 		return sheetIndex;
 	}
 
-	void setSheetIndex(int sheetIndex) {
-		this.sheetIndex = sheetIndex;
-	}
-
-	@Override
+	/**
+	 * 获取Excel的sheet名称
+	 * @return
+	 */
 	public String getSheetName() {
 		return sheetName;
+	}
+	
+	void setEmpty(boolean isEmpty) {
+		this.isEmpty = isEmpty;
+	}
+	
+	void setLastRow(boolean isLastRow) {
+		this.isLastRow = isLastRow;
+	}
+	
+	void setSheetIndex(int sheetIndex) {
+		this.sheetIndex = sheetIndex;
 	}
 
 	void setSheetName(String sheetName) {

@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,7 +26,9 @@ import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.BuiltinFormats;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.SharedStringsTable;
 import org.apache.poi.xssf.model.StylesTable;
@@ -48,7 +51,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
  * @author shanhm
  *
  */
-public class ExcelEventReader implements Reader {
+public class ExcelEventReader implements IReader {
 
 	private String type;
 
@@ -110,10 +113,8 @@ public class ExcelEventReader implements Reader {
 
 	private void initHssf() throws IOException {
 		hssfHandler = new ExcelHSSFHandler();
-
 		HSSFRequest hssfRequest = new HSSFRequest();
 		hssfRequest.addListenerForAllRecords(hssfHandler);
-
 		HSSFEventFactory factory = new HSSFEventFactory(); 
 		InputStream bookStream = pfs.createDocumentInputStream("Workbook");
 		factory.processEvents(hssfRequest, bookStream);
@@ -124,19 +125,10 @@ public class ExcelEventReader implements Reader {
 		XMLReader parser = XMLReaderFactory.createXMLReader("com.sun.org.apache.xerces.internal.parsers.SAXParser");
 		xssfHandler = new ExcelXSSFHandler(reader, parser);
 		parser.setContentHandler(xssfHandler);
-		//		Iterator<InputStream> it = reader.getSheetsData();
-		//		while(it.hasNext()){
-		//			InputStream in = it.next();
-		//			byte[] buf = new byte[1024];
-		//			int len;
-		//			while ((len = in.read(buf)) != -1) {
-		//				System.out.write(buf, 0, len);
-		//			}
-		//		}
 	}
 
 	@Override
-	public ReaderRow readRow() throws Exception {
+	public ExcelRow readRow() throws Exception {
 		if(EXCEL_XLS.equalsIgnoreCase(type)){
 			return hssfHandler.readRow();
 		}else if(EXCEL_XLSX.equalsIgnoreCase(type)){
@@ -153,33 +145,48 @@ public class ExcelEventReader implements Reader {
 	}
 
 	/**
-	 * 
-	 * @param sheetRangeIndex sheetRangeIndex
-	 * @param sheetName sheetName
+	 * é€šè¿‡sheetç´¢å¼•è®¾ç½®sheetçš„è¯»å–é¡ºåº
+	 * @param indexList ç´¢å¼•ä»1å¼€å§‹
+	 */
+	public void setSheetReadOrderByIndex(List<Integer> indexList){
+		List<String> nameList = new ArrayList<>();
+		for(int index : indexList){
+			if(index > xssfHandler.sheetNameList.size()){
+				continue;
+			}
+			nameList.add(xssfHandler.sheetNameList.get(index - 1));
+		}
+		xssfHandler.sheetNameGivenList = nameList;
+	}
+
+	/**
+	 * é€šè¿‡sheetåç§°è®¾ç½®sheetçš„è¯»å–é¡ºåº
+	 * @param nameList
+	 */
+	public void setSheetReadOrderByName(List<String> nameList){
+		xssfHandler.sheetNameGivenList = nameList;
+	}
+
+	/**
+	 * æ ¹æ®sheetç´¢å¼•å’Œsheetåç§°è¿‡æ»¤éœ€è¦å¤„ç†çš„sheet
+	 * @param sheetIndex sheetç´¢å¼•  ä»1å¼€å§‹
+	 * @param sheetName sheetåç§°
 	 * @return boolean
 	 */
-	protected boolean shouldSheetProcess(int sheetRangeIndex, String sheetName) {
+	protected boolean shouldSheetProcess(int sheetIndex, String sheetName) {
 		return true;
 	}
 
-	/**
-	 * sheetÖØĞÂÅÅĞò
-	 * @param sheetRangeList Ô­Ê¼sheetË³Ğò
-	 * @return ÖØÅÅĞòºóµÄsheetlist
-	 */
-	protected List<String> reRangeSheet(List<String> sheetRangeList) {
-		return sheetRangeList;
-	}
-
-	static enum CellDataType {
-		BOOL, ERROR, FORMULA, INLINESTR, SSTINDEX, FORMAT, NULL
-	}
 
 	/**
-	 * 
-	 * @author shanhm
-	 *
+	 * é‡æ–°è®¾ç½®sheetçš„è¯»å–é¡ºåº
+	 * @param nameList nameList
+	 * @return 
 	 */
+	protected List<String> resetSheetReadOrderByName(List<String> nameList) {
+		return nameList;
+	}
+
 	class ExcelXSSFHandler extends DefaultHandler {
 
 		private XSSFReader xssfReader;
@@ -190,29 +197,27 @@ public class ExcelEventReader implements Reader {
 
 		private StylesTable stylesTable;
 
-		//private boolean isInStringTable;
-
 		private List<String> sheetNameList = new ArrayList<>();
 
 		private Map<String, String> sheetNameRidMap = new LinkedHashMap<>();
+
+		private List<String> sheetNameGivenList = new ArrayList<>();
+
+		private int sheetIndexReading = 0;
+
+		private String sheetName;
+
+		private int sheetIndex;
 
 		private int rowMax;
 
 		private int cellMax;
 
-		private int sheetIndex = 0;
-
 		private int rowIndex = 0;
 
 		private int cellIndex = 0;
 
-		private CellDataType dataType = CellDataType.NULL;
-
-		private DataFormatter formatter = new DataFormatter();
-
-		private String formatString;
-
-		private short formatIndex;
+		private CellType cellType;
 
 		private String lastContents = ""; 
 
@@ -224,6 +229,12 @@ public class ExcelEventReader implements Reader {
 
 		private Iterator<ExcelRow> sheetDataIterator;
 
+		private DataFormatter formatter = new DataFormatter();
+
+		private String formatString;
+
+		private short formatIndex;
+
 		public ExcelXSSFHandler(XSSFReader xssfReader, XMLReader xmlReader) throws InvalidFormatException, IOException, SAXException, DocumentException {  
 			this.xmlReader = xmlReader;
 			this.xssfReader = xssfReader;
@@ -232,7 +243,6 @@ public class ExcelEventReader implements Reader {
 			InputStream bookStream = null;
 			try{
 				bookStream = xssfReader.getWorkbookData();
-				//xmlReader.parse(new InputSource(bookStream));Ã»ÓĞstartElementÊÂ¼ş£¬Ö»ºÃÕâÀï×Ô¶¨Òå½âÎö
 				SAXReader reader = new SAXReader();
 				reader.setEncoding("UTF-8");
 				Document doc = reader.read(bookStream);
@@ -249,7 +259,8 @@ public class ExcelEventReader implements Reader {
 			}finally{
 				IoUtil.close(bookStream); 
 			}
-			sheetNameList = ExcelEventReader.this.reRangeSheet(sheetNameList);
+			sheetNameGivenList.addAll(sheetNameList);//ç¦æ­¢å®¢æˆ·ä»£ç ä¿®æ”¹
+			sheetNameList = ExcelEventReader.this.resetSheetReadOrderByName(sheetNameGivenList); 
 		}
 
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
@@ -267,9 +278,9 @@ public class ExcelEventReader implements Reader {
 				cellIndex = 0;
 				int currentRowIndex = Integer.valueOf(attributes.getValue("r")) - 1;
 				while(rowIndex < currentRowIndex){
-					ExcelRow data = new ExcelRow(rowIndex, new ArrayList<String>(0));
+					ExcelRow data = new ExcelRow(rowIndex + 1, new ArrayList<String>(0));
 					data.setSheetIndex(sheetIndex); 
-					data.setSheetName(sheetNameList.get(sheetIndex)); 
+					data.setSheetName(sheetName); 
 					data.setEmpty(true); 
 					data.setLastRow(rowIndex == rowMax - 1); 
 					sheetData.add(data);
@@ -285,26 +296,33 @@ public class ExcelEventReader implements Reader {
 					cellIndex++;
 				}
 
-				String cellType = attributes.getValue("t");
-				if ("b".equals(cellType)) {
-					dataType = CellDataType.BOOL;
-				} else if ("e".equals(cellType)) {
-					dataType = CellDataType.ERROR;
-				} else if ("inlineStr".equals(cellType)) {
-					dataType = CellDataType.INLINESTR;
-				} else if ("s".equals(cellType)) {
-					dataType = CellDataType.SSTINDEX;
-				} else if ("str".equals(cellType)) {
-					dataType = CellDataType.FORMULA;
+				String type = attributes.getValue("t");
+				if(type == null){
+					cellType = CellType.BLANK;
+				}else{
+					switch(type){
+					case "b":
+						cellType = CellType.BOOLEAN; break;
+					case "e":
+						cellType = CellType.ERROR; break;
+					case "inlineStr":
+						//è¯­ä¹‰ä¸æ˜¯æ•°å­—ï¼Œåªæ˜¯ç”¨NUMERICæ¥åŒºåˆ†ä¸‹inlineStrå’Œs
+						cellType = CellType.NUMERIC; break; 
+					case "s":
+						cellType = CellType.STRING; break;
+					case "str":
+						cellType = CellType.FORMULA; break;
+					default:
+						cellType = CellType.BLANK;
+					}
 				}
 
 				String cellStyle = attributes.getValue("s");
 				if (cellStyle != null) {
-					dataType = CellDataType.FORMAT;
 					int styleIndex = Integer.parseInt(cellStyle);
 					XSSFCellStyle style = stylesTable.getStyleAt(styleIndex);
-					formatString = style.getDataFormatString();
 					formatIndex = style.getDataFormat();
+					formatString = style.getDataFormatString();
 					if (formatString == null) {
 						formatString = BuiltinFormats.getBuiltinFormat(formatIndex);
 					}
@@ -315,20 +333,31 @@ public class ExcelEventReader implements Reader {
 		@SuppressWarnings("deprecation")
 		public void endElement(String uri, String localName, String qName) throws SAXException {
 			if (qName.equals("v")) {
-				System.out.println(formatString); 
-				switch (dataType){
-				case SSTINDEX:
+				switch (cellType){
+				case STRING:
 					int sharedIndex = Integer.valueOf(lastContents);
 					lastContents = new XSSFRichTextString(stringTable.getEntryAt(sharedIndex)).toString();
 					break;
-				case FORMAT:
-					if (formatString != null) {
-						lastContents = formatter.formatRawCellContents(
-								Double.parseDouble(lastContents), formatIndex, formatString).trim();
-					}
+				case NUMERIC:
+					lastContents = new XSSFRichTextString(lastContents).toString();
 					break;
+				case BOOLEAN:
+				case ERROR:
+				case FORMULA:
 				default:
 
+				}
+
+				if (formatString != null) {
+					double value = Double.valueOf(lastContents);
+					if(DateUtil.isADateFormat(formatIndex,formatString)) {
+						if(DateUtil.isValidExcelDate(value)) {
+							Date date = DateUtil.getJavaDate(value, false);
+							lastContents = String.valueOf(date.getTime());
+						}
+					}else{
+						lastContents = formatter.formatRawCellContents(value, formatIndex, formatString).trim();
+					}
 				}
 			}
 
@@ -339,9 +368,9 @@ public class ExcelEventReader implements Reader {
 			}
 
 			if (qName.equals("row")) {
-				ExcelRow data = new ExcelRow(rowIndex, columnList);
+				ExcelRow data = new ExcelRow(rowIndex + 1, columnList);
 				data.setSheetIndex(sheetIndex); 
-				data.setSheetName(sheetNameList.get(sheetIndex)); 
+				data.setSheetName(sheetName); 
 				data.setEmpty(false); 
 				data.setLastRow(rowIndex == rowMax - 1); 
 				sheetData.add(data);
@@ -383,7 +412,7 @@ public class ExcelEventReader implements Reader {
 				int base = 1;
 				int c = cellstr.charAt(i) - 65;
 				if(bitIndex > 0){
-					c++;//Ïàµ±ÓÚ26½øÖÆ£¬¸öÎ»Aµ±×ö0£¬½øÎ»Aµ±×ö1
+					c++;//åˆ—æ•°ç›¸å½“äº26è¿›åˆ¶ï¼Œä¸ªä½Aå½“åš0ï¼Œè¿›ä½Aå½“åš1
 					for(int j = 0; j < bitIndex; j++){
 						base *=  26;
 					}
@@ -394,7 +423,7 @@ public class ExcelEventReader implements Reader {
 			return cellIndex;
 		}
 
-		public ReaderRow readRow() throws Exception {
+		public ExcelRow readRow() throws Exception {
 			while(true){
 				if(isEnd){
 					return null;
@@ -411,10 +440,16 @@ public class ExcelEventReader implements Reader {
 		}
 
 		private void read() throws Exception {
-			if(sheetIndex < sheetNameList.size()) {
-				String sheetName = sheetNameList.get(sheetIndex);
+			if(sheetIndexReading < sheetNameGivenList.size()) {
+				sheetName = sheetNameGivenList.get(sheetIndexReading);
+				sheetIndex = sheetNameList.indexOf(sheetName);
+				if(sheetIndex == -1){
+					return;
+				}
+				
+				sheetIndex++;
 				if(!shouldSheetProcess(sheetIndex, sheetName)){
-					sheetIndex++;
+					sheetIndexReading++;
 					return;
 				}
 
@@ -428,7 +463,7 @@ public class ExcelEventReader implements Reader {
 				}finally{
 					IoUtil.close(sheetStream);
 				}
-				sheetIndex++;
+				sheetIndexReading++;
 				return;
 			}else{
 				isEnd = true;
@@ -436,11 +471,6 @@ public class ExcelEventReader implements Reader {
 		}
 	}
 
-	/**
-	 * 
-	 * @author shanhm
-	 *
-	 */
 	class ExcelHSSFHandler implements HSSFListener {
 
 		private SSTRecord sstrec;
@@ -454,9 +484,9 @@ public class ExcelEventReader implements Reader {
 			case BOFRecord.sid:  
 				BOFRecord bof = (BOFRecord) record;
 				if (bof.getType() == BOFRecord.TYPE_WORKBOOK) {
-					System.out.println("´¦Àí workbook");
+					
 				} else if (bof.getType() == BOFRecord.TYPE_WORKSHEET) {
-					System.out.println("´¦Àísheet");
+					
 				}
 				break;  
 			case BoundSheetRecord.sid:
@@ -474,7 +504,6 @@ public class ExcelEventReader implements Reader {
 				System.out.println("Cell found with value " + numrec.getValue()
 				+ " at row " + numrec.getRow() + " and column " + numrec.getColumn());
 				break;
-				// SSTRecords store a array of unique strings used in Excel.
 			case SSTRecord.sid:
 				sstrec = (SSTRecord) record;
 				for (int k = 0; k < sstrec.getNumUniqueStrings(); k++) {
@@ -490,9 +519,11 @@ public class ExcelEventReader implements Reader {
 
 		}
 
-		public ReaderRow readRow() throws Exception {
+		public ExcelRow readRow() throws Exception {
 
 			return null;
 		}
 	}
+
 }
+

@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.eto.fom.boot.SpringContext;
 import org.eto.fom.task.parse.ParseTextTask;
-import org.eto.fom.util.file.reader.Reader;
-import org.eto.fom.util.file.reader.ReaderRow;
+import org.eto.fom.util.file.reader.IReader;
+import org.eto.fom.util.file.reader.IRow;
 import org.eto.fom.util.file.reader.TextReader;
 
 import com.examples.bean.ExampleBean;
@@ -24,12 +24,12 @@ public class InputMysqlExample1Task extends ParseTextTask<ExampleBean> {
 	}
 
 	@Override
-	public Reader getReader(String sourceUri) throws Exception {
+	public IReader getReader(String sourceUri) throws Exception {
 		return new TextReader(sourceUri, "#");
 	}
 
 	@Override
-	public List<ExampleBean> parseRowData(ReaderRow rowData, long batchTime) throws Exception {
+	public List<ExampleBean> parseRowData(IRow rowData, long batchTime) throws Exception {
 		ExampleBean bean = new ExampleBean(rowData.getColumnList());
 		bean.setSource("local");
 		bean.setFileType("txt");

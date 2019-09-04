@@ -7,7 +7,7 @@ import java.util.List;
  * @author shanhm
  *
  */
-public interface ReaderRow {
+public interface IRow {
 
 	/**
 	 * 获取当前行索引
@@ -32,17 +32,5 @@ public interface ReaderRow {
 	 * @return
 	 */
 	List<String> getColumnList();
-	
-	/**
-	 * 获取Excel的sheet索引
-	 * @return
-	 */
-	int getSheetIndex();
-	
-	/**
-	 * 获取Excel的sheet名称
-	 * @return
-	 */
-	String getSheetName();
 	
 }

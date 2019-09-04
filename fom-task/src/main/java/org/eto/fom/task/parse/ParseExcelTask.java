@@ -12,8 +12,7 @@ import org.eto.fom.context.ExceptionHandler;
 import org.eto.fom.context.ResultHandler;
 import org.eto.fom.util.IoUtil;
 import org.eto.fom.util.file.reader.ExcelReader;
-import org.eto.fom.util.file.reader.Reader;
-import org.eto.fom.util.file.reader.ReaderRow;
+import org.eto.fom.util.file.reader.ExcelRow;
 
 /**
  * 根据sourceUri解析单个Excel文件的任务实现
@@ -129,8 +128,8 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 	}
 
 	protected void parseExcel(String sourceUri, String sourceName, int lineIndex) throws Exception {
-		Reader reader = null;
-		ReaderRow row = null;
+		ExcelReader reader = null;
+		ExcelRow row = null;
 		String sheetName = null;
 		try{
 			reader = getExcelReader(sourceUri);
@@ -264,6 +263,23 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 			}
 		};
 	}
+	
+	/**
+	 * 将行字段数据映射成对应的bean或者map
+	 * @param row row
+	 * @param batchTime 批处理时间
+	 * @return 映射结果V列表
+	 * @throws Exception Exception
+	 */
+	protected abstract List<V> parseRowData(ExcelRow row, long batchTime) throws Exception;
+
+	/**
+	 * 批处理行数据
+	 * @param batchData batchData
+	 * @param batchTime batchTime
+	 * @throws Exception Exception
+	 */
+	protected abstract void batchProcess(List<V> batchData, long batchTime) throws Exception;
 
 	@Override
 	protected boolean afterExec(Boolean execResult) throws Exception {

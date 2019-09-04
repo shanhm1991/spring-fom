@@ -9,7 +9,7 @@ import java.io.Closeable;
  * @author shanhm
  *
  */
-public interface Reader extends Closeable {
+public interface IReader extends Closeable {
 	
 	public static final String EXCEL_XLS = "xls";
 
@@ -20,6 +20,6 @@ public interface Reader extends Closeable {
 	 * @return ReaderRow
 	 * @throws Exception Exception
 	 */
-	ReaderRow readRow() throws Exception;
+	IRow readRow() throws Exception;
 	
 }
