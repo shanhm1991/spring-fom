@@ -267,11 +267,15 @@ public class ExcelReader implements IExcelReader {
 		int indexOfPoint = doubleStr.indexOf('.');
 		if (b) {
 			int indexOfE = doubleStr.indexOf('E');
-			BigInteger xs = new BigInteger(doubleStr.substring(indexOfPoint + BigInteger.ONE.intValue(), indexOfE));
-			int pow = Integer.parseInt(doubleStr.substring(indexOfE + BigInteger.ONE.intValue()));
-			int xsLen = xs.toByteArray().length;
-			int scale = xsLen - pow > 0 ? xsLen - pow : 0;
-			doubleStr = String.format("%." + scale + "f", doubleStr);
+			try{
+				BigInteger xs = new BigInteger(doubleStr.substring(indexOfPoint + BigInteger.ONE.intValue(), indexOfE));
+				int pow = Integer.parseInt(doubleStr.substring(indexOfE + BigInteger.ONE.intValue()));
+				int xsLen = xs.toByteArray().length;
+				int scale = xsLen - pow > 0 ? xsLen - pow : 0;
+				doubleStr = String.format("%." + scale + "f", doubleStr);
+			}catch(Exception e){
+				LOG.error("Excel format error: value=" + doubleStr, e);
+			}
 		} else {
 			Pattern p = Pattern.compile(".0$");
 			Matcher m = p.matcher(doubleStr);
