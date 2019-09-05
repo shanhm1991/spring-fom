@@ -259,7 +259,10 @@ public class ExcelReader implements IExcelReader {
 	}
 
 	static String double2String(Double d) {
-		String doubleStr = d.toString();
+		return formatDouble(d.toString());
+	}
+	
+	static String formatDouble(String doubleStr) {
 		boolean b = doubleStr.contains("E");
 		int indexOfPoint = doubleStr.indexOf('.');
 		if (b) {
@@ -268,7 +271,7 @@ public class ExcelReader implements IExcelReader {
 			int pow = Integer.parseInt(doubleStr.substring(indexOfE + BigInteger.ONE.intValue()));
 			int xsLen = xs.toByteArray().length;
 			int scale = xsLen - pow > 0 ? xsLen - pow : 0;
-			doubleStr = String.format("%." + scale + "f", d);
+			doubleStr = String.format("%." + scale + "f", doubleStr);
 		} else {
 			Pattern p = Pattern.compile(".0$");
 			Matcher m = p.matcher(doubleStr);

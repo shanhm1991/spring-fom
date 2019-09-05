@@ -327,8 +327,7 @@ public class ExcelEventReader implements IExcelReader {
 					break;
 				case FORMULA:
 					try {
-						double value = Double.valueOf(lastContents);
-						lastContents = ExcelReader.double2String(value);
+						lastContents = ExcelReader.formatDouble(lastContents);
 					}  catch (Exception e) {
 						lastContents = new XSSFRichTextString(lastContents).toString();
 						LOG.error("Excel format error: sheet=" + sheetName + ",row=" + rowIndex + ",column=" + cellIndex, e);
@@ -342,14 +341,14 @@ public class ExcelEventReader implements IExcelReader {
 
 				if (formatString != null) {
 					try{
-						double value = Double.valueOf(lastContents);
 						if(DateUtil.isADateFormat(formatIndex,formatString)) {
+							double value = Double.valueOf(lastContents);
 							if(DateUtil.isValidExcelDate(value)) {
 								Date date = DateUtil.getJavaDate(value, false);
 								lastContents = String.valueOf(date.getTime());
 							}
 						}else{
-							lastContents = ExcelReader.double2String(value);
+							lastContents = ExcelReader.formatDouble(lastContents);
 						}
 					}catch(Exception e){
 						LOG.error("Excel format error: sheetName=" 
