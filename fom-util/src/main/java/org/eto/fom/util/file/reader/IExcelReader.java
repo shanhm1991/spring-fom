@@ -33,15 +33,4 @@ public interface IExcelReader extends IReader {
 	 */
 	void setSheetFilter(ExcelSheetFilter sheetFilter);
 	
-	/**
-	 * set the sheet list and order to be readed by sheetIndex
-	 * @param indexList (index start from 1)
-	 */
-	void setSheetListForReadByIndex(List<Integer> indexList);
-	
-	/**
-	 * set the sheet list and order to be readed by sheetName
-	 * @param nameList
-	 */
-	void setSheetListForReadByName(List<String> nameList);
 }

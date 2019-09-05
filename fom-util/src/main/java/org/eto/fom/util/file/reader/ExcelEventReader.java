@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,13 +17,14 @@ import org.apache.poi.hssf.eventusermodel.HSSFEventFactory;
 import org.apache.poi.hssf.eventusermodel.HSSFListener;
 import org.apache.poi.hssf.eventusermodel.HSSFRequest;
 import org.apache.poi.hssf.record.BOFRecord;
+import org.apache.poi.hssf.record.BlankRecord;
+import org.apache.poi.hssf.record.BoolErrRecord;
 import org.apache.poi.hssf.record.BoundSheetRecord;
 import org.apache.poi.hssf.record.DimensionsRecord;
-import org.apache.poi.hssf.record.FormatRecord;
+import org.apache.poi.hssf.record.FormulaRecord;
 import org.apache.poi.hssf.record.LabelSSTRecord;
 import org.apache.poi.hssf.record.NumberRecord;
 import org.apache.poi.hssf.record.Record;
-import org.apache.poi.hssf.record.RowRecord;
 import org.apache.poi.hssf.record.SSTRecord;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
@@ -30,7 +32,6 @@ import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.BuiltinFormats;
 import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.SharedStringsTable;
@@ -122,6 +123,7 @@ public class ExcelEventReader implements IExcelReader {
 		hssfHandler = new ExcelHSSFHandler();
 		HSSFRequest hssfRequest = new HSSFRequest();
 		hssfRequest.addListenerForAllRecords(hssfHandler);
+
 		HSSFEventFactory factory = new HSSFEventFactory(); 
 		InputStream bookStream = pfs.createDocumentInputStream("Workbook");
 		factory.processEvents(hssfRequest, bookStream);
@@ -167,23 +169,6 @@ public class ExcelEventReader implements IExcelReader {
 		this.sheetFilter = sheetFilter;
 	}
 
-	@Override
-	public void setSheetListForReadByIndex(List<Integer> indexList){
-		List<String> nameList = new ArrayList<>();
-		for(int index : indexList){
-			if(index > xssfHandler.sheetNameList.size()){
-				continue;
-			}
-			nameList.add(xssfHandler.sheetNameList.get(index - 1));
-		}
-		xssfHandler.sheetNameGivenList = nameList;
-	}
-
-	@Override
-	public void setSheetListForReadByName(List<String> nameList){
-		xssfHandler.sheetNameGivenList = nameList;
-	}
-
 	private class ExcelXSSFHandler extends DefaultHandler {
 
 		private XSSFReader xssfReader;
@@ -226,8 +211,6 @@ public class ExcelEventReader implements IExcelReader {
 
 		private int rowReadingIndex = 0;
 
-		private DataFormatter formatter = new DataFormatter();
-
 		private String formatString;
 
 		private short formatIndex;
@@ -258,9 +241,6 @@ public class ExcelEventReader implements IExcelReader {
 			}
 			//cann't let the customer code to directly modify sheetNameList
 			sheetNameGivenList.addAll(sheetNameList);
-			if(sheetFilter != null){
-				sheetFilter.resetSheetListForRead(sheetNameGivenList);
-			}
 		}
 
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
@@ -307,8 +287,8 @@ public class ExcelEventReader implements IExcelReader {
 					case "e":
 						cellType = CellType.ERROR; break;
 					case "inlineStr":
-						//just use CellType.NUMERIC to represent inlineStr
-						cellType = CellType.NUMERIC; break; 
+						//just use CellType._NONE to represent inlineStr
+						cellType = CellType._NONE; break; 
 					case "s":
 						cellType = CellType.STRING; break;
 					case "str":
@@ -331,7 +311,6 @@ public class ExcelEventReader implements IExcelReader {
 			}
 		}
 
-		@SuppressWarnings("deprecation")
 		public void endElement(String uri, String localName, String qName) throws SAXException {
 			/**
 			 * All fields are uniformly read into string,
@@ -341,14 +320,22 @@ public class ExcelEventReader implements IExcelReader {
 				switch (cellType){
 				case STRING:
 					int sharedIndex = Integer.valueOf(lastContents);
-					lastContents = new XSSFRichTextString(stringTable.getEntryAt(sharedIndex)).toString();
+					lastContents = stringTable.getItemAt(sharedIndex).toString();
 					break;
-				case NUMERIC:
+				case _NONE:
 					lastContents = new XSSFRichTextString(lastContents).toString();
+					break;
+				case FORMULA:
+					try {
+						double value = Double.valueOf(lastContents);
+						lastContents = ExcelReader.double2String(value);
+					}  catch (Exception e) {
+						lastContents = new XSSFRichTextString(lastContents).toString();
+						LOG.error("Excel format error: sheet=" + sheetName + ",row=" + rowIndex + ",column=" + cellIndex, e);
+					}
 					break;
 				case BOOLEAN:
 				case ERROR:
-				case FORMULA:
 				default:
 
 				}
@@ -362,10 +349,11 @@ public class ExcelEventReader implements IExcelReader {
 								lastContents = String.valueOf(date.getTime());
 							}
 						}else{
-							lastContents = formatter.formatRawCellContents(value, formatIndex, formatString).trim();
+							lastContents = ExcelReader.double2String(value);
 						}
 					}catch(Exception e){
-						LOG.error("Excel format error: sheetName=" + sheetName + ", rowIndex=" + (rowIndex + 1),  e);
+						LOG.error("Excel format error: sheetName=" 
+								+ sheetName + ", rowIndex=" + (rowIndex + 1) + ",column=" + cellIndex,  e);
 					}
 					formatString = null;
 				}
@@ -432,12 +420,15 @@ public class ExcelEventReader implements IExcelReader {
 			return cellIndex;
 		}
 
-		private List<ExcelRow> readSheet() throws Exception{ 
+		public List<ExcelRow> readSheet() throws Exception{ 
 			while(true){
 				List<ExcelRow> list = new ArrayList<>();
 				if(isEnd){
 					return null;
 				}else if(sheetData == null){
+					if(sheetFilter != null){
+						sheetFilter.resetSheetListForRead(sheetNameGivenList);
+					}
 					read();
 					continue;
 				}else if(rowReadingIndex > 0 && rowReadingIndex < sheetData.size()){
@@ -456,11 +447,14 @@ public class ExcelEventReader implements IExcelReader {
 			}
 		}
 
-		private ExcelRow readRow() throws Exception {
+		public ExcelRow readRow() throws Exception {
 			while(true){
 				if(isEnd){
 					return null;
 				}else if(sheetData == null){
+					if(sheetFilter != null){
+						sheetFilter.resetSheetListForRead(sheetNameGivenList);
+					}
 					read();
 					continue;
 				}
@@ -510,80 +504,204 @@ public class ExcelEventReader implements IExcelReader {
 
 	private class ExcelHSSFHandler implements HSSFListener {
 
-		private SSTRecord sst;
+		private SSTRecord stringTable;
+
+		private List<String> sheetNameList = new ArrayList<>();
+
+		private List<String> sheetNameGivenList = new ArrayList<>();
+		
+		private int sheetIndex = 0;
 
 		private String sheetName;  
 
-		private int sheetIndex = 0;
+		private int rowMax;
+
+		private short cellMax;
 
 		private int rowIndex = 0;
 
-		private String formatString;
+		private Map<String, List<ExcelRow>> bookData = new HashMap<>();
 
-		private int formatIndex;
+		private List<ExcelRow> sheetData;
 
-		private List<String> sheetNameList = new ArrayList<>();
+		private ExcelRow rowData;
 
 		@Override
 		public void processRecord(Record record) {
 			switch (record.getSid()) {  
+			case SSTRecord.sid:
+				stringTable = (SSTRecord)record;
+				break;
+			case BoundSheetRecord.sid:
+				BoundSheetRecord boundSheet = (BoundSheetRecord)record;
+				sheetNameList.add(boundSheet.getSheetname());
+				break;
 			case BOFRecord.sid:  
 				BOFRecord bof = (BOFRecord)record;
 				if (bof.getType() == BOFRecord.TYPE_WORKSHEET) {
+					sheetName = sheetNameList.get(sheetIndex);
+					rowIndex = 0;
 					sheetIndex++;
-					System.out.println("sheetIndex=" + sheetIndex); 
 				}
 				break;  
-			case BoundSheetRecord.sid:
-				BoundSheetRecord boundSheet = (BoundSheetRecord)record;
-				String name = boundSheet.getSheetname();
-				if(!name.equals(sheetName)){
-					sheetNameList.add(name);
-					sheetName = name;
-				}
-				break;
 			case DimensionsRecord.sid:
-				//DimensionsRecord dimensions = (DimensionsRecord)record;
-				break;
-			case RowRecord.sid: 
-				RowRecord row = (RowRecord)record;
-				rowIndex = row.getRowNumber();
-				System.out.println("rowIndex=" + rowIndex); 
+				DimensionsRecord dimensions = (DimensionsRecord)record;
+				rowMax = dimensions.getLastRow();
+				cellMax = dimensions.getLastCol();
+				sheetData = new ArrayList<>(rowMax);
+				rowData = new ExcelRow(rowIndex + 1, new ArrayList<>(cellMax));
+				rowData.setSheetIndex(sheetIndex);
+				rowData.setSheetName(sheetName); 
+				rowData.setLastRow(rowIndex == rowMax - 1); 
+				bookData.put(sheetName, sheetData);
 				break;
 			case NumberRecord.sid:
 				NumberRecord number = (NumberRecord) record;
-				System.out.println("row=" 
-						+ number.getRow() + ", column=" + number.getColumn() + ", value=" + number.getValue());
-				break;
-			case SSTRecord.sid:
-				sst = (SSTRecord)record;
+				prepareRowData(number.getRow());
+				fillRowData(number.getColumn(), ExcelReader.double2String(number.getValue())); 
 				break;
 			case LabelSSTRecord.sid:
 				LabelSSTRecord labelSST = (LabelSSTRecord)record;
-				System.out.println("row=" 
-						+ labelSST.getRow() + ", column=" + labelSST.getColumn() + ", value=" + sst.getString(labelSST.getSSTIndex()));
+				prepareRowData(labelSST.getRow());
+				fillRowData(labelSST.getColumn(), stringTable.getString(labelSST.getSSTIndex()).toString()); 
 				break;
-			case FormatRecord.sid:
-				FormatRecord format = (FormatRecord)record;
-				formatString = format.getFormatString();
-				formatIndex = format.getIndexCode();
-				if (formatString == null) {
-					formatString = BuiltinFormats.getBuiltinFormat(formatIndex);
-				}
+			case FormulaRecord.sid:
+				FormulaRecord formula = (FormulaRecord)record;
+				prepareRowData(formula.getRow());
+				fillRowData(formula.getColumn(), ExcelReader.double2String(formula.getValue())); 
+				break;
+			case BlankRecord.sid:
+				BlankRecord blank = (BlankRecord)record;
+				prepareRowData(blank.getRow());
+				fillRowData(blank.getColumn(), ""); 
+				break;
+			case BoolErrRecord.sid:
+				BoolErrRecord bool = (BoolErrRecord)record;
+				prepareRowData(bool.getRow());
+				fillRowData(bool.getColumn(), String.valueOf(bool.getBooleanValue())); 
 				break;
 			}  
-
 		}
 
-		private List<ExcelRow> readSheet() throws Exception{ 
-			return null;
+		private void fillRowData(short index, String value){
+			List<String> columnList = rowData.getColumnList();
+			while(columnList.size() < index - 1){
+				columnList.add("");
+			}
+			columnList.add(value);
 		}
 
+		private void prepareRowData(int rowNum){
+			if(rowNum > rowIndex){
+				rowData.setEmpty(false); 
+				sheetData.add(rowData);
+				rowIndex++;
+				fillEmptyRow(rowNum); 
+				rowData = new ExcelRow(rowIndex + 1, new ArrayList<>(cellMax));
+				rowData.setSheetIndex(sheetIndex);
+				rowData.setSheetName(sheetName); 
+				rowData.setLastRow(rowIndex == rowMax - 1); 
+			}
+		}
+
+		private void fillEmptyRow(int rowNum){
+			while(rowNum > rowIndex){
+				rowData = new ExcelRow(rowIndex + 1, new ArrayList<String>(0));
+				rowData.setSheetIndex(sheetIndex); 
+				rowData.setSheetName(sheetName); 
+				rowData.setEmpty(true); 
+				rowData.setLastRow(rowIndex == rowMax - 1); 
+				sheetData.add(rowData);
+				rowIndex++;
+			}
+			rowIndex = rowNum;
+		}
+
+		private int sheetReadingIndex = 0;
+		
+		private int rowReadingIndex = 0;
+		
+		private List<ExcelRow> sheetReadingData;
+		
+		private boolean inited = false;
+		
+		private boolean isEnd = false;
+
+		public List<ExcelRow> readSheet() throws Exception{ 
+			if(!inited){
+				init();
+			}
+			while(true){
+				List<ExcelRow> list = new ArrayList<>();
+				if(isEnd){
+					return null;
+				}else if(!inited){
+					init();
+					read();
+					continue;
+				}else if(rowReadingIndex > 0 && rowReadingIndex < sheetData.size()){
+					while(rowReadingIndex < sheetData.size()){
+						ExcelRow row = sheetReadingData.get(rowReadingIndex);
+						rowReadingIndex++;
+						list.add(row);
+					}
+					read();
+					return list;
+				}else{
+					list.addAll(sheetReadingData);
+					read();
+					return list;
+				}
+			}
+		}
+		
 		public ExcelRow readRow() throws Exception {
-
-			return null;
+			while(true){
+				if(isEnd){
+					return null;
+				}else if(!inited){
+					init();
+					read();
+					continue;
+				}
+				if(rowReadingIndex < sheetReadingData.size()){
+					ExcelRow row = sheetReadingData.get(rowReadingIndex);
+					rowReadingIndex++;
+					return row;
+				}else{
+					read();
+				}
+			}
+		}
+		
+		private void read() throws Exception {
+			if(sheetReadingIndex < sheetNameGivenList.size()) {
+				sheetName = sheetNameGivenList.get(sheetReadingIndex);
+				sheetIndex = sheetNameList.indexOf(sheetName) + 1;
+				if(sheetIndex == -1){
+					rowReadingIndex = 0;
+					sheetReadingIndex++;
+					return;
+				}
+				if(sheetFilter != null && !sheetFilter.filter(sheetIndex, sheetName)){
+					rowReadingIndex = 0;
+					sheetReadingIndex++;
+					return;
+				}
+				sheetReadingData = bookData.get(sheetName);
+				rowReadingIndex = 0;
+				sheetReadingIndex++;
+			}else{
+				isEnd = true;
+			}
+		}
+		
+		private void init(){
+			inited = true;
+			sheetNameGivenList.addAll(sheetNameList);
+			if(sheetFilter != null){
+				sheetFilter.resetSheetListForRead(sheetNameGivenList);
+			}
 		}
 	}
-
 }
-

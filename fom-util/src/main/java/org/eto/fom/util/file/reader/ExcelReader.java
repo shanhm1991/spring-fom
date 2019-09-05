@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
@@ -41,13 +42,13 @@ public class ExcelReader implements IExcelReader {
 	private Map<String, Sheet> sheetMap = new HashMap<>();
 
 	private List<String> sheetNameList = new ArrayList<>();
-	
+
 	private List<String> sheetNameGivenList = new ArrayList<>();
-	
+
 	private int sheetIndexReading = 0;
 
 	private Sheet sheet; 
-	
+
 	private int sheetIndex = 0;
 
 	private String sheetName;
@@ -56,8 +57,10 @@ public class ExcelReader implements IExcelReader {
 
 	private int rowCount;
 
+	private int cellIndex = 0;
+
 	private ExcelSheetFilter sheetFilter;
-	
+
 	private boolean inited = false;
 
 	public ExcelReader(String sourceUri) throws IOException {
@@ -86,27 +89,10 @@ public class ExcelReader implements IExcelReader {
 		this.inputStream = inputStream;
 		init();
 	}
-	
+
 	@Override
 	public void setSheetFilter(ExcelSheetFilter sheetFilter) {
 		this.sheetFilter = sheetFilter;
-	}
-
-	@Override
-	public void setSheetListForReadByIndex(List<Integer> indexList){
-		List<String> nameList = new ArrayList<>();
-		for(int index : indexList){
-			if(index > sheetNameList.size()){
-				continue;
-			}
-			nameList.add(sheetNameList.get(index - 1));
-		}
-		sheetNameGivenList = nameList;
-	}
-
-	@Override
-	public void setSheetListForReadByName(List<String> nameList){
-		sheetNameGivenList = nameList;
 	}
 
 	private void init() throws IOException{ 
@@ -125,11 +111,8 @@ public class ExcelReader implements IExcelReader {
 		}
 		//cann't let the customer code to directly modify sheetNameList
 		sheetNameGivenList.addAll(sheetNameList);
-		if(sheetFilter != null){
-			sheetFilter.resetSheetListForRead(sheetNameGivenList);
-		}
 	}
-	
+
 	@Override
 	public List<ExcelRow> readSheet() throws Exception {
 		List<ExcelRow> list = new ArrayList<>();
@@ -148,6 +131,9 @@ public class ExcelReader implements IExcelReader {
 	public ExcelRow readRow() {
 		if(!inited){
 			inited = true;
+			if(sheetFilter != null){
+				sheetFilter.resetSheetListForRead(sheetNameGivenList);
+			}
 			initSheet();
 		}
 		while(true){
@@ -195,8 +181,8 @@ public class ExcelReader implements IExcelReader {
 					List<String> list = new ArrayList<>(cellCount);
 
 					boolean isEmpty = true;
-					for(int i = 0;i < cellCount;i++){
-						String value = getCellValue(row.getCell(i));
+					for(cellIndex = 0; cellIndex < cellCount; cellIndex++){
+						String value = getCellValue(row.getCell(cellIndex));
 						if(isEmpty && !StringUtils.isBlank(value)){
 							isEmpty = false;
 						}
@@ -255,42 +241,37 @@ public class ExcelReader implements IExcelReader {
 				try {
 					return cell.getRichStringCellValue().toString();
 				} catch (IllegalStateException e2) {
-					LOG.error("Excel parse error: sheet=" + cell.getSheet().getSheetName() 
-							+ ",row=" + cell.getRowIndex() + ",column=" + cell.getColumnIndex(), e2);
-					return "error";
+					LOG.error("Excel format error: sheet=" + sheetName + ",row=" + rowIndex + ",column=" + cellIndex, e2);
+					return "";
 				}
 			} catch (Exception e) {
-				LOG.error("Excel parse error: sheet=" + cell.getSheet().getSheetName() 
-						+ ",row=" + cell.getRowIndex() + ",column=" + cell.getColumnIndex(), e);
+				LOG.error("Excel format error: sheet=" + sheetName + ",row=" + rowIndex + ",column=" + cellIndex, e);
 				return "";
 			}
 		case BLANK:
 			return "";
 		case ERROR:
-			LOG.error("Excel parse error: sheet=" + cell.getSheet().getSheetName() 
-					+ ",row=" + cell.getRowIndex() + ",column=" + cell.getColumnIndex());
+			LOG.error("Excel format error: sheet=" + sheetName + ",row=" + rowIndex + ",column=" + cellIndex);
 			return "";
 		default:
 			return "";
 		}
 	}
 
-	private static String double2String(Double d) {
+	static String double2String(Double d) {
 		String doubleStr = d.toString();
 		boolean b = doubleStr.contains("E");
 		int indexOfPoint = doubleStr.indexOf('.');
 		if (b) {
 			int indexOfE = doubleStr.indexOf('E');
-			BigInteger xs = 
-					new BigInteger(doubleStr.substring(indexOfPoint + BigInteger.ONE.intValue(), indexOfE));
-			int pow = 
-					Integer.parseInt(doubleStr.substring(indexOfE + BigInteger.ONE.intValue()));
+			BigInteger xs = new BigInteger(doubleStr.substring(indexOfPoint + BigInteger.ONE.intValue(), indexOfE));
+			int pow = Integer.parseInt(doubleStr.substring(indexOfE + BigInteger.ONE.intValue()));
 			int xsLen = xs.toByteArray().length;
 			int scale = xsLen - pow > 0 ? xsLen - pow : 0;
 			doubleStr = String.format("%." + scale + "f", d);
 		} else {
-			java.util.regex.Pattern p = Pattern.compile(".0$");
-			java.util.regex.Matcher m = p.matcher(doubleStr);
+			Pattern p = Pattern.compile(".0$");
+			Matcher m = p.matcher(doubleStr);
 			if (m.find()) {
 				doubleStr = doubleStr.replace(".0", "");
 			}

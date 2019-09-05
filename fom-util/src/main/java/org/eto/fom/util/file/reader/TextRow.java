@@ -31,18 +31,13 @@ public class TextRow implements IRow {
 		return isEmpty;
 	}
 	
-	void setEmpty(boolean isEmpty) {
-		this.isEmpty = isEmpty;
-	}
-
-	@Override
-	public boolean isLastRow() {
-		throw new UnsupportedOperationException();
-	}
-
 	@Override
 	public List<String> getColumnList() {
 		return columnList;
+	}
+	
+	void setEmpty(boolean isEmpty) {
+		this.isEmpty = isEmpty;
 	}
 
 	@Override

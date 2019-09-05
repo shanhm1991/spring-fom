@@ -38,13 +38,16 @@ public class ExcelRow implements IRow{
 	}
 
 	@Override
-	public boolean isLastRow() {
-		return isLastRow;
-	}
-
-	@Override
 	public List<String> getColumnList() {
 		return columnList;
+	}
+	
+	/**
+	 * 是否最后一行
+	 * @return
+	 */
+	public boolean isLastRow() {
+		return isLastRow;
 	}
 
 	/**

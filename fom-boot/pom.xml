@@ -127,7 +127,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
+			<!-- <plugin>
 				<artifactId>maven-eclipse-plugin</artifactId>
 				<configuration>
 					<downloadSources>true</downloadSources>
@@ -136,7 +136,7 @@
 						<sourceExclude>**/.svn/**</sourceExclude>
 					</sourceExcludes>
 				</configuration>
-			</plugin>
+			</plugin> -->
 		</plugins>
 	</build>
 

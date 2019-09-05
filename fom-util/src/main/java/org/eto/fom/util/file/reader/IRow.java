@@ -22,12 +22,6 @@ public interface IRow {
 	boolean isEmpty();
 	
 	/**
-	 * 是否是最后一行
-	 * @return
-	 */
-	boolean isLastRow();
-	
-	/**
 	 * 获取行列数据
 	 * @return
 	 */
