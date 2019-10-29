@@ -228,7 +228,12 @@ public class ExcelReader implements IExcelReader {
 				Date date = DateUtil.getJavaDate(value);
 				return String.valueOf(date.getTime());
 			}else{
-				return double2String(value);
+				try{
+					return double2String(value);
+				}catch(Exception e){
+					LOG.error("Excel format error: sheet=" + sheetName + ",row=" + rowIndex + ",column=" + cellIndex, e);
+					return String.valueOf(value);
+				}
 			}
 		case STRING:
 			return cell.getStringCellValue();
@@ -261,21 +266,17 @@ public class ExcelReader implements IExcelReader {
 	static String double2String(Double d) {
 		return formatDouble(d.toString());
 	}
-	
+
 	static String formatDouble(String doubleStr) {
 		boolean b = doubleStr.contains("E");
 		int indexOfPoint = doubleStr.indexOf('.');
 		if (b) {
 			int indexOfE = doubleStr.indexOf('E');
-			try{
-				BigInteger xs = new BigInteger(doubleStr.substring(indexOfPoint + BigInteger.ONE.intValue(), indexOfE));
-				int pow = Integer.parseInt(doubleStr.substring(indexOfE + BigInteger.ONE.intValue()));
-				int xsLen = xs.toByteArray().length;
-				int scale = xsLen - pow > 0 ? xsLen - pow : 0;
-				doubleStr = String.format("%." + scale + "f", doubleStr);
-			}catch(Exception e){
-				LOG.error("Excel format error: value=" + doubleStr, e);
-			}
+			BigInteger xs = new BigInteger(doubleStr.substring(indexOfPoint + BigInteger.ONE.intValue(), indexOfE));
+			int pow = Integer.parseInt(doubleStr.substring(indexOfE + BigInteger.ONE.intValue()));
+			int xsLen = xs.toByteArray().length;
+			int scale = xsLen - pow > 0 ? xsLen - pow : 0;
+			doubleStr = String.format("%." + scale + "f", doubleStr);
 		} else {
 			Pattern p = Pattern.compile(".0$");
 			Matcher m = p.matcher(doubleStr);

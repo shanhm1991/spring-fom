@@ -577,7 +577,14 @@ public class ExcelEventReader implements IExcelReader {
 			case NumberRecord.sid:
 				NumberRecord number = (NumberRecord) record;
 				prepareRowData(number.getRow());
-				fillRowData(number.getColumn(), ExcelReader.double2String(number.getValue())); 
+				String value1 = String.valueOf(number.getValue());
+				try{
+					value1 = ExcelReader.formatDouble(value1);
+				}catch(Exception e){
+					LOG.error("Excel format error: sheetName=" 
+							+ sheetName + ", rowIndex=" + (rowIndex + 1) + ",column=" + number.getColumn(),  e);
+				}
+				fillRowData(number.getColumn(), value1); 
 				break;
 			case LabelSSTRecord.sid:
 				LabelSSTRecord labelSST = (LabelSSTRecord)record;
@@ -587,7 +594,14 @@ public class ExcelEventReader implements IExcelReader {
 			case FormulaRecord.sid:
 				FormulaRecord formula = (FormulaRecord)record;
 				prepareRowData(formula.getRow());
-				fillRowData(formula.getColumn(), ExcelReader.double2String(formula.getValue())); 
+				String value2 = String.valueOf(formula.getValue());
+				try{
+					value2 = ExcelReader.formatDouble(value2);
+				}catch(Exception e){
+					LOG.error("Excel format error: sheetName=" 
+							+ sheetName + ", rowIndex=" + (rowIndex + 1) + ",column=" + formula.getColumn(),  e);
+				}
+				fillRowData(formula.getColumn(), value2); 
 				break;
 			case BlankRecord.sid:
 				BlankRecord blank = (BlankRecord)record;
