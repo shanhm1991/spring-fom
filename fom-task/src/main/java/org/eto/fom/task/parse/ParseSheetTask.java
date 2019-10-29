@@ -50,7 +50,7 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 	private Map<String, SheetHandler> sheetHandlerMap = new HashMap<>();
 
 	//excelData
-	private final Map<String, Object> excelData = new HashMap<>();
+	private final Map<String, List<Map<String, Object>>> excelData = new HashMap<>();
 
 	private File excel;
 
@@ -118,11 +118,11 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 			@Override
 			public boolean accept(File file) {
 				String name = file.getName().toLowerCase();
-				return name.endsWith(IExcelReader.EXCEL_XLSX) || name.endsWith(IExcelReader.EXCEL_XLS);
+				return name.endsWith(IExcelReader.EXCEL_XLSX);
 			}
 		});
 		if(array == null || array.length != 1  ){
-			throw new IllegalArgumentException("zip文件不合法，Excel(.xls或.xlsx)文件有且仅能有一个)");
+			throw new IllegalArgumentException("zip文件不合法，Excel(.xlsx)文件有且仅能有一个)");
 		}
 		return array[0];
 	}
@@ -228,7 +228,7 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 		data.put("row", row.getRowIndex());//在数据中补上Excel信息，在后续数据层反馈数据错误时方便定位
 
 		Map<String, Map<String,String>> rowRule = sheetRule.get(sheet);//not null(filter)
-		if(row.getRowIndex() == 0){
+		if(row.getRowIndex() == 1){
 			LinkedHashMap<Integer,String> link = new LinkedHashMap<>();
 			for(int i = 0;i < columns.size();i++){
 				link.put(i, columns.get(i).trim());
@@ -322,7 +322,7 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 		data.put(field, value);
 	}
 
-	private String buildError(String msg, Object sheet, Object row, String column){
+	protected String buildError(String msg, Object sheet, Object row, String column){
 		StringBuilder builder = new StringBuilder(msg);
 		builder.append(", sheet=").append(sheet);
 		builder.append(", row=").append(row);
@@ -364,7 +364,7 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 		handlerData(excelData);
 	}
 
-	protected abstract void handlerData(Map<String, Object> excelData);
+	protected abstract void handlerData(Map<String, List<Map<String, Object>>> excelData);
 
 	@Override
 	protected boolean sheetFilter(int sheetIndex, String sheetName) { 
@@ -388,6 +388,7 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 		 * @param excelData excel各个sheet的数据集，这地方用Map<String, Object>有点妥协，只是为了方便
 		 * @throws Exception
 		 */
-		void handler(String sheet, List<Map<String, Object>> sheetData, long batchTime, Map<String, Object> excelData) throws Exception;
+		void handler(String sheet, List<Map<String, Object>> sheetData, 
+				long batchTime, Map<String, List<Map<String, Object>>> excelData) throws Exception;
 	}
 }

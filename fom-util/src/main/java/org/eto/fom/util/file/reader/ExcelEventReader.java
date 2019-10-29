@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.eventusermodel.HSSFEventFactory;
 import org.apache.poi.hssf.eventusermodel.HSSFListener;
@@ -340,19 +341,26 @@ public class ExcelEventReader implements IExcelReader {
 				}
 
 				if (formatString != null) {
-					try{
-						if(DateUtil.isADateFormat(formatIndex,formatString)) {
+					if("General".equals(formatString) || "@".equals(formatString)){
+						//单元格格式为常规或文本，则保持不变
+					}else if(DateUtil.isADateFormat(formatIndex,formatString)){
+						//否则再看是否为日期
+						try{
 							double value = Double.valueOf(lastContents);
 							if(DateUtil.isValidExcelDate(value)) {
 								Date date = DateUtil.getJavaDate(value, false);
 								lastContents = String.valueOf(date.getTime());
 							}
-						}else{
-							lastContents = ExcelReader.formatDouble(lastContents);
+						}catch(Exception e){
+							//ignore
 						}
-					}catch(Exception e){
-						LOG.error("Excel format error: sheetName=" 
-								+ sheetName + ", rowIndex=" + (rowIndex + 1) + ",column=" + cellIndex,  e);
+					}else{
+						//最后尝试转一下数值（假如不是数值格式可能会被误伤，不过应该很少见）
+						try{
+							lastContents = ExcelReader.formatDouble(lastContents);
+						}catch(Exception e){
+							//ignore
+						}
 					}
 					formatString = null;
 				}
@@ -367,11 +375,23 @@ public class ExcelEventReader implements IExcelReader {
 				ExcelRow data = new ExcelRow(rowIndex + 1, columnList);
 				data.setSheetIndex(sheetIndex); 
 				data.setSheetName(sheetName); 
-				data.setEmpty(false); 
+				data.setEmpty(checkEmpty()); 
 				data.setLastRow(rowIndex == rowMax - 1); 
 				sheetData.add(data);
 				rowIndex++;
 			}
+		}
+
+		private boolean checkEmpty(){
+			if(columnList == null || columnList.size() == 0){
+				return true;
+			}
+			for(String str : columnList){
+				if(!StringUtils.isBlank(str)){
+					return false;
+				}
+			}
+			return true;
 		}
 
 		public void characters(char[] ch, int start, int length) throws SAXException {
@@ -508,7 +528,7 @@ public class ExcelEventReader implements IExcelReader {
 		private List<String> sheetNameList = new ArrayList<>();
 
 		private List<String> sheetNameGivenList = new ArrayList<>();
-		
+
 		private int sheetIndex = 0;
 
 		private String sheetName;  
@@ -617,13 +637,13 @@ public class ExcelEventReader implements IExcelReader {
 		}
 
 		private int sheetReadingIndex = 0;
-		
+
 		private int rowReadingIndex = 0;
-		
+
 		private List<ExcelRow> sheetReadingData;
-		
+
 		private boolean inited = false;
-		
+
 		private boolean isEnd = false;
 
 		public List<ExcelRow> readSheet() throws Exception{ 
@@ -653,7 +673,7 @@ public class ExcelEventReader implements IExcelReader {
 				}
 			}
 		}
-		
+
 		public ExcelRow readRow() throws Exception {
 			while(true){
 				if(isEnd){
@@ -672,7 +692,7 @@ public class ExcelEventReader implements IExcelReader {
 				}
 			}
 		}
-		
+
 		private void read() throws Exception {
 			if(sheetReadingIndex < sheetNameGivenList.size()) {
 				sheetName = sheetNameGivenList.get(sheetReadingIndex);
@@ -694,7 +714,7 @@ public class ExcelEventReader implements IExcelReader {
 				isEnd = true;
 			}
 		}
-		
+
 		private void init(){
 			inited = true;
 			sheetNameGivenList.addAll(sheetNameList);

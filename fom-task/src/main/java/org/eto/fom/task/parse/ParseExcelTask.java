@@ -11,7 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.eto.fom.context.ExceptionHandler;
 import org.eto.fom.context.ResultHandler;
 import org.eto.fom.util.IoUtil;
-import org.eto.fom.util.file.reader.ExcelReader;
+import org.eto.fom.util.file.reader.ExcelEventReader;
 import org.eto.fom.util.file.reader.ExcelRow;
 import org.eto.fom.util.file.reader.ExcelSheetFilter;
 import org.eto.fom.util.file.reader.IExcelReader;
@@ -134,7 +134,7 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 		ExcelRow row = null;
 		String sheetName = null;
 		try{
-			reader = new ExcelReader(sourceUri);
+			reader = getExcelReader(sourceUri);
 			reader.setSheetFilter(new ExcelSheetFilter() {
 				@Override
 				public void resetSheetListForRead(List<String> nameList) {
@@ -167,9 +167,7 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 							sourceName, sheetName, rowIndex, row.getColumnList());
 				}
 
-				if(row.isEmpty()){
-					log.debug("ignore empty row, sheet={}, row={}", sheetName, lineIndex);
-				}else{
+				if(!row.isEmpty()){
 					List<V> dataList = parseRowData(row, batchTime);
 					if(dataList != null){
 						batchData.addAll(dataList);
@@ -201,6 +199,10 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 		}finally{
 			IoUtil.close(reader);
 		}
+	}
+	
+	protected IExcelReader getExcelReader(String sourceUri) throws Exception{
+		return new ExcelEventReader(getExcelInputStream(sourceUri), IExcelReader.EXCEL_XLSX);
 	}
 
 	/**
