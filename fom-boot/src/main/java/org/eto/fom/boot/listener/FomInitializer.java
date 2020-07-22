@@ -6,7 +6,7 @@ import javax.servlet.ServletContext;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eto.fom.boot.ServletUtil;
-import org.eto.fom.context.ContextManager;
+import org.eto.fom.context.core.ContextManager;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;

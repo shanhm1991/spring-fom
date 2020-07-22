@@ -18,7 +18,6 @@ import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -28,7 +27,7 @@ import org.springframework.web.filter.CorsFilter;
  * -Dwebapp.root="/"<br>
  * -Dcache.root="/WEB-INF/cache"<br>
  * -Dlog.root="/log"<br>
- * -Dlog4jConfigLocation="/WEB-INF/log4j.properties"<br>
+ * -Dlog4jConfigLocation="/log4j.properties"<br>
  * -DfomConfigLocation="/WEB-INF/fom.xml"<br>
  * -DpoolConfigLocation="/WEB-INF/pool.xml"<br>
  * 
@@ -36,7 +35,6 @@ import org.springframework.web.filter.CorsFilter;
  *
  */
 @Configuration
-@ImportResource(locations= {"**/*spring*.xml"})  
 public class FomConfiguration implements ServletContextInitializer {
 	
 	private static final int ORDER4 = 4;
@@ -104,6 +102,10 @@ public class FomConfiguration implements ServletContextInitializer {
 				String root = System.getProperty("webapp.root");
 				if(StringUtils.isBlank(root)){
 					root = ClassLoader.getSystemResource("").getPath();
+					String os = System.getProperty("os.name");
+			    	if(os.toLowerCase().indexOf("windows") != -1){
+			    		root = root.substring(1);
+			    	}
 					System.setProperty("webapp.root", root);
 				}
 				context.setDocBase(root); 
@@ -115,7 +117,7 @@ public class FomConfiguration implements ServletContextInitializer {
 
 				String logPath = System.getProperty("log4jConfigLocation");
 				if(StringUtils.isBlank(logPath)){
-					PropertyConfigurator.configure(root + File.separator + "/WEB-INF/log4j.properties");
+					PropertyConfigurator.configure(root + File.separator + "/log4j.properties");
 				}
 			}
 		};

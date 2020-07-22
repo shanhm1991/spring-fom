@@ -8,8 +8,8 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eto.fom.context.ExceptionHandler;
-import org.eto.fom.context.ResultHandler;
+import org.eto.fom.context.core.ExceptionHandler;
+import org.eto.fom.context.core.ResultHandler;
 import org.eto.fom.util.IoUtil;
 import org.eto.fom.util.file.reader.ExcelEventReader;
 import org.eto.fom.util.file.reader.ExcelRow;
@@ -89,11 +89,11 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 	@Override
 	protected boolean beforeExec() throws Exception { 
 		String logName = new File(id).getName();
-		if(StringUtils.isBlank(getContextName())){
+		if(StringUtils.isBlank(getName())){
 			this.progressLog = new File(System.getProperty("cache.parse") + File.separator + logName + ".log");
 		}else{
 			this.progressLog = new File(System.getProperty("cache.parse") 
-					+ File.separator + getContextName() + File.separator + logName + ".log");
+					+ File.separator + getName() + File.separator + logName + ".log");
 		}
 
 		File parentFile = progressLog.getParentFile();
@@ -201,7 +201,7 @@ public abstract class ParseExcelTask<V> extends ParseTask<V> {
 		}
 	}
 	
-	protected IExcelReader getExcelReader(String sourceUri) throws Exception{
+	protected IExcelReader getExcelReader(String sourceUri) throws Exception {
 		return new ExcelEventReader(getExcelInputStream(sourceUri), IExcelReader.EXCEL_XLSX);
 	}
 

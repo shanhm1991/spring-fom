@@ -8,8 +8,8 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
-import org.eto.fom.context.Result;
-import org.eto.fom.context.ResultHandler;
+import org.eto.fom.context.core.Result;
+import org.eto.fom.context.core.ResultHandler;
 import org.eto.fom.util.hdfs.HdfsUtil;
 import org.eto.fom.util.log.LoggerAppender;
 

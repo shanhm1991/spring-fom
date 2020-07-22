@@ -1,4 +1,4 @@
-package org.eto.fom.context;
+package org.eto.fom.context.core;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
@@ -33,7 +33,7 @@ public class TimedFuture<T> extends FutureTask<T> {
 	}
 
 	public String getContextName(){
-		return task.getContextName();
+		return task.getName();
 	}
 
 	public String getTaskId() {

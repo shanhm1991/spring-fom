@@ -15,7 +15,7 @@ import org.apache.commons.lang.ArrayUtils;
  * @author shanhm
  *
  */
-class Loader {
+public class Loader {
 	
 	static URLClassLoader systemLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
 	

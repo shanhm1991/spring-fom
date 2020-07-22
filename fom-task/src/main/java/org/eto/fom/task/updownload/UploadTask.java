@@ -4,9 +4,9 @@ import java.io.File;
 import java.text.DecimalFormat;
 
 import org.apache.commons.lang.StringUtils;
-import org.eto.fom.context.ExceptionHandler;
-import org.eto.fom.context.ResultHandler;
-import org.eto.fom.context.Task;
+import org.eto.fom.context.core.ExceptionHandler;
+import org.eto.fom.context.core.ResultHandler;
+import org.eto.fom.context.core.Task;
 import org.eto.fom.task.updownload.helper.UploadHelper;
 
 /**

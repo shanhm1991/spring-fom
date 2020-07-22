@@ -1,4 +1,4 @@
-package org.eto.fom.context;
+package org.eto.fom.context.core;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -29,7 +29,9 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONObject;
-import org.eto.fom.context.ContextStatistics.CostDetail;
+import org.eto.fom.context.Loader;
+import org.eto.fom.context.annotation.FomContext;
+import org.eto.fom.context.core.ContextStatistics.CostDetail;
 import org.eto.fom.util.IoUtil;
 
 /**
@@ -38,9 +40,9 @@ import org.eto.fom.util.IoUtil;
  * @author shanhm
  *
  */
-public class ContextUtil {
+public class ContextHelper {
 
-	private static final Logger LOG = Logger.getLogger(ContextUtil.class);
+	private static final Logger LOG = Logger.getLogger(ContextHelper.class);
 
 	private static final int BEGIN = 2;
 
@@ -152,8 +154,8 @@ public class ContextUtil {
 
 			cmap.put("name", context.name);
 			cmap.put("state", context.getState().name().toLowerCase());
-			if(!cmap.containsKey(ContextConfig.CRON)){
-				cmap.put(ContextConfig.CRON, ""); 
+			if(!cmap.containsKey(ContextConfig.CONF_CRON)){
+				cmap.put(ContextConfig.CONF_CRON, ""); 
 			}
 			
 			cmap.put("executeTimes", String.valueOf(context.getExecuteTimes()));
@@ -205,19 +207,19 @@ public class ContextUtil {
 			String key = it.next();
 			String value = jsonObject.getString(key);
 			switch(key){
-			case ContextConfig.QUEUESIZE:
+			case ContextConfig.CONF_QUEUESIZE:
 				context.config.setQueueSize(Integer.parseInt(value)); break;
-			case ContextConfig.THREADCORE:
+			case ContextConfig.CONF_THREADCORE:
 				context.config.setThreadCore(Integer.parseInt(value)); break;
-			case ContextConfig.THREADMAX:
+			case ContextConfig.CONF_THREADMAX:
 				context.config.setThreadMax(Integer.parseInt(value)); break;
-			case ContextConfig.ALIVETIME:
+			case ContextConfig.CONF_ALIVETIME:
 				context.config.setAliveTime(Integer.parseInt(value)); break;
-			case ContextConfig.OVERTIME:
+			case ContextConfig.CONF_OVERTIME:
 				context.config.setOverTime(Integer.parseInt(value)); break;
-			case ContextConfig.CANCELLABLE:
+			case ContextConfig.CONF_CANCELLABLE:
 				context.config.setCancellable(Boolean.parseBoolean(value)); break;
-			case ContextConfig.CRON:
+			case ContextConfig.CONF_CRON:
 				context.config.setCron(value); break;
 			default:
 				context.config.put(key, value);
@@ -414,7 +416,7 @@ public class ContextUtil {
 			Constructor constructor = contextClass.getConstructor(String.class);
 			context = (Context)constructor.newInstance(name);
 		}
-		context.regist();
+		context.regist(ContextManager.LOADFROM_INPUT);
 		context.startup();
 		resMap.put("result", true);
 

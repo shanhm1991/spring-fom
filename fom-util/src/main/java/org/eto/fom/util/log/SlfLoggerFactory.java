@@ -22,15 +22,20 @@ public class SlfLoggerFactory {
 	public static Logger getLogger(String name){
 		org.apache.log4j.Logger logger = LogManager.exists(name);
 		if(logger != null){
+			//有可能返回的logger还没有设置好
 			return LoggerFactory.getLogger(name);
 		}
+
 		logger = org.apache.log4j.Logger.getLogger(name); 
 		logger.setLevel(Level.INFO);  
 		logger.setAdditivity(false); 
 		logger.removeAllAppenders();
-		LoggerAppender appender = new LoggerAppender();
-		PatternLayout layout = new PatternLayout();  
-		layout.setConversionPattern("%d{yyyy-MM-dd HH:mm:ss SSS} [%p] %t [%F:%L] %m%n");  
+		
+		final PatternLayout layout = new PatternLayout();  
+		layout.setConversionPattern("%d{yyyy-MM-dd HH:mm:ss SSS} %17t [%5p] %m%n");  
+		
+		final LoggerAppender appender = new LoggerAppender(); 
+		appender.setName(name);
 		appender.setLayout(layout); 
 		appender.setEncoding("UTF-8");
 		appender.setAppend(true);

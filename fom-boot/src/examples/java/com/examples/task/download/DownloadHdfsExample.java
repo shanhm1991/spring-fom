@@ -1,14 +1,15 @@
 package com.examples.task.download;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
-import org.eto.fom.context.Context;
-import org.eto.fom.context.FomContext;
+import org.eto.fom.context.annotation.FomContext;
+import org.eto.fom.context.core.Context;
 import org.eto.fom.task.updownload.DownloadTask;
 import org.eto.fom.task.updownload.helper.DownloadHelper;
 import org.eto.fom.task.updownload.helper.impl.HdfsHelper;
@@ -37,7 +38,7 @@ public class DownloadHdfsExample extends Context {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected Set<DownloadTask> scheduleBatchTasks() throws Exception {  
+	protected Collection<DownloadTask> scheduleBatch() throws Exception {  
 		List<String> list = HdfsUtil.list(masterUrl, slaveUrl, new Path("/test"), new PathFilter(){
 			@Override
 			public boolean accept(Path path) {

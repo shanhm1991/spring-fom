@@ -1,7 +1,7 @@
 package com.examples.task.download;
 
-import org.eto.fom.context.Context;
-import org.eto.fom.context.FomContext;
+import org.eto.fom.context.annotation.FomContext;
+import org.eto.fom.context.core.Context;
 
 /**
  * 

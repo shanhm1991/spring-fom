@@ -1,20 +1,20 @@
-package org.eto.fom.context;
+package org.eto.fom.context.core;
 
-import static org.eto.fom.context.State.INITED;
-import static org.eto.fom.context.State.RUNNING;
-import static org.eto.fom.context.State.SLEEPING;
-import static org.eto.fom.context.State.STOPPED;
-import static org.eto.fom.context.State.STOPPING;
-import static org.eto.fom.context.State.WAITING;
+import static org.eto.fom.context.core.State.INITED;
+import static org.eto.fom.context.core.State.RUNNING;
+import static org.eto.fom.context.core.State.SLEEPING;
+import static org.eto.fom.context.core.State.STOPPED;
+import static org.eto.fom.context.core.State.STOPPING;
+import static org.eto.fom.context.core.State.WAITING;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -25,6 +25,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
+import org.eto.fom.context.Monitor;
+import org.eto.fom.context.annotation.FomContext;
 import org.eto.fom.util.log.SlfLoggerFactory;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
@@ -105,9 +107,11 @@ public class Context implements Serializable {
 
 	/**
 	 * 注册到容器
+	 * @param loadFrom
+	 * @throws Exception
 	 */
-	public void regist() {
-		ContextManager.register(this); 
+	public void regist(String loadFrom) throws Exception {
+		ContextManager.register(this, loadFrom);  
 	}
 
 	public void unSerialize(){
@@ -454,7 +458,7 @@ public class Context implements Serializable {
 			executeTimes++;
 			execTime = System.currentTimeMillis();
 			try {
-				Set<? extends Task> tasks = scheduleBatchTasks();
+				Collection<? extends Task> tasks = scheduleBatch();
 				if(tasks != null){
 					for (Task<?> task : tasks){
 						String taskId = task.getId();
@@ -593,7 +597,7 @@ public class Context implements Serializable {
 	 * @return task set
 	 * @throws Exception Exception
 	 */
-	protected <E> Set<? extends Task<E>> scheduleBatchTasks() throws Exception {
+	protected <E> Collection<? extends Task<E>> scheduleBatch() throws Exception {
 		return new HashSet<>();
 	}
 
@@ -616,10 +620,10 @@ public class Context implements Serializable {
 						String taskId = entry.getKey(); 
 						if(future.getStartTime() > 0 && !future.isDone()){
 							long existTime = (System.currentTimeMillis() - future.getStartTime()) / UNIT;
-							int threadOverTime = Integer.parseInt(config.get(ContextConfig.OVERTIME)); 
+							int threadOverTime = Integer.parseInt(config.get(ContextConfig.CONF_OVERTIME)); 
 							if(existTime > threadOverTime) {
 								log.warn("task overtime[{}], {}s", taskId, existTime);
-								if(Boolean.parseBoolean(config.get(ContextConfig.CANCELLABLE))) { 
+								if(Boolean.parseBoolean(config.get(ContextConfig.CONF_CANCELLABLE))) { 
 									future.cancel(true);
 								}
 							}

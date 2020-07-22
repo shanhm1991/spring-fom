@@ -3,7 +3,7 @@ package com.examples.task.input;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eto.fom.boot.SpringContext;
+import org.eto.fom.context.SpringContext;
 import org.eto.fom.task.parse.ParseTextTask;
 import org.eto.fom.util.file.reader.IReader;
 import org.eto.fom.util.file.reader.IRow;

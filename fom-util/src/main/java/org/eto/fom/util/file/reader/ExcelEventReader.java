@@ -297,7 +297,7 @@ public class ExcelEventReader implements IExcelReader {
 					default:
 						cellType = CellType.BLANK;
 					}
-				}
+				} 
 
 				String cellStyle = attributes.getValue("s");
 				if (cellStyle != null) {
@@ -338,13 +338,13 @@ public class ExcelEventReader implements IExcelReader {
 				case ERROR:
 				default:
 
-				}
+				} 
 
+				//如果是常规和文本，则什么也不做，否则看是否是日期，如果不是日期再尝试转数值
 				if (formatString != null) {
 					if("General".equals(formatString) || "@".equals(formatString)){
-						//单元格格式为常规或文本，则保持不变
+
 					}else if(DateUtil.isADateFormat(formatIndex,formatString)){
-						//否则再看是否为日期
 						try{
 							double value = Double.valueOf(lastContents);
 							if(DateUtil.isValidExcelDate(value)) {
@@ -355,7 +355,6 @@ public class ExcelEventReader implements IExcelReader {
 							//ignore
 						}
 					}else{
-						//最后尝试转一下数值（假如不是数值格式可能会被误伤，不过应该很少见）
 						try{
 							lastContents = ExcelReader.formatDouble(lastContents);
 						}catch(Exception e){
@@ -577,14 +576,7 @@ public class ExcelEventReader implements IExcelReader {
 			case NumberRecord.sid:
 				NumberRecord number = (NumberRecord) record;
 				prepareRowData(number.getRow());
-				String value1 = String.valueOf(number.getValue());
-				try{
-					value1 = ExcelReader.formatDouble(value1);
-				}catch(Exception e){
-					LOG.error("Excel format error: sheetName=" 
-							+ sheetName + ", rowIndex=" + (rowIndex + 1) + ",column=" + number.getColumn(),  e);
-				}
-				fillRowData(number.getColumn(), value1); 
+				fillRowData(number.getColumn(), ExcelReader.double2String(number.getValue())); 
 				break;
 			case LabelSSTRecord.sid:
 				LabelSSTRecord labelSST = (LabelSSTRecord)record;
@@ -594,14 +586,7 @@ public class ExcelEventReader implements IExcelReader {
 			case FormulaRecord.sid:
 				FormulaRecord formula = (FormulaRecord)record;
 				prepareRowData(formula.getRow());
-				String value2 = String.valueOf(formula.getValue());
-				try{
-					value2 = ExcelReader.formatDouble(value2);
-				}catch(Exception e){
-					LOG.error("Excel format error: sheetName=" 
-							+ sheetName + ", rowIndex=" + (rowIndex + 1) + ",column=" + formula.getColumn(),  e);
-				}
-				fillRowData(formula.getColumn(), value2); 
+				fillRowData(formula.getColumn(), ExcelReader.double2String(formula.getValue())); 
 				break;
 			case BlankRecord.sid:
 				BlankRecord blank = (BlankRecord)record;

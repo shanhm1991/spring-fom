@@ -1,12 +1,13 @@
 package com.examples.task;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-import org.eto.fom.context.Context;
-import org.eto.fom.context.FomContext;
-import org.eto.fom.context.Task;
+import org.eto.fom.context.annotation.FomContext;
+import org.eto.fom.context.core.Context;
+import org.eto.fom.context.core.Task;
 
 /**
  * 
@@ -22,7 +23,7 @@ public class Demo1 extends Context {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected Set<Task<Boolean>> scheduleBatchTasks() throws Exception {
+	protected Collection<Task<Boolean>> scheduleBatch() throws Exception {
 		Set<Task<Boolean>> set = new HashSet<>();
 		for(int i = 1; i < 50;i++){
 			set.add(new Task<Boolean>("demo1-" + i){

@@ -1,11 +1,12 @@
 package com.test;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eto.fom.context.Context;
-import org.eto.fom.context.FomContext;
-import org.eto.fom.context.Task;
+import org.eto.fom.context.annotation.FomContext;
+import org.eto.fom.context.core.Context;
+import org.eto.fom.context.core.Task;
 
 /**
  * 
@@ -19,7 +20,7 @@ public class ContextTest extends Context {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	protected Set<SelfTask> scheduleBatchTasks() throws Exception {
+	protected Collection<SelfTask> scheduleBatch() throws Exception {
 		Set<SelfTask> set = new HashSet<>();
 		set.add(new SelfTask("demoTask"));
 		return set;

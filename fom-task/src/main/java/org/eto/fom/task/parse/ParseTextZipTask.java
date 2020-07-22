@@ -8,8 +8,8 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eto.fom.context.ExceptionHandler;
-import org.eto.fom.context.ResultHandler;
+import org.eto.fom.context.core.ExceptionHandler;
+import org.eto.fom.context.core.ResultHandler;
 import org.eto.fom.util.file.ZipUtil;
 
 /**
@@ -94,22 +94,22 @@ public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
 	@Override
 	protected boolean beforeExec() throws Exception {
 		String sourceName = new File(id).getName();
-		if(StringUtils.isBlank(getContextName())){
+		if(StringUtils.isBlank(getName())){
 			this.progressLog = new File(System.getProperty("cache.parse") + File.separator + sourceName + ".log");
 		}else{
 			this.progressLog = new File(System.getProperty("cache.parse") 
-					+ File.separator + getContextName() + File.separator + sourceName + ".log");
+					+ File.separator + getName() + File.separator + sourceName + ".log");
 		}
 		File parentFile = progressLog.getParentFile();
 		if(!parentFile.exists() && !parentFile.mkdirs()){
 			throw new RuntimeException("cache directory create failed: " + parentFile);
 		}
 
-		if(StringUtils.isBlank(getContextName())){
+		if(StringUtils.isBlank(getName())){
 			this.unzipDir = new File(System.getProperty("cache.parse") + File.separator + sourceName);
 		}else{
 			this.unzipDir = new File(System.getProperty("cache.parse")
-					+ File.separator + getContextName() + File.separator + sourceName);
+					+ File.separator + getName() + File.separator + sourceName);
 		}
 
 		if(!ZipUtil.valid(id)){ 

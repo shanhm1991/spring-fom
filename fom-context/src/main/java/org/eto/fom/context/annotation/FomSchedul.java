@@ -1,4 +1,4 @@
-package org.eto.fom.context;
+package org.eto.fom.context.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -14,38 +14,27 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface FomContext {
-	
-	public static final int CORE = 4;
-	
-	public static final int MAX = 10;
-	
-	public static final int ALIVE = 30;
-	
-	public static final int OVER = 3600;
-	
-	public static final int QUEUE = 200;
+public @interface FomSchedul {
 
 	public String name() default "";
 	
 	public String remark() default "";
-
+	
 	public String cron() default "";
 	
 	public boolean execOnLoad() default true;
 	
 	public boolean stopWithNoCron() default false;
 
-	public int threadCore() default CORE;
+	public int threadCore() default FomContext.CORE;
 
-	public int threadMax() default MAX;
+	public int threadMax() default FomContext.MAX;
 
-	public int threadAliveTime() default ALIVE;
+	public int threadAliveTime() default FomContext.ALIVE;
 
-	public int threadOverTime() default OVER;
+	public int threadOverTime() default FomContext.OVER;
 	
-	public int queueSize() default QUEUE;
+	public int queueSize() default FomContext.QUEUE;
 
 	public boolean cancellable() default false;
-
 }

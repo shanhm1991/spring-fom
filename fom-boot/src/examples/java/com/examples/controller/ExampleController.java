@@ -3,8 +3,8 @@ package com.examples.controller;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eto.fom.context.ContextUtil;
-import org.eto.fom.context.Task;
+import org.eto.fom.context.core.ContextHelper;
+import org.eto.fom.context.core.Task;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,7 +26,7 @@ public class ExampleController {
 			}
 			
 		};
-		ContextUtil.submitTask("DemoStateTest1", task);
+		ContextHelper.submitTask("DemoStateTest1", task);
 		
 		Map<String,Object> map = new HashMap<>();
 		map.put("result", true);

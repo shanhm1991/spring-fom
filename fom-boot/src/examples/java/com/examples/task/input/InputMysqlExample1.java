@@ -2,12 +2,13 @@ package com.examples.task.input;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.eto.fom.boot.ServletUtil;
-import org.eto.fom.context.Context;
+import org.eto.fom.context.core.Context;
 import org.eto.fom.util.PatternUtil;
 import org.eto.fom.util.file.FileUtil;
 
@@ -37,7 +38,7 @@ public class InputMysqlExample1 extends Context {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected Set<InputMysqlExample1Task> scheduleBatchTasks() throws Exception { 
+	protected Collection<InputMysqlExample1Task> scheduleBatch() throws Exception { 
 		List<String> list = FileUtil.list(srcPath, new FileFilter(){
 			@Override
 			public boolean accept(File file) {

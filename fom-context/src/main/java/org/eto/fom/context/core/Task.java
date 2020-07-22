@@ -1,4 +1,4 @@
-package org.eto.fom.context;
+package org.eto.fom.context.core;
 
 import java.util.concurrent.Callable;
 
@@ -216,7 +216,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	 * 只有在context中使用时才会赋值，否则将为null
 	 * @return context name
 	 */
-	protected final String getContextName(){
+	protected final String getName(){
 		if(context == null){
 			return null;
 		}
@@ -227,7 +227,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	 * 只有在context中使用时才会赋值，否则将为null
 	 * @return ContextConfig
 	 */
-	protected final ContextConfig getContextConfig(){
+	protected final ContextConfig getConfig(){
 		if(context == null){
 			return null;
 		}

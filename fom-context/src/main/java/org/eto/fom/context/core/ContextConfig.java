@@ -1,4 +1,4 @@
-package org.eto.fom.context;
+package org.eto.fom.context.core;
 
 import java.io.Serializable;
 import java.text.DateFormat;
@@ -14,8 +14,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
-import org.eto.fom.util.map.MapUtils;
-import org.eto.fom.util.xml.XmlUtil;
+import org.eto.fom.context.SpringContext;
+import org.eto.fom.context.annotation.FomContext;
 import org.quartz.CronExpression;
 
 /**
@@ -31,57 +31,57 @@ public final class ContextConfig implements Serializable {
 	/**
 	 * 定时表达式
 	 */
-	public static final String CRON = "cron";
+	public static final String CONF_CRON = "cron";
 
 	/**
 	 * 备注
 	 */
-	public static final String REMARK = "remark";
+	public static final String CONF_REMARK = "remark";
 
 	/**
 	 * 线程池任务队列长度
 	 */
-	public static final String QUEUESIZE = "queueSize";
+	public static final String CONF_QUEUESIZE = "queueSize";
 
 	/**
 	 * 线程池核心线程数
 	 */
-	public static final String THREADCORE = "threadCore";
+	public static final String CONF_THREADCORE = "threadCore";
 
 	/**
 	 * 线程池最大线程数
 	 */
-	public static final String THREADMAX = "threadMax";
+	public static final String CONF_THREADMAX = "threadMax";
 
 	/**
 	 * 线程池任务线程最长空闲时间
 	 */
-	public static final String ALIVETIME = "threadAliveTime";
+	public static final String CONF_ALIVETIME = "threadAliveTime";
 
 	/**
 	 * 线程池任务线程执行超时时间
 	 */
-	public static final String OVERTIME = "threadOverTime";
+	public static final String CONF_OVERTIME = "threadOverTime";
 
 	/**
 	 * 线程池任务线程如果超时是否中断
 	 */
-	public static final String CANCELLABLE = "cancellable";
+	public static final String CONF_CANCELLABLE = "cancellable";
 
 	/** 
 	 * 如果没有配置定时周期，是否在执行完批量任务后自行结束
 	 */
-	public static final String STOPWITHNOCRON = "stopWithNoCron";
+	public static final String CONF_STOPWITHNOCRON = "stopWithNoCron";
 
 	/** 
 	 * 启动时是否立即执行定时批量任务
 	 */
-	public static final String EXECONLOAN = "execOnLoad";
+	public static final String CONF_EXECONLOAN = "execOnLoad";
 
 	public static boolean validKey(String key){
-		return !THREADCORE.equals(key) && !THREADMAX.equals(key) && !ALIVETIME.equals(key) && !STOPWITHNOCRON.equals(key)
-				&& !OVERTIME.equals(key) && !QUEUESIZE.equals(key) && !CANCELLABLE.equals(key) && !CRON.equals(key) 
-				&& !EXECONLOAN.equals(key);
+		return !CONF_THREADCORE.equals(key) && !CONF_THREADMAX.equals(key) && !CONF_ALIVETIME.equals(key) && !CONF_STOPWITHNOCRON.equals(key)
+				&& !CONF_OVERTIME.equals(key) && !CONF_QUEUESIZE.equals(key) && !CONF_CANCELLABLE.equals(key) && !CONF_CRON.equals(key) 
+				&& !CONF_EXECONLOAN.equals(key);
 	}
 
 	transient TimedExecutorPool pool;
@@ -103,28 +103,28 @@ public final class ContextConfig implements Serializable {
 					valueMap.put(e.getName(), e.getTextTrim());
 				}
 			}
-			setThreadCore(XmlUtil.getInt(element, THREADCORE, THREADCORE_DEFAULT, THREADCORE_MIN, THREADCORE_MAX));
-			setThreadMax(XmlUtil.getInt(element, THREADMAX, THREADMAX_DEFAULT, THREADMAX_MIN, THREADMAX_MAX));
-			setAliveTime(XmlUtil.getInt(element, ALIVETIME, ALIVETIME_DEFAULT, ALIVETIME_MIN, ALIVETIME_MAX));
-			setOverTime(XmlUtil.getInt(element, OVERTIME, OVERTIME_DEFAULT, OVERTIME_MIN, OVERTIME_MAX));
-			setQueueSize(XmlUtil.getInt(element, QUEUESIZE, QUEUESIZE_DEFAULT, QUEUESIZE_MIN, QUEUESIZE_MAX));
-			setCancellable(XmlUtil.getBoolean(element, CANCELLABLE, false));
-			setCron(XmlUtil.getString(element, CRON, ""));
-			setRemark(XmlUtil.getString(element, REMARK, ""));
-			setStopWithNoCron(XmlUtil.getBoolean(element, STOPWITHNOCRON, false));
-			setExecOnLoad(XmlUtil.getBoolean(element, EXECONLOAN, true));
+			setThreadCore(XmlUtil.getInt(element, CONF_THREADCORE, THREADCORE_DEFAULT, THREADCORE_MIN, THREADCORE_MAX));
+			setThreadMax(XmlUtil.getInt(element, CONF_THREADMAX, THREADMAX_DEFAULT, THREADMAX_MIN, THREADMAX_MAX));
+			setAliveTime(XmlUtil.getInt(element, CONF_ALIVETIME, ALIVETIME_DEFAULT, ALIVETIME_MIN, ALIVETIME_MAX));
+			setOverTime(XmlUtil.getInt(element, CONF_OVERTIME, OVERTIME_DEFAULT, OVERTIME_MIN, OVERTIME_MAX));
+			setQueueSize(XmlUtil.getInt(element, CONF_QUEUESIZE, QUEUESIZE_DEFAULT, QUEUESIZE_MIN, QUEUESIZE_MAX));
+			setCancellable(XmlUtil.getBoolean(element, CONF_CANCELLABLE, false));
+			setCron(XmlUtil.getString(element, CONF_CRON, ""));
+			setRemark(XmlUtil.getString(element, CONF_REMARK, ""));
+			setStopWithNoCron(XmlUtil.getBoolean(element, CONF_STOPWITHNOCRON, false));
+			setExecOnLoad(XmlUtil.getBoolean(element, CONF_EXECONLOAN, true));
 		}else if(cMap != null){
 			valueMap.putAll(cMap);
-			setThreadCore(MapUtils.getInt(THREADCORE, cMap, THREADCORE_DEFAULT));
-			setThreadMax(MapUtils.getInt(THREADMAX, cMap, THREADMAX_DEFAULT));
-			setAliveTime(MapUtils.getInt(ALIVETIME, cMap, ALIVETIME_DEFAULT));
-			setOverTime(MapUtils.getInt(OVERTIME, cMap, OVERTIME_DEFAULT));
-			setQueueSize(MapUtils.getInt(QUEUESIZE, cMap, QUEUESIZE_DEFAULT));
-			setCron(cMap.get(CRON)); 
-			setRemark(cMap.get(REMARK));
-			setCancellable(MapUtils.getBoolean(CANCELLABLE, cMap, false));
-			setStopWithNoCron(MapUtils.getBoolean(STOPWITHNOCRON, cMap, false));
-			setExecOnLoad(MapUtils.getBoolean(EXECONLOAN, cMap, true));
+			setThreadCore(MapUtils.getInt(CONF_THREADCORE, cMap, THREADCORE_DEFAULT));
+			setThreadMax(MapUtils.getInt(CONF_THREADMAX, cMap, THREADMAX_DEFAULT));
+			setAliveTime(MapUtils.getInt(CONF_ALIVETIME, cMap, ALIVETIME_DEFAULT));
+			setOverTime(MapUtils.getInt(CONF_OVERTIME, cMap, OVERTIME_DEFAULT));
+			setQueueSize(MapUtils.getInt(CONF_QUEUESIZE, cMap, QUEUESIZE_DEFAULT));
+			setCron(cMap.get(CONF_CRON)); 
+			setRemark(cMap.get(CONF_REMARK));
+			setCancellable(MapUtils.getBoolean(CONF_CANCELLABLE, cMap, false));
+			setStopWithNoCron(MapUtils.getBoolean(CONF_STOPWITHNOCRON, cMap, false));
+			setExecOnLoad(MapUtils.getBoolean(CONF_EXECONLOAN, cMap, true));
 		}else if(fc != null){
 			setThreadCore(fc.threadCore());
 			setThreadMax(fc.threadMax());
@@ -151,10 +151,10 @@ public final class ContextConfig implements Serializable {
 	}
 
 	void initPool(){
-		int core = Integer.parseInt(valueMap.get(THREADCORE)); 
-		int max = Integer.parseInt(valueMap.get(THREADMAX));
-		int aliveTime = Integer.parseInt(valueMap.get(ALIVETIME));   
-		int queueSize = Integer.parseInt(valueMap.get(QUEUESIZE));  
+		int core = Integer.parseInt(valueMap.get(CONF_THREADCORE)); 
+		int max = Integer.parseInt(valueMap.get(CONF_THREADMAX));
+		int aliveTime = Integer.parseInt(valueMap.get(CONF_ALIVETIME));   
+		int queueSize = Integer.parseInt(valueMap.get(CONF_QUEUESIZE));  
 		pool = new TimedExecutorPool(core,max,aliveTime,new LinkedBlockingQueue<Runnable>(queueSize));
 		pool.allowCoreThreadTimeOut(true);
 	}
@@ -227,7 +227,7 @@ public final class ContextConfig implements Serializable {
 		if(queueSize < QUEUESIZE_MIN || queueSize > QUEUESIZE_MAX){
 			queueSize = QUEUESIZE_DEFAULT;
 		}
-		valueMap.put(QUEUESIZE, String.valueOf(queueSize));
+		valueMap.put(CONF_QUEUESIZE, String.valueOf(queueSize));
 		return queueSize;
 	}
 
@@ -297,7 +297,7 @@ public final class ContextConfig implements Serializable {
 	 * @return remark
 	 */
 	public String getRemark(){
-		return valueMap.get(REMARK);
+		return valueMap.get(CONF_REMARK);
 	}
 
 	/**
@@ -305,7 +305,7 @@ public final class ContextConfig implements Serializable {
 	 * @param remark remark
 	 */
 	public void setRemark(String remark){
-		valueMap.put(REMARK, remark);
+		valueMap.put(CONF_REMARK, remark);
 	}
 
 	/**
@@ -313,7 +313,7 @@ public final class ContextConfig implements Serializable {
 	 * @return threadCore
 	 */
 	public int getThreadCore(){
-		return Integer.parseInt(valueMap.get(THREADCORE));
+		return Integer.parseInt(valueMap.get(CONF_THREADCORE));
 	}
 
 	/**
@@ -325,7 +325,7 @@ public final class ContextConfig implements Serializable {
 		if(threadCore < THREADCORE_MIN || threadCore > THREADCORE_MAX){
 			threadCore = THREADCORE_DEFAULT;
 		}
-		valueMap.put(THREADCORE, String.valueOf(threadCore));
+		valueMap.put(CONF_THREADCORE, String.valueOf(threadCore));
 		if(pool != null && pool.getCorePoolSize() != threadCore){
 			pool.setCorePoolSize(threadCore);
 		}
@@ -337,7 +337,7 @@ public final class ContextConfig implements Serializable {
 	 * @return threadMax
 	 */
 	public int getThreadMax(){
-		return Integer.parseInt(valueMap.get(THREADMAX));
+		return Integer.parseInt(valueMap.get(CONF_THREADMAX));
 	}
 
 	/**
@@ -349,7 +349,7 @@ public final class ContextConfig implements Serializable {
 		if(threadMax < THREADMAX_MIN || threadMax > THREADMAX_MAX){
 			threadMax = THREADMAX_DEFAULT;
 		}
-		valueMap.put(THREADMAX, String.valueOf(threadMax));
+		valueMap.put(CONF_THREADMAX, String.valueOf(threadMax));
 		if(pool != null && pool.getMaximumPoolSize() != threadMax){
 			pool.setMaximumPoolSize(threadMax);
 		}
@@ -361,7 +361,7 @@ public final class ContextConfig implements Serializable {
 	 * @return aliveTime
 	 */
 	public int getAliveTime(){
-		return Integer.parseInt(valueMap.get(ALIVETIME));
+		return Integer.parseInt(valueMap.get(CONF_ALIVETIME));
 	}
 
 	/**
@@ -373,7 +373,7 @@ public final class ContextConfig implements Serializable {
 		if(aliveTime < ALIVETIME_MIN || aliveTime > ALIVETIME_MAX){
 			aliveTime = ALIVETIME_DEFAULT;
 		}
-		valueMap.put(ALIVETIME, String.valueOf(aliveTime));
+		valueMap.put(CONF_ALIVETIME, String.valueOf(aliveTime));
 		if(pool != null && pool.getKeepAliveTime(TimeUnit.SECONDS) != aliveTime){ 
 			pool.setKeepAliveTime(aliveTime, TimeUnit.SECONDS);
 		}
@@ -385,7 +385,7 @@ public final class ContextConfig implements Serializable {
 	 * @return overTime
 	 */
 	public int getOverTime(){
-		return Integer.parseInt(valueMap.get(OVERTIME));
+		return Integer.parseInt(valueMap.get(CONF_OVERTIME));
 	}
 
 	/**
@@ -397,7 +397,7 @@ public final class ContextConfig implements Serializable {
 		if(overTime < OVERTIME_MIN || overTime > OVERTIME_MAX){
 			overTime = OVERTIME_DEFAULT;
 		}
-		valueMap.put(OVERTIME, String.valueOf(overTime));
+		valueMap.put(CONF_OVERTIME, String.valueOf(overTime));
 		return overTime;
 	}
 
@@ -406,7 +406,7 @@ public final class ContextConfig implements Serializable {
 	 * @return cancellable
 	 */
 	public boolean getCancellable(){
-		return Boolean.parseBoolean(valueMap.get(CANCELLABLE));
+		return Boolean.parseBoolean(valueMap.get(CONF_CANCELLABLE));
 	}
 
 	/**
@@ -415,7 +415,7 @@ public final class ContextConfig implements Serializable {
 	 * @return cancellable
 	 */
 	public boolean setCancellable(boolean cancellable){
-		valueMap.put(CANCELLABLE, String.valueOf(cancellable));
+		valueMap.put(CONF_CANCELLABLE, String.valueOf(cancellable));
 		return cancellable;
 	}
 
@@ -424,7 +424,7 @@ public final class ContextConfig implements Serializable {
 	 * @return cron
 	 */
 	public String getCron(){
-		return valueMap.get(CRON);
+		return valueMap.get(CONF_CRON);
 	}
 
 	/**
@@ -436,6 +436,12 @@ public final class ContextConfig implements Serializable {
 		if(StringUtils.isBlank(cron)){
 			return;
 		}
+		
+		//可能来自注解
+		if(cron.indexOf("${") != -1){ 
+			cron = SpringContext.getPropertiesValue(cron);
+		}
+		
 		CronExpression c = null;
 		try {
 			c = new CronExpression(cron);
@@ -443,8 +449,8 @@ public final class ContextConfig implements Serializable {
 			throw new IllegalArgumentException(e);
 		}
 		if(cronExpression == null
-				|| !(cron.equals(valueMap.get(CRON)  ))){
-			valueMap.put(CRON, cron);
+				|| !(cron.equals(valueMap.get(CONF_CRON)  ))){
+			valueMap.put(CONF_CRON, cron);
 			cronExpression = c;
 		}
 	}
@@ -454,7 +460,7 @@ public final class ContextConfig implements Serializable {
 	 * @param stopWithNoCron stopWithNoCron
 	 */
 	public void setStopWithNoCron(boolean stopWithNoCron) {
-		valueMap.put(STOPWITHNOCRON, String.valueOf(stopWithNoCron));
+		valueMap.put(CONF_STOPWITHNOCRON, String.valueOf(stopWithNoCron));
 	}
 
 	/**
@@ -462,7 +468,7 @@ public final class ContextConfig implements Serializable {
 	 * @return stopWithNoCron
 	 */
 	public boolean getStopWithNoCron() {
-		return MapUtils.getBoolean(STOPWITHNOCRON, valueMap, false);
+		return MapUtils.getBoolean(CONF_STOPWITHNOCRON, valueMap, false);
 	}
 
 	/**
@@ -470,7 +476,7 @@ public final class ContextConfig implements Serializable {
 	 * @param execOnLoad execOnLoad
 	 */
 	public void setExecOnLoad(boolean execOnLoad) {
-		valueMap.put(EXECONLOAN, String.valueOf(execOnLoad));
+		valueMap.put(CONF_EXECONLOAN, String.valueOf(execOnLoad));
 	}
 
 	/**
@@ -478,7 +484,12 @@ public final class ContextConfig implements Serializable {
 	 * @return execOnLoad
 	 */
 	public boolean getExecOnLoad(){
-		return MapUtils.getBoolean(EXECONLOAN, valueMap, true);
+		return MapUtils.getBoolean(CONF_EXECONLOAN, valueMap, true);
+	}
+	
+	@Override
+	public String toString() {
+		return valueMap.toString();
 	}
 
 	private static final int THREADCORE_DEFAULT = 4;

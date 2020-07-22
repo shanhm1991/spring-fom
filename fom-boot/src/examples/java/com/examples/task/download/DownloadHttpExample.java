@@ -1,11 +1,12 @@
 package com.examples.task.download;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eto.fom.context.Context;
-import org.eto.fom.context.FomContext;
+import org.eto.fom.context.annotation.FomContext;
+import org.eto.fom.context.core.Context;
 import org.eto.fom.task.updownload.DownloadTask;
 import org.eto.fom.task.updownload.helper.impl.HttpHelper;
 
@@ -28,7 +29,7 @@ public class DownloadHttpExample extends Context {
  
 	@SuppressWarnings("unchecked")
 	@Override
-	protected Set<DownloadTask> scheduleBatchTasks() throws Exception {
+	protected Collection<DownloadTask> scheduleBatch() throws Exception {
 		String uri = "http://localhost:4040/fom/index.html";
 		String destName = new File(uri).getName();
 		

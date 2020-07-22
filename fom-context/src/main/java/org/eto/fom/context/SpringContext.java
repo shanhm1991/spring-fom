@@ -1,11 +1,13 @@
-package org.eto.fom.boot;
+package org.eto.fom.context;
 
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringValueResolver;
 
 /**
  * 
@@ -13,19 +15,32 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class SpringContext implements ApplicationContextAware {
+public class SpringContext implements ApplicationContextAware, EmbeddedValueResolverAware {
 
-	//volatile只能保证引用的变化立即刷新，但系统对这个引用只有一次引用赋值操作
+	//仅由main初始化一次
 	private static volatile ApplicationContext applicationContext;
 
+	private static volatile StringValueResolver stringValueResolver;
+
 	@Override 
-	public void setApplicationContext(ApplicationContext context) throws BeansException {
-		if(applicationContext != null){
-			throw new UnsupportedOperationException();
-		}
-		applicationContext = context;
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		SpringContext.applicationContext = applicationContext;
 	}
-	
+
+	@Override
+	public void setEmbeddedValueResolver(StringValueResolver stringValueResolver) {
+		SpringContext.stringValueResolver = stringValueResolver;
+	}
+
+	/**
+	 * 获取spring环境配置
+	 * @param name
+	 * @return
+	 */
+	public static String getPropertiesValue(String name) {
+		return stringValueResolver.resolveStringValue(name);
+	}
+
 	/**
 	 * 根据bean的id来查找对象
 	 * @param id id

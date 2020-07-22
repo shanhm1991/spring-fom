@@ -12,9 +12,9 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eto.fom.context.ExceptionHandler;
-import org.eto.fom.context.ResultHandler;
-import org.eto.fom.context.Task;
+import org.eto.fom.context.core.ExceptionHandler;
+import org.eto.fom.context.core.ResultHandler;
+import org.eto.fom.context.core.Task;
 import org.eto.fom.task.updownload.helper.DownloadZipHelper;
 import org.eto.fom.util.IoUtil;
 import org.eto.fom.util.file.ZipUtil;
@@ -159,11 +159,11 @@ public class DownloadZipTask extends Task<Boolean> {
 			return false;
 		}
 
-		if(StringUtils.isBlank(getContextName())){
+		if(StringUtils.isBlank(getName())){
 			this.cachePath = System.getProperty("cache.download") + File.separator + id;
 		}else{
 			this.cachePath = System.getProperty("cache.download")
-					+ File.separator + getContextName() + File.separator + id;
+					+ File.separator + getName() + File.separator + id;
 		}
 
 		File file = new File(cachePath);

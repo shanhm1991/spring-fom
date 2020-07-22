@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.dom4j.Document;
@@ -35,9 +37,7 @@ import org.eto.fom.util.file.reader.IExcelReader;
  * 
  */
 public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>> {
-
-	private static final int WAIT_FILE = 100;
-
+	
 	//<sheetName, <columnIndex, columName>>
 	private Map<String, LinkedHashMap<Integer,String>> columnIndexMap = new HashMap<>();
 
@@ -50,11 +50,9 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 	private Map<String, SheetHandler> sheetHandlerMap = new HashMap<>();
 
 	//excelData
-	private final Map<String, List<Map<String, Object>>> excelData = new HashMap<>();
+	private final Map<String, Collection<Map<String, Object>>> excelData = new HashMap<>();
 
 	private File excel;
-
-	private String excelRule;
 
 	protected final String sourceName;
 
@@ -62,11 +60,20 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 
 	protected File zipWorkHome;
 
+	private String excelRule;
 
-	public ParseSheetTask(File file, String excelRule) {
+	public ParseSheetTask(File file) {
 		super(file.getPath(), 0, true);
 		this.sourceUri = file.getPath();
 		this.sourceName = file.getName();
+	}
+	
+
+	public String getExcelRule() {
+		return excelRule;
+	}
+
+	public void setExcelRule(String excelRule) {
 		this.excelRule = excelRule;
 	}
 
@@ -75,8 +82,6 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 	 */
 	@Override
 	protected boolean beforeExec() throws Exception {
-
-		waitFileComplete();
 
 		excel = findExcel();
 
@@ -87,33 +92,15 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 		return true;
 	}
 
-	private void waitFileComplete() throws InterruptedException{
-		File file = new File(sourceUri);
-		long len = file.length();
-		Thread.sleep(WAIT_FILE);
-		while(len != file.length()){
-			Thread.sleep(WAIT_FILE);
-		}
-	}
-
 	protected File findExcel() throws Exception{
-		if(!ZipUtil.valid(sourceUri)){ 
-			log.error("invalid zip."); 
-			throw new IllegalArgumentException("非法zip.");
-		}
-
 		this.zipWorkHome = new File(System.getProperty("cache.parse")
-				+ File.separator + getContextName() + File.separator + sourceName);
+				+ File.separator + getName() + File.separator + sourceName);
 		if(!zipWorkHome.mkdirs()){
 			log.error("directory create failed: {}", zipWorkHome);
 			throw new IllegalArgumentException("解压目录创建失败," + zipWorkHome);
 		}
 
-		File zip = new File(sourceUri); 
-		long cost = ZipUtil.unZip(zip, zipWorkHome);
-		String size = formatSize(zip.length());
-		log.info("finish unzip({}KB), cost={}ms", size, cost);
-
+		unzip(new File(sourceUri), zipWorkHome);
 		File[] array = zipWorkHome.listFiles(new FileFilter(){
 			@Override
 			public boolean accept(File file) {
@@ -126,19 +113,40 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 		}
 		return array[0];
 	}
+	
+	protected void unzip(File zip, File unzipPath) throws Exception{
+		if(!ZipUtil.valid(sourceUri)){ 
+			log.error("invalid zip."); 
+			throw new IllegalArgumentException("非法zip.");
+		}
+		
+		long cost = ZipUtil.unZip(zip, unzipPath);
+		String size = formatSize(zip.length());
+		log.info("finish unzip({}KB), cost={}ms", size, cost);
+	}
 
 	protected abstract void initSheetHander(Map<String, SheetHandler> handlerMap);
 
 	protected void initExcelRule() throws DocumentException, FileNotFoundException {  
-		String excelRulePath = getContextConfig().getString(excelRule, "");
-		if(excelRulePath == null){
-			throw new IllegalArgumentException("未发现excel解析规则.");
+		if(StringUtils.isBlank(excelRule)){ //可以手动赋值excelRule或者将excelRule放在context的config中
+			if(getConfig() != null){
+				excelRule = getConfig().getString("excelRule", "");
+			}
 		}
-		File ruleXml = new File(excelRulePath);
+		
+		if(StringUtils.isBlank(excelRule)){
+			throw new IllegalArgumentException("没有配置excel解析规则：excelRule");
+		}
+		
+		File ruleXml = new File(excelRule);
 		if(!ruleXml.exists()){
-			throw new IllegalArgumentException("未发现excel解析规则.");
+			ruleXml = new File(System.getProperty("webapp.root") + excelRule);
+			if(!ruleXml.exists()){
+				throw new IllegalArgumentException("未发现excel解析规则, target=" + excelRule);
+			}
 		}
 
+		log.info("加载Excel解析规则, target=" + excelRule);
 		SAXReader reader = new SAXReader();
 		reader.setEncoding("UTF-8");
 		Document doc = reader.read(new FileInputStream(ruleXml));
@@ -173,7 +181,7 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 			}
 		}
 	}
-
+	
 	@Override
 	protected boolean afterExec(Boolean execResult) throws Exception {
 		clean();
@@ -247,7 +255,7 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 			if(columns.size() > index){
 				columnValue = columns.get(index).trim();
 			}
-
+			
 			Map<String,String> columnRule = rowRule.get(columnName);
 			//1. Excel有值列，但不在配置规则中
 			if(columnRule == null){
@@ -338,9 +346,14 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 		if(handler != null){
 			handler.handler(sheet, sheetData, batchTime, excelData);
 		}else{
-			List<Map<String, Object>> list = new ArrayList<>(sheetData.size());
-			list.addAll(sheetData);
-			excelData.put(sheet, list);
+			Collection<Map<String, Object>> singleSheetData = excelData.get(sheet);
+			if(CollectionUtils.isEmpty(singleSheetData)){
+				List<Map<String, Object>> list = new ArrayList<>(sheetData.size());
+				list.addAll(sheetData);
+				excelData.put(sheet, list);
+			}else{
+				singleSheetData.addAll(sheetData);
+			}
 		}
 	}
 
@@ -357,14 +370,10 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 			throw new IllegalArgumentException("缺少sheet数据:" + list);  
 		}
 
-		columnIndexMap = null;
-		sheetRule = null;
-		necessarySheet = null;
-		sheetHandlerMap = null;
 		handlerData(excelData);
 	}
 
-	protected abstract void handlerData(Map<String, List<Map<String, Object>>> excelData);
+	protected abstract void handlerData(Map<String, Collection<Map<String, Object>>> excelData);
 
 	@Override
 	protected boolean sheetFilter(int sheetIndex, String sheetName) { 
@@ -388,7 +397,7 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 		 * @param excelData excel各个sheet的数据集，这地方用Map<String, Object>有点妥协，只是为了方便
 		 * @throws Exception
 		 */
-		void handler(String sheet, List<Map<String, Object>> sheetData, 
-				long batchTime, Map<String, List<Map<String, Object>>> excelData) throws Exception;
+		void handler(String sheet, List<Map<String, Object>> sheetData, long batchTime, 
+				Map<String, Collection<Map<String, Object>>> excelData) throws Exception;
 	}
 }

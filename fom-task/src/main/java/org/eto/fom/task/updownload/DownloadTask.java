@@ -4,9 +4,9 @@ import java.io.File;
 import java.text.DecimalFormat;
 
 import org.apache.commons.lang.StringUtils;
-import org.eto.fom.context.ExceptionHandler;
-import org.eto.fom.context.ResultHandler;
-import org.eto.fom.context.Task;
+import org.eto.fom.context.core.ExceptionHandler;
+import org.eto.fom.context.core.ResultHandler;
+import org.eto.fom.context.core.Task;
 import org.eto.fom.task.updownload.helper.DownloadHelper;
 
 /**
@@ -119,10 +119,10 @@ public final class DownloadTask extends Task<Boolean> {
 		if(!isWithTemp){
 			downloadPath = destPath;
 		}else{
-			if(StringUtils.isBlank(getContextName())){
+			if(StringUtils.isBlank(getName())){
 				downloadPath = System.getProperty("cache.download");
 			}else{
-				downloadPath = System.getProperty("cache.download") + File.separator + getContextName();
+				downloadPath = System.getProperty("cache.download") + File.separator + getName();
 			}
 			File file = new File(downloadPath);
 			if(!file.exists() && !file.mkdirs()){

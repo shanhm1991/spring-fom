@@ -228,12 +228,7 @@ public class ExcelReader implements IExcelReader {
 				Date date = DateUtil.getJavaDate(value);
 				return String.valueOf(date.getTime());
 			}else{
-				try{
-					return double2String(value);
-				}catch(Exception e){
-					LOG.error("Excel format error: sheet=" + sheetName + ",row=" + rowIndex + ",column=" + cellIndex, e);
-					return String.valueOf(value);
-				}
+				return double2String(value);
 			}
 		case STRING:
 			return cell.getStringCellValue();

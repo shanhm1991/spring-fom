@@ -3,7 +3,7 @@ package org.eto.fom.task.parse;
 import java.io.File;
 import java.text.DecimalFormat;
 
-import org.eto.fom.context.Task;
+import org.eto.fom.context.core.Task;
 
 /**
  * 

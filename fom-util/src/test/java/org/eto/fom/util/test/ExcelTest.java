@@ -24,7 +24,18 @@ import org.xml.sax.SAXException;
 public class ExcelTest {
 
 	public static void main(String[] args) throws Exception {
-		test3();
+//		ExcelEventReader reader = new ExcelEventReader("F:/1.xlsx");
+//		ExcelRow row = null;
+//		
+//		while((row = reader.readRow()) != null){
+//			if(!row.isEmpty()){
+//				System.out.println(row); 
+//			}
+//			
+//		}
+//		reader.close();
+		
+		System.out.println(-Double.MIN_VALUE);
 	}
 	
 	public static void test3() throws Exception{

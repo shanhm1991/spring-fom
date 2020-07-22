@@ -1,12 +1,13 @@
 package com.examples.task.upload;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.eto.fom.boot.ServletUtil;
-import org.eto.fom.context.Context;
-import org.eto.fom.context.FomContext;
+import org.eto.fom.context.annotation.FomContext;
+import org.eto.fom.context.core.Context;
 import org.eto.fom.task.updownload.UploadTask;
 import org.eto.fom.task.updownload.helper.UploadHelper;
 import org.eto.fom.task.updownload.helper.impl.HdfsHelper;
@@ -29,7 +30,7 @@ public class UploadHdfsExample extends Context {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected Set<UploadTask> scheduleBatchTasks() throws Exception { 
+	protected Collection<UploadTask> scheduleBatch() throws Exception { 
 		String path = ServletUtil.getContextPath("/source") + File.separator + "hdfs.jpg";
 		UploadHelper helper = new HdfsHelper(masterUrl, slaveUrl);
 
