@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eto.fom.boot.ServletUtil;
+import org.eto.fom.boot.listener.FomListener;
 import org.eto.fom.context.core.Context;
 import org.eto.fom.util.PatternUtil;
 import org.eto.fom.util.file.FileUtil;
@@ -36,24 +36,24 @@ public class InputEsContext extends Context {
 	private File esJson;
 	
 	public InputEsContext() {
-		srcPath = ServletUtil.getContextPath(config.getString("srcPath", ""));
+		srcPath = FomListener.getRealPath(config.getString("srcPath", ""));
 		pattern = config.getString("pattern", "");
 		batch = config.getInt("batch", 5000);
 		isDelMatchFail = config.getBoolean("isDelMatchFail", false);
 		esIndex = config.getString("esIndex", "");
 		esType = config.getString("esType", "");
-		esJson = new File(ServletUtil.getContextPath((config.getString("esJson", "")))); 
+		esJson = new File(FomListener.getRealPath((config.getString("esJson", "")))); 
 	}
 
 	public InputEsContext(String name){
 		super(name);
-		srcPath = ServletUtil.getContextPath(config.getString("srcPath", ""));
+		srcPath = FomListener.getRealPath(config.getString("srcPath", ""));
 		pattern = config.getString("pattern", "");
 		batch = config.getInt("batch", 5000);
 		isDelMatchFail = config.getBoolean("isDelMatchFail", false);
 		esIndex = config.getString("esIndex", "");
 		esType = config.getString("esType", "");
-		esJson = new File(ServletUtil.getContextPath((config.getString("esJson", "")))); 
+		esJson = new File(FomListener.getRealPath((config.getString("esJson", "")))); 
 	}
 
 	@SuppressWarnings("unchecked")

@@ -20,9 +20,6 @@
 					<include>META-INF/**</include>
 				</includes>
 			</resource>
-			<resource>
-				<directory>src/examples/resources</directory>
-			</resource>
 		</resources>
 		<testResources>
 			<testResource>
@@ -48,10 +45,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-javadoc-plugin</artifactId> 
-				<configuration> <aggregate>true</aggregate> </configuration> <executions> 
-				<execution> <id>doc</id> <goals> <goal>jar</goal> </goals> </execution> </executions> 
-				</plugin> -->
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
 				<configuration>
@@ -86,30 +79,12 @@
 							<includes>
 								<include>org/**</include>
 								<include>META-INF/**</include>
-								<include>application.properties</include>
-							</includes>
-							<excludes>
-								<exclude>com/examples/**</exclude>
-							</excludes>
-						</configuration>
-					</execution>
-					<execution>
-						<id>example-jar</id>
-						<phase>package</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-						<configuration>
-							<classifier>example-${project.version}</classifier>
-							<classesDirectory>${project.build.directory}/classes</classesDirectory>
-							<includes>
-								<include>com/examples/**</include>
 							</includes>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
+			<!-- <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
@@ -126,31 +101,9 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<!-- <plugin>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<configuration>
-					<downloadSources>true</downloadSources>
-					<addVersionToProjectName>true</addVersionToProjectName>
-					<sourceExcludes>
-						<sourceExclude>**/.svn/**</sourceExclude>
-					</sourceExcludes>
-				</configuration>
 			</plugin> -->
 		</plugins>
 	</build>
-
-	<!-- <dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>Finchley.RELEASE</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement> -->
 
 	<dependencies>
 		<dependency>
@@ -171,11 +124,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- <dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-eureka</artifactId>
-			<version>1.1.5.RELEASE</version>
-		</dependency> -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
@@ -206,6 +154,5 @@
 			<artifactId>fom-util</artifactId>
 			<version>1.0.1</version>
 		</dependency>
-		
 	</dependencies>
 </project>

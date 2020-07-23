@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eto.fom.boot.ServletUtil;
+import org.eto.fom.boot.listener.FomListener;
 import org.eto.fom.context.annotation.FomContext;
 import org.eto.fom.context.core.Context;
 import org.eto.fom.task.updownload.UploadTask;
@@ -31,7 +31,7 @@ public class UploadHdfsExample extends Context {
 	@SuppressWarnings("unchecked")
 	@Override
 	protected Collection<UploadTask> scheduleBatch() throws Exception { 
-		String path = ServletUtil.getContextPath("/source") + File.separator + "hdfs.jpg";
+		String path = FomListener.getRealPath("/source") + File.separator + "hdfs.jpg";
 		UploadHelper helper = new HdfsHelper(masterUrl, slaveUrl);
 
 		Set<UploadTask> set = new HashSet<>();

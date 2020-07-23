@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
-	<!-- Tomcat启动从配置文件web.xml.读两个节点:<listener/>和<context-param/> -->
+	<!-- 兼容Tomcat的配置文件web.xml -->
+	<!-- 加载步骤:<listener/>和<context-param/> -->
 	<!-- 紧接着,创建一个上下文ServletContext(这个WEB项目所有部分共享),并将<context-param/>转为键值对交给ServletContext -->
 	<!-- 然后,创建监听器实例<listener/>,在监听器中的初始化方法contextInitialized(ServletContextEvent args)中: -->
 	<!-- ServletContext = ServletContextEvent.getServletContext(); -->
 	<!-- context-param的值 = ServletContext.getInitParameter("context-param的键"); -->
 	<!-- 从而获取到所有配置的context-param -->
 	<!-- web.xml加载顺序： context-param->listener->filter->servlet，listener加载顺序就是书写顺序. -->
-	<context-param>
-		<param-name>log4jConfigLocation</param-name>
-		<param-value>/WEB-INF/log4j.properties</param-value>
-	</context-param>
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>WEB-INF/applicationContext.xml</param-value>
@@ -31,10 +28,10 @@
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 	<listener>
-		<listener-class>com.fom.pool.PoolListener</listener-class>
+		<listener-class>org.eto.fom.boot.listener.PoolListener</listener-class>
 	</listener>
 	<listener>
-		<listener-class>com.fom.context.FomContextListener</listener-class>
+		<listener-class>org.eto.fom.boot.listener.FomListener</listener-class>
 	</listener>
 	
 	<filter>

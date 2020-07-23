@@ -6,7 +6,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.eto.fom.util.pool.PoolManager;
 
@@ -17,7 +16,7 @@ import org.eto.fom.util.pool.PoolManager;
  */
 public class PoolListener implements ServletContextListener{
 
-	private static Logger log;
+	private static Logger log = Logger.getLogger(PoolListener.class); 
 
 	public PoolListener(){
 
@@ -25,11 +24,6 @@ public class PoolListener implements ServletContextListener{
 
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
-		String logRoot = System.getProperty("log.root");
-		if(StringUtils.isBlank(logRoot)){ 
-			System.setProperty("log.root", System.getProperty("webapp.root") + File.separator + "log");
-		}
-		log = Logger.getLogger(PoolListener.class);
 		ServletContext context = event.getServletContext();
 		try{
 			File poolXml = new File(context.getRealPath(context.getInitParameter("poolConfigLocation")));

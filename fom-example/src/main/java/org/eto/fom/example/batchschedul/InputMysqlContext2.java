@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eto.fom.boot.ServletUtil;
+import org.eto.fom.boot.listener.FomListener;
 import org.eto.fom.context.core.Context;
 import org.eto.fom.util.PatternUtil;
 import org.eto.fom.util.file.FileUtil;
@@ -31,7 +31,7 @@ public class InputMysqlContext2 extends Context {
 	
 	public InputMysqlContext2(String name){
 		super(name);
-		srcPath = ServletUtil.getContextPath(config.getString("srcPath", ""));
+		srcPath = FomListener.getRealPath(config.getString("srcPath", ""));
 		batch = config.getInt("batch", 5000);
 		isDelMatchFail = config.getBoolean("isDelMatchFail", false);
 		pattern = config.getString("pattern", "");
