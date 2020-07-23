@@ -49,26 +49,11 @@
 			<artifactId>c3p0</artifactId>
 			<version>0.9.5.1</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.eto</groupId>
 			<artifactId>fom-boot</artifactId>
 			<version>1.0.1</version>
 		</dependency>
-		<dependency>
-			<groupId>org.eto</groupId>
-			<artifactId>fom-context</artifactId>
-			<version>1.0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eto</groupId>
-			<artifactId>fom-task</artifactId>
-			<version>1.0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eto</groupId>
-			<artifactId>fom-util</artifactId>
-			<version>1.0.1</version>
-		</dependency>
+
 	</dependencies>
 </project>
