@@ -1,4 +1,4 @@
-package com.examples;
+package org.eto.fom.example;
 
 import org.eto.fom.boot.FomConfiguration;
 import org.springframework.boot.SpringApplication;
@@ -8,9 +8,11 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
-@SpringBootApplication(exclude={DataSourceAutoConfiguration.class,HibernateJpaAutoConfiguration.class})
+@SpringBootApplication(exclude={
+		DataSourceAutoConfiguration.class,
+		HibernateJpaAutoConfiguration.class})
 @Import({FomConfiguration.class})
-@ComponentScan(basePackages = {"org.eto.fom.boot","com.examples"})
+@ComponentScan(basePackages = {"org.eto.fom"})
 public class Boot {
 
 	public static void main(String[] args) {
