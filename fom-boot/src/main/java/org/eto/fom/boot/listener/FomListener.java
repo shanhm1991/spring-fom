@@ -19,8 +19,7 @@ public class FomListener implements ServletContextListener, ApplicationRunner {
 	
 	/**
 	 * 为了将fom放在spring加载完之后加载，先在现在contextInitialized中记下ServletContext，然后spring加载完之后再在run中取值，
-	 * 注意的是FomContextListener在这里是两个实例，一个是tomcat创建的，一个是spring管理，
-	 * 所以这里用static来共享, 顺带提供一个获取应用相对路径的方法
+	 * 注意的是FomContextListener在这里是两个实例，一个是tomcat创建的，一个是spring管理，所以这里用static来共享
 	 */
 	private static volatile ServletContext context;
 
@@ -33,13 +32,4 @@ public class FomListener implements ServletContextListener, ApplicationRunner {
 	public void run(ApplicationArguments args) throws Exception {
 		ContextManager.load(context.getRealPath(context.getInitParameter("fomConfigLocation")));
 	} 
-	
-	/**
-	 * 获取应用相对路径
-	 * @param path
-	 * @return
-	 */
-	public static String getRealPath(String path){
-		return context.getRealPath(path);
-	}
 }

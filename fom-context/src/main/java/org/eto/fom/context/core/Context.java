@@ -37,24 +37,25 @@ import org.slf4j.Logger;
  * @author shanhm
  *
  */
-public class Context implements Serializable {
-
-	private static final long serialVersionUID = 9154119563307298882L;
+public class Context {
 
 	//所有的Context共用，防止两个Context创建针对同一个文件的任务
 	static final Map<String,TimedFuture<Result<?>>> FUTUREMAP = new ConcurrentHashMap<>(1000);
 
-	protected final ContextConfig config = new ContextConfig();
+	//当前构造的context的名称
+	static final ThreadLocal<String> localName = new ThreadLocal<>();
+
+	protected final ContextConfig config;
 
 	protected final String name;
 
-	protected transient Logger log;
+	protected Logger log;
 
-	transient volatile long loadTime;
+	final long loadTime = System.currentTimeMillis();;
 
 	transient volatile long execTime;
 
-	transient ContextStatistics statistics;
+	transient ContextStatistics statistics = new ContextStatistics();;
 
 	private boolean firstRun = true;
 
@@ -65,44 +66,20 @@ public class Context implements Serializable {
 	transient Map<Long, Exception> lastException = new ConcurrentHashMap<>();
 
 	public Context(){
-		Class<?> clazz = this.getClass();
-		FomContext fc = clazz.getAnnotation(FomContext.class);
-		if(fc == null){
-			this.name = clazz.getSimpleName();
+		String lname = localName.get();
+		if(StringUtils.isBlank(lname)){
+			this.name = lname;
 		}else{
-			if(StringUtils.isBlank(fc.name())){
-				this.name = clazz.getSimpleName();
-			}else{
+			Class<?> clazz = this.getClass();
+			FomContext fc = clazz.getAnnotation(FomContext.class);
+			if(fc != null && StringUtils.isNotBlank(fc.name())){
 				this.name = fc.name();
+			}else{
+				this.name = clazz.getSimpleName();
 			}
 		}
-		initValue(name, fc); 
-	}
-
-	/**
-	 * @param name 模块名称
-	 */
-	public Context(String name){
-		if(StringUtils.isBlank(name)){
-			throw new IllegalArgumentException("param name cann't be empty.");
-		}
-		this.name = name;
 		this.log = SlfLoggerFactory.getLogger(name);
-		Class<?> clazz = this.getClass();
-		FomContext fc = clazz.getAnnotation(FomContext.class);
-		initValue(name, fc);
-	}
-
-	/**
-	 * xml > 注解  > 默认
-	 * @param name
-	 * @param fc
-	 */
-	private void initValue(String name,FomContext fc){
-		this.log = SlfLoggerFactory.getLogger(name); 
-		config.init(ContextManager.elementMap.get(name),  ContextManager.createMap.get(name), fc);
-		statistics = new ContextStatistics();
-		loadTime = System.currentTimeMillis();
+		config = new ContextConfig(name);
 	}
 
 	/**
@@ -118,8 +95,6 @@ public class Context implements Serializable {
 		this.log = SlfLoggerFactory.getLogger(name); 
 		switchState(INITED);
 		config.initPool();
-		statistics = new ContextStatistics();
-		loadTime = System.currentTimeMillis();
 	}
 
 	/**
@@ -390,7 +365,7 @@ public class Context implements Serializable {
 	private class InnerThread extends Thread implements  Serializable {
 
 		private static final long serialVersionUID = 2023244859604452982L;
-		
+
 		private static final int CRON_LEN = 4;
 
 		public InnerThread(){
@@ -434,7 +409,7 @@ public class Context implements Serializable {
 							return;
 						}
 					}
-					
+
 					if(config.getStopWithNoCron()){
 						terminate();
 						return;
@@ -451,7 +426,7 @@ public class Context implements Serializable {
 				}
 			}
 		}
-		
+
 		@SuppressWarnings("rawtypes")
 		private void runSchedul(){
 			switchState(RUNNING);
@@ -480,7 +455,7 @@ public class Context implements Serializable {
 				log.error("get task failed", e);
 			}
 		}
-		
+
 		private long calculateWaitTime(CronExpression cronExpression, long exeTime){
 			String expression = cronExpression.getCronExpression();
 			StringTokenizer exprs = new StringTokenizer(expression, " \t", false);
@@ -636,6 +611,6 @@ public class Context implements Serializable {
 		}.start();
 
 	}
-	
+
 	private static final long UNIT = 1000;
 }

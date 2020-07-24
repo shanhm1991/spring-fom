@@ -1,21 +1,18 @@
 package org.eto.fom.context.core;
 
-import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.dom4j.Element;
 import org.eto.fom.context.SpringContext;
-import org.eto.fom.context.annotation.FomContext;
 import org.quartz.CronExpression;
 
 /**
@@ -24,9 +21,7 @@ import org.quartz.CronExpression;
  * @author shanhm
  *
  */
-public final class ContextConfig implements Serializable {
-
-	private static final long serialVersionUID = -580843719008019078L;
+public final class ContextConfig {
 
 	/**
 	 * 定时表达式
@@ -78,75 +73,39 @@ public final class ContextConfig implements Serializable {
 	 */
 	public static final String CONF_EXECONLOAN = "execOnLoad";
 
-	public static boolean validKey(String key){
-		return !CONF_THREADCORE.equals(key) && !CONF_THREADMAX.equals(key) && !CONF_ALIVETIME.equals(key) && !CONF_STOPWITHNOCRON.equals(key)
-				&& !CONF_OVERTIME.equals(key) && !CONF_QUEUESIZE.equals(key) && !CONF_CANCELLABLE.equals(key) && !CONF_CRON.equals(key) 
-				&& !CONF_EXECONLOAN.equals(key);
-	}
+	//已加载的配置
+	static final Map<String, ConcurrentMap<String,String>> loadedConfig = new HashMap<>();
 
 	transient TimedExecutorPool pool;
 
 	volatile CronExpression cronExpression;
 
-	//valueMap只允许put动作，在put时先判断key是否存在，再判断value是否相等，可以很好的避免线程安全问题
-	Map<String, String> valueMap = new ConcurrentHashMap<>();
+	final Map<String, String> valueMap; 
 
-	@SuppressWarnings("unchecked")
-	void init(Element element, Map<String, String> cMap, FomContext fc){
-		if(element != null){
-			List<Element> list = element.elements();
-			for(Element e : list){
-				String value = e.getTextTrim();
-				if(StringUtils.isBlank(value)){
-					valueMap.put(e.getName(), e.asXML());
-				}else{
-					valueMap.put(e.getName(), e.getTextTrim());
-				}
-			}
-			setThreadCore(XmlUtil.getInt(element, CONF_THREADCORE, THREADCORE_DEFAULT, THREADCORE_MIN, THREADCORE_MAX));
-			setThreadMax(XmlUtil.getInt(element, CONF_THREADMAX, THREADMAX_DEFAULT, THREADMAX_MIN, THREADMAX_MAX));
-			setAliveTime(XmlUtil.getInt(element, CONF_ALIVETIME, ALIVETIME_DEFAULT, ALIVETIME_MIN, ALIVETIME_MAX));
-			setOverTime(XmlUtil.getInt(element, CONF_OVERTIME, OVERTIME_DEFAULT, OVERTIME_MIN, OVERTIME_MAX));
-			setQueueSize(XmlUtil.getInt(element, CONF_QUEUESIZE, QUEUESIZE_DEFAULT, QUEUESIZE_MIN, QUEUESIZE_MAX));
-			setCancellable(XmlUtil.getBoolean(element, CONF_CANCELLABLE, false));
-			setCron(XmlUtil.getString(element, CONF_CRON, ""));
-			setRemark(XmlUtil.getString(element, CONF_REMARK, ""));
-			setStopWithNoCron(XmlUtil.getBoolean(element, CONF_STOPWITHNOCRON, false));
-			setExecOnLoad(XmlUtil.getBoolean(element, CONF_EXECONLOAN, true));
-		}else if(cMap != null){
-			valueMap.putAll(cMap);
-			setThreadCore(MapUtils.getInt(CONF_THREADCORE, cMap, THREADCORE_DEFAULT));
-			setThreadMax(MapUtils.getInt(CONF_THREADMAX, cMap, THREADMAX_DEFAULT));
-			setAliveTime(MapUtils.getInt(CONF_ALIVETIME, cMap, ALIVETIME_DEFAULT));
-			setOverTime(MapUtils.getInt(CONF_OVERTIME, cMap, OVERTIME_DEFAULT));
-			setQueueSize(MapUtils.getInt(CONF_QUEUESIZE, cMap, QUEUESIZE_DEFAULT));
-			setCron(cMap.get(CONF_CRON)); 
-			setRemark(cMap.get(CONF_REMARK));
-			setCancellable(MapUtils.getBoolean(CONF_CANCELLABLE, cMap, false));
-			setStopWithNoCron(MapUtils.getBoolean(CONF_STOPWITHNOCRON, cMap, false));
-			setExecOnLoad(MapUtils.getBoolean(CONF_EXECONLOAN, cMap, true));
-		}else if(fc != null){
-			setThreadCore(fc.threadCore());
-			setThreadMax(fc.threadMax());
-			setAliveTime(fc.threadAliveTime());
-			setOverTime(fc.threadOverTime());
-			setQueueSize(fc.queueSize());
-			setCancellable(fc.cancellable());
-			setCron(fc.cron());
-			setRemark(fc.remark());
-			setStopWithNoCron(fc.stopWithNoCron());
-			setExecOnLoad(fc.execOnLoad());
+	public static boolean validKey(String key){
+		return !CONF_THREADCORE.equals(key) && !CONF_THREADMAX.equals(key) && !CONF_ALIVETIME.equals(key) && !CONF_STOPWITHNOCRON.equals(key)
+				&& !CONF_OVERTIME.equals(key) && !CONF_QUEUESIZE.equals(key) && !CONF_CANCELLABLE.equals(key) && !CONF_CRON.equals(key) 
+				&& !CONF_EXECONLOAN.equals(key);
+	}
+	
+	ContextConfig(String name){
+		if(loadedConfig.containsKey(name)){
+			valueMap = loadedConfig.remove(name);
 		}else{
-			setThreadCore(THREADCORE_DEFAULT);
-			setThreadMax(THREADMAX_DEFAULT);
-			setAliveTime(ALIVETIME_DEFAULT);
-			setOverTime(OVERTIME_DEFAULT);
-			setQueueSize(QUEUESIZE_DEFAULT);
-			setCancellable(false);
-			setStopWithNoCron(false);
-			setExecOnLoad(true);
+			valueMap = new ConcurrentHashMap<>();
 		}
-
+		
+		setThreadCore(MapUtils.getInt(CONF_THREADCORE, valueMap, THREADCORE_DEFAULT));
+		setThreadMax(MapUtils.getInt(CONF_THREADMAX, valueMap, THREADMAX_DEFAULT));
+		setAliveTime(MapUtils.getInt(CONF_ALIVETIME, valueMap, ALIVETIME_DEFAULT));
+		setOverTime(MapUtils.getInt(CONF_OVERTIME, valueMap, OVERTIME_DEFAULT));
+		setQueueSize(MapUtils.getInt(CONF_QUEUESIZE, valueMap, QUEUESIZE_DEFAULT));
+		setCron(valueMap.get(CONF_CRON)); 
+		setRemark(valueMap.get(CONF_REMARK));
+		setCancellable(MapUtils.getBoolean(CONF_CANCELLABLE, valueMap, false));
+		setStopWithNoCron(MapUtils.getBoolean(CONF_STOPWITHNOCRON, valueMap, false));
+		setExecOnLoad(MapUtils.getBoolean(CONF_EXECONLOAN, valueMap, true));
+		
 		initPool();
 	}
 
@@ -158,14 +117,6 @@ public final class ContextConfig implements Serializable {
 		pool = new TimedExecutorPool(core,max,aliveTime,new LinkedBlockingQueue<Runnable>(queueSize));
 		pool.allowCoreThreadTimeOut(true);
 	}
-
-//	boolean getBoolean(Map<String, String> map, String key){
-//		try{
-//			return Boolean.parseBoolean(map.get(key)); 
-//		}catch(Exception e){
-//			return false;
-//		}
-//	}
 
 	long getActives(){
 		if(pool == null){
@@ -240,6 +191,9 @@ public final class ContextConfig implements Serializable {
 		if(!validKey(key)){
 			throw new IllegalArgumentException("not support key:" + key);
 		}
+		if(value == null){
+			return;
+		}
 		valueMap.put(key, value);
 	}
 
@@ -305,6 +259,9 @@ public final class ContextConfig implements Serializable {
 	 * @param remark remark
 	 */
 	public void setRemark(String remark){
+		if(remark == null){
+			return;
+		}
 		valueMap.put(CONF_REMARK, remark);
 	}
 
@@ -436,12 +393,12 @@ public final class ContextConfig implements Serializable {
 		if(StringUtils.isBlank(cron)){
 			return;
 		}
-		
+
 		//可能来自注解
 		if(cron.indexOf("${") != -1){ 
 			cron = SpringContext.getPropertiesValue(cron);
 		}
-		
+
 		CronExpression c = null;
 		try {
 			c = new CronExpression(cron);
@@ -486,7 +443,7 @@ public final class ContextConfig implements Serializable {
 	public boolean getExecOnLoad(){
 		return MapUtils.getBoolean(CONF_EXECONLOAN, valueMap, true);
 	}
-	
+
 	@Override
 	public String toString() {
 		return valueMap.toString();

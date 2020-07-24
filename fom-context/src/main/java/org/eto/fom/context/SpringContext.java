@@ -44,6 +44,20 @@ public class SpringContext implements ApplicationContextAware, EmbeddedValueReso
 	}
 	
 	/**
+	 * 获取应用下的资源路径
+	 * @param path
+	 * @return
+	 * @throws IOException 
+	 */
+	public static String getPath(String path) throws IOException{
+		Resource resource = applicationContext.getResource(path);
+		if(resource != null){
+			return resource.getFile().getPath();
+		}
+		return "";
+	}
+	
+	/**
 	 * 获取应用下的资源
 	 * @param path
 	 * @return

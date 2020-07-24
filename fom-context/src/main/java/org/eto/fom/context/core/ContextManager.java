@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -50,16 +49,12 @@ public class ContextManager {
 
 	private static final Logger LOG = Logger.getLogger(ContextManager.class);
 
-	//Context构造器从中获取配置
-	public static final Map<String, Element> elementMap = new ConcurrentHashMap<>();
 
-	//Context构造器从中获取配置
-	public static final Map<String, Map<String,String>> createMap = new ConcurrentHashMap<>();
 
-	public static ConcurrentMap<String,Context> contextMap = new ConcurrentHashMap<>();
+	static ConcurrentMap<String,Context> loadedContext = new ConcurrentHashMap<>();
 
 	public static boolean exist(String contextName){
-		return contextMap.containsKey(contextName);
+		return loadedContext.containsKey(contextName);
 	}
 
 	public static void register(Context context) throws Exception {
@@ -67,7 +62,7 @@ public class ContextManager {
 			return;
 		}
 
-		Context exits = contextMap.putIfAbsent(context.name, context);
+		Context exits = loadedContext.putIfAbsent(context.name, context);
 		if(exits != null){
 			LOG.warn("context[" + context.name + "] already exist, load ignored.");
 			return;
@@ -137,8 +132,8 @@ public class ContextManager {
 		loadFomSchedul(pckages);
 
 		loadFomSchedulBatch(pckages);
-		
-		for(Entry<String, Context> entry : contextMap.entrySet()){
+
+		for(Entry<String, Context> entry : loadedContext.entrySet()){
 			entry.getValue().startup();
 		}
 	}
@@ -229,99 +224,79 @@ public class ContextManager {
 		packList.add(pack);
 	}
 
-	@SuppressWarnings("rawtypes")
-	private static void loadXmlContexts(String xmlPath, Element fom) {
+	@SuppressWarnings({ "unchecked" })
+	private static void loadXmlContexts(String xmlPath, Element fom) throws Exception {
 		Element contexts = fom.element("contexts");
 		if(contexts == null){
 			return;
-		}
+		} 
 
 		LOG.info("load context from: " + xmlPath); 
 		Iterator<?> it = contexts.elementIterator("context");
 		while(it.hasNext()){
 			Element element = (Element)it.next();
 			String name = element.attributeValue("name");
-			String clazz = element.attributeValue("class");
-			if(StringUtils.isBlank(clazz)){
+			String classname = element.attributeValue("class");
+
+			if(StringUtils.isBlank(classname)){
 				LOG.warn("ignore context[" + name + "], class can not be empty."); 
 				continue;
 			}
 
-			try {
-				Class<?> contextClass = Class.forName(clazz);
-				if(!Context.class.isAssignableFrom(contextClass)){
-					LOG.warn("ignore context[" + name + "], " + clazz + " isn't a Context."); 
-					continue;
-				}
-
-				boolean isNameEmpty = false; 
-				if(StringUtils.isBlank(name)){ 
-					isNameEmpty = true;
-					FomContext fc = contextClass.getAnnotation(FomContext.class);
-					if(fc != null && !StringUtils.isBlank(fc.name())){
-						name = fc.name();
-					}else{
-						name = contextClass.getSimpleName();
+			ConcurrentMap<String, String> map = new ConcurrentHashMap<>();
+			Class<?> clazz = Class.forName(classname);
+			if(StringUtils.isBlank(name)){ 
+				FomContext fc = clazz.getAnnotation(FomContext.class);
+				if(fc != null){
+					name = fc.name();
+					if(StringUtils.isBlank(name)){
+						name = clazz.getSimpleName();
 					}
-				}
-
-				ContextManager.elementMap.put(name, element);
-				if(isNameEmpty){ 
-					Context context = (Context)contextClass.newInstance();
-					context.regist();
+					map.put(ContextConfig.CONF_CRON, fc.cron());
+					map.put(ContextConfig.CONF_THREADCORE, String.valueOf(fc.threadCore()));
+					map.put(ContextConfig.CONF_THREADMAX, String.valueOf(fc.threadMax()));
+					map.put(ContextConfig.CONF_QUEUESIZE, String.valueOf(fc.queueSize()));
+					map.put(ContextConfig.CONF_OVERTIME, String.valueOf(fc.threadOverTime()));
+					map.put(ContextConfig.CONF_ALIVETIME, String.valueOf(fc.threadAliveTime()));
+					map.put(ContextConfig.CONF_CANCELLABLE, String.valueOf(fc.cancellable()));
+					map.put(ContextConfig.CONF_EXECONLOAN, String.valueOf(fc.execOnLoad()));
+					map.put(ContextConfig.CONF_STOPWITHNOCRON, String.valueOf(fc.stopWithNoCron()));
+					map.put(ContextConfig.CONF_REMARK, String.valueOf(fc.remark()));
 				}else{
-					Constructor constructor = contextClass.getConstructor(String.class);
-					Context context = (Context)constructor.newInstance(name);
-					context.regist();
+					name = clazz.getSimpleName();
 				}
-			} catch (Exception e) {
-				LOG.error("load context[" + name + "] failed", e);
 			}
+
+			if(!Context.class.isAssignableFrom(clazz)){
+				LOG.warn("ignore context[" + name + "], " + classname + " isn't a Context."); 
+				continue;
+			}
+
+			// 以xml的配置为准，如果没有配置，则去注解的值，如果也没有注解，再使用默认值
+			List<Element> elements = element.elements();
+			for(Element e : elements){
+				String value = e.getTextTrim();
+				if(StringUtils.isBlank(value)){
+					map.put(e.getName(), e.asXML());
+				}else{
+					map.put(e.getName(), e.getTextTrim());
+				}
+			}
+
+			Context.localName.set(name); 
+			ContextConfig.loadedConfig.putIfAbsent(name, map);
+			Context context = (Context)clazz.newInstance();
+			context.regist();
 		}
 	}
 
-	//	private static void loadxmlIncludes(Element fom, String xmlPath) throws IOException {
-	//		Element includes = fom.element("includes");
-	//		if(includes == null){
-	//			return;
-	//		}
-	//
-	//		Iterator<?> it = includes.elementIterator("include");
-	//		while(it.hasNext()){
-	//			Element element = (Element)it.next();
-	//
-	//
-	//			Resource r = SpringContext.getResource("/");
-	//			System.out.println(r.getFile().getPath());
-	//
-	//			Resource[] arr = SpringContext.getResources("**/fom*.xml");
-	//			System.out.println(Arrays.asList(arr)); 
-	//
-	//			File xml = new File(location);
-	//			if(!xml.exists() || !xml.isFile()){
-	//				LOG.warn("cann't find config: " + location);  
-	//				continue;
-	//			}
-	//
-	//			try{
-	//				SAXReader reader = new SAXReader();
-	//				reader.setEncoding("UTF-8");
-	//				Document doc = reader.read(new FileInputStream(xml));
-	//				Element root = doc.getRootElement();
-	//				loadXmlContexts(root, location);
-	//			}catch(Exception e){
-	//				LOG.error("", e); 
-	//			}
-	//		}
-	//	}
-
-	private static void loadFomContexts(List<String> pckages){
+	private static void loadFomContexts(List<String> pckages) throws Exception{
 		Set<Class<?>> clazzs = new HashSet<>();
 		for(String pack : pckages){
 			Reflections reflections = new Reflections(pack.trim());
 			clazzs.addAll(reflections.getTypesAnnotatedWith(FomContext.class));
 		}
-		
+
 		if(clazzs.isEmpty()){
 			return;
 		}
@@ -332,24 +307,39 @@ public class ContextManager {
 				LOG.warn("ignore context, " + clazz + " isn't a Context");
 				continue;
 			}
+			
+			FomContext fc = clazz.getAnnotation(FomContext.class);
+			ConcurrentMap<String, String> map = new ConcurrentHashMap<>();
+			map.put(ContextConfig.CONF_CRON, fc.cron());
+			map.put(ContextConfig.CONF_THREADCORE, String.valueOf(fc.threadCore()));
+			map.put(ContextConfig.CONF_THREADMAX, String.valueOf(fc.threadMax()));
+			map.put(ContextConfig.CONF_QUEUESIZE, String.valueOf(fc.queueSize()));
+			map.put(ContextConfig.CONF_OVERTIME, String.valueOf(fc.threadOverTime()));
+			map.put(ContextConfig.CONF_ALIVETIME, String.valueOf(fc.threadAliveTime()));
+			map.put(ContextConfig.CONF_CANCELLABLE, String.valueOf(fc.cancellable()));
+			map.put(ContextConfig.CONF_EXECONLOAN, String.valueOf(fc.execOnLoad()));
+			map.put(ContextConfig.CONF_STOPWITHNOCRON, String.valueOf(fc.stopWithNoCron()));
+			map.put(ContextConfig.CONF_REMARK, String.valueOf(fc.remark()));
+			
+			String name = fc.name();
+			if(StringUtils.isBlank(name)){
+				name = clazz.getSimpleName();
+			}
 
-			try {
-				Context context = (Context)clazz.newInstance();
-				context.regist();
-			} catch (Exception e) {
-				LOG.error("load context failed", e);
-			} 
+			Context.localName.set(name); 
+			ContextConfig.loadedConfig.putIfAbsent(name, map);
+			Context context = (Context)clazz.newInstance();
+			context.regist();
 		}
 	}
 
-	@SuppressWarnings({ "serial" })
 	private static void loadFomSchedul(List<String> pckages) throws Exception {
 		Set<Class<?>> clazzs = new HashSet<>();
 		for(String pack : pckages){
 			Reflections reflections = new Reflections(pack.trim());
 			clazzs.addAll(reflections.getTypesAnnotatedWith(FomSchedul.class));
 		}
-		
+
 		if(clazzs.isEmpty()){
 			return;
 		}
@@ -357,15 +347,13 @@ public class ContextManager {
 		LOG.info("load context with @FomSchedul"); 
 		SpringRegistry registry = SpringContext.getBean(SpringRegistry.class);
 		for(Class<?> clazz : clazzs){
-			FomSchedul fom = clazz.getAnnotation(FomSchedul.class);
-
-			String name = fom.name();
+			FomSchedul fc = clazz.getAnnotation(FomSchedul.class);
+			String name = fc.name();
 			if(StringUtils.isBlank(name)){
 				name = clazz.getSimpleName();
 			}
 
-			String cron = fom.cron();
-			//没有@Scheduled则忽略
+			String cron = fc.cron();
 			List<Method> methods = new ArrayList<>();
 			for(Method method : clazz.getMethods()){
 				Scheduled sch = method.getAnnotation(Scheduled.class);
@@ -377,6 +365,7 @@ public class ContextManager {
 				}
 			}
 
+			//没有@Scheduled方法，或者没有设置cron的就忽略
 			if(methods.isEmpty()){
 				LOG.warn("ignore context, " + clazz + " hasn't Scheduled method");
 				continue;
@@ -386,27 +375,25 @@ public class ContextManager {
 				LOG.warn("ignore context, " + clazz + " hasn't cron expression.");
 				continue;
 			}
-			
+
 			final Object instance = clazz.newInstance();
 			registry.regist(name + "-task", instance); 
 
-			Map<String, String> map = new HashMap<>();
+			ConcurrentMap<String, String> map = new ConcurrentHashMap<>();
 			map.put(ContextConfig.CONF_CRON, cron);
-			map.put(ContextConfig.CONF_THREADCORE, String.valueOf(fom.threadCore()));
-			map.put(ContextConfig.CONF_THREADMAX, String.valueOf(fom.threadMax()));
-			map.put(ContextConfig.CONF_QUEUESIZE, String.valueOf(fom.queueSize()));
-			map.put(ContextConfig.CONF_OVERTIME, String.valueOf(fom.threadOverTime()));
-			map.put(ContextConfig.CONF_ALIVETIME, String.valueOf(fom.threadAliveTime()));
-			map.put(ContextConfig.CONF_CANCELLABLE, String.valueOf(fom.cancellable()));
-			map.put(ContextConfig.CONF_EXECONLOAN, String.valueOf(fom.execOnLoad()));
-			map.put(ContextConfig.CONF_STOPWITHNOCRON, String.valueOf(fom.stopWithNoCron()));
-			map.put(ContextConfig.CONF_REMARK, String.valueOf(fom.remark()));
-			createMap.putIfAbsent(name, map);
-
-			Context context = new Context(name){
-
-				private final Object target = instance;
-
+			map.put(ContextConfig.CONF_THREADCORE, String.valueOf(fc.threadCore()));
+			map.put(ContextConfig.CONF_THREADMAX, String.valueOf(fc.threadMax()));
+			map.put(ContextConfig.CONF_QUEUESIZE, String.valueOf(fc.queueSize()));
+			map.put(ContextConfig.CONF_OVERTIME, String.valueOf(fc.threadOverTime()));
+			map.put(ContextConfig.CONF_ALIVETIME, String.valueOf(fc.threadAliveTime()));
+			map.put(ContextConfig.CONF_CANCELLABLE, String.valueOf(fc.cancellable()));
+			map.put(ContextConfig.CONF_EXECONLOAN, String.valueOf(fc.execOnLoad()));
+			map.put(ContextConfig.CONF_STOPWITHNOCRON, String.valueOf(fc.stopWithNoCron()));
+			map.put(ContextConfig.CONF_REMARK, String.valueOf(fc.remark()));
+			
+			Context.localName.set(name); 
+			ContextConfig.loadedConfig.putIfAbsent(name, map);
+			Context context = new Context(){
 				@SuppressWarnings({ "unchecked", "rawtypes" })
 				@Override
 				protected Collection<Task> scheduleBatch() throws Exception {
@@ -414,7 +401,7 @@ public class ContextManager {
 						@Override
 						protected Object exec() throws Exception {
 							for(Method method : methods){
-								method.invoke(target);
+								method.invoke(instance);
 							}
 							return null;
 						}
@@ -459,14 +446,13 @@ public class ContextManager {
 		}
 	}
 
-	@SuppressWarnings("serial")
 	private static void loadFomSchedulBatch(List<String> pckages) throws Exception {
 		Set<Class<?>> clazzs = new HashSet<>();
 		for(String pack : pckages){
 			Reflections reflections = new Reflections(pack.trim());
 			clazzs.addAll(reflections.getTypesAnnotatedWith(FomSchedulBatch.class));
 		}
-		
+
 		if(clazzs.isEmpty()){
 			return;
 		}
@@ -489,7 +475,7 @@ public class ContextManager {
 			final Object instance = clazz.newInstance();
 			registry.regist(name + "-task", instance); 
 
-			Map<String, String> map = new HashMap<>();
+			ConcurrentMap<String, String> map = new ConcurrentHashMap<>();
 			map.put(ContextConfig.CONF_CRON, fom.cron());
 			map.put(ContextConfig.CONF_THREADCORE, String.valueOf(fom.threadCore()));
 			map.put(ContextConfig.CONF_THREADMAX, String.valueOf(fom.threadMax()));
@@ -501,15 +487,12 @@ public class ContextManager {
 			map.put(ContextConfig.CONF_STOPWITHNOCRON, String.valueOf(fom.stopWithNoCron()));
 			map.put(ContextConfig.CONF_REMARK, String.valueOf(fom.remark()));
 
-			createMap.putIfAbsent(name, map);
-
-			Context context = new Context(name){
-
-				private final SchedulBatchFactory factory = (SchedulBatchFactory)instance;
-
+			Context.localName.set(name); 
+			ContextConfig.loadedConfig.putIfAbsent(name, map);
+			Context context = new Context(){
 				@Override
 				protected <E> Collection<? extends Task<E>> scheduleBatch() throws Exception {
-					return factory.creatTasks();
+					return ((SchedulBatchFactory)instance).creatTasks();
 				}
 			};
 

@@ -16,8 +16,6 @@ import org.eto.fom.context.core.Task;
 @FomContext(cron="0/10 * * * * ?")
 public class ContextTest extends Context {
 	
-	private static final long serialVersionUID = -4648914163608513224L;
-	
 	@SuppressWarnings("unchecked")
 	@Override
 	protected Collection<SelfTask> scheduleBatch() throws Exception {
