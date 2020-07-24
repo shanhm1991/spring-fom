@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fom>
+<fom-scan>com.examples.a, com.a.b</fom-scan>
+
 	<contexts>
 		<context class="com.examples.task.input.InputEsExample">
 			<remark>使用自定义pool的方式将本地指定目录下text文本解析导入Es库</remark>

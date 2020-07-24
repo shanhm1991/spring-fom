@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fom>
+
+<fom-scan>com.examples.b, com.a</fom-scan>
+
 	<contexts>
 		<context class="com.examples.task.input.InputMysqlExample1">
 			<remark>使用Mybatis的方式将本地指定目录下text文本解析导入Mysql库</remark>

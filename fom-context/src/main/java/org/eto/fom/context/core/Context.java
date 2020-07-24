@@ -110,8 +110,8 @@ public class Context implements Serializable {
 	 * @param loadFrom
 	 * @throws Exception
 	 */
-	public void regist(String loadFrom) throws Exception {
-		ContextManager.register(this, loadFrom);  
+	public void regist() throws Exception {
+		ContextManager.register(this);  
 	}
 
 	public void unSerialize(){

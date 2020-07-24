@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- 加载优先级：cache > xml > 注解 > 默认值 -->
+<!-- 加载优先级：cache > xml > 注解（@FomContext > @FomSchedul > @FomSchedulBatch） -->
 <fom>
-
-	<fom-scan>com.examples</fom-scan>
-
 	<includes>
 		<include>**/fom*.xml</include>
 	</includes>

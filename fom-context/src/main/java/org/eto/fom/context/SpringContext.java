@@ -1,11 +1,13 @@
 package org.eto.fom.context;
 
+import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EmbeddedValueResolverAware;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringValueResolver;
 
@@ -39,6 +41,25 @@ public class SpringContext implements ApplicationContextAware, EmbeddedValueReso
 	 */
 	public static String getPropertiesValue(String name) {
 		return stringValueResolver.resolveStringValue(name);
+	}
+	
+	/**
+	 * 获取应用下的资源
+	 * @param path
+	 * @return
+	 */
+	public static Resource getResource(String path){
+		return applicationContext.getResource(path);
+	}
+	
+	/**
+	 * 获取应用下的资源
+	 * @param path 
+	 * @return
+	 * @throws IOException 
+	 */
+	public static Resource[] getResources(String path) throws IOException{
+		return applicationContext.getResources(path);
 	}
 
 	/**

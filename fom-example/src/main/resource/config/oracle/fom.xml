@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fom>
+
+<fom-scan>com.a</fom-scan>
+
 	<contexts>
 		<context class="com.examples.task.input.InputOracleExample1">
 			<remark>使用Mybatis的方式将本地指定目录下text文本的zip包解析导入Oracle库 </remark>

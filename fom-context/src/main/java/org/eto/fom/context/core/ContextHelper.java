@@ -416,7 +416,7 @@ public class ContextHelper {
 			Constructor constructor = contextClass.getConstructor(String.class);
 			context = (Context)constructor.newInstance(name);
 		}
-		context.regist(ContextManager.LOADFROM_INPUT);
+		context.regist();
 		context.startup();
 		resMap.put("result", true);
 
