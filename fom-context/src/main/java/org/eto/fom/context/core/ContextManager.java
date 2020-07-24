@@ -2,11 +2,13 @@ package org.eto.fom.context.core;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,13 +30,16 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.eto.fom.context.SpringContext;
 import org.eto.fom.context.SpringRegistry;
-import org.eto.fom.context.annotation.FomContext;
 import org.eto.fom.context.annotation.FomConfig;
+import org.eto.fom.context.annotation.FomContext;
 import org.eto.fom.context.annotation.FomSchedul;
 import org.eto.fom.context.annotation.FomSchedulBatch;
 import org.eto.fom.context.annotation.SchedulBatchFactory;
 import org.eto.fom.util.IoUtil;
 import org.reflections.Reflections;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.scheduling.annotation.Scheduled;
 
 /**
@@ -58,6 +63,8 @@ public class ContextManager {
 	public static final String LOADFROM_FOMSCHEDULBATCH = "@FomSchedulBatch";
 
 	public static final String LOADFROM_INPUT = "input";
+	
+	private static ResourcePatternResolver pathResolver = new PathMatchingResourcePatternResolver();
 
 	//Context构造器从中获取配置
 	public static final Map<String, Element> elementMap = new ConcurrentHashMap<>();
@@ -148,7 +155,7 @@ public class ContextManager {
 
 				loadXmlContexts(fom, xmlPath);  
 
-				loadxmlIncludes(fom);
+				loadxmlIncludes(fom, xmlPath);
 
 				Element scan = fom.element("fom-scan");
 				if(scan == null){
@@ -256,17 +263,22 @@ public class ContextManager {
 		}
 	}
 
-	private static void loadxmlIncludes(Element fom) {
+	private static void loadxmlIncludes(Element fom, String xmlPath) throws IOException {
 		Element includes = fom.element("includes");
 		if(includes == null){
 			return;
 		}
 
-		String path = System.getProperty("webapp.root");
+//		String path = System.getProperty("webapp.root");
 		Iterator<?> it = includes.elementIterator("include");
 		while(it.hasNext()){
 			Element element = (Element)it.next();
-			String location = path + element.getTextTrim();
+			String location = xmlPath + File.separator + element.getTextTrim();
+			
+			System.out.println(Arrays.asList(location)); 
+			Resource[] arr = pathResolver.getResources(location);
+			System.out.println(Arrays.asList(arr)); 
+			
 			File xml = new File(location);
 			if(!xml.exists() || !xml.isFile()){
 				LOG.warn("cann't find config: " + location);  

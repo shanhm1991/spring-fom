@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Configuration;
  *
  */
 @Configuration
-public class ServletInitializer implements ServletContextInitializer {
+public class ServerInitializer implements ServletContextInitializer {
 
 	@Override
 	public void onStartup(ServletContext context) throws ServletException {
@@ -92,7 +92,11 @@ public class ServletInitializer implements ServletContextInitializer {
 				super.postProcessContext(context);
 				String root = System.getProperty("webapp.root");
 				if(StringUtils.isBlank(root)){
-					root = new File("").getAbsolutePath(); //默认根路径
+					root = ClassLoader.getSystemResource(".").getPath(); //默认根路径
+					String os = System.getProperty("os.name");
+					if(os.toLowerCase().indexOf("windows") != -1){
+						root = root.substring(1);
+					}
 					System.setProperty("webapp.root", root);
 				}
 				context.setDocBase(root); 

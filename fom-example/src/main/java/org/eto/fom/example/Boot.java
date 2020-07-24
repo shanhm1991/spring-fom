@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Import;
 @SpringBootApplication(exclude={
 		DataSourceAutoConfiguration.class,
 		HibernateJpaAutoConfiguration.class})
-@Import({FomConfiguration.class})
+//@Import({FomConfiguration.class})
 @ComponentScan(basePackages = {"org.eto.fom"})
 public class Boot {
 

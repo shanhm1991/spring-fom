@@ -15,16 +15,22 @@ public class SimpleDemo {
 
 	public static void main(String[] args) throws Exception {
 		
-		Task<Boolean> task = new Task<Boolean>("SimpleTask"){
-			@Override
-			protected Boolean exec() throws Exception {
-				Thread.sleep(5000); 
-				return true;
-			}
-			
-		};
+		System.out.println(SimpleDemo.class.getClassLoader().getResource(".").getPath());
 		
-		Future<Result<Boolean>> future = ContextHelper.submitTask("SimpleContext", task);
-		System.out.println(future.get()); 
+		System.out.println(ClassLoader.getSystemResource(".").getPath());
+		
+		System.out.println(SimpleDemo.class.getResource(".").getPath()); 
+		
+//		Task<Boolean> task = new Task<Boolean>("SimpleTask"){
+//			@Override
+//			protected Boolean exec() throws Exception {
+//				Thread.sleep(5000); 
+//				return true;
+//			}
+//			
+//		};
+//		
+//		Future<Result<Boolean>> future = ContextHelper.submitTask("SimpleContext", task);
+//		System.out.println(future.get()); 
 	}
 }
