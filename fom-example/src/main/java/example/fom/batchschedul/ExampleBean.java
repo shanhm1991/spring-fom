@@ -63,4 +63,9 @@ public class ExampleBean {
 	public void setImportWay(String importWay) {
 		this.importWay = importWay;
 	}
+
+	@Override
+	public String toString() {
+		return "{id=" + id + ", name=" + name + ", source=" + source + ", fileType=" + fileType + ", importWay=" + importWay + "}";
+	}
 }

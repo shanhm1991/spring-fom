@@ -1,8 +1,7 @@
-package example.fom.xml;
+package example.fom.xml.pool;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -18,26 +17,16 @@ import org.eto.fom.util.file.FileUtil;
  * @author shanhm
  *
  */
-public class InputOracleContext1 extends Context {
-
-	private String srcPath;
-
-	private int batch;
-
-	private boolean isDelMatchFail;
-	
-	private String pattern;
-
-	public InputOracleContext1() throws IOException{
-		srcPath = SpringContext.getPath(config.getString("srcPath", ""));
-		batch = config.getInt("batch", 5000);
-		isDelMatchFail = config.getBoolean("isDelMatchFail", false);
-		pattern = config.getString("pattern", "");
-	}
+public class InputOracleWithPoolContext extends Context{
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected Collection<InputOracleTask1> scheduleBatch() throws Exception { 
+	protected Collection<InputOracleWithPoolTask> scheduleBatch() throws Exception { 
+		String srcPath = SpringContext.getPath(config.getString("srcPath", ""));
+		int batch = config.getInt("batch", 5000);
+		boolean isDelMatchFail = config.getBoolean("isDelMatchFail", false);
+		String pattern = config.getString("pattern", "");
+		
 		List<String> list = FileUtil.list(srcPath, new FileFilter(){
 			@Override
 			public boolean accept(File file) {
@@ -51,10 +40,10 @@ public class InputOracleContext1 extends Context {
 			}
 		}); 
 		
-		Set<InputOracleTask1> set = new HashSet<>();
+		Set<InputOracleWithPoolTask> set = new HashSet<>();
 		String subPettern = config.getString("zipEntryPattern", "");
 		for(String uri : list){
-			set.add(new InputOracleTask1(uri, batch, subPettern));
+			set.add(new InputOracleWithPoolTask(uri, batch, subPettern));
 		}
 		return set;
 	}

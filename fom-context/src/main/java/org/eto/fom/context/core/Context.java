@@ -67,7 +67,7 @@ public class Context {
 
 	public Context(){
 		String lname = localName.get();
-		if(StringUtils.isBlank(lname)){
+		if(StringUtils.isNotBlank(lname)){
 			this.name = lname;
 		}else{
 			Class<?> clazz = this.getClass();

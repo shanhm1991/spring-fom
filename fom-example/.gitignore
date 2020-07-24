@@ -2,5 +2,7 @@
 /target/
 /data/
 /log/
+/cache/
 .project
 .classpath
+logfile.log

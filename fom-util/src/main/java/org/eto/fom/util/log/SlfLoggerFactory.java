@@ -28,7 +28,7 @@ public class SlfLoggerFactory {
 		logger = org.apache.log4j.Logger.getLogger(name); 
 		logger.setLevel(Level.INFO);  
 		logger.setAdditivity(false); 
-		logger.removeAllAppenders();
+		//logger.removeAllAppenders();
 
 		final PatternLayout layout = new PatternLayout();  
 		layout.setConversionPattern("%d{yyyy-MM-dd HH:mm:ss SSS} %17t [%5p] %m%n");  

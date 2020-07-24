@@ -75,7 +75,7 @@ public final class PoolManager {
 	private static void load(File file){
 		SAXReader reader = new SAXReader();
 		reader.setEncoding("UTF-8");
-		LOG.info("load file: " + file); 
+		LOG.info("load pool: " + file); 
 		Document doc = null;
 		try{
 			doc = reader.read(new FileInputStream(file));

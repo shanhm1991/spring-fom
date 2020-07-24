@@ -1,4 +1,4 @@
-package example.fom.xml;
+package example.fom.xml.pool;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,17 +17,15 @@ import org.eto.fom.util.pool.handler.JdbcHandler;
  * @author shanhm
  *
  */
-public class InputOracleTask2 extends ParseTextZipTask<Map<String, Object>> {
+public class InputOracleWithPoolTask extends ParseTextZipTask<Map<String, Object>> {
 
 	private static final String POOL = "example_oracle";
 
-	private static final String SQL = 
-			"insert into demo(id,name,source,filetype,importway) "
-					+ "values (#id#,#name#,#source#,#fileType#,#importWay#)";
+	private static final String SQL = "insert into demo(id,name,source,filetype,importway) values (#id#,#name#,#source#,#fileType#,#importWay#)";
 
 	private final String pattern;
 
-	public InputOracleTask2(String sourceUri, int batch, String pattern) {
+	public InputOracleWithPoolTask(String sourceUri, int batch, String pattern) {
 		super(sourceUri, batch); 
 		this.pattern = pattern;
 	}
@@ -52,9 +50,8 @@ public class InputOracleTask2 extends ParseTextZipTask<Map<String, Object>> {
 	@Override
 	public void batchProcess(List<Map<String, Object>> lineDatas, long batchTime) throws Exception {
 		JdbcHandler.handler.batchExecute(POOL, SQL, lineDatas);
-		log.info("处理数据入库:" + lineDatas.size());
 	}
-	
+
 	@Override
 	public boolean matchEntryName(String entryName) {
 		return PatternUtil.match(pattern, entryName);

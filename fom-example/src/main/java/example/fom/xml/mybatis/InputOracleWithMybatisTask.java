@@ -1,9 +1,8 @@
-package example.fom.xml;
+package example.fom.xml.mybatis;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.eto.fom.context.SpringContext;
 import org.eto.fom.task.parse.ParseTextZipTask;
 import org.eto.fom.util.PatternUtil;
 import org.eto.fom.util.file.reader.IReader;
@@ -11,20 +10,23 @@ import org.eto.fom.util.file.reader.IRow;
 import org.eto.fom.util.file.reader.TextReader;
 
 import example.fom.batchschedul.ExampleBean;
-import example.fom.batchschedul.dao.ExamplesDao;
+import example.fom.xml.mybatis.service.InputOracleService;
 
 /**
  * 
  * @author shanhm
  *
  */
-public class InputOracleTask1 extends ParseTextZipTask<ExampleBean> {
+public class InputOracleWithMybatisTask extends ParseTextZipTask<ExampleBean> {
 	
 	private final String pattern;
 	
-	public InputOracleTask1(String sourceUri, int batch, String pattern) {
+	private final InputOracleService service;
+	
+	public InputOracleWithMybatisTask(String sourceUri, int batch, String pattern, InputOracleService service) {
 		super(sourceUri, batch); 
 		this.pattern = pattern;
+		this.service = service;
 	}
 
 	@Override
@@ -43,10 +45,7 @@ public class InputOracleTask1 extends ParseTextZipTask<ExampleBean> {
 	
 	@Override
 	public void batchProcess(List<ExampleBean> lineDatas, long batchTime) throws Exception {
-		ExamplesDao demoDao = SpringContext.getBean("oracleExampleDao", ExamplesDao.class);
-		demoDao.batchInsert(lineDatas);
-		log.info("处理数据入库:" + lineDatas.size());
-		
+		service.input(lineDatas);
 	}
 
 	@Override

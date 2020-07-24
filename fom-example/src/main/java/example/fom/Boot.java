@@ -9,7 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication(exclude={
 		DataSourceAutoConfiguration.class,
 		HibernateJpaAutoConfiguration.class})
-@ComponentScan(basePackages = {"org.eto.fom"})
+@ComponentScan(basePackages = {"org.eto.fom", "example.fom"})
 public class Boot {
 
 	public static void main(String[] args) {
