@@ -1,4 +1,4 @@
-package example.fom.batchschedul;
+package example.fom.batchschedul.pool;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -22,8 +22,7 @@ public class InputMysqlTask2 extends ParseExcelTask<Map<String, Object>> {
 	private static final String POOL = "example_mysql";
 
 	private static final String SQL = 
-			"insert into demo(id,name,source,filetype,importway) "
-					+ "values (#id#,#name#,#source#,#fileType#,#importWay#)";
+			"insert into demo(id,name,source,filetype,importway)values(#id#,#name#,#source#,#fileType#,#importWay#)";
 	
 	public InputMysqlTask2(String sourceUri, int batch){
 		super(sourceUri, batch, false); 
@@ -44,8 +43,6 @@ public class InputMysqlTask2 extends ParseExcelTask<Map<String, Object>> {
 	@Override
 	public void batchProcess(List<Map<String, Object>> lineDatas, long batchTime) throws Exception {
 		JdbcHandler.handler.batchExecute(POOL, SQL, lineDatas);
-		log.info("处理数据入库:" + lineDatas.size());
-		
 	}
 
 	@Override

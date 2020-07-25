@@ -22,7 +22,7 @@ import example.fom.xml.mybatis.service.impl.InputOracleServiceImpl;
 public class InputOracleWithMybatisContext extends Context {
 
 	@Autowired
-	private InputOracleServiceImpl service;
+	private InputOracleServiceImpl service; //TODO 这里类型写InputOracleService会提示两个实例错误，不知道为什么
 	
 	@SuppressWarnings("unchecked")
 	@Override

@@ -9,7 +9,7 @@ import org.eto.fom.util.file.reader.IReader;
 import org.eto.fom.util.file.reader.IRow;
 import org.eto.fom.util.file.reader.TextReader;
 
-import example.fom.batchschedul.ExampleBean;
+import example.fom.xml.mybatis.bean.ExampleBean;
 import example.fom.xml.mybatis.service.InputOracleService;
 
 /**

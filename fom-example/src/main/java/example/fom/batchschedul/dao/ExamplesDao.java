@@ -3,7 +3,7 @@ package example.fom.batchschedul.dao;
 import java.util.List;
 import java.util.Map;
 
-import example.fom.batchschedul.ExampleBean;
+import example.fom.xml.mybatis.bean.ExampleBean;
 
 /**
  * 

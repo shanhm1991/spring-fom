@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.mybatis.spring.support.SqlSessionDaoSupport;
 
-import example.fom.batchschedul.ExampleBean;
+import example.fom.xml.mybatis.bean.ExampleBean;
 
 /**
  * 

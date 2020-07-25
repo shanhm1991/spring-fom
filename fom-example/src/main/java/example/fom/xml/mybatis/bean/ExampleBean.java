@@ -1,4 +1,4 @@
-package example.fom.batchschedul;
+package example.fom.xml.mybatis.bean;
 
 import java.util.List;
 

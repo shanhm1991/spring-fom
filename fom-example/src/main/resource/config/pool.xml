@@ -7,7 +7,7 @@
 		</nodes>
 	</pool> -->
 
-	<pool name="example_oracle" class="org.eto.fom.util.pool.JdbcPool">
+	<!-- <pool name="example_oracle" class="org.eto.fom.util.pool.JdbcPool">
 		<core>10</core>
 		<max>10</max>
 		<waitTimeOut>60000</waitTimeOut>
@@ -16,7 +16,7 @@
 		<url>jdbc:oracle:thin:@192.168.141.21:1521:orcl</url>
 		<user>scott</user>
 		<passwd>admin</passwd>
-	</pool>
+	</pool> -->
 	
 	<!-- <pool name="example_mysql" class="org.eto.fom.util.pool.JdbcPool">
 		<core>20</core>

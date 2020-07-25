@@ -1,8 +1,7 @@
-package example.fom.batchschedul;
+package example.fom.batchschedul.mybatis;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -18,7 +17,7 @@ import org.eto.fom.util.file.FileUtil;
  * @author shanhm
  *
  */
-public class InputMysqlContext2 extends Context {
+public class InputMysqWithMybatis extends Context {
 
 	private String srcPath;
 
@@ -26,9 +25,9 @@ public class InputMysqlContext2 extends Context {
 
 	private boolean isDelMatchFail;
 	
-	private String pattern; 
+	private String pattern;
 	
-	public InputMysqlContext2() throws IOException{
+	public InputMysqWithMybatis() throws Exception{
 		srcPath = SpringContext.getPath(config.getString("srcPath", ""));
 		batch = config.getInt("batch", 5000);
 		isDelMatchFail = config.getBoolean("isDelMatchFail", false);
@@ -37,7 +36,7 @@ public class InputMysqlContext2 extends Context {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected Collection<InputMysqlTask2> scheduleBatch() throws Exception { 
+	protected Collection<InputMysqlTask1> scheduleBatch() throws Exception { 
 		List<String> list = FileUtil.list(srcPath, new FileFilter(){
 			@Override
 			public boolean accept(File file) {
@@ -51,9 +50,9 @@ public class InputMysqlContext2 extends Context {
 			}
 		}); 
 		
-		Set<InputMysqlTask2> set = new HashSet<>();
+		Set<InputMysqlTask1> set = new HashSet<>();
 		for(String uri : list){
-			set.add(new InputMysqlTask2(uri, batch));
+			set.add(new InputMysqlTask1(uri, batch));
 		}
 		return set;
 	}

@@ -2,7 +2,7 @@ package example.fom.xml.mybatis.mapper;
 
 import java.util.List;
 
-import example.fom.batchschedul.ExampleBean;
+import example.fom.xml.mybatis.bean.ExampleBean;
 
 /**
  * 

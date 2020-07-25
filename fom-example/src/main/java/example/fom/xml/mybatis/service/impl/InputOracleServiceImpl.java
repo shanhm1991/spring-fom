@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import example.fom.batchschedul.ExampleBean;
+import example.fom.xml.mybatis.bean.ExampleBean;
 import example.fom.xml.mybatis.mapper.InputOracleMapper;
 import example.fom.xml.mybatis.service.InputOracleService;
 

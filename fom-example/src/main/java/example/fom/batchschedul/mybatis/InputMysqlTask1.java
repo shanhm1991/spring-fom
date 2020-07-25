@@ -1,4 +1,4 @@
-package example.fom.batchschedul;
+package example.fom.batchschedul.mybatis;
 
 import java.util.Arrays;
 import java.util.List;
@@ -10,6 +10,7 @@ import org.eto.fom.util.file.reader.IRow;
 import org.eto.fom.util.file.reader.TextReader;
 
 import example.fom.batchschedul.dao.ExamplesDao;
+import example.fom.xml.mybatis.bean.ExampleBean;
 
 /**
  * 
