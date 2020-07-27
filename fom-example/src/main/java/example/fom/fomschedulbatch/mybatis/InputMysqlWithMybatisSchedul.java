@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eto.fom.context.SpringContext;
 import org.eto.fom.context.annotation.FomConfig;
 import org.eto.fom.context.annotation.FomSchedulBatch;
 import org.eto.fom.context.annotation.SchedulBatchFactory;
@@ -21,7 +22,7 @@ import example.fom.fomschedulbatch.mybatis.service.impl.InputMysqServiceImpl;
  * @author shanhm
  *
  */
-@FomSchedulBatch
+@FomSchedulBatch(cron = "0/15 * * * * ?", remark = "将指定目录下text文本解析导入Mysql")
 public class InputMysqlWithMybatisSchedul implements SchedulBatchFactory {
 
 	@FomConfig(key = "srcPath", value = "/source")
@@ -39,7 +40,7 @@ public class InputMysqlWithMybatisSchedul implements SchedulBatchFactory {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<InputMysqlWithMybatisTask> creatTasks() throws Exception {
-		List<String> list = FileUtil.list(srcPath, new FileFilter(){
+		List<String> list = FileUtil.list(SpringContext.getPath(srcPath), new FileFilter(){
 			@Override
 			public boolean accept(File file) {
 				return PatternUtil.match(pattern, file.getName());

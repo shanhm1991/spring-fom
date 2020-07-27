@@ -33,7 +33,7 @@ public class DataSourceConfig {
 	public SqlSessionFactory sqlSessionFactory(@Qualifier("oracleDataSource") DataSource dataSource) throws Exception{
 		SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
 		factory.setDataSource(dataSource);
-		factory.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath:/example/fom/xml/**/*Mapper.xml"));
+		factory.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath:/example/fom/fomcontextxml/**/*Mapper.xml"));
 		return factory.getObject();
 	}
 	

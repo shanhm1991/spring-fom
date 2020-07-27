@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fom>
-	 <fom-scan>cexample.fom.fomcontext</fom-scan>
+	 <fom-scan>example.fom.fomcontext</fom-scan>
 <!--
 	<contexts>
 		<context class="com.examples.task.input.InputEsExample">

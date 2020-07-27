@@ -31,7 +31,7 @@ public class DataSourceConfig {
 	public SqlSessionFactory sqlSessionFactory(@Qualifier("mysqlDataSource") DataSource dataSource) throws Exception{
 		SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
 		factory.setDataSource(dataSource);
-		factory.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath:/example/fom/batchschedul/**/*Mapper.xml"));
+		factory.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath:/example/fom/fomschedulbatch/**/*Mapper.xml"));
 		return factory.getObject();
 	}
 	

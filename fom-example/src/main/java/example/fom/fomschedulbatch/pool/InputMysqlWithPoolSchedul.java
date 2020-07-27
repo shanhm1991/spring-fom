@@ -2,14 +2,14 @@ package example.fom.fomschedulbatch.pool;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.IOException;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.eto.fom.context.SpringContext;
-import org.eto.fom.context.core.Context;
+import org.eto.fom.context.annotation.FomConfig;
+import org.eto.fom.context.annotation.FomSchedulBatch;
+import org.eto.fom.context.annotation.SchedulBatchFactory;
 import org.eto.fom.util.PatternUtil;
 import org.eto.fom.util.file.FileUtil;
 
@@ -18,37 +18,25 @@ import org.eto.fom.util.file.FileUtil;
  * @author shanhm
  *
  */
-public class InputMysqlWithPoolSchedul extends Context {
+@FomSchedulBatch(name = "InputMysqlWithPoolDemo", cron = "0/35 * * * * ?", remark = "将指定目录下text文本解析导入Mysql")
+public class InputMysqlWithPoolSchedul implements SchedulBatchFactory {
 
-	
+	@FomConfig(value = "/source")
 	private String srcPath;
 
-	private int batch;
-
-	private boolean isDelMatchFail;
-	
+	@FomConfig("test.xlsx")
 	private String pattern; 
 	
-	public InputMysqlWithPoolSchedul() throws IOException{
-		srcPath = SpringContext.getPath(config.getString("srcPath", ""));
-		batch = config.getInt("batch", 5000);
-		isDelMatchFail = config.getBoolean("isDelMatchFail", false);
-		pattern = config.getString("pattern", "");
-	}
-
+	@FomConfig("5000")
+	private int batch;
+	
 	@SuppressWarnings("unchecked")
 	@Override
-	protected Collection<InputMysqlWithPoolTask> scheduleBatch() throws Exception { 
-		List<String> list = FileUtil.list(srcPath, new FileFilter(){
+	public Set<InputMysqlWithPoolTask> creatTasks() throws Exception {
+		List<String> list = FileUtil.list(SpringContext.getPath(srcPath), new FileFilter(){
 			@Override
 			public boolean accept(File file) {
-				if(!PatternUtil.match(pattern, file.getName())){
-					if(isDelMatchFail && !file.delete()){
-						log.warn("删除文件[不匹配]失败:" + name);
-					}
-					return false;
-				}
-				return true;
+				return PatternUtil.match(pattern, file.getName());
 			}
 		}); 
 		
