@@ -20,7 +20,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
  *
  */
 @Configuration("oracleDataSourceConfig")
-@MapperScan(basePackages="example.fom.xml", sqlSessionTemplateRef="oracleSqlSessionTemplate")
+@MapperScan(basePackages="example.fom.fomcontextxml", sqlSessionTemplateRef="oracleSqlSessionTemplate")
 public class DataSourceConfig {
 
 	@Bean("oracleDataSource")

@@ -77,19 +77,7 @@ public class ContextManager {
 		for(Field f : fields){
 			FomConfig c = f.getAnnotation(FomConfig.class);
 			if(c != null){
-				String value = c.value();
-				if(value.indexOf("${") != -1){ 
-					value = SpringContext.getPropertiesValue(value);
-				}
-
-				f.setAccessible(true); 
-				f.set(context, value);
-
-				String key = c.key();
-				if(StringUtils.isBlank(key)){
-					key = f.getName();
-				}
-				context.config.put(key, value); 
+				valueField(f, context, c.key(), c.value(), context);
 			}
 		}
 
@@ -418,19 +406,7 @@ public class ContextManager {
 			for(Field f : fields){
 				FomConfig c = f.getAnnotation(FomConfig.class);
 				if(c != null){
-					String value = c.value();
-					if(value.indexOf("${") != -1){ 
-						value = SpringContext.getPropertiesValue(value);
-					}
-
-					f.setAccessible(true); 
-					f.set(instance, value);
-
-					String key = c.key();
-					if(StringUtils.isBlank(key)){
-						key = f.getName();
-					}
-					context.config.put(key, value); 
+					valueField(f, instance, c.key(), c.value(), context);
 				}
 			}
 
@@ -501,19 +477,7 @@ public class ContextManager {
 			for(Field f : fields){
 				FomConfig c = f.getAnnotation(FomConfig.class);
 				if(c != null){
-					String value = c.value();
-					if(value.indexOf("${") != -1){ 
-						value = SpringContext.getPropertiesValue(value);
-					}
-
-					f.setAccessible(true); 
-					f.set(instance, value);
-
-					String key = c.key();
-					if(StringUtils.isBlank(key)){
-						key = f.getName();
-					}
-					context.config.put(key, value); 
+					valueField(f, instance, c.key(), c.value(), context);
 				}
 			}
 
@@ -526,6 +490,50 @@ public class ContextManager {
 			}
 			context.regist();
 		}
+	}
+	
+	private static void valueField(Field field, Object instance, String key, String value, Context context) throws Exception{
+		if(value.indexOf("${") != -1){ 
+			value = SpringContext.getPropertiesValue(value);
+		}
+		
+		field.setAccessible(true);
+		switch(field.getGenericType().toString()){
+		case "short":
+		case "class java.lang.Short":
+			field.set(instance, Short.valueOf(value));
+			break;
+		case "int":
+		case "class java.lang.Integer":
+			field.set(instance, Integer.valueOf(value));
+			break;
+		case "long":
+		case "class java.lang.Long":
+			field.set(instance, Long.valueOf(value));
+			break;
+		case "float":
+		case "class java.lang.Float":
+			field.set(instance, Float.valueOf(value));
+			break;
+		case "double":
+		case "class java.lang.Double":
+			field.set(instance, Double.valueOf(value));
+			break;
+		case "boolean":
+		case "class java.lang.Boolean":
+			field.set(instance, Boolean.valueOf(value));
+			break;
+		case "class java.lang.String":
+			field.set(instance, value);
+			break;
+	    default:
+			throw new UnsupportedOperationException("不支持的配置类型：" + instance.getClass().getName() + "." + field.getName());
+		}
+		
+		if(StringUtils.isBlank(key)){
+			key = field.getName();
+		}
+		context.config.put(key, value); 
 	}
 
 }

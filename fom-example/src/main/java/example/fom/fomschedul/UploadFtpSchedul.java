@@ -7,6 +7,7 @@ import org.eto.fom.context.annotation.FomConfig;
 import org.eto.fom.context.annotation.FomSchedul;
 import org.eto.fom.task.updownload.helper.UploadHelper;
 import org.eto.fom.task.updownload.helper.impl.FtpHelper;
+import org.springframework.scheduling.annotation.Scheduled;
 
 /**
  * 
@@ -17,18 +18,19 @@ import org.eto.fom.task.updownload.helper.impl.FtpHelper;
 @FomSchedul(cron = "0 0 23 * * ?", remark = "上传文件到Ftp服务")
 public class UploadFtpSchedul {
 	
-	@FomConfig("${ftp.hostname}")
+	@FomConfig("${ftp.hostname:undefined}")
 	private String hostname;
 
-	@FomConfig("${ftp.port}")
+	@FomConfig("${ftp.port:4000}")
 	private int port;
 
-	@FomConfig("${ftp.user}")
+	@FomConfig("${ftp.user:undefined}")
 	private String user;
 
-	@FomConfig("${ftp.passwd}")
+	@FomConfig("${ftp.passwd:undefined}")
 	private String passwd;
 	
+	@Scheduled
 	public void upload() throws Exception{
 		UploadHelper helper = new FtpHelper(hostname, port, user, passwd);
 		String source = SpringContext.getPath("/source") + File.separator + "ftp.jpg";

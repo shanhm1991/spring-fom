@@ -7,6 +7,7 @@ import org.eto.fom.context.annotation.FomConfig;
 import org.eto.fom.context.annotation.FomSchedul;
 import org.eto.fom.task.updownload.helper.UploadHelper;
 import org.eto.fom.task.updownload.helper.impl.HdfsHelper;
+import org.springframework.scheduling.annotation.Scheduled;
 
 /**
  * 
@@ -16,15 +17,16 @@ import org.eto.fom.task.updownload.helper.impl.HdfsHelper;
 @FomSchedul(cron = "0 0 22 * * ?", remark = "上传文件到hdfs服务")
 public class UploadHdfsSchedul {
 
-	@FomConfig("${hdfs.masterUrl}")
+	@FomConfig("${hdfs.masterUrl:undefined}")
 	private String masterUrl;
 
-	@FomConfig("${hdfs.slaveUrl}")
+	@FomConfig("${hdfs.slaveUrl:undefined}")
 	private String slaveUrl;
 
-	@FomConfig("${hdfs.destPath}")
+	@FomConfig("${hdfs.destPath:undefined}")
 	private String destPath;
 
+	@Scheduled
 	public void upload() throws Exception { 
 		UploadHelper helper = new HdfsHelper(masterUrl, slaveUrl);
 		String source = SpringContext.getPath("/source") + File.separator + "hdfs.jpg";
