@@ -21,7 +21,6 @@ public class SlfLoggerFactory {
 	public static Logger getLogger(String name){
 		org.apache.log4j.Logger logger = LogManager.exists(name);
 		if(logger != null){
-			//有可能返回的logger还没有设置好
 			return LoggerFactory.getLogger(name);
 		}
 

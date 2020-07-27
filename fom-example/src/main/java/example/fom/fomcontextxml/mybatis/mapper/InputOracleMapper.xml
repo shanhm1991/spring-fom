@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="example.fom.xml.mybatis.mapper.InputOracleMapper">
+
+	<insert id="input" parameterType="List" useGeneratedKeys="false">
+		insert all 
+		<foreach collection="list" item="item" index="index">
+			into demo(id,name,source,filetype,importway) values 
+			(#{item.id},#{item.name},#{item.source},#{item.fileType},#{item.importWay}) 
+		</foreach>
+		select 1 from dual
+	</insert>
+</mapper>
