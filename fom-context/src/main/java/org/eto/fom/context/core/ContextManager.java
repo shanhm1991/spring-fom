@@ -3,7 +3,6 @@ package org.eto.fom.context.core;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.ObjectInputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -21,6 +20,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -34,10 +34,11 @@ import org.eto.fom.context.annotation.FomContext;
 import org.eto.fom.context.annotation.FomSchedul;
 import org.eto.fom.context.annotation.FomSchedulBatch;
 import org.eto.fom.context.annotation.SchedulBatchFactory;
-import org.eto.fom.util.IoUtil;
 import org.reflections.Reflections;
 import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.Scheduled;
+
+import com.google.gson.Gson;
 
 /**
  * context实例的管理
@@ -57,7 +58,7 @@ public class ContextManager {
 		return loadedContext.containsKey(contextName);
 	}
 
-	public static void register(Context context) throws Exception {
+	public static void register(Context context, boolean configValued) throws Exception {
 		if(context == null){
 			return;
 		}
@@ -72,12 +73,14 @@ public class ContextManager {
 		registry.regist(context.name, context); 
 
 		Class<?> clazz = context.getClass();
-		//扫描FomContfig
-		Field[] fields = clazz.getDeclaredFields();
-		for(Field f : fields){
-			FomConfig c = f.getAnnotation(FomConfig.class);
-			if(c != null){
-				valueField(f, context, c.key(), c.value(), context);
+		if(!configValued){
+			//扫描FomContfig
+			Field[] fields = clazz.getDeclaredFields();
+			for(Field f : fields){
+				FomConfig c = f.getAnnotation(FomConfig.class);
+				if(c != null){
+					valueField(f, context, c.key(), c.value(), context);
+				}
 			}
 		}
 
@@ -99,7 +102,7 @@ public class ContextManager {
 	 */
 	public static void load(String xmlPath) throws Exception{ 
 
-		loadCacheContexts(); 
+		loadCache(); 
 
 		File xml = new File(xmlPath);
 		if(!xml.exists()){
@@ -112,7 +115,7 @@ public class ContextManager {
 		findConfig(xml, confMap, pckages);
 
 		for(Entry<String,Element> entry : confMap.entrySet()){
-			loadXmlContexts(entry.getKey(), entry.getValue());
+			loadXml(entry.getKey(), entry.getValue());
 		}
 
 		loadFomContexts(pckages);
@@ -126,7 +129,8 @@ public class ContextManager {
 		}
 	}
 
-	private static void loadCacheContexts() {
+	@SuppressWarnings("unchecked")
+	private static void loadCache() throws Exception {
 		String cache = System.getProperty("cache.context");
 		File[] array = new File(cache).listFiles(new FileFilter(){
 			@Override
@@ -139,18 +143,31 @@ public class ContextManager {
 		}
 
 		LOG.info("load context from cache：" + cache); 
+		Gson gson = new Gson();
 		for(File file : array){
-			String name = file.getName().split("\\.")[0];
-			ObjectInputStream input = null;
-			try{
-				input = new ObjectInputStream(new FileInputStream(file));
-				Context context = (Context) input.readObject();
-				context.unSerialize();
-				context.regist();
-			}catch(Exception e){
-				LOG.error("load context[" + name + "] from cache failed", e);
-			}finally{
-				IoUtil.close(input);
+			try(FileInputStream input = new FileInputStream(file)){
+				List<String> list = IOUtils.readLines(input);
+				String json = list.get(0); //not null
+				
+				Map<String, String> map = gson.fromJson(json, Map.class);
+				String fom_context = map.get("fom_context");
+				String fom_schedul = map.get("fom_schedul");
+				String fom_schedulbatch = map.get("fom_schedulbatch");
+				
+				if(StringUtils.isNotBlank(fom_context)){
+					Class<?> clazz = Class.forName(fom_context);
+					Context context = (Context)gson.fromJson(json, clazz);
+					context.init();
+					context.regist(true);
+				}else if(StringUtils.isNotBlank(fom_schedul)){
+					Context context = (Context)gson.fromJson(json, Context.class); //就为了获取configmap，这里实现不太优雅，暂且忍了
+					loadFomSchedul(Class.forName(fom_schedul), context.config.valueMap);
+				}else if(StringUtils.isNotBlank(fom_schedulbatch)){
+					Context context = (Context)gson.fromJson(json, Context.class); 
+					loadFomSchedulBatch(Class.forName(fom_schedulbatch), context.config.valueMap);
+				}else{
+					LOG.warn("not valid cache file：" + file.getName()); 
+				}
 			}
 		}
 	}
@@ -213,7 +230,7 @@ public class ContextManager {
 	}
 
 	@SuppressWarnings({ "unchecked" })
-	private static void loadXmlContexts(String xmlPath, Element fom) throws Exception {
+	private static void loadXml(String xmlPath, Element fom) throws Exception {
 		Element contexts = fom.element("contexts");
 		if(contexts == null){
 			return;
@@ -274,7 +291,9 @@ public class ContextManager {
 			Context.localName.set(name); 
 			ContextConfig.loadedConfig.putIfAbsent(name, map);
 			Context context = (Context)clazz.newInstance();
-			context.regist();
+			
+			context.fom_context = classname;
+			context.regist(false);
 		}
 	}
 
@@ -317,7 +336,9 @@ public class ContextManager {
 			Context.localName.set(name); 
 			ContextConfig.loadedConfig.putIfAbsent(name, map);
 			Context context = (Context)clazz.newInstance();
-			context.regist();
+			
+			context.fom_context = clazz.getName();
+			context.regist(false);
 		}
 	}
 
@@ -333,41 +354,47 @@ public class ContextManager {
 		}
 
 		LOG.info("load context with @FomSchedul"); 
-		SpringRegistry registry = SpringContext.getBean(SpringRegistry.class);
 		for(Class<?> clazz : clazzs){
-			FomSchedul fc = clazz.getAnnotation(FomSchedul.class);
-			String name = fc.name();
-			if(StringUtils.isBlank(name)){
-				name = clazz.getSimpleName();
-			}
+			loadFomSchedul(clazz,  null);
+		}
+	}
+	
+	private static void loadFomSchedul(Class<?> clazz, ConcurrentHashMap<String, String> map) throws Exception {
+		FomSchedul fc = clazz.getAnnotation(FomSchedul.class);
+		String name = fc.name();
+		if(StringUtils.isBlank(name)){
+			name = clazz.getSimpleName();
+		}
 
-			String cron = fc.cron();
-			List<Method> methods = new ArrayList<>();
-			for(Method method : clazz.getMethods()){
-				Scheduled sch = method.getAnnotation(Scheduled.class);
-				if(sch != null){
-					methods.add(method);
-					if(StringUtils.isBlank(cron)){
-						cron = sch.cron();
-					}
+		String cron = fc.cron();
+		List<Method> methods = new ArrayList<>();
+		for(Method method : clazz.getMethods()){
+			Scheduled sch = method.getAnnotation(Scheduled.class);
+			if(sch != null){
+				methods.add(method);
+				if(StringUtils.isBlank(cron)){
+					cron = sch.cron();
 				}
 			}
+		}
 
-			//没有@Scheduled方法，或者没有设置cron的就忽略
-			if(methods.isEmpty()){
-				LOG.warn("ignore context, " + clazz + " hasn't Scheduled method");
-				continue;
-			}
+		//没有@Scheduled方法，或者没有设置cron的就忽略
+		if(methods.isEmpty()){
+			LOG.warn("ignore context, " + clazz + " hasn't Scheduled method");
+			return;
+		}
 
-			if(StringUtils.isBlank(cron)){
-				LOG.warn("ignore context, " + clazz + " hasn't cron expression.");
-				continue;
-			}
+		if(StringUtils.isBlank(cron)){
+			LOG.warn("ignore context, " + clazz + " hasn't cron expression.");
+			return;
+		}
 
-			final Object instance = clazz.newInstance();
-			registry.regist(name + "-task", instance); 
+		SpringRegistry registry = SpringContext.getBean(SpringRegistry.class);
+		final Object instance = clazz.newInstance();
+		registry.regist(name + "-task", instance); 
 
-			ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
+		if(map == null){
+			map = new ConcurrentHashMap<>();
 			map.put(ContextConfig.CONF_CRON, cron);
 			map.put(ContextConfig.CONF_THREADCORE, String.valueOf(fc.threadCore()));
 			map.put(ContextConfig.CONF_THREADMAX, String.valueOf(fc.threadMax()));
@@ -378,48 +405,49 @@ public class ContextManager {
 			map.put(ContextConfig.CONF_EXECONLOAN, String.valueOf(fc.execOnLoad()));
 			map.put(ContextConfig.CONF_STOPWITHNOCRON, String.valueOf(fc.stopWithNoCron()));
 			map.put(ContextConfig.CONF_REMARK, String.valueOf(fc.remark()));
-			
-			Context.localName.set(name); 
-			ContextConfig.loadedConfig.putIfAbsent(name, map);
-			Context context = new Context(){
-				@SuppressWarnings({ "unchecked", "rawtypes" })
-				@Override
-				protected Collection<Task> scheduleBatch() throws Exception {
-					Task task = new Task(name + "-task"){
-						@Override
-						protected Object exec() throws Exception {
-							for(Method method : methods){
-								method.invoke(instance);
-							}
-							return null;
-						}
-					};
-
-					List<Task> list = new ArrayList<>();
-					list.add(task);
-					return list;
-				}
-			};
-
-			//扫描FomContfig
-			Field[] fields = clazz.getDeclaredFields();
-			for(Field f : fields){
-				FomConfig c = f.getAnnotation(FomConfig.class);
-				if(c != null){
-					valueField(f, instance, c.key(), c.value(), context);
-				}
-			}
-
-			//扫描PostConstruct
-			for(Method method : clazz.getMethods()){
-				PostConstruct con = method.getAnnotation(PostConstruct.class);
-				if(con != null){
-					method.invoke(instance);
-				}
-			}
-
-			context.regist();
 		}
+		
+		Context.localName.set(name); 
+		ContextConfig.loadedConfig.putIfAbsent(name, map);
+		Context context = new Context(){
+			@SuppressWarnings({ "unchecked", "rawtypes" })
+			@Override
+			protected Collection<Task> scheduleBatch() throws Exception {
+				Task task = new Task(name + "-task"){
+					@Override
+					protected Object exec() throws Exception {
+						for(Method method : methods){
+							method.invoke(instance);
+						}
+						return null;
+					}
+				};
+
+				List<Task> list = new ArrayList<>();
+				list.add(task);
+				return list;
+			}
+		};
+
+		//扫描FomContfig
+		Field[] fields = clazz.getDeclaredFields();
+		for(Field f : fields){
+			FomConfig c = f.getAnnotation(FomConfig.class);
+			if(c != null){
+				valueField(f, instance, c.key(), c.value(), context);
+			}
+		}
+
+		//扫描PostConstruct
+		for(Method method : clazz.getMethods()){
+			PostConstruct con = method.getAnnotation(PostConstruct.class);
+			if(con != null){
+				method.invoke(instance);
+			}
+		}
+
+		context.fom_schedul = clazz.getName();
+		context.regist(false);
 	}
 
 	private static void loadFomSchedulBatch(List<String> pckages) throws Exception {
@@ -434,24 +462,29 @@ public class ContextManager {
 		}
 
 		LOG.info("load context with @FomSchedulBatch"); 
-		SpringRegistry registry = SpringContext.getBean(SpringRegistry.class);
 		for(Class<?> clazz : clazzs){
-			if(!SchedulBatchFactory.class.isAssignableFrom(clazz)){
-				LOG.warn("ignore context, " + clazz + " isn't a implements of SchedulBatchFactory.");
-				continue;
-			}
+			loadFomSchedulBatch(clazz, null);
+		}
+	}
+	
+	private static void loadFomSchedulBatch(Class<?> clazz, ConcurrentHashMap<String, String> map) throws Exception {
+		if(!SchedulBatchFactory.class.isAssignableFrom(clazz)){
+			LOG.warn("ignore context, " + clazz + " isn't a implements of SchedulBatchFactory.");
+			return;
+		}
 
-			FomSchedulBatch fom = clazz.getAnnotation(FomSchedulBatch.class);
+		FomSchedulBatch fom = clazz.getAnnotation(FomSchedulBatch.class);
+		String name = fom.name();
+		if(StringUtils.isBlank(name)){
+			name = clazz.getSimpleName();
+		}
 
-			String name = fom.name();
-			if(StringUtils.isBlank(name)){
-				name = clazz.getSimpleName();
-			}
+		SpringRegistry registry = SpringContext.getBean(SpringRegistry.class);
+		final Object instance = clazz.newInstance();
+		registry.regist(name + "-task", instance); 
 
-			final Object instance = clazz.newInstance();
-			registry.regist(name + "-task", instance); 
-
-			ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
+		if(map == null){
+			map = new ConcurrentHashMap<>();
 			map.put(ContextConfig.CONF_CRON, fom.cron());
 			map.put(ContextConfig.CONF_THREADCORE, String.valueOf(fom.threadCore()));
 			map.put(ContextConfig.CONF_THREADMAX, String.valueOf(fom.threadMax()));
@@ -462,34 +495,36 @@ public class ContextManager {
 			map.put(ContextConfig.CONF_EXECONLOAN, String.valueOf(fom.execOnLoad()));
 			map.put(ContextConfig.CONF_STOPWITHNOCRON, String.valueOf(fom.stopWithNoCron()));
 			map.put(ContextConfig.CONF_REMARK, String.valueOf(fom.remark()));
-
-			Context.localName.set(name); 
-			ContextConfig.loadedConfig.putIfAbsent(name, map);
-			Context context = new Context(){
-				@Override
-				protected <E> Collection<? extends Task<E>> scheduleBatch() throws Exception {
-					return ((SchedulBatchFactory)instance).creatTasks();
-				}
-			};
-
-			//扫描FomContfig
-			Field[] fields = clazz.getDeclaredFields();
-			for(Field f : fields){
-				FomConfig c = f.getAnnotation(FomConfig.class);
-				if(c != null){
-					valueField(f, instance, c.key(), c.value(), context);
-				}
-			}
-
-			//扫描PostConstruct
-			for(Method method : clazz.getMethods()){
-				PostConstruct con = method.getAnnotation(PostConstruct.class);
-				if(con != null){
-					method.invoke(instance);
-				}
-			}
-			context.regist();
 		}
+
+		Context.localName.set(name); 
+		ContextConfig.loadedConfig.putIfAbsent(name, map);
+		Context context = new Context(){
+			@Override
+			protected <E> Collection<? extends Task<E>> scheduleBatch() throws Exception {
+				return ((SchedulBatchFactory)instance).creatTasks();
+			}
+		};
+
+		//扫描FomContfig
+		Field[] fields = clazz.getDeclaredFields();
+		for(Field f : fields){
+			FomConfig c = f.getAnnotation(FomConfig.class);
+			if(c != null){
+				valueField(f, instance, c.key(), c.value(), context);
+			}
+		}
+
+		//扫描PostConstruct
+		for(Method method : clazz.getMethods()){
+			PostConstruct con = method.getAnnotation(PostConstruct.class);
+			if(con != null){
+				method.invoke(instance);
+			}
+		}
+		
+		context.fom_schedulbatch = clazz.getName();
+		context.regist(false);
 	}
 	
 	private static void valueField(Field field, Object instance, String key, String value, Context context) throws Exception{

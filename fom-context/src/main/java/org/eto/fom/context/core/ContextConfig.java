@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -80,6 +81,7 @@ public final class ContextConfig {
 	@Expose
 	TimedExecutorPool pool;
 
+	@Expose
 	volatile CronExpression cronExpression;
 
 	final ConcurrentHashMap<String, String> valueMap; 
@@ -102,22 +104,21 @@ public final class ContextConfig {
 		setAliveTime(MapUtils.getInt(CONF_ALIVETIME, valueMap, ALIVETIME_DEFAULT));
 		setOverTime(MapUtils.getInt(CONF_OVERTIME, valueMap, OVERTIME_DEFAULT));
 		setQueueSize(MapUtils.getInt(CONF_QUEUESIZE, valueMap, QUEUESIZE_DEFAULT));
-		setCron(valueMap.get(CONF_CRON)); 
 		setRemark(valueMap.get(CONF_REMARK));
 		setCancellable(MapUtils.getBoolean(CONF_CANCELLABLE, valueMap, false));
 		setStopWithNoCron(MapUtils.getBoolean(CONF_STOPWITHNOCRON, valueMap, false));
 		setExecOnLoad(MapUtils.getBoolean(CONF_EXECONLOAN, valueMap, true));
-
-		initPool();
 	}
 
-	void initPool(){
-		int core = Integer.parseInt(valueMap.get(CONF_THREADCORE)); 
-		int max = Integer.parseInt(valueMap.get(CONF_THREADMAX));
-		int aliveTime = Integer.parseInt(valueMap.get(CONF_ALIVETIME));   
-		int queueSize = Integer.parseInt(valueMap.get(CONF_QUEUESIZE));  
+	void init(){
+		int core = MapUtils.getInt(CONF_THREADCORE, valueMap, THREADCORE_DEFAULT); 
+		int max = MapUtils.getInt(CONF_THREADMAX, valueMap, THREADMAX_DEFAULT);
+		int aliveTime = MapUtils.getInt(CONF_ALIVETIME, valueMap, ALIVETIME_DEFAULT);   
+		int queueSize = MapUtils.getInt(CONF_QUEUESIZE, valueMap, QUEUESIZE_DEFAULT);  
 		pool = new TimedExecutorPool(core,max,aliveTime,new LinkedBlockingQueue<Runnable>(queueSize));
 		pool.allowCoreThreadTimeOut(true);
+		
+		setCron(valueMap.get(CONF_CRON));
 	}
 
 	long getActives(){
@@ -407,8 +408,9 @@ public final class ContextConfig {
 		} catch (ParseException e) {
 			throw new IllegalArgumentException(e);
 		}
+		
 		if(cronExpression == null
-				|| !(cron.equals(valueMap.get(CONF_CRON)  ))){
+				|| !(cronExpression.getCronExpression().equals(cron.toUpperCase(Locale.US)))){
 			valueMap.put(CONF_CRON, cron);
 			cronExpression = c;
 		}

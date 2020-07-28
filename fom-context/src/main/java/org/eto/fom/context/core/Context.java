@@ -41,12 +41,15 @@ import com.google.gson.annotations.Expose;
  */
 public class Context {
 
+	private static final long UNIT = 1000;
+
 	//所有的Context共用，防止两个Context创建针对同一个文件的任务
 	static final Map<String,TimedFuture<Result<?>>> FUTUREMAP = new ConcurrentHashMap<>(1000);
 
 	//当前构造的context的名称
 	static final ThreadLocal<String> localName = new ThreadLocal<>();
 
+	@Expose
 	final long loadTime = System.currentTimeMillis();
 
 	@Expose
@@ -70,7 +73,7 @@ public class Context {
 
 	@Expose
 	private volatile long executeExceptions;
-	
+
 	@Expose
 	private State state = INITED; 
 
@@ -79,7 +82,7 @@ public class Context {
 
 	@Expose
 	private AtomicLong submits = new AtomicLong(0); 
-	
+
 	public Context(){
 		String lname = localName.get();
 		if(StringUtils.isNotBlank(lname)){
@@ -93,8 +96,8 @@ public class Context {
 				this.name = clazz.getSimpleName();
 			}
 		}
-		this.log = SlfLoggerFactory.getLogger(name);
 		config = new ContextConfig(name);
+		init();
 	}
 
 	public Context(String name){
@@ -109,8 +112,8 @@ public class Context {
 				this.name = clazz.getSimpleName();
 			}
 		}
-		this.log = SlfLoggerFactory.getLogger(name);
 		config = new ContextConfig(name);
+		init();
 	}
 
 	/**
@@ -118,14 +121,13 @@ public class Context {
 	 * @param loadFrom
 	 * @throws Exception
 	 */
-	public void regist() throws Exception {
-		ContextManager.register(this);  
+	public void regist(boolean configValued) throws Exception {
+		ContextManager.register(this, configValued);  
 	}
 
-	public void unSerialize(){
+	void init(){
 		this.log = SlfLoggerFactory.getLogger(name); 
-		switchState(INITED);
-		config.initPool();
+		config.init();
 	}
 
 	/**
@@ -254,7 +256,7 @@ public class Context {
 			case INITED:
 			case STOPPED:
 				if(config.pool.isShutdown()){
-					config.initPool();
+					config.init();
 				}
 				innerThread = new InnerThread();
 				innerThread.start();
@@ -639,5 +641,10 @@ public class Context {
 
 	}
 
-	private static final long UNIT = 1000;
+	// 记住class,反序列化时使用
+	String fom_context;
+
+	String fom_schedul;
+
+	String fom_schedulbatch;
 }

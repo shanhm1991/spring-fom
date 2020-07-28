@@ -231,17 +231,16 @@ public class ContextHelper {
 			}
 		}
 
+		map.put("result", true);//已经更新成功
 		if(context.config.valueMap.equals(bakMap)){ 
-			map.put("result", false);
-			map.put("msg", "context[" + name + "] has nothing changed.");
+			map.put("msg", "context[" + name + "] has nothing to chang.");
 			return map;
 		}
-
-		map.put("result", true);//已经更新成功
+		
 		if(serialize(name, context)){
-			map.put("msg", "context[" + name + "] changed success.");
+			map.put("msg", "context[" + name + "] changed.");
 		}else{
-			map.put("msg", "context[" + name + "] changed success, but save failed.");
+			map.put("msg", "context[" + name + "] changed, but save failed.");
 		}
 		return map;
 	}
@@ -276,7 +275,6 @@ public class ContextHelper {
 					public boolean shouldSkipField(FieldAttributes field) {
 						return field.getAnnotation(Expose.class) != null;
 					}
-					
 					@Override
 					public boolean shouldSkipClass(Class<?> arg0) {
 						return false;
@@ -413,7 +411,7 @@ public class ContextHelper {
 			}
 		}
 
-		if(ContextManager.exist(name)){ //此处有线程安全问题，这里不要紧
+		if(ContextManager.exist(name)){ //此处有线程安全问题
 			LOG.warn("context[" + name + "] already exist, create canceled.");
 			resMap.put("result", false);
 			resMap.put("msg", "context[" + name + "] already exist, create canceled.");
@@ -424,7 +422,7 @@ public class ContextHelper {
 		ContextConfig.loadedConfig.putIfAbsent(name, map);
 		Context context = (Context)contextClass.newInstance();
 		
-		context.regist();
+		context.regist(false);
 		context.startup();
 		resMap.put("result", true);
 
