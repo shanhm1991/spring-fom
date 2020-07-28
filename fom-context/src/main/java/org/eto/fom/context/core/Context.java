@@ -96,8 +96,8 @@ public class Context {
 				this.name = clazz.getSimpleName();
 			}
 		}
-		config = new ContextConfig(name);
-		init();
+		this.config = new ContextConfig(name);
+		this.log = SlfLoggerFactory.getLogger(name); 
 	}
 
 	public Context(String name){
@@ -112,8 +112,8 @@ public class Context {
 				this.name = clazz.getSimpleName();
 			}
 		}
-		config = new ContextConfig(name);
-		init();
+		this.config = new ContextConfig(name);
+		this.log = SlfLoggerFactory.getLogger(name); 
 	}
 
 	/**
@@ -121,13 +121,8 @@ public class Context {
 	 * @param loadFrom
 	 * @throws Exception
 	 */
-	public void regist(boolean configValued) throws Exception {
-		ContextManager.register(this, configValued);  
-	}
-
-	void init(){
-		this.log = SlfLoggerFactory.getLogger(name); 
-		config.init();
+	public void regist(boolean putConfig) throws Exception {
+		ContextManager.register(this, putConfig);  
 	}
 
 	/**

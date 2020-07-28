@@ -282,8 +282,23 @@ public class ContextHelper {
 				}).create();
 		
 		String file = cache + File.separator + name + "." + System.currentTimeMillis();
+		
+		
 		try(FileOutputStream output = new FileOutputStream(file)){
-			IOUtils.write(gson.toJson(context), output, "UTF-8");
+			if(StringUtils.isBlank(context.fom_context)){
+				Map<String, Object> map = new HashMap<>(); //规避匿名类的序列化问题
+				map.put("name", context.name);
+				map.put("fom_context", context.fom_context);
+				map.put("fom_schedul", context.fom_schedul);
+				map.put("fom_schedulbatch", context.fom_schedulbatch);
+				
+				Map<String, Map<String, String>> config = new HashMap<>();
+				config.put("valueMap", context.config.valueMap);
+				map.put("config", config);
+				IOUtils.write(gson.toJson(map), output, "UTF-8");
+			}else{
+				IOUtils.write(gson.toJson(context), output, "UTF-8"); 
+			}
 			return true;
 		}catch(Exception e){
 			LOG.error("context[" + name + "] save failed: " + e);
