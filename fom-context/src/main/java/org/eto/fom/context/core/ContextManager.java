@@ -231,7 +231,7 @@ public class ContextManager {
 				continue;
 			}
 
-			ConcurrentMap<String, String> map = new ConcurrentHashMap<>();
+			ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
 			Class<?> clazz = Class.forName(classname);
 			if(StringUtils.isBlank(name)){ 
 				FomContext fc = clazz.getAnnotation(FomContext.class);
@@ -297,7 +297,7 @@ public class ContextManager {
 			}
 			
 			FomContext fc = clazz.getAnnotation(FomContext.class);
-			ConcurrentMap<String, String> map = new ConcurrentHashMap<>();
+			ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
 			map.put(ContextConfig.CONF_CRON, fc.cron());
 			map.put(ContextConfig.CONF_THREADCORE, String.valueOf(fc.threadCore()));
 			map.put(ContextConfig.CONF_THREADMAX, String.valueOf(fc.threadMax()));
@@ -367,7 +367,7 @@ public class ContextManager {
 			final Object instance = clazz.newInstance();
 			registry.regist(name + "-task", instance); 
 
-			ConcurrentMap<String, String> map = new ConcurrentHashMap<>();
+			ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
 			map.put(ContextConfig.CONF_CRON, cron);
 			map.put(ContextConfig.CONF_THREADCORE, String.valueOf(fc.threadCore()));
 			map.put(ContextConfig.CONF_THREADMAX, String.valueOf(fc.threadMax()));
@@ -451,7 +451,7 @@ public class ContextManager {
 			final Object instance = clazz.newInstance();
 			registry.regist(name + "-task", instance); 
 
-			ConcurrentMap<String, String> map = new ConcurrentHashMap<>();
+			ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
 			map.put(ContextConfig.CONF_CRON, fom.cron());
 			map.put(ContextConfig.CONF_THREADCORE, String.valueOf(fom.threadCore()));
 			map.put(ContextConfig.CONF_THREADMAX, String.valueOf(fom.threadMax()));

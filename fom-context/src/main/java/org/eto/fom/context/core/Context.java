@@ -31,6 +31,8 @@ import org.eto.fom.util.log.SlfLoggerFactory;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
 
+import com.google.gson.annotations.Expose;
+
 /**
  * 模块最小单位，相当于一个组织者的角色，负责创建和组织Task的运行
  * 
@@ -45,30 +47,59 @@ public class Context {
 	//当前构造的context的名称
 	static final ThreadLocal<String> localName = new ThreadLocal<>();
 
-	protected final ContextConfig config;
+	final long loadTime = System.currentTimeMillis();
+
+	@Expose
+	final ContextStatistics statistics = new ContextStatistics();
 
 	protected final String name;
 
+	protected final ContextConfig config;
+
+	@Expose
 	protected Logger log;
 
-	final long loadTime = System.currentTimeMillis();;
+	@Expose
+	volatile long execTime;
 
-	transient volatile long execTime;
-
-	transient ContextStatistics statistics = new ContextStatistics();;
-
+	@Expose
 	private boolean firstRun = true;
 
-	private transient volatile long executeTimes;
+	@Expose
+	private volatile long executeTimes;
 
-	private transient volatile long executeExceptions;
+	@Expose
+	private volatile long executeExceptions;
+	
+	@Expose
+	private State state = INITED; 
 
-	transient Map<Long, Exception> lastException = new ConcurrentHashMap<>();
+	@Expose
+	Map<Long, Exception> lastException = new ConcurrentHashMap<>();
 
+	@Expose
+	private AtomicLong submits = new AtomicLong(0); 
+	
 	public Context(){
 		String lname = localName.get();
 		if(StringUtils.isNotBlank(lname)){
 			this.name = lname;
+		}else{
+			Class<?> clazz = this.getClass();
+			FomContext fc = clazz.getAnnotation(FomContext.class);
+			if(fc != null && StringUtils.isNotBlank(fc.name())){
+				this.name = fc.name();
+			}else{
+				this.name = clazz.getSimpleName();
+			}
+		}
+		this.log = SlfLoggerFactory.getLogger(name);
+		config = new ContextConfig(name);
+	}
+
+	public Context(String name){
+		if(StringUtils.isNotBlank(name)){
+			this.name = name;
 		}else{
 			Class<?> clazz = this.getClass();
 			FomContext fc = clazz.getAnnotation(FomContext.class);
@@ -192,8 +223,6 @@ public class Context {
 	public final String getName(){
 		return name;
 	}
-
-	private transient State state = INITED; 
 
 	private void switchState(State s) {
 		synchronized (this) {
@@ -545,8 +574,6 @@ public class Context {
 		}
 	}
 
-	private AtomicLong submits = new AtomicLong(0); 
-
 	/**
 	 * 提交任务
 	 * @param task task
@@ -556,7 +583,7 @@ public class Context {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public <E> TimedFuture<Result<E>> submit(Task<E> task) throws Exception {
 		if(submits.incrementAndGet() % UNIT == 0){
-			Monitor.INSTANCE.monitorJvm();
+			Monitor.jvm();
 			cleanFutures();
 		}
 		String taskId = task.getId();

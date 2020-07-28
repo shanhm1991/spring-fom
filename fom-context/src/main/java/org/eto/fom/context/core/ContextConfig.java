@@ -6,7 +6,6 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -14,6 +13,8 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eto.fom.context.SpringContext;
 import org.quartz.CronExpression;
+
+import com.google.gson.annotations.Expose;
 
 /**
  * context实例的配置管理
@@ -74,27 +75,28 @@ public final class ContextConfig {
 	public static final String CONF_EXECONLOAN = "execOnLoad";
 
 	//已加载的配置
-	static final Map<String, ConcurrentMap<String,String>> loadedConfig = new HashMap<>();
+	static final Map<String, ConcurrentHashMap<String,String>> loadedConfig = new HashMap<>();
 
-	transient TimedExecutorPool pool;
+	@Expose
+	TimedExecutorPool pool;
 
 	volatile CronExpression cronExpression;
 
-	final Map<String, String> valueMap; 
+	final ConcurrentHashMap<String, String> valueMap; 
 
 	public static boolean validKey(String key){
 		return !CONF_THREADCORE.equals(key) && !CONF_THREADMAX.equals(key) && !CONF_ALIVETIME.equals(key) && !CONF_STOPWITHNOCRON.equals(key)
 				&& !CONF_OVERTIME.equals(key) && !CONF_QUEUESIZE.equals(key) && !CONF_CANCELLABLE.equals(key) && !CONF_CRON.equals(key) 
 				&& !CONF_EXECONLOAN.equals(key);
 	}
-	
+
 	ContextConfig(String name){
 		if(loadedConfig.containsKey(name)){
 			valueMap = loadedConfig.remove(name);
 		}else{
 			valueMap = new ConcurrentHashMap<>();
 		}
-		
+
 		setThreadCore(MapUtils.getInt(CONF_THREADCORE, valueMap, THREADCORE_DEFAULT));
 		setThreadMax(MapUtils.getInt(CONF_THREADMAX, valueMap, THREADMAX_DEFAULT));
 		setAliveTime(MapUtils.getInt(CONF_ALIVETIME, valueMap, ALIVETIME_DEFAULT));
@@ -105,7 +107,7 @@ public final class ContextConfig {
 		setCancellable(MapUtils.getBoolean(CONF_CANCELLABLE, valueMap, false));
 		setStopWithNoCron(MapUtils.getBoolean(CONF_STOPWITHNOCRON, valueMap, false));
 		setExecOnLoad(MapUtils.getBoolean(CONF_EXECONLOAN, valueMap, true));
-		
+
 		initPool();
 	}
 

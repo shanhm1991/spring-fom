@@ -69,7 +69,7 @@ class ContextStatistics {
 
 	LinkedList<String> daysHaveSaved = new LinkedList<>(); 
 
-	Map<String, Queue<CostDetail>> successMap = new ConcurrentHashMap<>();
+	ConcurrentHashMap<String, Queue<CostDetail>> successMap = new ConcurrentHashMap<>();
 
 	public ContextStatistics() {
 		allCostMap.put(COSTLEVEL_1, new AtomicLong(0));

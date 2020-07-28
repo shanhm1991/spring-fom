@@ -3,7 +3,6 @@ package org.eto.fom.context.core;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,11 +16,11 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Appender;
@@ -33,7 +32,12 @@ import org.codehaus.jettison.json.JSONObject;
 import org.eto.fom.context.Loader;
 import org.eto.fom.context.annotation.FomContext;
 import org.eto.fom.context.core.ContextStatistics.CostDetail;
-import org.eto.fom.util.IoUtil;
+
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.Expose;
 
 /**
  * context的操作api
@@ -242,7 +246,7 @@ public class ContextHelper {
 		return map;
 	}
 
-	private static boolean serialize(String name, Context context){
+	private static boolean serialize(String name, Context context) {
 		String cache = System.getProperty("cache.context");
 		File[] array = new File(cache).listFiles(new FileFilter(){
 			@Override
@@ -266,17 +270,26 @@ public class ContextHelper {
 			}
 		}
 
+		Gson gson = new GsonBuilder().addSerializationExclusionStrategy(
+				new ExclusionStrategy() {
+					@Override
+					public boolean shouldSkipField(FieldAttributes field) {
+						return field.getAnnotation(Expose.class) != null;
+					}
+					
+					@Override
+					public boolean shouldSkipClass(Class<?> arg0) {
+						return false;
+					}
+				}).create();
+		
 		String file = cache + File.separator + name + "." + System.currentTimeMillis();
-		ObjectOutputStream out = null;
-		try{
-			out = new ObjectOutputStream(new FileOutputStream(file));
-			out.writeObject(context);
+		try(FileOutputStream output = new FileOutputStream(file)){
+			IOUtils.write(gson.toJson(context), output, "UTF-8");
 			return true;
 		}catch(Exception e){
-			LOG.error("context[" + name + "] serialize failed.");
+			LOG.error("context[" + name + "] save failed: " + e);
 			return false;
-		}finally{
-			IoUtil.close(out);
 		}
 	}
 
@@ -359,7 +372,7 @@ public class ContextHelper {
 		json = json.replaceAll("\\\\", "\\\\\\\\");
 		JSONObject jsonObject = new JSONObject(json);
 
-		ConcurrentMap<String, String> map = new ConcurrentHashMap<>();
+		ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
 		Iterator<String> it = jsonObject.keys();
 		while(it.hasNext()){
 			String key = it.next();
