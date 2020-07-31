@@ -789,9 +789,9 @@ public class ContextHelper {
 		} 
 		
 		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss SSS");
-		for(Entry<Long, Exception> entry : context.lastException.entrySet()){
+		for(Entry<Long, Throwable> entry : context.lastException.entrySet()){
 			String key = format.format(entry.getKey());
-			Exception e = entry.getValue();
+			Throwable e = entry.getValue();
 			StringBuilder builder = new StringBuilder("msg = " + e.getMessage() + "<br>stackTrace:<br>");
 			for(StackTraceElement stack : e.getStackTrace()){
 				builder.append(stack).append("<br>");

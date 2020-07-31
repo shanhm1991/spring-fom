@@ -78,7 +78,7 @@ public class Context {
 	private State state = INITED; 
 
 	@Expose
-	Map<Long, Exception> lastException = new ConcurrentHashMap<>();
+	Map<Long, Throwable> lastException = new ConcurrentHashMap<>();
 
 	@Expose
 	private AtomicLong submits = new AtomicLong(0); 
@@ -413,9 +413,24 @@ public class Context {
 				if(firstRun && !config.getExecOnLoad()){
 					firstRun = false;
 				}else{
-					runSchedul();
+					try {
+						runSchedul();
+					} catch (RejectedExecutionException e) {
+						log.warn("task submit rejected.");
+					} catch (RuntimeException e){
+						executeExceptions++;
+						lastException.clear();
+						lastException.put(execTime, e);
+						log.error("get task failed", e);
+					}catch(Throwable e){
+						log.error("schedul terminated unexpectedly", e);
+						executeExceptions++;
+						lastException.clear();
+						lastException.put(execTime, e);
+						stopSelf();
+						return;
+					}
 				}
-
 				if(config.cronExpression != null) {
 					long waitTime = calculateWaitTime(config.cronExpression, execTime);
 					//如果设定周期较短，而执行时间较长
@@ -454,31 +469,22 @@ public class Context {
 		}
 
 		@SuppressWarnings("rawtypes")
-		private void runSchedul(){
+		private void runSchedul() throws Exception{
 			switchState(RUNNING);
 			executeTimes++;
 			execTime = System.currentTimeMillis();
-			try {
-				Collection<? extends Task> tasks = scheduleBatch();
-				if(tasks != null){
-					for (Task<?> task : tasks){
-						String taskId = task.getId();
-						if(isTaskAlive(taskId)){ 
-							if (log.isDebugEnabled()) {
-								log.debug("task[{}] is still alive, create canceled.", taskId); 
-							}
-							continue;
+			Collection<? extends Task> tasks = scheduleBatch();
+			if(tasks != null){
+				for (Task<?> task : tasks){
+					String taskId = task.getId();
+					if(isTaskAlive(taskId)){ 
+						if (log.isDebugEnabled()) {
+							log.debug("task[{}] is still alive, create canceled.", taskId); 
 						}
-						submit(task);
+						continue;
 					}
+					submit(task);
 				}
-			} catch (RejectedExecutionException e) {
-				log.warn("task submit rejected.");
-			} catch (Exception e){
-				executeExceptions++;
-				lastException.clear();
-				lastException.put(execTime, e);
-				log.error("get task failed", e);
 			}
 		}
 
