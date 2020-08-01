@@ -108,7 +108,7 @@ public final class ContextConfig {
 		setRemark(valueMap.get(CONF_REMARK));
 		setCancellable(MapUtils.getBoolean(CONF_CANCELLABLE, valueMap, false));
 		setStopWithNoCron(MapUtils.getBoolean(CONF_STOPWITHNOCRON, valueMap, false));
-		setExecOnLoad(MapUtils.getBoolean(CONF_EXECONLOAN, valueMap, true));
+		setExecOnLoad(MapUtils.getBoolean(CONF_EXECONLOAN, valueMap, false));
 		
 		init();
 	}
@@ -446,7 +446,7 @@ public final class ContextConfig {
 	 * @return execOnLoad
 	 */
 	public boolean getExecOnLoad(){
-		return MapUtils.getBoolean(CONF_EXECONLOAN, valueMap, true);
+		return MapUtils.getBoolean(CONF_EXECONLOAN, valueMap, false);
 	}
 
 	@Override

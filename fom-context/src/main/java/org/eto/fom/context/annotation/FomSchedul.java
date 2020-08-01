@@ -22,7 +22,7 @@ public @interface FomSchedul {
 	
 	public String cron() default "";
 	
-	public boolean execOnLoad() default true;
+	public boolean execOnLoad() default false;
 	
 	public boolean stopWithNoCron() default false;
 

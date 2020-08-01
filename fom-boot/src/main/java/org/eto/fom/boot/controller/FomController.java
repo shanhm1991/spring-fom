@@ -109,12 +109,6 @@ public class FomController {
 		return ContextHelper.failedDetail(name);
 	}
 	
-	@RequestMapping("/executedetail")
-	@ResponseBody
-	public Map<String,String> executedetail(String name) throws Exception { 
-		return  ContextHelper.getLastExceptions(name);
-	}
-
 	@RequestMapping("/activedetail")
 	@ResponseBody
 	public Map<String,Object> activeDetail(String name) throws Exception{ 

@@ -15,7 +15,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
@@ -28,7 +27,6 @@ import org.apache.log4j.LogManager;
 import org.eto.fom.context.Monitor;
 import org.eto.fom.context.annotation.FomContext;
 import org.eto.fom.util.log.SlfLoggerFactory;
-import org.quartz.CronExpression;
 import org.slf4j.Logger;
 
 import com.google.gson.annotations.Expose;
@@ -63,22 +61,19 @@ public class Context {
 	protected Logger log;
 
 	@Expose
-	volatile long execTime;
+	volatile long lastTime;
+
+	@Expose
+	volatile long nextTime;
+
+	@Expose
+	volatile long execTimes;
 
 	@Expose
 	private boolean firstRun = true;
 
 	@Expose
-	private volatile long executeTimes;
-
-	@Expose
-	private volatile long executeExceptions;
-
-	@Expose
 	private State state = INITED; 
-
-	@Expose
-	Map<Long, Throwable> lastException = new ConcurrentHashMap<>();
 
 	@Expose
 	private AtomicLong submits = new AtomicLong(0); 
@@ -370,29 +365,11 @@ public class Context {
 		}
 	}
 
-	/**
-	 * 获取自程序启动以来模块定时任务的执行次数
-	 * @return executeTimes
-	 */
-	public long getExecuteTimes(){
-		return executeTimes;
-	}
-
-	/**
-	 * 获取自程序启动以来模块定时任务的执行异常次数
-	 * @return executeTimes
-	 */
-	public long getExecuteExceptions(){
-		return executeExceptions;
-	}
-
 	private transient InnerThread innerThread;
 
 	private class InnerThread extends Thread implements  Serializable {
 
 		private static final long serialVersionUID = 2023244859604452982L;
-
-		private static final int CRON_LEN = 4;
 
 		public InnerThread(){
 			this.setName("context[" + name + "]"); 
@@ -418,23 +395,25 @@ public class Context {
 					} catch (RejectedExecutionException e) {
 						log.warn("task submit rejected.");
 					} catch (RuntimeException e){
-						executeExceptions++;
-						lastException.clear();
-						lastException.put(execTime, e);
-						log.error("get task failed", e);
+						log.error("", e);
 					}catch(Throwable e){
-						log.error("schedul terminated unexpectedly", e);
-						executeExceptions++;
-						lastException.clear();
-						lastException.put(execTime, e);
+						log.error("context[" + name + "] terminated unexpectedly", e); 
 						stopSelf();
 						return;
 					}
 				}
+
 				if(config.cronExpression != null) {
-					long waitTime = calculateWaitTime(config.cronExpression, execTime);
-					//如果设定周期较短，而执行时间较长
-					if(waitTime > 0){
+					Date last = new Date();
+					if(lastTime > 0){
+						last = new Date(lastTime);
+					}
+
+					Date next = config.cronExpression.getTimeAfter(last);
+					nextTime = next.getTime();
+
+					long waitTime = nextTime - System.currentTimeMillis();
+					if(waitTime > 0){ //考虑到runSchedul()本身的耗时
 						switchState(SLEEPING);
 						synchronized (this) {
 							try {
@@ -471,43 +450,18 @@ public class Context {
 		@SuppressWarnings("rawtypes")
 		private void runSchedul() throws Exception{
 			switchState(RUNNING);
-			executeTimes++;
-			execTime = System.currentTimeMillis();
+			lastTime = System.currentTimeMillis();
+			execTimes++;
 			Collection<? extends Task> tasks = scheduleBatch();
 			if(tasks != null){
 				for (Task<?> task : tasks){
 					String taskId = task.getId();
 					if(isTaskAlive(taskId)){ 
-						if (log.isDebugEnabled()) {
-							log.debug("task[{}] is still alive, create canceled.", taskId); 
-						}
+						log.warn("task[{}] is still alive, create canceled.", taskId); 
 						continue;
 					}
 					submit(task);
 				}
-			}
-		}
-
-		private long calculateWaitTime(CronExpression cronExpression, long exeTime){
-			String expression = cronExpression.getCronExpression();
-			StringTokenizer exprs = new StringTokenizer(expression, " \t", false);
-			int index = 0;
-			while(exprs.hasMoreTokens() && index <= CRON_LEN){
-				index++;
-				String expr = exprs.nextToken().trim();
-				if(expr.indexOf('/') != -1){
-					break;
-				}
-			}
-
-			Date nextDate = cronExpression.getTimeAfter(new Date(exeTime));
-			long nextTime = nextDate.getTime();
-			if(index <= CRON_LEN){
-				Date nextDate2 = cronExpression.getTimeAfter(nextDate);
-				long now = System.currentTimeMillis();
-				return (nextDate2.getTime() - nextTime) - (now - exeTime);
-			}else{
-				return nextTime - exeTime;
 			}
 		}
 

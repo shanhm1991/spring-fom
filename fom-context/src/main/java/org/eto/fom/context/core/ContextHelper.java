@@ -150,7 +150,7 @@ public class ContextHelper {
 	 * @return map结果
 	 */
 	public static List<Map<String, String>> list() {
-		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss SSS");
+		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		List<Map<String, String>> list = new ArrayList<>();
 		for(Entry<String, Context> entry : ContextManager.loadedContext.entrySet()){
 			Context context = entry.getValue();
@@ -163,14 +163,20 @@ public class ContextHelper {
 				cmap.put(ContextConfig.CONF_CRON, ""); 
 			}
 			
-			cmap.put("executeTimes", String.valueOf(context.getExecuteTimes()));
-			cmap.put("executeExceptions", String.valueOf(context.getExecuteExceptions()));
-			
 			String exec = "";
-			if(context.execTime > 0){
-				exec = format.format(context.execTime);
+			if(context.lastTime > 0){
+				exec = format.format(context.lastTime);
 			}
-			cmap.put("execTime", exec);
+			cmap.put("lastTime", exec);
+			
+			String next = "";
+			if(context.nextTime > 0){
+				next = format.format(context.nextTime);
+			}
+			cmap.put("nextTime", next);
+			
+			cmap.put("execTimes", String.valueOf(context.execTimes)); 
+			
 			cmap.put("loadTime", format.format(context.loadTime));
 			cmap.put("level", context.getLogLevel());
 			cmap.put("active", String.valueOf(context.getActives())); 
@@ -775,29 +781,5 @@ public class ContextHelper {
 		String json = builder.toString();
 		json = json.substring(0, json.length() - 1) + "]";
 		return json;
-	}
-	
-	/**
-	 * 获取最近一次异常信息
-	 * @return map
-	 */
-	public static Map<String, String> getLastExceptions(String name){
-		Map<String,String> map = new HashMap<>();
-		Context context = ContextManager.loadedContext.get(name);
-		if(context == null){
-			return map;
-		} 
-		
-		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss SSS");
-		for(Entry<Long, Throwable> entry : context.lastException.entrySet()){
-			String key = format.format(entry.getKey());
-			Throwable e = entry.getValue();
-			StringBuilder builder = new StringBuilder("msg = " + e.getMessage() + "<br>stackTrace:<br>");
-			for(StackTraceElement stack : e.getStackTrace()){
-				builder.append(stack).append("<br>");
-			}
-			map.put(key, builder.toString());
-		}
-		return map;
 	}
 }
