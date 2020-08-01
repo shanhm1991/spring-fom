@@ -18,9 +18,9 @@ import org.slf4j.LoggerFactory;
 public abstract class Task<E> implements Callable<Result<E>> {
 
 	protected volatile Logger log = LoggerFactory.getLogger("ROOT");
-	
+
 	public static final float FILE_UNIT = 1024.0f;
-	
+
 	public static final int SUCCESS_MIN = 200;
 
 	public static final int SUCCESS_MAX = 207;
@@ -29,7 +29,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	 * 任务唯一标识
 	 */
 	protected final String id;
-	
+
 	/**
 	 * 异常处理器
 	 */
@@ -39,13 +39,15 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	 * 结果处理器
 	 */
 	protected ResultHandler<E> resultHandler;
-	
+
 	private volatile Context context;
-	
+
 	private volatile long createTime;
-	
+
 	private volatile long startTime;
-	
+
+	private boolean isResultHandler = false;
+
 	/**
 	 * @param id Task唯一标识
 	 */
@@ -82,7 +84,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
 	}
-	
+
 	/**
 	 * 设置异常处理器
 	 * @param exceptionHandler exceptionHandler
@@ -102,19 +104,19 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	@Override
 	public final Result<E> call() {  
 		Thread.currentThread().setName(id);
-		Result<E> result = new Result<>(id); 
 		long sTime = System.currentTimeMillis();
 		this.startTime = sTime;
+
+		final Result<E> result = new Result<>(id); 
 		result.startTime = sTime;
 		result.createTime = this.createTime;
-		
+
 		log.info("task started."); 
 		try {
 			result.success = beforeExec();
 			if(result.success){
-				E content = exec();
-				result.content = content;
-				result.success = afterExec(content);
+				result.content = exec();
+				result.success = afterExec(result.content);
 			}
 		} catch(Throwable e) {
 			log.error("", e); 
@@ -124,34 +126,77 @@ public abstract class Task<E> implements Callable<Result<E>> {
 				exceptionHandler.handle(e); 
 			}
 		}
-		
 		result.costTime = System.currentTimeMillis() - sTime;
-		if(resultHandler != null){
-			try{
-				resultHandler.handle(result);
-			}catch(Exception e){
-				log.error("", e); 
-				result.success = false;
-				if(result.throwable == null){
-					result.throwable = e;
-				}
-			}
-		}
-		
-		//这里算上resulthandler的结果和耗时
-		long cost = System.currentTimeMillis() - sTime;
+
+
+
+		//		if(resultHandler != null){
+		//			try{
+		//				resultHandler.handle(result);
+		//			}catch(Exception e){
+		//				log.error("", e); 
+		//				result.success = false;
+		//				if(result.throwable == null){
+		//					result.throwable = e;
+		//				}
+		//			}
+		//		}
+		//		
+		//		//这里算上resulthandler的结果和耗时
+		//		long cost = System.currentTimeMillis() - sTime;
 		if(result.success){
 			if(context != null){
-				context.statistics.successIncrease(id, cost, this.createTime, this.startTime); 
+				context.statistics.successIncrease(id, result.costTime, this.createTime, this.startTime); 
 			}
-			log.info("task success, cost={}ms", cost);
+			log.info("task success, cost={}ms", result.costTime);
 		}else{
 			if(context != null){
 				context.statistics.failedIncrease(id, result);
 			}
-			log.warn("task failed, cost={}ms", cost);
+			log.warn("task failed, cost={}ms", result.costTime);
+		}
+
+		if(!isResultHandler){
+			try {
+				handleResult(result); 
+			} catch (Exception e) {
+				log.error("", e);
+			} 
 		}
 		return result;
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void handleResult(Result<E> result) throws Exception{
+		if(resultHandler == null){
+			return;
+		}
+
+		final Result<E> res = result.clone(); //result交接
+		String tid = id + "-resultHandler";
+		if(context == null){
+			Thread t = new Thread(tid){
+				@Override
+				public void run() {
+					try {
+						resultHandler.handle(res);
+					} catch (Exception e) {
+						log.error("", e);
+					}
+				};
+			};
+			t.start();
+		}else{
+			Task task = new Task(tid){
+				@Override
+				protected Object exec() throws Exception {
+					Task.this.resultHandler.handle(res);
+					return null;
+				}
+			};
+			task.isResultHandler = true;
+			context.submit(task); 
+		}
 	}
 
 	/**
@@ -162,14 +207,14 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	protected boolean beforeExec() throws Exception {
 		return true;
 	}
-	
+
 	/**
 	 * 任务执行
 	 * @return E
 	 * @throws Exception
 	 */
 	protected abstract E exec() throws Exception;
-	
+
 	/**
 	 * 任务执行后的工作
 	 * @param e exec返回结果
@@ -179,7 +224,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	protected boolean afterExec(E e) throws Exception {
 		return true;
 	}
-	
+
 	/**
 	 * 获取任务id
 	 * @return id
@@ -187,7 +232,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	public final String getId() {
 		return id;
 	}
-	
+
 	/**
 	 * 获取任务创建时间
 	 * @return createTime
@@ -195,7 +240,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	public final long getCreateTime() {
 		return createTime;
 	}
-	
+
 	/**
 	 * 获取任务开始时间
 	 * @return startTime
@@ -203,7 +248,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	public final long getStartTime() {
 		return startTime;
 	}
-	
+
 	final void setContext(Context context){
 		if(context == null){
 			return;
@@ -211,7 +256,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		this.context = context;
 		this.log = SlfLoggerFactory.getLogger(context.name); 
 	}
-	
+
 	/**
 	 * 只有在context中使用时才会赋值，否则将为null
 	 * @return context name
@@ -222,7 +267,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		}
 		return context.getName();
 	}
-	
+
 	/**
 	 * 只有在context中使用时才会赋值，否则将为null
 	 * @return ContextConfig
@@ -233,7 +278,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		}
 		return context.config;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public final boolean equals(Object obj) {
@@ -243,7 +288,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		Task<E> task = (Task<E>)obj;
 		return this.id.equals(task.id);
 	}
-	
+
 	@Override
 	public final int hashCode() {
 		return this.id.hashCode();

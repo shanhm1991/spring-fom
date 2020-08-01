@@ -11,7 +11,7 @@ package org.eto.fom.context.core;
  * @author shanhm
  * 
  */
-public class Result<E> {
+public class Result<E> implements Cloneable{
 
 	final String taskId;
 
@@ -85,5 +85,11 @@ public class Result<E> {
 
 	public void setContent(E content) {
 		this.content = content;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Result<E> clone() throws CloneNotSupportedException {
+		return (Result<E>)super.clone();
 	}
 }
