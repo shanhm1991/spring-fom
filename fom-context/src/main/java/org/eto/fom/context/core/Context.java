@@ -70,7 +70,7 @@ public class Context {
 	volatile long execTimes;
 
 	@Expose
-	private boolean firstRun = true;
+	private boolean runOnStartup = true;
 
 	@Expose
 	private State state = INITED; 
@@ -230,6 +230,7 @@ public class Context {
 		synchronized (this) {
 			if(state == STOPPING && config.pool.isTerminated()){
 				state = STOPPED;
+				runOnStartup = true;
 			}
 			return state;
 		}
@@ -309,6 +310,7 @@ public class Context {
 					return map;
 				}else{
 					state = STOPPED;
+					runOnStartup = true;
 					map.put("result", true);
 					map.put("msg", "context[" + name + "] stopped.");
 					log.info("context[{}] stopped.", name); 
@@ -387,8 +389,8 @@ public class Context {
 					return;
 				}
 
-				if(firstRun && !config.getExecOnLoad()){
-					firstRun = false;
+				if(runOnStartup && !config.getExecOnLoad()){
+					runOnStartup = false;
 				}else{
 					try {
 						runSchedul();
@@ -482,6 +484,7 @@ public class Context {
 			if(waitTask()){
 				onScheduleTerminate();
 				switchState(STOPPED);
+				runOnStartup = true;
 			}
 
 			cleanFutures();
@@ -523,6 +526,7 @@ public class Context {
 			synchronized (Context.this) {
 				if(stopSucc){
 					state = STOPPED;
+					runOnStartup = true;
 					log.info("context[{}] stoped.", name);
 				}else{
 					log.warn("context[{}] is still stopping, though has waiting for a day.", name);

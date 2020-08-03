@@ -102,7 +102,7 @@ img {
 	<table class="display nowrap" style="width: 100%">
 		<tr>
 			<td>
-				<table id="fom" class="display nowrap" style="width: 100%">
+				<table id="fom" class="display nowrap" style="width: 100%; text-align: center;">
 					<thead>
 						<tr>
 							<th></th>
@@ -227,9 +227,9 @@ img {
 								}
 								
 								$('td', row)
-								.eq(4)
-								.css("text-align", "center")
-								.html(execTimes);
+								.eq(1)
+								.css("text-align", "left")
+								.html(name);
 								
 								var select = "<select id='select_"
 									+ name
@@ -286,7 +286,7 @@ img {
 
 								if (success > 0) {
 									$('td', row)
-										.eq(6)
+										.eq(7)
 										.css("text-align", "center")
 										.html(
 											"<a style='color:red;' id='"
