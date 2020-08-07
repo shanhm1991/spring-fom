@@ -1,0 +1,4 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.eto.fom.context.SpringContext,\
+org.eto.fom.context.SpringRegistry,\
+org.eto.fom.context.core.FomConfiguration

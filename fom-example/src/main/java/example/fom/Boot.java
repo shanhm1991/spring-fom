@@ -4,12 +4,17 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfiguration;
 
+/**
+ * 
+ * @author shanhm
+ *
+ */
 @SpringBootApplication(exclude={
 		DataSourceAutoConfiguration.class,
-		HibernateJpaAutoConfiguration.class})
-@ComponentScan(basePackages = {"org.eto.fom", "example.fom"})
+		HibernateJpaAutoConfiguration.class,
+		ServletWebServerFactoryAutoConfiguration.class})
 public class Boot {
 
 	public static void main(String[] args) {

@@ -99,19 +99,16 @@ public class ContextManager {
 	public static void load(String xmlPath) throws Exception{ 
 
 		loadCache(); 
+		
+		List<String> pckages = FomConfiguration.packages;
 
 		File xml = new File(xmlPath);
-		if(!xml.exists()){
-			LOG.info("cann't find fom config: " + xmlPath); 
-			return;
-		}
-
-		Map<String, Element> confMap = new HashMap<>();
-		List<String> pckages = new ArrayList<>();
-		findConfig(xml, confMap, pckages);
-
-		for(Entry<String,Element> entry : confMap.entrySet()){
-			loadXml(entry.getKey(), entry.getValue());
+		if(xml.exists()){
+			Map<String, Element> confMap = new HashMap<>();
+			findConfig(xml, confMap, pckages);
+			for(Entry<String,Element> entry : confMap.entrySet()){
+				loadXml(entry.getKey(), entry.getValue());
+			}
 		}
 
 		loadFomContexts(pckages);

@@ -6,7 +6,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 import org.apache.catalina.Context;
+import org.apache.catalina.connector.Connector;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.embedded.tomcat.TomcatConnectorCustomizer;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
@@ -28,6 +31,9 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class ServerInitializer implements ServletContextInitializer {
+	
+	@Value("${server.port:8080}")
+	private int port;
 
 	@Override
 	public void onStartup(ServletContext context) throws ServletException {
@@ -86,7 +92,7 @@ public class ServerInitializer implements ServletContextInitializer {
 	
 	@Bean
 	public ServletWebServerFactory servletContainer() {
-		return new TomcatServletWebServerFactory() {
+		TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory() {
 			@Override
 			protected void postProcessContext(Context context) {
 				super.postProcessContext(context);
@@ -102,5 +108,15 @@ public class ServerInitializer implements ServletContextInitializer {
 				context.setDocBase(root); 
 			}
 		};
+		
+		TomcatConnectorCustomizer connector = new TomcatConnectorCustomizer(){
+			@Override
+			public void customize(Connector connector) {
+				connector.setPort(port);
+			}
+		};
+		
+		tomcat.addConnectorCustomizers(connector); 
+		return tomcat;
 	}
 }

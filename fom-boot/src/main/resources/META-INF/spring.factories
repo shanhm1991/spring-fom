@@ -1,0 +1,5 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.eto.fom.boot.FomConfiguration,\
+org.eto.fom.boot.ServerInitializer,\
+org.eto.fom.boot.listener.FomListener,\
+org.eto.fom.boot.controller.FomController
