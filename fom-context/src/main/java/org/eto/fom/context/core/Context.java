@@ -633,7 +633,7 @@ public class Context {
 	 * @param results 任务执行结果集
 	 */
 	protected <E> void onBatchComplete(long execTimes, List<Result<E>> results) {
-
+		log.debug("tasks of batch[" + execTimes + "] completed.");
 	}
 
 	private void cleanFutures(){
