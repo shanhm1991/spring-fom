@@ -1,6 +1,10 @@
 package org.eto.fom.context.core;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eto.fom.util.log.SlfLoggerFactory;
 import org.slf4j.Logger;
@@ -39,6 +43,11 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	 * 结果处理器
 	 */
 	protected ResultHandler<E> resultHandler;
+
+	/**
+	 * 当前任务的周期提交批次，提交线程设置
+	 */
+	volatile long execTimes; 
 
 	private volatile Context context;
 
@@ -101,6 +110,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		this.resultHandler = resultHandler;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public final Result<E> call() {  
 		Thread.currentThread().setName(id);
@@ -128,32 +138,35 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		}
 		result.costTime = System.currentTimeMillis() - sTime;
 
+		if(context != null){
+			ConcurrentLinkedQueue<Result<?>> resultQueue = context.batchResultsMap.get(execTimes);
+			if(resultQueue != null){
+				resultQueue.add(result);
 
+				AtomicInteger batchSubmits = context.batchSubmitsMap.get(execTimes); //not null 
+				if(batchSubmits.decrementAndGet() == 0){
+					context.batchResultsMap.remove(execTimes);
+					context.batchSubmitsMap.remove(execTimes);
 
-		//		if(resultHandler != null){
-		//			try{
-		//				resultHandler.handle(result);
-		//			}catch(Exception e){
-		//				log.error("", e); 
-		//				result.success = false;
-		//				if(result.throwable == null){
-		//					result.throwable = e;
-		//				}
-		//			}
-		//		}
-		//		
-		//		//这里算上resulthandler的结果和耗时
-		//		long cost = System.currentTimeMillis() - sTime;
-		if(result.success){
-			if(context != null){
+					Result<E>[] array = new Result[resultQueue.size()];
+					List<Result<E>> results = Arrays.asList(resultQueue.toArray(array));
+					context.onBatchComplete(execTimes, results);
+				}
+			}
+			
+			if(result.success){
 				context.statistics.successIncrease(id, result.costTime, this.createTime, this.startTime); 
-			}
-			log.info("task success, cost={}ms", result.costTime);
-		}else{
-			if(context != null){
+				log.info("task success, cost={}ms", result.costTime);
+			}else{
 				context.statistics.failedIncrease(id, result);
+				log.warn("task failed, cost={}ms", result.costTime);
 			}
-			log.warn("task failed, cost={}ms", result.costTime);
+		}else{
+			if(result.success){
+				log.info("task success, cost={}ms", result.costTime);
+			}else{
+				log.warn("task failed, cost={}ms", result.costTime);
+			}
 		}
 
 		if(!isResultHandler){

@@ -13,14 +13,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -41,42 +46,83 @@ public class Context {
 
 	private static final long UNIT = 1000;
 
-	//所有的Context共用，防止两个Context创建针对同一个文件的任务
+	/**
+	 * 所有的Context共用，防止两个Context创建针对同一个文件的任务
+	 */
 	static final Map<String,TimedFuture<Result<?>>> FUTUREMAP = new ConcurrentHashMap<>(1000);
 
-	//当前构造的context的名称
+	/**
+	 * 当前构造的context的名称
+	 */
 	static final ThreadLocal<String> localName = new ThreadLocal<>();
 
+	/**
+	 * 加载时间点
+	 */
 	@Expose
 	final long loadTime = System.currentTimeMillis();
 
+	/**
+	 * 统计信息
+	 */
 	@Expose
 	final ContextStatistics statistics = new ContextStatistics();
 
+	/**
+	 * 名称，不可变
+	 */
 	protected final String name;
 
+	/**
+	 * 配置池
+	 */
 	protected final ContextConfig config;
 
 	@Expose
 	protected Logger log;
 
+	/**
+	 * 上次执行时间点
+	 */
 	@Expose
 	volatile long lastTime;
 
+	/**
+	 * 下次执行时间点
+	 */
 	@Expose
 	volatile long nextTime;
 
+	/**
+	 * 执行次数
+	 */
 	@Expose
 	volatile long execTimes;
 
+	/**
+	 * 是否是在启动时执行
+	 */
 	@Expose
 	private boolean runOnStartup = true;
 
+	/**
+	 * 状态
+	 */
 	@Expose
 	private State state = INITED; 
 
+	/**
+	 * 提交次数，每当次数达到1000时执行一次cleanFutures，定时线程和submit线程共享
+	 */
 	@Expose
-	private AtomicLong submits = new AtomicLong(0); 
+	private AtomicLong submits = new AtomicLong(); 
+
+	/**
+	 * 执行批次，与提交任务数的映射
+	 */
+	ConcurrentMap<Long, AtomicInteger> batchSubmitsMap = new ConcurrentHashMap<>();
+
+	ConcurrentMap<Long, ConcurrentLinkedQueue<Result<?>>> batchResultsMap = new ConcurrentHashMap<>();
 
 	public Context(){
 		String lname = localName.get();
@@ -116,7 +162,7 @@ public class Context {
 	 * @param loadFrom
 	 * @throws Exception
 	 */
-	public void regist(boolean putConfig) throws Exception {
+	void regist(boolean putConfig) throws Exception {
 		ContextManager.register(this, putConfig);  
 	}
 
@@ -455,14 +501,24 @@ public class Context {
 			lastTime = System.currentTimeMillis();
 			execTimes++;
 			Collection<? extends Task> tasks = scheduleBatch();
-			if(tasks != null){
+			if(!CollectionUtils.isEmpty(tasks)){
+				AtomicInteger batchSubmits = new AtomicInteger();
+				ConcurrentLinkedQueue<Result<?>> resultQueue = new ConcurrentLinkedQueue<>();
+				batchSubmitsMap.put(execTimes, batchSubmits);
+				batchResultsMap.put(execTimes, resultQueue);
 				for (Task<?> task : tasks){
+					task.execTimes = execTimes; //设置任务批次
 					String taskId = task.getId();
 					if(isTaskAlive(taskId)){ 
 						log.warn("task[{}] is still alive, create canceled.", taskId); 
 						continue;
 					}
 					submit(task);
+					/**
+					 * submit有一定的操作，如果task本身非常轻量瞬间就能完成的那种，
+					 * 可能任务还没提交完，但是已经提交的任务已经全部执行完，这时将提前触发onBatchComplete，不过暂时忽略此种场景
+					 */
+					batchSubmits.incrementAndGet();
 				}
 			}
 		}
@@ -565,9 +621,18 @@ public class Context {
 	}
 
 	/**
-	 * 一次性批量任务全部完成时执行的操作
+	 * stopWithNoCron = true，结束时触发
 	 */
 	protected void onScheduleTerminate() {
+
+	}
+
+	/**
+	 * 周期性提交的任务都执行完时触发
+	 * @param execTimes 周期批次
+	 * @param results 任务执行结果集
+	 */
+	protected <E> void onBatchComplete(long execTimes, List<Result<E>> results) {
 
 	}
 
