@@ -8,6 +8,7 @@ import static org.eto.fom.context.core.State.STOPPING;
 import static org.eto.fom.context.core.State.WAITING;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -507,7 +508,8 @@ public class Context {
 				batchSubmitsMap.put(execTimes, batchSubmits);
 				batchResultsMap.put(execTimes, resultQueue);
 				for (Task<?> task : tasks){
-					task.execTimes = execTimes; //设置任务批次
+					task.batch = execTimes; //设置任务批次
+					task.batchTime = lastTime;
 					String taskId = task.getId();
 					if(isTaskAlive(taskId)){ 
 						log.warn("task[{}] is still alive, create canceled.", taskId); 
@@ -629,11 +631,15 @@ public class Context {
 
 	/**
 	 * 周期性提交的任务都执行完时触发
-	 * @param execTimes 周期批次
-	 * @param results 任务执行结果集
+	 * @param batch 批次
+	 * @param batchTime 周期执行的时间点 
+	 * @param results 任务执行的结果集
 	 */
-	protected <E> void onBatchComplete(long execTimes, List<Result<E>> results) {
-		log.debug("tasks of batch[" + execTimes + "] completed.");
+	protected <E> void onBatchComplete(long batch, long batchTime, List<Result<E>> results) {
+		if(log.isDebugEnabled()){
+			String time = new SimpleDateFormat("yyyyMMdd HH:mm:ss").format(batchTime);
+			log.debug(results.size() +  " tasks of batch[" + execTimes + "] submited on " + time  + " completed.");
+		}
 	}
 
 	private void cleanFutures(){

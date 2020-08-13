@@ -47,7 +47,12 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	/**
 	 * 当前任务的周期提交批次，提交线程设置
 	 */
-	volatile long execTimes; 
+	volatile long batch; 
+	
+	/**
+	 * 当前任务被提交的周期时间点
+	 */
+	volatile long batchTime;
 
 	private volatile Context context;
 
@@ -139,18 +144,18 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		result.costTime = System.currentTimeMillis() - sTime;
 
 		if(context != null){
-			ConcurrentLinkedQueue<Result<?>> resultQueue = context.batchResultsMap.get(execTimes);
+			ConcurrentLinkedQueue<Result<?>> resultQueue = context.batchResultsMap.get(batch);
 			if(resultQueue != null){
 				resultQueue.add(result);
 
-				AtomicInteger batchSubmits = context.batchSubmitsMap.get(execTimes); //not null 
+				AtomicInteger batchSubmits = context.batchSubmitsMap.get(batch); //not null 
 				if(batchSubmits.decrementAndGet() == 0){
-					context.batchResultsMap.remove(execTimes);
-					context.batchSubmitsMap.remove(execTimes);
+					context.batchResultsMap.remove(batch);
+					context.batchSubmitsMap.remove(batch);
 
 					Result<E>[] array = new Result[resultQueue.size()];
 					List<Result<E>> results = Arrays.asList(resultQueue.toArray(array));
-					context.onBatchComplete(execTimes, results);
+					context.onBatchComplete(batch, batchTime, results);
 				}
 			}
 			
