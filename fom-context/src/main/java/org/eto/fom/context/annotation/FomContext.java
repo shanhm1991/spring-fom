@@ -18,13 +18,13 @@ public @interface FomContext {
 	
 	public static final int CORE = 4;
 	
-	public static final int MAX = 10;
+	public static final int MAX = 200;
 	
 	public static final int ALIVE = 30;
 	
 	public static final int OVER = 3600;
 	
-	public static final int QUEUE = 200;
+	public static final int QUEUE = 2000;
 
 	public String name() default "";
 	

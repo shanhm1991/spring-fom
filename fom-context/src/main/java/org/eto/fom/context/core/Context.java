@@ -21,10 +21,10 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -503,12 +503,12 @@ public class Context {
 			execTimes++;
 			Collection<? extends Task> tasks = scheduleBatch();
 			if(!CollectionUtils.isEmpty(tasks)){
-				//防止任务已经全部提交并执行完,但是submitComplete还没有置为true,错误触发时机,所以batchSubmits置1,确保全部提交完时也检查一次
+				//防止任务已经全部提交并执行完,但是submitLatch还没有countDown,错过触发时机,所以batchSubmits置1,确保全部提交完时也检查一次
 				AtomicInteger batchSubmits = new AtomicInteger(1);
 				batchSubmitsMap.put(execTimes, batchSubmits);
 				
 				//由于submit有一定步骤,防止出现任务还没提交完,但是已提交的任务已经执行完并将batchSubmits置0,导致提前触发onBatchComplete
-				AtomicBoolean submitComplete = new AtomicBoolean(false);
+				CountDownLatch submitLatch = new CountDownLatch(1);
 				
 				ConcurrentLinkedQueue<Result<?>> resultQueue = new ConcurrentLinkedQueue<>();
 				batchResultsMap.put(execTimes, resultQueue);
@@ -520,7 +520,7 @@ public class Context {
 						task = it.next();
 						task.batch = execTimes; 
 						task.batchTime = lastTime;
-						task.submitComplete = submitComplete;
+						task.submitLatch = submitLatch;
 						String taskId = task.getId();
 						if(isTaskAlive(taskId)){ 
 							log.warn("task[{}] is still alive, create canceled.", taskId); 
@@ -532,8 +532,8 @@ public class Context {
 				} catch (RejectedExecutionException e) {
 					log.warn("task[" + task.getId() + "] submit rejected.", e);
 				}finally{ 
-					submitComplete.compareAndSet(false, true);
-					checkBatchComplete(execTimes, lastTime, submitComplete, batchSubmitsMap, batchResultsMap);
+					submitLatch.countDown();
+					checkBatchComplete(execTimes, lastTime, submitLatch, batchSubmitsMap, batchResultsMap);
 				}
 			}
 		}
@@ -646,7 +646,7 @@ public class Context {
 	<E> void checkBatchComplete(
 			long batch, 
 			long batchTime,
-			AtomicBoolean submitComplete,
+			CountDownLatch submitLatch,
 			ConcurrentMap<Long, AtomicInteger> batchSubmitsMap,
 			ConcurrentMap<Long, ConcurrentLinkedQueue<Result<?>>> batchResultsMap){
 		ConcurrentLinkedQueue<Result<?>> resultQueue = batchResultsMap.get(batch);
@@ -654,10 +654,10 @@ public class Context {
 			return; //已经处理过
 		}
 		
-		boolean isSubmitFinished = false;
+		long isSubmitFinished = 0;
 		int taskNotCompleted = 0;
 		AtomicInteger batchSubmits = batchSubmitsMap.get(batch); //not null 
-		if(isSubmitFinished = submitComplete.get() 
+		if((isSubmitFinished = submitLatch.getCount()) == 0
 				&& (taskNotCompleted = batchSubmits.decrementAndGet()) == 0){
 			batchResultsMap.remove(batch);
 			batchSubmitsMap.remove(batch);
@@ -666,7 +666,7 @@ public class Context {
 			List<Result<E>> results = Arrays.asList(resultQueue.toArray(array));
 			onBatchComplete(batch, batchTime, results);
 		}
-		log.debug("batch[" + batch + "], isSubmitFinished：" + isSubmitFinished + ", taskNotCompleted：" + taskNotCompleted); 
+		log.debug("batch[" + batch + "], isSubmitFinished：" + (isSubmitFinished == 0) + ", taskNotCompleted：" + taskNotCompleted); 
 	}
 
 	/**

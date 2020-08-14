@@ -2,7 +2,7 @@ package org.eto.fom.context.core;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.CountDownLatch;
 
 import org.eto.fom.util.log.SlfLoggerFactory;
 import org.slf4j.Logger;
@@ -55,7 +55,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	/**
 	 * 当前批次任务是否全部提交完成，提交线程设置
 	 */
-	volatile AtomicBoolean submitComplete;
+	volatile CountDownLatch submitLatch;
 
 	private volatile Context context;
 
@@ -150,7 +150,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 				ConcurrentLinkedQueue<Result<?>> resultQueue = context.batchResultsMap.get(batch);
 				if(resultQueue != null){
 					resultQueue.add(result);
-					context.checkBatchComplete(batch, batchTime, submitComplete, context.batchSubmitsMap, context.batchResultsMap);
+					context.checkBatchComplete(batch, batchTime, submitLatch, context.batchSubmitsMap, context.batchResultsMap);
 				}
 			}
 
