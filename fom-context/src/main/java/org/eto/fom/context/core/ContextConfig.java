@@ -458,13 +458,13 @@ public final class ContextConfig {
 
 	private static final int THREADCORE_MIN = 1;
 
-	private static final int THREADCORE_MAX = 10;
+	private static final int THREADCORE_MAX = 100;
 
-	private static final int THREADMAX_DEFAULT = 20;
+	private static final int THREADMAX_DEFAULT = 200;
 
-	private static final int THREADMAX_MIN = 10;
+	private static final int THREADMAX_MIN = 100;
 
-	private static final int THREADMAX_MAX = 100;
+	private static final int THREADMAX_MAX = 1000;
 
 	private static final int ALIVETIME_DEFAULT = 30;
 
@@ -478,10 +478,10 @@ public final class ContextConfig {
 
 	private static final int OVERTIME_MAX = 86400;
 
-	private static final int QUEUESIZE_DEFAULT = 200;
+	private static final int QUEUESIZE_DEFAULT = 2000;
 
 	private static final int QUEUESIZE_MIN = 1;
 
-	private static final int QUEUESIZE_MAX = 10000000;
+	private static final int QUEUESIZE_MAX = Integer.MAX_VALUE;
 
 }

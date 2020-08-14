@@ -9,6 +9,7 @@ import static org.eto.fom.context.core.State.WAITING;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -442,7 +444,7 @@ public class Context {
 					try {
 						runSchedul();
 					} catch (RejectedExecutionException e) {
-						log.warn("task submit rejected.");
+						log.warn("task submit rejected.", e);
 					} catch (RuntimeException e){
 						log.error("", e);
 					}catch(Throwable e){
@@ -497,30 +499,39 @@ public class Context {
 		}
 
 		@SuppressWarnings("rawtypes")
-		private void runSchedul() throws Exception{
+		private void runSchedul() throws Exception { 
 			switchState(RUNNING);
 			lastTime = System.currentTimeMillis();
 			execTimes++;
 			Collection<? extends Task> tasks = scheduleBatch();
 			if(!CollectionUtils.isEmpty(tasks)){
-				AtomicInteger batchSubmits = new AtomicInteger();
-				ConcurrentLinkedQueue<Result<?>> resultQueue = new ConcurrentLinkedQueue<>();
+				//防止任务已经全部提交并执行完,但是submitComplete还没有置为true,错误触发时机,所以batchSubmits置1,确保全部提交完时也检查一次
+				AtomicInteger batchSubmits = new AtomicInteger(1);
 				batchSubmitsMap.put(execTimes, batchSubmits);
+				
+				//由于submit有一定步骤,防止出现任务还没提交完,但是已提交的任务已经执行完并将batchSubmits置0,导致提前触发onBatchComplete
+				AtomicBoolean submitComplete = new AtomicBoolean(false);
+				
+				ConcurrentLinkedQueue<Result<?>> resultQueue = new ConcurrentLinkedQueue<>();
 				batchResultsMap.put(execTimes, resultQueue);
-				for (Task<?> task : tasks){
-					task.batch = execTimes; //设置任务批次
-					task.batchTime = lastTime;
-					String taskId = task.getId();
-					if(isTaskAlive(taskId)){ 
-						log.warn("task[{}] is still alive, create canceled.", taskId); 
-						continue;
+				
+				try{
+					for (Task<?> task : tasks){
+						task.batch = execTimes; 
+						task.batchTime = lastTime;
+						task.submitComplete = submitComplete;
+						String taskId = task.getId();
+						if(isTaskAlive(taskId)){ 
+							log.warn("task[{}] is still alive, create canceled.", taskId); 
+							continue;
+						}
+						submit(task);
+						batchSubmits.incrementAndGet();
 					}
-					submit(task);
-					/**
-					 * submit有一定的操作，如果task本身非常轻量瞬间就能完成的那种，
-					 * 可能任务还没提交完，但是已经提交的任务已经全部执行完，这时将提前触发onBatchComplete，不过暂时忽略此种场景
-					 */
-					batchSubmits.incrementAndGet();
+				}finally{ 
+					submitComplete.compareAndSet(false, true); 
+					log.info(String.valueOf( submitComplete.get()));
+					checkBatchComplete(execTimes, lastTime, submitComplete, batchSubmitsMap, batchResultsMap);
 				}
 			}
 		}
@@ -627,6 +638,32 @@ public class Context {
 	 */
 	protected void onScheduleTerminate() {
 
+	}
+
+	@SuppressWarnings("unchecked")
+	<E> void checkBatchComplete(
+			long batch, 
+			long batchTime,
+			AtomicBoolean submitComplete,
+			ConcurrentMap<Long, AtomicInteger> batchSubmitsMap,
+			ConcurrentMap<Long, ConcurrentLinkedQueue<Result<?>>> batchResultsMap){
+		ConcurrentLinkedQueue<Result<?>> resultQueue = batchResultsMap.get(batch);
+		if(resultQueue == null){
+			return; //已经处理过
+		}
+		
+		AtomicInteger batchSubmits = batchSubmitsMap.get(batch); //not null 
+		boolean c =submitComplete.get();
+		int s = batchSubmits.decrementAndGet();
+		log.info(c + "--------" + s);
+		if(c && s == 0){
+			batchResultsMap.remove(batch);
+			batchSubmitsMap.remove(batch);
+			
+			Result<E>[] array = new Result[resultQueue.size()];
+			List<Result<E>> results = Arrays.asList(resultQueue.toArray(array));
+			onBatchComplete(batch, batchTime, results);
+		}
 	}
 
 	/**

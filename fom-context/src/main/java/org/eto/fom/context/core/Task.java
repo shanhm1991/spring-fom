@@ -1,10 +1,8 @@
 package org.eto.fom.context.core;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eto.fom.util.log.SlfLoggerFactory;
 import org.slf4j.Logger;
@@ -48,11 +46,16 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	 * 当前任务的周期提交批次，提交线程设置
 	 */
 	volatile long batch; 
-	
+
 	/**
-	 * 当前任务被提交的周期时间点
+	 * 当前任务被提交的周期时间点，提交线程设置
 	 */
 	volatile long batchTime;
+
+	/**
+	 * 当前批次任务是否全部提交完成，提交线程设置
+	 */
+	volatile AtomicBoolean submitComplete;
 
 	private volatile Context context;
 
@@ -115,7 +118,6 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		this.resultHandler = resultHandler;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public final Result<E> call() {  
 		Thread.currentThread().setName(id);
@@ -126,7 +128,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		result.startTime = sTime;
 		result.createTime = this.createTime;
 
-		log.info("task started."); 
+		//log.info("task started."); 
 		try {
 			result.success = beforeExec();
 			if(result.success){
@@ -144,21 +146,15 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		result.costTime = System.currentTimeMillis() - sTime;
 
 		if(context != null){
-			ConcurrentLinkedQueue<Result<?>> resultQueue = context.batchResultsMap.get(batch);
-			if(resultQueue != null){
-				resultQueue.add(result);
-
-				AtomicInteger batchSubmits = context.batchSubmitsMap.get(batch); //not null 
-				if(batchSubmits.decrementAndGet() == 0){
-					context.batchResultsMap.remove(batch);
-					context.batchSubmitsMap.remove(batch);
-
-					Result<E>[] array = new Result[resultQueue.size()];
-					List<Result<E>> results = Arrays.asList(resultQueue.toArray(array));
-					context.onBatchComplete(batch, batchTime, results);
+			if(!isResultHandler){
+				ConcurrentLinkedQueue<Result<?>> resultQueue = context.batchResultsMap.get(batch);
+				if(resultQueue != null){
+					resultQueue.add(result);
+					context.checkBatchComplete(batch, batchTime, submitComplete, context.batchSubmitsMap, context.batchResultsMap);
 				}
 			}
-			
+
+			// ResultHandler也算在统计内
 			if(result.success){
 				context.statistics.successIncrease(id, result.costTime, this.createTime, this.startTime); 
 				log.info("task success, cost={}ms", result.costTime);
