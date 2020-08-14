@@ -530,7 +530,6 @@ public class Context {
 					}
 				}finally{ 
 					submitComplete.compareAndSet(false, true); 
-					log.info(String.valueOf( submitComplete.get()));
 					checkBatchComplete(execTimes, lastTime, submitComplete, batchSubmitsMap, batchResultsMap);
 				}
 			}
@@ -653,10 +652,7 @@ public class Context {
 		}
 		
 		AtomicInteger batchSubmits = batchSubmitsMap.get(batch); //not null 
-		boolean c =submitComplete.get();
-		int s = batchSubmits.decrementAndGet();
-		log.info(c + "--------" + s);
-		if(c && s == 0){
+		if(submitComplete.get() && batchSubmits.decrementAndGet() == 0){
 			batchResultsMap.remove(batch);
 			batchSubmitsMap.remove(batch);
 			
@@ -675,7 +671,7 @@ public class Context {
 	protected <E> void onBatchComplete(long batch, long batchTime, List<Result<E>> results) {
 		if(log.isDebugEnabled()){
 			String time = new SimpleDateFormat("yyyyMMdd HH:mm:ss").format(batchTime);
-			log.debug(results.size() +  " tasks of batch[" + execTimes + "] submited on " + time  + " completed.");
+			log.debug(results.size() +  " tasks of batch[" + batch + "] submited on " + time  + " completed.");
 		}
 	}
 
