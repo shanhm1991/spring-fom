@@ -443,8 +443,6 @@ public class Context {
 				}else{
 					try {
 						runSchedul();
-					} catch (RejectedExecutionException e) {
-						log.warn("task submit rejected.", e);
 					} catch (RuntimeException e){
 						log.error("", e);
 					}catch(Throwable e){
@@ -515,8 +513,11 @@ public class Context {
 				ConcurrentLinkedQueue<Result<?>> resultQueue = new ConcurrentLinkedQueue<>();
 				batchResultsMap.put(execTimes, resultQueue);
 				
+				Task<?> task = null;
+				Iterator<? extends Task> it = tasks.iterator();
 				try{
-					for (Task<?> task : tasks){
+					while(it.hasNext()){
+						task = it.next();
 						task.batch = execTimes; 
 						task.batchTime = lastTime;
 						task.submitComplete = submitComplete;
@@ -528,8 +529,10 @@ public class Context {
 						submit(task);
 						batchSubmits.incrementAndGet();
 					}
+				} catch (RejectedExecutionException e) {
+					log.warn("task[" + task.getId() + "] submit rejected.", e);
 				}finally{ 
-					submitComplete.compareAndSet(false, true); 
+					submitComplete.compareAndSet(false, true);
 					checkBatchComplete(execTimes, lastTime, submitComplete, batchSubmitsMap, batchResultsMap);
 				}
 			}
@@ -651,8 +654,11 @@ public class Context {
 			return; //已经处理过
 		}
 		
+		boolean isSubmitFinished = false;
+		int taskNotCompleted = 0;
 		AtomicInteger batchSubmits = batchSubmitsMap.get(batch); //not null 
-		if(submitComplete.get() && batchSubmits.decrementAndGet() == 0){
+		if(isSubmitFinished = submitComplete.get() 
+				&& (taskNotCompleted = batchSubmits.decrementAndGet()) == 0){
 			batchResultsMap.remove(batch);
 			batchSubmitsMap.remove(batch);
 			
@@ -660,6 +666,7 @@ public class Context {
 			List<Result<E>> results = Arrays.asList(resultQueue.toArray(array));
 			onBatchComplete(batch, batchTime, results);
 		}
+		log.debug("batch[" + batch + "], isSubmitFinished：" + isSubmitFinished + ", taskNotCompleted：" + taskNotCompleted); 
 	}
 
 	/**
