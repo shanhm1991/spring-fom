@@ -9,7 +9,7 @@ import static org.eto.fom.context.core.State.WAITING;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,13 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -120,12 +117,12 @@ public class Context {
 	@Expose
 	private AtomicLong submits = new AtomicLong(); 
 
-	/**
-	 * 执行批次，与提交任务数的映射
-	 */
-	ConcurrentMap<Long, AtomicInteger> batchSubmitsMap = new ConcurrentHashMap<>();
-
-	ConcurrentMap<Long, ConcurrentLinkedQueue<Result<?>>> batchResultsMap = new ConcurrentHashMap<>();
+	//	/**
+	//	 * 执行批次，与提交任务数的映射
+	//	 */
+	//	ConcurrentMap<Long, AtomicInteger> batchSubmitsMap = new ConcurrentHashMap<>();
+	//
+	//	ConcurrentMap<Long, ConcurrentLinkedQueue<Result<?>>> batchResultsMap = new ConcurrentHashMap<>();
 
 	public Context(){
 		String lname = localName.get();
@@ -503,37 +500,32 @@ public class Context {
 			execTimes++;
 			Collection<? extends Task> tasks = scheduleBatch();
 			if(!CollectionUtils.isEmpty(tasks)){
-				//防止任务已经全部提交并执行完,但是submitLatch还没有countDown,错过触发时机,所以batchSubmits置1,确保全部提交完时也检查一次
-				AtomicInteger batchSubmits = new AtomicInteger(1);
-				batchSubmitsMap.put(execTimes, batchSubmits);
-				
-				//由于submit有一定步骤,防止出现任务还没提交完,但是已提交的任务已经执行完并将batchSubmits置0,导致提前触发onBatchComplete
-				CountDownLatch submitLatch = new CountDownLatch(1);
-				
-				ConcurrentLinkedQueue<Result<?>> resultQueue = new ConcurrentLinkedQueue<>();
-				batchResultsMap.put(execTimes, resultQueue);
-				
+				// 关于BatchStatus：
+				// 由于submit有一定步骤（任务执行非常快），要防止出现任务还在提交中，但是已提交的任务已经执行完，导致提前触发onBatchComplete
+				// 上面的问题可以通过submitLatch控制，确保onBatchComplete一定在任务提交完成之后触发；
+				// 但是还需要防止全部任务已经执行完，但是submitLatch还没有countDown，导致onBatchComplete不被触发；
+				// 所以taskNotCompleted提前置1，并在全部提交完成时检查是否触发onBatchComplete
+				BatchStatus batchStatus = new BatchStatus(execTimes, lastTime);
+				batchStatus.increaseTaskNotCompleted();
+				batchStatus.setCompletedDone(false); 
 				Task<?> task = null;
 				Iterator<? extends Task> it = tasks.iterator();
 				try{
 					while(it.hasNext()){
 						task = it.next();
-						task.batch = execTimes; 
-						task.batchTime = lastTime;
-						task.submitLatch = submitLatch;
+						task.batchStatus = batchStatus;
 						String taskId = task.getId();
 						if(isTaskAlive(taskId)){ 
 							log.warn("task[{}] is still alive, create canceled.", taskId); 
 							continue;
 						}
 						submit(task);
-						batchSubmits.incrementAndGet();
 					}
 				} catch (RejectedExecutionException e) {
 					log.warn("task[" + task.getId() + "] submit rejected.", e);
 				}finally{ 
-					submitLatch.countDown();
-					checkBatchComplete(execTimes, lastTime, submitLatch, batchSubmitsMap, batchResultsMap);
+					batchStatus.countDown();
+					checkBatchComplete(batchStatus);
 				}
 			}
 		}
@@ -620,7 +612,17 @@ public class Context {
 		}
 		String taskId = task.getId();
 		task.setContext(Context.this); 
-		TimedFuture future = config.pool.submit(task);
+
+		TimedFuture future = null;
+		if(task.batchStatus == null){
+			future = config.pool.submit(task);
+		}else{
+			synchronized (task.batchStatus) { //复合操作，定义BatchStatus的原因就在于此
+				future = config.pool.submit(task);
+				task.batchStatus.increaseTaskNotCompleted();
+			}
+		}
+
 		FUTUREMAP.put(taskId, future); 
 		log.info("task[{}] created.", taskId); 
 		return future; 
@@ -642,31 +644,16 @@ public class Context {
 
 	}
 
-	@SuppressWarnings("unchecked")
-	<E> void checkBatchComplete(
-			long batch, 
-			long batchTime,
-			CountDownLatch submitLatch,
-			ConcurrentMap<Long, AtomicInteger> batchSubmitsMap,
-			ConcurrentMap<Long, ConcurrentLinkedQueue<Result<?>>> batchResultsMap){
-		ConcurrentLinkedQueue<Result<?>> resultQueue = batchResultsMap.get(batch);
-		if(resultQueue == null){
-			return; //已经处理过
+	<E> void checkBatchComplete(BatchStatus batchStatus) throws InterruptedException{
+		if(batchStatus.isCompletedDone()){
+			return;
 		}
-		
-		long isSubmitFinished = 0;
-		int taskNotCompleted = 0;
-		AtomicInteger batchSubmits = batchSubmitsMap.get(batch); //not null 
-		if((isSubmitFinished = submitLatch.getCount()) == 0
-				&& (taskNotCompleted = batchSubmits.decrementAndGet()) == 0){
-			batchResultsMap.remove(batch);
-			batchSubmitsMap.remove(batch);
-			
-			Result<E>[] array = new Result[resultQueue.size()];
-			List<Result<E>> results = Arrays.asList(resultQueue.toArray(array));
-			onBatchComplete(batch, batchTime, results);
+
+		if(batchStatus.isLastTaskComplete() && batchStatus.hasCountDown()){ //这里判断先后顺序不能变，不管通不通过，taskNotCompleted需要减1
+			onBatchComplete(batchStatus.getBatch(), batchStatus.getBatchTime(), batchStatus.getList());
 		}
-		log.debug("batch[" + batch + "], isSubmitFinished：" + (isSubmitFinished == 0) + ", taskNotCompleted：" + taskNotCompleted); 
+		log.debug("batch[" + batchStatus.getBatch() + "], isSubmitFinished：" 
+				+ batchStatus.hasCountDown() + ", taskNotCompleted：" + batchStatus.getTaskNotCompleted()); 
 	}
 
 	/**
@@ -675,7 +662,7 @@ public class Context {
 	 * @param batchTime 周期执行的时间点 
 	 * @param results 任务执行的结果集
 	 */
-	protected <E> void onBatchComplete(long batch, long batchTime, List<Result<E>> results) {
+	protected <E> void onBatchComplete(long batch, long batchTime, List<Result<?>> results) {
 		if(log.isDebugEnabled()){
 			String time = new SimpleDateFormat("yyyyMMdd HH:mm:ss").format(batchTime);
 			log.debug(results.size() +  " tasks of batch[" + batch + "] submited on " + time  + " completed.");
@@ -709,6 +696,73 @@ public class Context {
 			}
 		}.start();
 
+	}
+
+	// 借助BatchStatus对象实现同步策略
+	static class BatchStatus {
+
+		private final long batch;
+
+		private final long batchTime;
+
+		private final List<Result<?>> list = new ArrayList<>();
+
+		private final CountDownLatch submitLatch = new CountDownLatch(1);
+
+		private int taskNotCompleted;
+
+		//不需要参与同步策略，只有定时线程可能会修改其值
+		private volatile boolean completedDone = false;
+
+		public void countDown(){
+			submitLatch.countDown();
+		}
+
+		public boolean hasCountDown() throws InterruptedException{
+			return submitLatch.await(0, TimeUnit.MILLISECONDS);
+		}
+
+		public BatchStatus(long batch, long batchTime){
+			this.batch = batch;
+			this.batchTime = batchTime;
+		}
+
+		public long getBatch() {
+			return batch;
+		}
+
+		public long getBatchTime() {
+			return batchTime;
+		}
+
+		public synchronized void addResult(Result<?> result){
+			list.add(result);
+		}
+
+		public synchronized List<Result<?>> getList() {
+			return list;
+		}
+
+		public synchronized int increaseTaskNotCompleted(){
+			return ++taskNotCompleted;
+		}
+
+		public synchronized boolean isLastTaskComplete(){
+			return --taskNotCompleted == 0;
+		}
+
+		// 这里获取只是大日志用，所以不需要参与同步保证正确性，给个估计值
+		public int getTaskNotCompleted(){
+			return taskNotCompleted;
+		}
+
+		public boolean isCompletedDone() {
+			return completedDone;
+		}
+
+		public void setCompletedDone(boolean completedDone) {
+			this.completedDone = completedDone;
+		}
 	}
 
 	// 记住class,反序列化时使用

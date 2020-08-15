@@ -13,7 +13,7 @@ import org.eto.fom.context.core.Result;
  * @author shanhm
  *
  */
-@FomContext(cron = "0/15 * * * * ?")
+@FomContext(cron = "0/15 * * * * ?", queueSize = 200)
 public class BatchCompleteTest extends Context {
 	
 	@SuppressWarnings("unchecked")
@@ -27,7 +27,7 @@ public class BatchCompleteTest extends Context {
 	}
 
 	@Override
-	protected <E> void onBatchComplete(long batch, long batchTime, List<Result<E>> results) {
+	protected <E> void onBatchComplete(long batch, long batchTime, List<Result<?>> results) {
 		String time = new SimpleDateFormat("yyyyMMdd HH:mm:ss").format(batchTime);
 		log.info(results.size() +  " tasks of batch[" + batch + "] submited on " + time  + " completed.");
 	}
