@@ -493,23 +493,15 @@ public class Context {
 			}
 		}
 
-		@SuppressWarnings("rawtypes")
 		private void runSchedul() throws Exception { 
 			switchState(RUNNING);
 			lastTime = System.currentTimeMillis();
 			execTimes++;
-			Collection<? extends Task> tasks = scheduleBatch();
+			Collection<? extends Task<?>> tasks = scheduleBatch();
 			if(!CollectionUtils.isEmpty(tasks)){
-				// 关于BatchStatus：
-				// 由于submit有一定步骤（任务执行非常快），要防止出现任务还在提交中，但是已提交的任务已经执行完，导致提前触发onBatchComplete
-				// 上面的问题可以通过submitLatch控制，确保onBatchComplete一定在任务提交完成之后触发；
-				// 但是还需要防止全部任务已经执行完，但是submitLatch还没有countDown，导致onBatchComplete不被触发；
-				// 所以taskNotCompleted提前置1，并在全部提交完成时检查是否触发onBatchComplete
-				BatchStatus batchStatus = new BatchStatus(execTimes, lastTime);
-				batchStatus.increaseTaskNotCompleted();
-				batchStatus.setCompletedDone(false); 
+				Iterator<? extends Task<?>> it = tasks.iterator();
+				BatchStatus<?> batchStatus = new BatchStatus<>(execTimes, lastTime);
 				Task<?> task = null;
-				Iterator<? extends Task> it = tasks.iterator();
 				try{
 					while(it.hasNext()){
 						task = it.next();
@@ -599,6 +591,16 @@ public class Context {
 	}
 
 	/**
+	 * 提交批任务
+	 * @param tasks
+	 * @throws Exception
+	 */
+	public <E> void submitBatch(Collection<? extends Task<E>> tasks) throws Exception{
+		//TODO
+
+	}
+
+	/**
 	 * 提交任务
 	 * @param task task
 	 * @return TimedFuture
@@ -613,14 +615,9 @@ public class Context {
 		String taskId = task.getId();
 		task.setContext(Context.this); 
 
-		TimedFuture future = null;
-		if(task.batchStatus == null){
-			future = config.pool.submit(task);
-		}else{
-			synchronized (task.batchStatus) { //复合操作，定义BatchStatus的原因就在于此
-				future = config.pool.submit(task);
-				task.batchStatus.increaseTaskNotCompleted();
-			}
+		TimedFuture future = config.pool.submit(task);
+		if(task.batchStatus != null){
+			task.batchStatus.increaseTaskNotCompleted();
 		}
 
 		FUTUREMAP.put(taskId, future); 
@@ -644,11 +641,7 @@ public class Context {
 
 	}
 
-	<E> void checkBatchComplete(BatchStatus batchStatus) throws InterruptedException{
-		if(batchStatus.isCompletedDone()){
-			return;
-		}
-
+	<E> void checkBatchComplete(BatchStatus<E> batchStatus) throws InterruptedException{
 		if(batchStatus.isLastTaskComplete() && batchStatus.hasCountDown()){ //这里判断先后顺序不能变，不管通不通过，taskNotCompleted需要减1
 			onBatchComplete(batchStatus.getBatch(), batchStatus.getBatchTime(), batchStatus.getList());
 		}
@@ -662,7 +655,7 @@ public class Context {
 	 * @param batchTime 周期执行的时间点 
 	 * @param results 任务执行的结果集
 	 */
-	protected <E> void onBatchComplete(long batch, long batchTime, List<Result<?>> results) {
+	protected <E> void onBatchComplete(long batch, long batchTime, List<Result<E>> results) {
 		if(log.isDebugEnabled()){
 			String time = new SimpleDateFormat("yyyyMMdd HH:mm:ss").format(batchTime);
 			log.debug(results.size() +  " tasks of batch[" + batch + "] submited on " + time  + " completed.");
@@ -698,21 +691,24 @@ public class Context {
 
 	}
 
-	// 借助BatchStatus对象实现同步策略
-	static class BatchStatus {
+	/**
+	 * 定义BatchStatus是为了实现onBatchComplete，
+	 * 由于submit有一定步骤（任务执行非常快），要防止出现任务还在提交中，但是已提交的任务已经执行完，导致提前触发onBatchComplete
+	 * 上面的问题可以通过submitLatch控制，确保onBatchComplete一定在任务提交完成之后触发；
+	 * 但是还这样又可能出现全部任务已经执行完，但是submitLatch还没有countDown，导致onBatchComplete不被触发；
+	 * 所以需要taskNotCompleted提前置1，以便在全部提交完成时主动检查是否触发onBatchComplete
+	 */
+	static class BatchStatus<E> {
 
 		private final long batch;
 
 		private final long batchTime;
 
-		private final List<Result<?>> list = new ArrayList<>();
+		private final List<Result<E>> list = new ArrayList<>();
 
 		private final CountDownLatch submitLatch = new CountDownLatch(1);
 
-		private int taskNotCompleted;
-
-		//不需要参与同步策略，只有定时线程可能会修改其值
-		private volatile boolean completedDone = false;
+		private final AtomicLong taskNotCompleted = new AtomicLong(1);
 
 		public void countDown(){
 			submitLatch.countDown();
@@ -735,33 +731,25 @@ public class Context {
 			return batchTime;
 		}
 
-		public synchronized void addResult(Result<?> result){
+		public synchronized void addResult(Result<E> result){
 			list.add(result);
 		}
 
-		public synchronized List<Result<?>> getList() {
+		public synchronized List<Result<E>> getList() {
 			return list;
 		}
 
-		public synchronized int increaseTaskNotCompleted(){
-			return ++taskNotCompleted;
+		public long increaseTaskNotCompleted(){
+			return taskNotCompleted.incrementAndGet();
 		}
 
-		public synchronized boolean isLastTaskComplete(){
-			return --taskNotCompleted == 0;
+		public boolean isLastTaskComplete(){
+			return taskNotCompleted.decrementAndGet() == 0;
 		}
 
-		// 这里获取只是大日志用，所以不需要参与同步保证正确性，给个估计值
-		public int getTaskNotCompleted(){
-			return taskNotCompleted;
-		}
-
-		public boolean isCompletedDone() {
-			return completedDone;
-		}
-
-		public void setCompletedDone(boolean completedDone) {
-			this.completedDone = completedDone;
+		// 这里获取个近似值只是打日志用，不需要参与同步保证正确性
+		public long getTaskNotCompleted(){
+			return taskNotCompleted.get();
 		}
 	}
 
@@ -771,4 +759,5 @@ public class Context {
 	String fom_schedul;
 
 	String fom_schedulbatch;
+
 }

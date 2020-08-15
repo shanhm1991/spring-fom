@@ -26,8 +26,9 @@ public class BatchCompleteTest extends Context {
 		return list;
 	}
 
+	@SuppressWarnings("hiding")
 	@Override
-	protected <E> void onBatchComplete(long batch, long batchTime, List<Result<?>> results) {
+	protected <Void> void onBatchComplete(long batch, long batchTime, List<Result<Void>> results) {
 		String time = new SimpleDateFormat("yyyyMMdd HH:mm:ss").format(batchTime);
 		log.info(results.size() +  " tasks of batch[" + batch + "] submited on " + time  + " completed.");
 	}

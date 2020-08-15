@@ -135,11 +135,6 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		result.costTime = System.currentTimeMillis() - sTime;
 
 		if(context != null){
-			if(!isResultHandler && batchStatus != null){
-				batchStatus.addResult(result); 
-				context.checkBatchComplete(batchStatus);
-			}
-
 			// ResultHandler也算在统计内
 			if(result.success){
 				context.statistics.successIncrease(id, result.costTime, this.createTime, this.startTime); 
@@ -148,6 +143,12 @@ public abstract class Task<E> implements Callable<Result<E>> {
 				context.statistics.failedIncrease(id, result);
 				log.warn("task failed, cost={}ms", result.costTime);
 			}
+
+			if(!isResultHandler && batchStatus != null){
+				batchStatus.addResult(result); 
+				context.checkBatchComplete(batchStatus);
+			}
+
 		}else{
 			if(result.success){
 				log.info("task success, cost={}ms", result.costTime);
