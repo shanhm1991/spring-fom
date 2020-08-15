@@ -102,7 +102,8 @@ public class ContextHelper {
 	 * @throws Exception Exception
 	 */
 	public static <E> TimedFuture<Result<E>> submitTask(String contextName, Task<E> task) throws Exception { 
-		Context context = ContextManager.loadedContext.get(contextName);
+		@SuppressWarnings("unchecked")
+		Context<E> context = (Context<E>)ContextManager.loadedContext.get(contextName);
 		if(context == null){
 			throw new IllegalArgumentException("context[" + contextName + "] not exist.");
 		} 
@@ -152,8 +153,8 @@ public class ContextHelper {
 	public static List<Map<String, String>> list() {
 		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		List<Map<String, String>> list = new ArrayList<>();
-		for(Entry<String, Context> entry : ContextManager.loadedContext.entrySet()){
-			Context context = entry.getValue();
+		for(Entry<String, Context<?>> entry : ContextManager.loadedContext.entrySet()){
+			Context<?> context = entry.getValue();
 			Map<String,String> cmap = new HashMap<>();
 			cmap.putAll(context.config.valueMap); 
 
@@ -200,7 +201,7 @@ public class ContextHelper {
 	 */
 	public static Map<String, Object> save(String name, String json) throws Exception {
 		Map<String,Object> map = new HashMap<>();
-		Context context = ContextManager.loadedContext.get(name);
+		Context<?> context = ContextManager.loadedContext.get(name);
 		if(context == null){
 			map.put("result", false);
 			map.put("msg", "context[" + name + "] not exist.");
@@ -251,7 +252,7 @@ public class ContextHelper {
 		return map;
 	}
 
-	private static boolean serialize(String name, Context context) {
+	private static boolean serialize(String name, Context<?> context) {
 		String cache = System.getProperty("cache.context");
 		File[] array = new File(cache).listFiles(new FileFilter(){
 			@Override
@@ -319,7 +320,7 @@ public class ContextHelper {
 	 */
 	public static Map<String,Object> startup(String name) {
 		Map<String,Object> map = new HashMap<>();
-		Context context = ContextManager.loadedContext.get(name);
+		Context<?> context = ContextManager.loadedContext.get(name);
 		if(context == null){
 			map.put("result", false);
 			map.put("msg", "context[" + name + "] not exist.");
@@ -335,7 +336,7 @@ public class ContextHelper {
 	 */
 	public static Map<String,Object> shutDown(String name){
 		Map<String,Object> map = new HashMap<>();
-		Context context = ContextManager.loadedContext.get(name);
+		Context<?> context = ContextManager.loadedContext.get(name);
 		if(context == null){
 			map.put("result", false);
 			map.put("msg", "context[" + name + "] not exist.");
@@ -351,7 +352,7 @@ public class ContextHelper {
 	 */
 	public static Map<String, Object> execNow(String name) {
 		Map<String,Object> map = new HashMap<>();
-		Context context = ContextManager.loadedContext.get(name);
+		Context<?> context = ContextManager.loadedContext.get(name);
 		if(context == null){
 			map.put("result", false);
 			map.put("msg", "context[" + name + "] not exist.");
@@ -367,7 +368,7 @@ public class ContextHelper {
 	 */
 	public static Map<String, Object> state(String name) {
 		Map<String,Object> map = new HashMap<>();
-		Context context = ContextManager.loadedContext.get(name);
+		Context<?> context = ContextManager.loadedContext.get(name);
 		if(context == null){
 			map.put("result", false);
 			map.put("msg", "context[" + name + "] not exist.");
@@ -441,7 +442,7 @@ public class ContextHelper {
 
 		Context.localName.set(name); 
 		ContextConfig.loadedConfig.putIfAbsent(name, map);
-		Context context = (Context)contextClass.newInstance();
+		Context<?> context = (Context<?>)contextClass.newInstance();
 		
 		context.regist(false);
 		context.startup();
@@ -461,7 +462,7 @@ public class ContextHelper {
 	 * @param level 日志级别
 	 */
 	public static void changeLogLevel(String name, String level) {
-		Context context = ContextManager.loadedContext.get(name);
+		Context<?> context = ContextManager.loadedContext.get(name);
 		if(context == null){
 			return;
 		}
@@ -580,7 +581,7 @@ public class ContextHelper {
 	public static Map<String, Object> activeDetail(String name) {
 		Map<String,Object> map = new HashMap<>();
 		map.put("size", 0);
-		Context context = ContextManager.loadedContext.get(name);
+		Context<?> context = ContextManager.loadedContext.get(name);
 		if(context == null){
 			return map;
 		}
@@ -613,7 +614,7 @@ public class ContextHelper {
 	public static Map<String, Object> failedDetail(String name) {
 		Map<String,Object> map = new HashMap<>();
 		map.put("size", 0);
-		Context context = ContextManager.loadedContext.get(name);
+		Context<?> context = ContextManager.loadedContext.get(name);
 		if(context == null){
 			return map;
 		} 
@@ -649,7 +650,7 @@ public class ContextHelper {
 	 * @return map结果
 	 */
 	public static Map<String, Object> waitingdetail(String name) {
-		Context context = ContextManager.loadedContext.get(name);
+		Context<?> context = ContextManager.loadedContext.get(name);
 		if(context == null){
 			Map<String,Object> map = new HashMap<>();
 			map.put("size", 0);
@@ -667,7 +668,7 @@ public class ContextHelper {
 	 * @throws Exception Exception
 	 */
 	public static Map<String, Object> successDetail(String name) throws Exception {
-		Context context = ContextManager.loadedContext.get(name);
+		Context<?> context = ContextManager.loadedContext.get(name);
 		if(context == null){
 			return new HashMap<String, Object>(); 
 		}
@@ -695,7 +696,7 @@ public class ContextHelper {
 	 */
 	public static Map<String, Object> saveCostLevel(String name, String levelStr, String saveDay, String date) throws Exception {
 		Map<String, Object> map = new HashMap<>();
-		Context context = ContextManager.loadedContext.get(name);
+		Context<?> context = ContextManager.loadedContext.get(name);
 		if(context == null){
 			map.put("isSuccess", false);
 			return map;
@@ -739,7 +740,7 @@ public class ContextHelper {
 	 */
 	public static Map<String, Object> changeDate(String name, String date) throws Exception {
 		Map<String, Object> map = new HashMap<>();
-		Context context = ContextManager.loadedContext.get(name);
+		Context<?> context = ContextManager.loadedContext.get(name);
 		if(context == null){
 			map.put("isSuccess", false);
 			return map;
@@ -754,7 +755,7 @@ public class ContextHelper {
 	 * @throws Exception Exception
 	 */
 	public static String dataDownload(String name) throws Exception {
-		Context context = ContextManager.loadedContext.get(name);
+		Context<?> context = ContextManager.loadedContext.get(name);
 		if(context == null){
 			return "";
 		} 

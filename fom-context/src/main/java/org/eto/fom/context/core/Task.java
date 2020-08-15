@@ -44,9 +44,9 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	/**
 	 * 批任务执行状态，提交线程设置
 	 */
-	volatile BatchStatus batchStatus;
+	volatile BatchStatus<E> batchStatus;
 
-	private volatile Context context;
+	private volatile Context<E> context;
 
 	private volatile long createTime;
 
@@ -250,7 +250,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		return startTime;
 	}
 
-	final void setContext(Context context){
+	final void setContext(Context<E> context){
 		if(context == null){
 			return;
 		}

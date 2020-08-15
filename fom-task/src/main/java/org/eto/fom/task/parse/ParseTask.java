@@ -11,7 +11,7 @@ import org.eto.fom.context.core.Task;
  *
  * @param <V> 行数据解析结果类型
  */
-public abstract class ParseTask<V> extends Task<Boolean> {
+public abstract class ParseTask<V, E> extends Task<E> {
 	
 	protected final int batch;
 	

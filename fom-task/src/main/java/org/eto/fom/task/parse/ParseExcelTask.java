@@ -32,7 +32,7 @@ import org.eto.fom.util.file.reader.IExcelReader;
  * @author shanhm
  *
  */
-public abstract class ParseExcelTask<V> extends ParseTask<V> {
+public abstract class ParseExcelTask<V> extends ParseTask<V, Boolean> {
 
 	private boolean isBatchBySheet;
 

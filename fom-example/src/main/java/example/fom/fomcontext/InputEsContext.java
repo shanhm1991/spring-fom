@@ -20,7 +20,7 @@ import org.eto.fom.util.file.FileUtil;
  *
  */
 @FomContext(cron = "0 0 18 * * ?", remark = "将指定目录下text文本解析导入ES")
-public class InputEsContext extends Context {
+public class InputEsContext extends Context<Boolean> {
 
 	@FomConfig("/source")
 	private String srcPath;
@@ -40,7 +40,6 @@ public class InputEsContext extends Context {
 	@FomConfig("config/fomcontext/index.json")
 	private String esJson;
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	protected Collection<InputEsTask> scheduleBatch() throws Exception { 
 		List<String> list = FileUtil.list(SpringContext.getPath(srcPath), new FileFilter(){

@@ -50,18 +50,18 @@ public class ContextManager {
 
 	private static final Logger LOG = Logger.getLogger(ContextManager.class);
 
-	static ConcurrentMap<String,Context> loadedContext = new ConcurrentHashMap<>();
+	static ConcurrentMap<String,Context<?>> loadedContext = new ConcurrentHashMap<>();
 
 	public static boolean exist(String contextName){
 		return loadedContext.containsKey(contextName);
 	}
 
-	public static void register(Context context, boolean putConfig) throws Exception {
+	public static void register(Context<?> context, boolean putConfig) throws Exception {
 		if(context == null){
 			return;
 		}
 
-		Context exits = loadedContext.putIfAbsent(context.name, context);
+		Context<?> exits = loadedContext.putIfAbsent(context.name, context);
 		if(exits != null){
 			LOG.warn("context[" + context.name + "] already exist, load ignored.");
 			return;
@@ -117,7 +117,7 @@ public class ContextManager {
 
 		loadFomSchedulBatch(pckages);
 
-		for(Entry<String, Context> entry : loadedContext.entrySet()){
+		for(Entry<String, Context<?>> entry : loadedContext.entrySet()){
 			entry.getValue().startup();
 		}
 	}
@@ -156,7 +156,7 @@ public class ContextManager {
 					Context.localName.set(name); 
 					ContextConfig.loadedConfig.putIfAbsent(name, valueMap);
 					Class<?> clazz = Class.forName(fom_context);
-					Context context = (Context)clazz.newInstance();
+					Context<?> context = (Context<?>)clazz.newInstance();
 					context.regist(false);
 				}else if(StringUtils.isNotBlank(fom_schedul)){
 					loadFomSchedul(Class.forName(fom_schedul), valueMap, false);
@@ -287,7 +287,7 @@ public class ContextManager {
 
 			Context.localName.set(name); 
 			ContextConfig.loadedConfig.putIfAbsent(name, map);
-			Context context = (Context)clazz.newInstance();
+			Context<?> context = (Context<?>)clazz.newInstance();
 
 			context.fom_context = classname;
 			context.regist(true);
@@ -332,7 +332,7 @@ public class ContextManager {
 
 			Context.localName.set(name); 
 			ContextConfig.loadedConfig.putIfAbsent(name, map);
-			Context context = (Context)clazz.newInstance();
+			Context<?> context = (Context<?>)clazz.newInstance();
 
 			context.fom_context = clazz.getName();
 			context.regist(true);
@@ -412,13 +412,13 @@ public class ContextManager {
 
 		Context.localName.set(name); 
 		ContextConfig.loadedConfig.putIfAbsent(name, map);
-		Context context = new Context(){
-			@SuppressWarnings({ "unchecked", "rawtypes" })
+		
+		Context<?> context = new Context<Object>(){
 			@Override
-			protected Collection<Task> scheduleBatch() throws Exception {
-				Task task = new Task(name + "-task"){
+			protected Collection<Task<Object>> scheduleBatch() throws Exception {
+				Task<Object> task = new Task<Object>(name + "-task"){
 					@Override
-					protected Object exec() throws Exception {
+					protected Object exec() throws Exception { 
 						for(Method method : methods){
 							method.invoke(instance);
 						}
@@ -426,7 +426,7 @@ public class ContextManager {
 					}
 				};
 
-				List<Task> list = new ArrayList<>();
+				List<Task<Object>> list = new ArrayList<>();
 				list.add(task);
 				return list;
 			}
@@ -508,10 +508,11 @@ public class ContextManager {
 
 		Context.localName.set(name); 
 		ContextConfig.loadedConfig.putIfAbsent(name, map);
-		Context context = new Context(){
+		Context<Object> context = new Context<Object>(){
+			@SuppressWarnings("unchecked")
 			@Override
-			protected <E> Collection<? extends Task<E>> scheduleBatch() throws Exception {
-				return ((SchedulBatchFactory)instance).creatTasks();
+			protected Collection<? extends Task<Object>> scheduleBatch() throws Exception {
+				return ((SchedulBatchFactory<Object>)instance).creatTasks();
 			}
 		};
 
@@ -537,7 +538,7 @@ public class ContextManager {
 	}
 
 	private static void valueField(
-			Field field, Object instance, String key, String value, Context context, boolean putConfig) throws Exception{
+			Field field, Object instance, String key, String value, Context<?> context, boolean putConfig) throws Exception{
 		if(value.indexOf("${") != -1){ 
 			value = SpringContext.getPropertiesValue(value);
 		}

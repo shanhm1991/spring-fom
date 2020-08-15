@@ -19,7 +19,7 @@ import org.eto.fom.util.file.FileUtil;
  *
  */
 @FomSchedulBatch(name = "InputMysqlWithPoolDemo", cron = "0/35 * * * * ?", remark = "将指定目录下text文本解析导入Mysql")
-public class InputMysqlWithPoolSchedul implements SchedulBatchFactory {
+public class InputMysqlWithPoolSchedul implements SchedulBatchFactory<Boolean> {
 
 	@FomConfig(value = "/source")
 	private String srcPath;
@@ -30,7 +30,6 @@ public class InputMysqlWithPoolSchedul implements SchedulBatchFactory {
 	@FomConfig("5000")
 	private int batch;
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public Set<InputMysqlWithPoolTask> creatTasks() throws Exception {
 		List<String> list = FileUtil.list(SpringContext.getPath(srcPath), new FileFilter(){

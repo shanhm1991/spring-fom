@@ -17,9 +17,8 @@ import org.eto.fom.util.file.FileUtil;
  * @author shanhm
  *
  */
-public class InputOracleWithPoolContext extends Context{
+public class InputOracleWithPoolContext extends Context<Boolean> {
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected Collection<InputOracleWithPoolTask> scheduleBatch() throws Exception { 
 		String srcPath = SpringContext.getPath(config.getString("srcPath", ""));

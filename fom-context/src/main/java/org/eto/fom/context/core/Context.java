@@ -42,7 +42,7 @@ import com.google.gson.annotations.Expose;
  * @author shanhm
  *
  */
-public class Context {
+public class Context<E> {
 
 	private static final long UNIT = 1000;
 
@@ -116,13 +116,6 @@ public class Context {
 	 */
 	@Expose
 	private AtomicLong submits = new AtomicLong(); 
-
-	//	/**
-	//	 * 执行批次，与提交任务数的映射
-	//	 */
-	//	ConcurrentMap<Long, AtomicInteger> batchSubmitsMap = new ConcurrentHashMap<>();
-	//
-	//	ConcurrentMap<Long, ConcurrentLinkedQueue<Result<?>>> batchResultsMap = new ConcurrentHashMap<>();
 
 	public Context(){
 		String lname = localName.get();
@@ -497,11 +490,11 @@ public class Context {
 			switchState(RUNNING);
 			lastTime = System.currentTimeMillis();
 			execTimes++;
-			Collection<? extends Task<?>> tasks = scheduleBatch();
+			Collection<? extends Task<E>> tasks = scheduleBatch();
 			if(!CollectionUtils.isEmpty(tasks)){
-				Iterator<? extends Task<?>> it = tasks.iterator();
-				BatchStatus<?> batchStatus = new BatchStatus<>(execTimes, lastTime);
-				Task<?> task = null;
+				Iterator<? extends Task<E>> it = tasks.iterator();
+				BatchStatus<E> batchStatus = new BatchStatus<>(execTimes, lastTime);
+				Task<E> task = null;
 				try{
 					while(it.hasNext()){
 						task = it.next();
@@ -595,7 +588,7 @@ public class Context {
 	 * @param tasks
 	 * @throws Exception
 	 */
-	public <E> void submitBatch(Collection<? extends Task<E>> tasks) throws Exception{
+	public void submitBatch(Collection<? extends Task<E>> tasks) throws Exception{
 		//TODO
 
 	}
@@ -607,7 +600,7 @@ public class Context {
 	 * @throws Exception Exception
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public <E> TimedFuture<Result<E>> submit(Task<E> task) throws Exception {
+	public TimedFuture<Result<E>> submit(Task<E> task) throws Exception {
 		if(submits.incrementAndGet() % UNIT == 0){
 			Monitor.jvm();
 			cleanFutures();
@@ -630,7 +623,7 @@ public class Context {
 	 * @return task set
 	 * @throws Exception Exception
 	 */
-	protected <E> Collection<? extends Task<E>> scheduleBatch() throws Exception {
+	protected Collection<? extends Task<E>> scheduleBatch() throws Exception {
 		return new HashSet<>();
 	}
 
@@ -641,7 +634,7 @@ public class Context {
 
 	}
 
-	<E> void checkBatchComplete(BatchStatus<E> batchStatus) throws InterruptedException{
+	void checkBatchComplete(BatchStatus<E> batchStatus) throws InterruptedException{
 		if(batchStatus.isLastTaskComplete() && batchStatus.hasCountDown()){ //这里判断先后顺序不能变，不管通不通过，taskNotCompleted需要减1
 			onBatchComplete(batchStatus.getBatch(), batchStatus.getBatchTime(), batchStatus.getList());
 		}
@@ -655,7 +648,7 @@ public class Context {
 	 * @param batchTime 周期执行的时间点 
 	 * @param results 任务执行的结果集
 	 */
-	protected <E> void onBatchComplete(long batch, long batchTime, List<Result<E>> results) {
+	protected void onBatchComplete(long batch, long batchTime, List<Result<E>> results) {
 		if(log.isDebugEnabled()){
 			String time = new SimpleDateFormat("yyyyMMdd HH:mm:ss").format(batchTime);
 			log.debug(results.size() +  " tasks of batch[" + batch + "] submited on " + time  + " completed.");

@@ -29,7 +29,7 @@ import org.eto.fom.util.file.reader.IRow;
  * @author shanhm
  *
  */
-public abstract class ParseTextTask<V> extends ParseTask<V> {
+public abstract class ParseTextTask<V> extends ParseTask<V, Boolean> {
 
 	private int rowIndex = 0;
 

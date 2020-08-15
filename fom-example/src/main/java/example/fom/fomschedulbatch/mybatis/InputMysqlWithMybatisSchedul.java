@@ -23,7 +23,7 @@ import example.fom.fomschedulbatch.mybatis.service.impl.InputMysqServiceImpl;
  *
  */
 @FomSchedulBatch(cron = "0/15 * * * * ?", remark = "将指定目录下text文本解析导入Mysql")
-public class InputMysqlWithMybatisSchedul implements SchedulBatchFactory {
+public class InputMysqlWithMybatisSchedul implements SchedulBatchFactory<Boolean> {
 
 	@FomConfig(key = "srcPath", value = "/source")
 	private String srcPath;
@@ -37,7 +37,6 @@ public class InputMysqlWithMybatisSchedul implements SchedulBatchFactory {
 	@Autowired
 	private InputMysqServiceImpl service;
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<InputMysqlWithMybatisTask> creatTasks() throws Exception {
 		List<String> list = FileUtil.list(SpringContext.getPath(srcPath), new FileFilter(){

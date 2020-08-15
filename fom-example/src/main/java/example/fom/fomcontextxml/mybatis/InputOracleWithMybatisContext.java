@@ -19,12 +19,11 @@ import example.fom.fomcontextxml.mybatis.service.impl.InputOracleServiceImpl;
  * @author shanhm
  *
  */
-public class InputOracleWithMybatisContext extends Context {
+public class InputOracleWithMybatisContext extends Context<Boolean> {
 
 	@Autowired
 	private InputOracleServiceImpl service; //TODO 这里类型写InputOracleService会提示两个实例错误，不知道为什么
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	protected Collection<InputOracleWithMybatisTask> scheduleBatch() throws Exception { 
 		String srcPath = SpringContext.getPath(config.getString("srcPath", ""));

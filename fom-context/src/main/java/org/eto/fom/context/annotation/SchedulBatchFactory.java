@@ -9,7 +9,7 @@ import org.eto.fom.context.core.Task;
  * @author shanhm
  *
  */
-public interface SchedulBatchFactory {
+public interface SchedulBatchFactory<E> {
 
-	<E> Collection<? extends Task<E>> creatTasks() throws Exception;
+	Collection<? extends Task<E>> creatTasks() throws Exception;
 }

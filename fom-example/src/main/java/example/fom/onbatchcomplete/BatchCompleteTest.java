@@ -14,9 +14,8 @@ import org.eto.fom.context.core.Result;
  *
  */
 @FomContext(cron = "0/15 * * * * ?", queueSize = 200)
-public class BatchCompleteTest extends Context {
+public class BatchCompleteTest extends Context<Void> {
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	protected List<DemoTask> scheduleBatch() throws Exception {
 		List<DemoTask> list = new ArrayList<>(500);
@@ -26,9 +25,8 @@ public class BatchCompleteTest extends Context {
 		return list;
 	}
 
-	@SuppressWarnings("hiding")
 	@Override
-	protected <Void> void onBatchComplete(long batch, long batchTime, List<Result<Void>> results) {
+	protected void onBatchComplete(long batch, long batchTime, List<Result<Void>> results) {
 		String time = new SimpleDateFormat("yyyyMMdd HH:mm:ss").format(batchTime);
 		log.info(results.size() +  " tasks of batch[" + batch + "] submited on " + time  + " completed.");
 	}
