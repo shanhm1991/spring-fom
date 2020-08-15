@@ -94,10 +94,10 @@ public class Context<E> {
 	volatile long nextTime;
 
 	/**
-	 * 执行次数
+	 * 周期执行次数
 	 */
 	@Expose
-	volatile long execTimes;
+	volatile long batchScheduls;
 
 	/**
 	 * 是否是在启动时执行
@@ -112,10 +112,16 @@ public class Context<E> {
 	private State state = INITED; 
 
 	/**
-	 * 提交次数，每当次数达到1000时执行一次cleanFutures，定时线程和submit线程共享
+	 * 所有的任务提交总数数，每当次数达到1000时执行一次cleanFutures，定时线程和submit线程共享
 	 */
 	@Expose
 	private AtomicLong submits = new AtomicLong(); 
+
+	/**
+	 * 批任务提交次数
+	 */
+	@Expose
+	private AtomicLong batchSubmits = new AtomicLong(); 
 
 	public Context(){
 		String lname = localName.get();
@@ -489,11 +495,11 @@ public class Context<E> {
 		private void runSchedul() throws Exception { 
 			switchState(RUNNING);
 			lastTime = System.currentTimeMillis();
-			execTimes++;
+			batchScheduls++;
 			Collection<? extends Task<E>> tasks = scheduleBatch();
 			if(!CollectionUtils.isEmpty(tasks)){
 				Iterator<? extends Task<E>> it = tasks.iterator();
-				BatchStatus<E> batchStatus = new BatchStatus<>(execTimes, lastTime);
+				BatchStatus<E> batchStatus = new BatchStatus<>(true, batchScheduls, lastTime);
 				Task<E> task = null;
 				try{
 					while(it.hasNext()){
@@ -513,16 +519,6 @@ public class Context<E> {
 					checkBatchComplete(batchStatus);
 				}
 			}
-		}
-
-		/**
-		 * null 没有创建过任务
-		 * done 创建过任务，但远程文件没删除
-		 * else 任务还没结束
-		 */
-		private boolean isTaskAlive(String key){
-			Future<Result<?>> future = FUTUREMAP.get(key);
-			return future != null && !future.isDone();
 		}
 
 		private void terminate(){
@@ -584,13 +580,46 @@ public class Context<E> {
 	}
 
 	/**
+	 * null 没有创建过任务
+	 * done 创建过任务，但远程文件没删除
+	 * else 任务还没结束
+	 */
+	private boolean isTaskAlive(String key){
+		Future<Result<?>> future = FUTUREMAP.get(key);
+		return future != null && !future.isDone();
+	}
+
+	/**
 	 * 提交批任务
 	 * @param tasks
+	 * @throws InterruptedException 
 	 * @throws Exception
 	 */
-	public void submitBatch(Collection<? extends Task<E>> tasks) throws Exception{
-		//TODO
+	public void submitBatch(Collection<? extends Task<E>> tasks) throws InterruptedException  {
+		if(CollectionUtils.isEmpty(tasks)){
+			return;
+		}
 
+		Iterator<? extends Task<E>> it = tasks.iterator();
+		BatchStatus<E> batchStatus = new BatchStatus<>(false, batchSubmits.incrementAndGet(), System.currentTimeMillis());
+		Task<E> task = null;
+		try{
+			while(it.hasNext()){
+				task = it.next();
+				task.batchStatus = batchStatus;
+				String taskId = task.getId();
+				if(isTaskAlive(taskId)){ 
+					log.warn("task[{}] is still alive, create canceled.", taskId); 
+					continue;
+				}
+				submit(task);
+			}
+		} catch (RejectedExecutionException e) {
+			log.warn("task[" + task.getId() + "] submit rejected.", e);
+		}finally{ 
+			batchStatus.countDown();
+			checkBatchComplete(batchStatus);
+		}
 	}
 
 	/**
@@ -600,7 +629,7 @@ public class Context<E> {
 	 * @throws Exception Exception
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public TimedFuture<Result<E>> submit(Task<E> task) throws Exception {
+	public TimedFuture<Result<E>> submit(Task<E> task) {
 		if(submits.incrementAndGet() % UNIT == 0){
 			Monitor.jvm();
 			cleanFutures();
@@ -635,11 +664,23 @@ public class Context<E> {
 	}
 
 	void checkBatchComplete(BatchStatus<E> batchStatus) throws InterruptedException{
-		if(batchStatus.isLastTaskComplete() && batchStatus.hasCountDown()){ //这里判断先后顺序不能变，不管通不通过，taskNotCompleted需要减1
+		String s = batchStatus.isSchedul ? "schedul" : "submit";
+		boolean isLastTaskComplete = batchStatus.isLastTaskComplete();
+		boolean hasCountDown = batchStatus.hasCountDown();
+		if(log.isDebugEnabled()){
+			log.debug(s + "[" + batchStatus.getBatch() + "], isSubmitFinished：" 
+					+ hasCountDown + ", taskNotCompleted：" + batchStatus.getTaskNotCompleted()); 
+		}
+		
+		if(isLastTaskComplete && hasCountDown){ 
+			if(log.isDebugEnabled()){
+				String time = new SimpleDateFormat("yyyyMMdd HH:mm:ss").format(batchStatus.getBatchTime());
+				log.debug(batchStatus.getList().size() +  " tasks of " + s 
+						+ "[" + batchStatus.getBatch() + "] created on " + time  + " completed.");
+			}
 			onBatchComplete(batchStatus.getBatch(), batchStatus.getBatchTime(), batchStatus.getList());
 		}
-		log.debug("batch[" + batchStatus.getBatch() + "], isSubmitFinished：" 
-				+ batchStatus.hasCountDown() + ", taskNotCompleted：" + batchStatus.getTaskNotCompleted()); 
+		
 	}
 
 	/**
@@ -649,10 +690,7 @@ public class Context<E> {
 	 * @param results 任务执行的结果集
 	 */
 	protected void onBatchComplete(long batch, long batchTime, List<Result<E>> results) {
-		if(log.isDebugEnabled()){
-			String time = new SimpleDateFormat("yyyyMMdd HH:mm:ss").format(batchTime);
-			log.debug(results.size() +  " tasks of batch[" + batch + "] submited on " + time  + " completed.");
-		}
+
 	}
 
 	private void cleanFutures(){
@@ -693,6 +731,8 @@ public class Context<E> {
 	 */
 	static class BatchStatus<E> {
 
+		private final boolean isSchedul;
+
 		private final long batch;
 
 		private final long batchTime;
@@ -711,9 +751,14 @@ public class Context<E> {
 			return submitLatch.await(0, TimeUnit.MILLISECONDS);
 		}
 
-		public BatchStatus(long batch, long batchTime){
+		public BatchStatus(boolean isSchedul, long batch, long batchTime){
+			this.isSchedul = isSchedul;
 			this.batch = batch;
 			this.batchTime = batchTime;
+		}
+
+		public boolean isSchedul() {
+			return isSchedul;
 		}
 
 		public long getBatch() {

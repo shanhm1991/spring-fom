@@ -176,7 +176,7 @@ public class ContextHelper {
 			}
 			cmap.put("nextTime", next);
 			
-			cmap.put("execTimes", String.valueOf(context.execTimes)); 
+			cmap.put("execTimes", String.valueOf(context.batchScheduls)); 
 			
 			cmap.put("loadTime", format.format(context.loadTime));
 			cmap.put("level", context.getLogLevel());
