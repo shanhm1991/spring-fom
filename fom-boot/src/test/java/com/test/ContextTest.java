@@ -14,9 +14,8 @@ import org.eto.fom.context.core.Task;
  *
  */
 @FomContext(cron="0/10 * * * * ?")
-public class ContextTest extends Context {
+public class ContextTest extends Context<Boolean> {
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	protected Collection<SelfTask> scheduleBatch() throws Exception {
 		Set<SelfTask> set = new HashSet<>();
