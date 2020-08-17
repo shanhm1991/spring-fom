@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -155,7 +156,7 @@ public class ContextHelper {
 		List<Map<String, String>> list = new ArrayList<>();
 		for(Entry<String, Context<?>> entry : ContextManager.loadedContext.entrySet()){
 			Context<?> context = entry.getValue();
-			Map<String,String> cmap = new HashMap<>();
+			TreeMap<String,String> cmap = new TreeMap<>();
 			cmap.putAll(context.config.valueMap); 
 
 			cmap.put("name", context.name);

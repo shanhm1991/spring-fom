@@ -495,6 +495,8 @@ public class Context<E> {
 		}
 
 		private void runSchedul() throws Exception { 
+			cleanFutures();
+			
 			switchState(RUNNING);
 			lastTime = System.currentTimeMillis();
 			batchScheduls++;
@@ -634,8 +636,9 @@ public class Context<E> {
 	public TimedFuture<Result<E>> submit(Task<E> task) {
 		if(submits.incrementAndGet() % UNIT == 0){
 			Monitor.jvm();
-			cleanFutures();
+			cleanFutures(); 
 		}
+		
 		String taskId = task.getId();
 		task.setContext(Context.this); 
 
@@ -709,6 +712,12 @@ public class Context<E> {
 
 	}
 
+	/**
+	 * 检测时机：
+	 * <p>1.定时任务每次开始时
+	 * <p>2.定时模块关闭(shutdown)时，或者自行结束时
+	 * <p>3.每当提交过的任务数达到1000的整数倍时（考虑到主动submit任务的常见）
+	 */
 	private void cleanFutures(){
 		new Thread(name + "-clean"){
 			@Override
@@ -717,6 +726,7 @@ public class Context<E> {
 				while(it.hasNext()){
 					Entry<String, TimedFuture<Result<?>>> entry = it.next();
 					TimedFuture<Result<?>> future = entry.getValue();
+					//只检测自己提交的任务
 					if(name.equals(future.getContextName())){   
 						String taskId = entry.getKey(); 
 						if(future.getStartTime() > 0 && !future.isDone()){

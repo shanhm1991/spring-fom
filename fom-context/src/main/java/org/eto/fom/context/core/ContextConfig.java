@@ -29,6 +29,16 @@ public final class ContextConfig {
 	 * 定时表达式
 	 */
 	public static final String CONF_CRON = "cron";
+	
+	/**
+	 * 定时周期
+	 */
+	public static final String CONF_FIXEDRATE = "fixedRate";
+	
+	/**
+	 * 定时周期
+	 */
+	public static final String CONF_FIXEDDELAY = "fixedDelay";
 
 	/**
 	 * 备注
@@ -74,6 +84,36 @@ public final class ContextConfig {
 	 * 启动时是否立即执行定时批量任务
 	 */
 	public static final String CONF_EXECONLOAN = "execOnLoad";
+	
+	public static final int THREADCORE_DEFAULT = 4;
+
+	public static final int THREADCORE_MIN = 1;
+
+	public static final int THREADCORE_MAX = 100;
+
+	public static final int THREADMAX_DEFAULT = 200;
+
+	public static final int THREADMAX_MIN = 100;
+
+	public static final int THREADMAX_MAX = 1000;
+
+	public static final int ALIVETIME_DEFAULT = 30;
+
+	public static final int ALIVETIME_MIN = 5;
+
+	public static final int ALIVETIME_MAX = 300;
+
+	public static final int OVERTIME_DEFAULT = 3600;
+
+	public static final int OVERTIME_MIN = 1;
+
+	public static final int OVERTIME_MAX = 86400;
+
+	public static final int QUEUESIZE_DEFAULT = 2000;
+
+	public static final int QUEUESIZE_MIN = 1;
+
+	public static final int QUEUESIZE_MAX = Integer.MAX_VALUE;
 
 	//已加载的配置
 	static final Map<String, ConcurrentHashMap<String,String>> loadedConfig = new HashMap<>();
@@ -87,9 +127,10 @@ public final class ContextConfig {
 	final ConcurrentHashMap<String, String> valueMap; 
 
 	public static boolean validKey(String key){
-		return !CONF_THREADCORE.equals(key) && !CONF_THREADMAX.equals(key) && !CONF_ALIVETIME.equals(key) && !CONF_STOPWITHNOCRON.equals(key)
-				&& !CONF_OVERTIME.equals(key) && !CONF_QUEUESIZE.equals(key) && !CONF_CANCELLABLE.equals(key) && !CONF_CRON.equals(key) 
-				&& !CONF_EXECONLOAN.equals(key);
+		return !CONF_THREADCORE.equals(key) && !CONF_THREADMAX.equals(key) && !CONF_QUEUESIZE.equals(key) 
+				&& !CONF_ALIVETIME.equals(key) && !CONF_OVERTIME.equals(key) && !CONF_CANCELLABLE.equals(key)
+				&& !CONF_CRON.equals(key) && !CONF_FIXEDRATE.equals(key) && !CONF_FIXEDDELAY.equals(key) 
+				&& !CONF_STOPWITHNOCRON.equals(key) && !CONF_EXECONLOAN.equals(key);
 	}
 
 	ContextConfig(String name){
@@ -105,6 +146,8 @@ public final class ContextConfig {
 		setOverTime(MapUtils.getInt(CONF_OVERTIME, valueMap, OVERTIME_DEFAULT));
 		setQueueSize(MapUtils.getInt(CONF_QUEUESIZE, valueMap, QUEUESIZE_DEFAULT));
 		setCron(valueMap.get(CONF_CRON));
+		setFixedRate(MapUtils.getInt(CONF_FIXEDRATE, valueMap, 0)); 
+		setFixedDelay(MapUtils.getInt(CONF_FIXEDDELAY, valueMap, 0)); 
 		setRemark(valueMap.get(CONF_REMARK));
 		setCancellable(MapUtils.getBoolean(CONF_CANCELLABLE, valueMap, false));
 		setStopWithNoCron(MapUtils.getBoolean(CONF_STOPWITHNOCRON, valueMap, false));
@@ -193,7 +236,7 @@ public final class ContextConfig {
 	 */
 	public void put(String key, String value) {
 		if(!validKey(key)){
-			throw new IllegalArgumentException("not support key:" + key);
+			throw new UnsupportedOperationException("not support key:" + key);
 		}
 		if(value == null){
 			return;
@@ -416,6 +459,40 @@ public final class ContextConfig {
 			cronExpression = c;
 		}
 	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public int getFixedRate(){
+		return Integer.parseInt(valueMap.get(CONF_FIXEDRATE)); 
+	}
+	
+	/**
+	 * 
+	 * @param fixedRate
+	 */
+	public void setFixedRate(int fixedRate){
+		fixedRate = fixedRate > 0 ? fixedRate : 0;
+		valueMap.put(CONF_FIXEDRATE, String.valueOf(fixedRate));
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public int getFixedDelay(){
+		return Integer.parseInt(valueMap.get(CONF_FIXEDDELAY));
+	}
+	
+	/**
+	 * 
+	 * @param fixedDelay
+	 */
+	public void setFixedDelay(int fixedDelay){
+		fixedDelay = fixedDelay > 0 ? fixedDelay : 0;
+		valueMap.put(CONF_FIXEDDELAY, String.valueOf(fixedDelay));
+	}
 
 	/**
 	 * 没有设置定时周期，是否在执行完批任务后就关闭
@@ -453,35 +530,5 @@ public final class ContextConfig {
 	public String toString() {
 		return valueMap.toString();
 	}
-
-	private static final int THREADCORE_DEFAULT = 4;
-
-	private static final int THREADCORE_MIN = 1;
-
-	private static final int THREADCORE_MAX = 100;
-
-	private static final int THREADMAX_DEFAULT = 200;
-
-	private static final int THREADMAX_MIN = 100;
-
-	private static final int THREADMAX_MAX = 1000;
-
-	private static final int ALIVETIME_DEFAULT = 30;
-
-	private static final int ALIVETIME_MIN = 5;
-
-	private static final int ALIVETIME_MAX = 300;
-
-	private static final int OVERTIME_DEFAULT = 36000;
-
-	private static final int OVERTIME_MIN = 1;
-
-	private static final int OVERTIME_MAX = 86400;
-
-	private static final int QUEUESIZE_DEFAULT = 2000;
-
-	private static final int QUEUESIZE_MIN = 1;
-
-	private static final int QUEUESIZE_MAX = Integer.MAX_VALUE;
 
 }
