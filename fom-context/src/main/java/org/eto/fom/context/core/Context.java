@@ -450,17 +450,11 @@ public class Context<E> {
 					}
 				}
 
-				if(config.cronExpression != null) {
-					Date last = new Date();
-					if(lastTime > 0){
-						last = new Date(lastTime);
-					}
-
-					Date next = config.cronExpression.getTimeAfter(last);
-					nextTime = next.getTime();
-
+				caculateNextTime();
+				
+				if(nextTime > 0) {
 					long waitTime = nextTime - System.currentTimeMillis();
-					if(waitTime > 0){ //考虑到runSchedul()本身的耗时
+					if(waitTime > 0){ 
 						switchState(SLEEPING);
 						synchronized (this) {
 							try {
@@ -491,6 +485,23 @@ public class Context<E> {
 						}
 					}
 				}
+			}
+		}
+		
+		private void caculateNextTime(){
+			Date last = new Date();
+			if(lastTime > 0){
+				last = new Date(lastTime);
+			}
+			
+			if(config.cronExpression != null){
+				nextTime = config.cronExpression.getTimeAfter(last).getTime();
+			}else if(config.getFixedDelay() > 0){
+				nextTime = System.currentTimeMillis() + config.getFixedDelay() * UNIT;
+			}else if(config.getFixedRate() > 0){
+				nextTime = last.getTime() + config.getFixedRate() * UNIT;
+			}else{
+				nextTime = 0;
 			}
 		}
 

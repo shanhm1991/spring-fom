@@ -108,8 +108,7 @@ img {
 							<th></th>
 							<th>name</th>
 							<th>load time</th>
-							<th>cron</th>
-							<th>schedul times</th>
+							<th>schedule times</th>
 							<th>last time</th>
 							<th>next time</th>
 							<th>success</th>
@@ -151,10 +150,6 @@ img {
 								},
 								{
 									"data" : "loadTime"
-								},
-								{
-									"data" : "cron",
-									"orderable" : false,
 								},
 								{
 									"data" : "execTimes"
@@ -265,7 +260,7 @@ img {
 										+ "<option value='ERROR' selected='selected'>ERROR</option>"
 										+ "</select>"
 								}
-								$('td', row).eq(12)
+								$('td', row).eq(11)
 									.html(select);
 
 								var img;
@@ -282,11 +277,11 @@ img {
 								} else {
 									img = "<img src='images/inited.png' title='inited'>"
 								}
-								$('td', row).eq(11).css("text-align", "center").html(img);
+								$('td', row).eq(10).css("text-align", "center").html(img);
 
 								if (success > 0) {
 									$('td', row)
-										.eq(7)
+										.eq(6)
 										.css("text-align", "center")
 										.html(
 											"<a style='color:red;' id='"
@@ -296,14 +291,14 @@ img {
 											+ "</a>");
 								} else {
 									$('td', row)
-										.eq(7)
+										.eq(6)
 										.css("text-align", "center")
 										.html(success);
 								}
 								
 								if (failedDetails > 0) {
 									$('td', row)
-										.eq(8)
+										.eq(7)
 										.css("text-align", "center")
 										.html(
 											"<a style='color:red;' id='"
@@ -313,14 +308,14 @@ img {
 											+ ")</a>");
 								} else {
 									$('td', row)
-										.eq(8)
+										.eq(7)
 										.css("text-align", "center")
 										.html(failed);
 								}
 								
 								if (waiting > 0) { //text-align:center;
 									$('td', row)
-										.eq(9)
+										.eq(8)
 										.css("text-align", "center")
 										.html(
 											"<a style='color:red;' id='"
@@ -330,14 +325,14 @@ img {
 											+ "</a>");
 								} else {
 									$('td', row)
-										.eq(9)
+										.eq(8)
 										.css("text-align", "center")
 										.html(waiting);
 								}
 								
 								if (actives > 0) {
 									$('td', row)
-										.eq(10)
+										.eq(9)
 										.css("text-align", "center")
 										.html(
 											"<a style='color:red;' id='"
@@ -347,7 +342,7 @@ img {
 											+ "</a>");
 								} else {
 									$('td', row)
-										.eq(10)
+										.eq(9)
 										.css("text-align", "center")
 										.html(actives);
 								}
