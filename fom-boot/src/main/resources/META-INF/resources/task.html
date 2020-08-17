@@ -129,13 +129,17 @@ img {
 <script type="text/javascript">
 	var table;
 	var created = 0;
+	
+	var pathname = window.document.location.pathname
+	pathname = pathname.substring(0, pathname.substr(1).indexOf('/') + 1 );
+	
 	$(document)
 		.ready(
 			function() {
 				table = $('#fom')
 					.DataTable(
 						{
-							"ajax" : "/list",
+							"ajax" : pathname + "/list",
 							"aLengthMenu" : [
 								[ 15, 30, 50, 100 ],
 								[ 15, 30, 50, 100 ] ],
@@ -390,7 +394,7 @@ img {
 	function initLogger() {
 		$
 			.ajax({
-				url : "/listOtherLogs",
+				url : pathname + "/listOtherLogs",
 				type : "POST",
 				dataType : "json",
 				success : function(data) {
@@ -407,7 +411,7 @@ img {
 	function queryLevel(e) {
 		var logger = $(e).val();
 		$.ajax({
-			url : "/queryLevel",
+			url : pathname + "/queryLevel",
 			type : "POST",
 			dataType : "json",
 			data : {
@@ -423,7 +427,7 @@ img {
 		var level = $(e).val();
 		var logger = $("#logger").val();
 		$.ajax({
-			url : "/saveLevel",
+			url : pathname + "/saveLevel",
 			type : "POST",
 			dataType : "json",
 			data : {
@@ -476,7 +480,7 @@ img {
 		}
 		$
 			.ajax({
-				url : "/operation",
+				url : pathname + "/operation",
 				type : "POST",
 				dataType : "json",
 				data : {
@@ -533,7 +537,7 @@ img {
 		//Tb = tbody
 		var name = Tb.attr("id");
 		$.ajax({
-			url : "/save",
+			url : pathname + "/save",
 			type : "POST",
 			dataType : "json",
 			data : {
@@ -560,7 +564,7 @@ img {
 		var name = $(e).attr("id").split("_")[1];
 		var level = $(e).val();
 		$.ajax({
-			url : "/log",
+			url : pathname + "/log",
 			type : "POST",
 			dataType : "json",
 			data : {
@@ -608,7 +612,7 @@ img {
 				}
 				json = json.substr(0, json.length - 1) + '}';
 				$.ajax({
-					url : "/create",
+					url : pathname + "/create",
 					type : "POST",
 					dataType : "json",
 					data : {
@@ -661,7 +665,7 @@ img {
 		var name = $(e).attr("id");
 		$
 			.ajax({
-				url : "/activedetail",
+				url : pathname + "/activedetail",
 				type : "POST",
 				dataType : "json",
 				data : {
@@ -705,7 +709,7 @@ img {
 		var name = $(e).attr("id");
 		$
 			.ajax({
-				url : "/faileddetail",
+				url : pathname + "/faileddetail",
 				type : "POST",
 				dataType : "json",
 				data : {
@@ -751,7 +755,7 @@ img {
 		var name = $(e).attr("id");
 		$
 			.ajax({
-				url : "/waitingdetail",
+				url : pathname + "/waitingdetail",
 				type : "POST",
 				dataType : "json",
 				data : {
@@ -793,7 +797,7 @@ img {
 		var name = $(e).attr("id");
 		$
 			.ajax({
-				url : "/successdetail",
+				url : pathname + "/successdetail",
 				type : "POST",
 				dataType : "json",
 				data : {
@@ -1015,7 +1019,7 @@ img {
 		var date = $("#costDate").val();
 		var name = $(e).attr("id");
 		$.ajax({
-			url : "/saveCostLevel",
+			url : pathname + "/saveCostLevel",
 			type : "POST",
 			dataType : "json",
 			data : {
@@ -1044,7 +1048,7 @@ img {
 
 	function dataDownload(e) {
 		var name = $(e).attr("id");
-		window.open("/dataDownload?name=" + name);
+		window.open(pathname + "/dataDownload?name=" + name);
 	}
 </script>
 </html>

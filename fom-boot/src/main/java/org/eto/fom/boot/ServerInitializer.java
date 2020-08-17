@@ -34,6 +34,9 @@ public class ServerInitializer implements ServletContextInitializer {
 	
 	@Value("${server.port:8080}")
 	private int port;
+	
+	@Value("${server.servlet.context-path:/}")
+	private String contextPath;
 
 	@Override
 	public void onStartup(ServletContext context) throws ServletException {
@@ -106,6 +109,7 @@ public class ServerInitializer implements ServletContextInitializer {
 					System.setProperty("webapp.root", root);
 				}
 				context.setDocBase(root); 
+				context.setPath(contextPath);
 			}
 		};
 		

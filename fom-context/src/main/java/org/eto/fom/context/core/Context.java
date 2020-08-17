@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -648,14 +648,28 @@ public class Context<E> {
 		log.info("task[{}] created.", taskId); 
 		return future; 
 	}
+	
+	/**
+	 * 周期执行任务
+	 * @return
+	 * @throws Exception
+	 */
+	protected Task<E> schedule() throws Exception {
+		return null;
+	}
 
 	/**
-	 * 周期性获取批量任务
+	 * 周期执行批量任务
 	 * @return task set
 	 * @throws Exception Exception
 	 */
 	protected Collection<? extends Task<E>> scheduleBatch() throws Exception {
-		return new HashSet<>();
+		List<Task<E>> list = new LinkedList<>();
+		Task<E> task = schedule();
+		if(task != null){
+			list.add(task);
+		}
+		return list;
 	}
 
 	/**
