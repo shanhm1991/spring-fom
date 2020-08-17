@@ -40,6 +40,8 @@ import com.google.gson.annotations.Expose;
  * 模块最小单位，相当于一个组织者的角色，负责创建和组织Task的运行
  * 
  * @author shanhm
+ * 
+ * @param <E> 任务执行结果类型
  *
  */
 public class Context<E> {

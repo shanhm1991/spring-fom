@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  * 任务
  * <br>Callable的抽象实现，在context中作为最小执行单位，也可以单独创建调用或者提交线程池
  * 
- * @param <E> 任务结果数据类型
+ * @param <E> 任务执行结果类型
  * 
  * @author shanhm
  *

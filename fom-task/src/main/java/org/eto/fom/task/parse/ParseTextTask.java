@@ -24,7 +24,7 @@ import org.eto.fom.util.file.reader.IRow;
  * <br>5.删除源文件，删除progressLog
  * <br>上述任何步骤失败或异常均会使任务提前失败结束
  * 
- * @param <V> 行数据解析结果类型
+ * @param <V> 解析任务行数据解析结果类型
  * 
  * @author shanhm
  *

@@ -9,7 +9,8 @@ import org.eto.fom.context.core.Task;
  * 
  * @author shanhm
  *
- * @param <V> 行数据解析结果类型
+ * @param <V> 解析任务行数据解析结果类型
+ * @param <E> 任务执行结果类型
  */
 public abstract class ParseTask<V, E> extends Task<E> {
 	

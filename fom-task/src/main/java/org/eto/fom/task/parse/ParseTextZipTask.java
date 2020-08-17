@@ -35,7 +35,7 @@ import org.eto.fom.util.file.ZipUtil;
  * 
  * @see ParseTextTask
  * 
- * @param <V> 行数据解析结果类型
+ * @param <V> 解析任务行数据解析结果类型
  * 
  * @author shanhm
  * 
