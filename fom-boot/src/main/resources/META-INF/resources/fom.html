@@ -129,6 +129,27 @@ img {
 <script type="text/javascript">
 	var table;
 	var created = 0;
+	
+	var path=(function(){
+		var regExp = /^(\/(\w+))/,
+		    isValid = regExp.test(window.document.location.pathname);
+		if(isValid){
+			var ctxPath = RegExp.$1,
+			    ctxPathName = RegExp.$2,
+			    ctxPathSlash = ctxPathName ? ctxPathName + '/' : ctxPathName;
+			
+			return {
+				ctxPath: ctxPath,
+				ctxPathSlash: ctxPathSlash
+			};
+		}
+		
+		return {
+			ctxPath: '',
+			ctxPathSlash: ''
+		};
+	})();
+	
 	$(document)
 		.ready(
 			function() {
