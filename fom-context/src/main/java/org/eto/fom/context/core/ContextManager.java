@@ -374,6 +374,9 @@ public class ContextManager {
 		}
 
 		String cron = fc.cron();
+		long fixedRate = fc.fixedRate();
+		long fixedDelay = fc.fixedDelay();
+		
 		List<Method> methods = new ArrayList<>();
 		for(Method method : clazz.getMethods()){
 			Scheduled sch = method.getAnnotation(Scheduled.class);
@@ -381,6 +384,12 @@ public class ContextManager {
 				methods.add(method);
 				if(StringUtils.isBlank(cron)){
 					cron = sch.cron();
+				}
+				if(fixedRate <= 0){
+					fixedRate = sch.fixedRate();
+				}
+				if(fixedDelay <= 0){
+					fixedDelay = sch.fixedDelay();
 				}
 			}
 		}
@@ -403,8 +412,8 @@ public class ContextManager {
 		if(map == null){
 			map = new ConcurrentHashMap<>();
 			map.put(ContextConfig.CONF_CRON, cron);
-			map.put(ContextConfig.CONF_FIXEDRATE, String.valueOf(fc.fixedRate()));
-			map.put(ContextConfig.CONF_FIXEDDELAY, String.valueOf(fc.fixedDelay()));
+			map.put(ContextConfig.CONF_FIXEDRATE, String.valueOf(fixedRate));
+			map.put(ContextConfig.CONF_FIXEDDELAY, String.valueOf(fixedDelay));
 			map.put(ContextConfig.CONF_THREADCORE, String.valueOf(fc.threadCore()));
 			map.put(ContextConfig.CONF_THREADMAX, String.valueOf(fc.threadMax()));
 			map.put(ContextConfig.CONF_QUEUESIZE, String.valueOf(fc.queueSize()));
