@@ -78,7 +78,7 @@ public final class ContextConfig {
 	/** 
 	 * 如果没有配置定时周期，是否在执行完批量任务后自行结束
 	 */
-	public static final String CONF_STOPWITHNOCRON = "stopWithNoCron";
+	public static final String CONF_STOPWITHNOSCHEDULE = "stopWithNoSchedule";
 
 	/** 
 	 * 启动时是否立即执行定时批量任务
@@ -130,7 +130,7 @@ public final class ContextConfig {
 		return !CONF_THREADCORE.equals(key) && !CONF_THREADMAX.equals(key) && !CONF_QUEUESIZE.equals(key) 
 				&& !CONF_ALIVETIME.equals(key) && !CONF_OVERTIME.equals(key) && !CONF_CANCELLABLE.equals(key)
 				&& !CONF_CRON.equals(key) && !CONF_FIXEDRATE.equals(key) && !CONF_FIXEDDELAY.equals(key) 
-				&& !CONF_STOPWITHNOCRON.equals(key) && !CONF_EXECONLOAN.equals(key);
+				&& !CONF_STOPWITHNOSCHEDULE.equals(key) && !CONF_EXECONLOAN.equals(key);
 	}
 
 	ContextConfig(String name){
@@ -150,7 +150,7 @@ public final class ContextConfig {
 		setFixedDelay(MapUtils.getInt(CONF_FIXEDDELAY, valueMap, 0)); 
 		setRemark(valueMap.get(CONF_REMARK));
 		setCancellable(MapUtils.getBoolean(CONF_CANCELLABLE, valueMap, false));
-		setStopWithNoCron(MapUtils.getBoolean(CONF_STOPWITHNOCRON, valueMap, false));
+		setStopWithNoSchedule(MapUtils.getBoolean(CONF_STOPWITHNOSCHEDULE, valueMap, false));
 		setExecOnLoad(MapUtils.getBoolean(CONF_EXECONLOAN, valueMap, false));
 		
 		init();
@@ -496,18 +496,18 @@ public final class ContextConfig {
 
 	/**
 	 * 没有设置定时周期，是否在执行完批任务后就关闭
-	 * @param stopWithNoCron stopWithNoCron
+	 * @param stopWithNoSchedule 
 	 */
-	public void setStopWithNoCron(boolean stopWithNoCron) {
-		valueMap.put(CONF_STOPWITHNOCRON, String.valueOf(stopWithNoCron));
+	public void setStopWithNoSchedule(boolean stopWithNoSchedule) {
+		valueMap.put(CONF_STOPWITHNOSCHEDULE, String.valueOf(stopWithNoSchedule));
 	}
 
 	/**
 	 * 获取配置，是否在执行完批任务后就关闭
-	 * @return stopWithNoCron
+	 * @return 
 	 */
-	public boolean getStopWithNoCron() {
-		return MapUtils.getBoolean(CONF_STOPWITHNOCRON, valueMap, false);
+	public boolean getStopWithNoSchedule() {
+		return MapUtils.getBoolean(CONF_STOPWITHNOSCHEDULE, valueMap, false);
 	}
 
 	/**

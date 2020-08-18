@@ -176,7 +176,6 @@ public class ContextHelper {
 				next = format.format(context.nextTime);
 			}
 			cmap.put("nextTime", next);
-			
 			cmap.put("execTimes", String.valueOf(context.batchScheduls)); 
 			
 			cmap.put("loadTime", format.format(context.loadTime));
@@ -187,7 +186,9 @@ public class ContextHelper {
 			cmap.put("failedDetails", String.valueOf(context.statistics.getfailedDetails()));
 			cmap.put("success", String.valueOf(context.getSuccess()));
 
-			cmap.remove("stopWithNoCron");
+			// 不允许编辑的参数
+			cmap.remove(ContextConfig.CONF_STOPWITHNOSCHEDULE);
+			cmap.remove(ContextConfig.CONF_EXECONLOAN);
 			list.add(cmap);
 		}
 		return list;
@@ -221,19 +222,32 @@ public class ContextHelper {
 			String value = jsonObject.getString(key);
 			switch(key){
 			case ContextConfig.CONF_QUEUESIZE:
-				context.config.setQueueSize(Integer.parseInt(value)); break;
+				context.config.setQueueSize(Integer.parseInt(value)); 
+				break;
 			case ContextConfig.CONF_THREADCORE:
-				context.config.setThreadCore(Integer.parseInt(value)); break;
+				context.config.setThreadCore(Integer.parseInt(value)); 
+				break;
 			case ContextConfig.CONF_THREADMAX:
-				context.config.setThreadMax(Integer.parseInt(value)); break;
+				context.config.setThreadMax(Integer.parseInt(value)); 
+				break;
 			case ContextConfig.CONF_ALIVETIME:
-				context.config.setAliveTime(Integer.parseInt(value)); break;
+				context.config.setAliveTime(Integer.parseInt(value)); 
+				break;
 			case ContextConfig.CONF_OVERTIME:
-				context.config.setOverTime(Integer.parseInt(value)); break;
+				context.config.setOverTime(Integer.parseInt(value)); 
+				break;
 			case ContextConfig.CONF_CANCELLABLE:
-				context.config.setCancellable(Boolean.parseBoolean(value)); break;
+				context.config.setCancellable(Boolean.parseBoolean(value)); 
+				break;
 			case ContextConfig.CONF_CRON:
-				context.config.setCron(value); break;
+				context.config.setCron(value); 
+				break;
+			case ContextConfig.CONF_FIXEDRATE:
+				context.config.setFixedRate(Integer.parseInt(value));
+				break;
+			case ContextConfig.CONF_FIXEDDELAY:
+				context.config.setFixedDelay(Integer.parseInt(value));
+				break;
 			default:
 				context.config.put(key, value);
 			}

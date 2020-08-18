@@ -10,7 +10,7 @@ public class DemoTask extends Task<Void> {
 
 	@Override
 	protected Void exec() throws Exception {
-		Thread.sleep(50);
+		Thread.sleep(5000);
 		return null;
 	}
 

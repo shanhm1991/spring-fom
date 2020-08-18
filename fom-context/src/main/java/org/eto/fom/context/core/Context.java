@@ -436,21 +436,22 @@ public class Context<E> {
 					return;
 				}
 
-				if(runOnStartup && !config.getExecOnLoad()){
-					runOnStartup = false;
-				}else{
-					try {
+				try{
+					if(runOnStartup && !config.getExecOnLoad()){
+						runOnStartup = false;
+						caculateNextTime(null); 
+					}else{
 						runSchedul();
-					} catch (RuntimeException e){
-						log.error("", e);
-					}catch(Throwable e){
-						log.error("context[" + name + "] terminated unexpectedly", e); 
-						stopSelf();
-						return;
 					}
+				}catch(InterruptedException e){
+					// ignore 进入下次循环，获取判断当前状态
+				}catch (RuntimeException e){
+					log.error("", e);
+				}catch(Throwable e){
+					log.error("context[" + name + "] terminated unexpectedly", e); 
+					stopSelf();
+					return;
 				}
-
-				caculateNextTime();
 				
 				if(nextTime > 0) {
 					long waitTime = nextTime - System.currentTimeMillis();
@@ -471,7 +472,7 @@ public class Context<E> {
 						}
 					}
 
-					if(config.getStopWithNoCron()){
+					if(config.getStopWithNoSchedule()){
 						terminate();
 						return;
 					}else{
@@ -487,19 +488,31 @@ public class Context<E> {
 				}
 			}
 		}
-		
-		private void caculateNextTime(){
+
+		private void caculateNextTime(BatchStatus<E> batchStatus) throws InterruptedException { 
 			Date last = new Date();
 			if(lastTime > 0){
 				last = new Date(lastTime);
 			}
-			
+
 			if(config.cronExpression != null){
 				nextTime = config.cronExpression.getTimeAfter(last).getTime();
-			}else if(config.getFixedDelay() > 0){
-				nextTime = System.currentTimeMillis() + config.getFixedDelay() * UNIT;
+				if(batchStatus != null){
+					batchStatus.waitCaculateCountDown();
+				}
 			}else if(config.getFixedRate() > 0){
 				nextTime = last.getTime() + config.getFixedRate() * UNIT;
+				if(batchStatus != null){
+					batchStatus.waitCaculateCountDown();
+				}
+			}else if(config.getFixedDelay() > 0){
+				if(batchStatus == null){
+					nextTime = last.getTime() + config.getFixedDelay() * UNIT; 
+				}else{
+					nextTime = 0;
+					batchStatus.waitCaculateCountDown();
+					nextTime = System.currentTimeMillis() + config.getFixedDelay() * UNIT;
+				}
 			}else{
 				nextTime = 0;
 			}
@@ -507,7 +520,7 @@ public class Context<E> {
 
 		private void runSchedul() throws Exception { 
 			cleanFutures();
-			
+
 			switchState(RUNNING);
 			lastTime = System.currentTimeMillis();
 			batchScheduls++;
@@ -530,8 +543,9 @@ public class Context<E> {
 				} catch (RejectedExecutionException e) {
 					log.warn("task[" + task.getId() + "] submit rejected.", e);
 				}finally{ 
-					batchStatus.countDown();
+					batchStatus.countDownSubmit();
 					checkBatchComplete(batchStatus);
+					caculateNextTime(batchStatus); 
 				}
 			}
 		}
@@ -632,7 +646,7 @@ public class Context<E> {
 		} catch (RejectedExecutionException e) {
 			log.warn("task[" + task.getId() + "] submit rejected.", e);
 		}finally{ 
-			batchStatus.countDown();
+			batchStatus.countDownSubmit();
 			checkBatchComplete(batchStatus);
 		}
 	}
@@ -649,7 +663,7 @@ public class Context<E> {
 			Monitor.jvm();
 			cleanFutures(); 
 		}
-		
+
 		String taskId = task.getId();
 		task.setContext(Context.this); 
 
@@ -662,7 +676,7 @@ public class Context<E> {
 		log.info("task[{}] created.", taskId); 
 		return future; 
 	}
-	
+
 	/**
 	 * 周期执行任务
 	 * @return
@@ -687,7 +701,7 @@ public class Context<E> {
 	}
 
 	/**
-	 * stopWithNoCron = true，结束时触发
+	 * stopWithNoSchedule = true，结束时触发
 	 */
 	protected void onScheduleTerminate() {
 
@@ -696,12 +710,12 @@ public class Context<E> {
 	void checkBatchComplete(BatchStatus<E> batchStatus) throws InterruptedException{
 		String s = batchStatus.isSchedul ? "schedul" : "submit";
 		boolean isLastTaskComplete = batchStatus.isLastTaskComplete();
-		boolean hasCountDown = batchStatus.hasCountDown();
+		boolean hasCountDown = batchStatus.hasSubmitCountDown();
 		if(log.isDebugEnabled()){
 			log.debug(s + "[" + batchStatus.getBatch() + "], isSubmitFinished：" 
 					+ hasCountDown + ", taskNotCompleted：" + batchStatus.getTaskNotCompleted()); 
 		}
-		
+
 		if(isLastTaskComplete && hasCountDown){ 
 			if(log.isDebugEnabled()){
 				String time = new SimpleDateFormat("yyyyMMdd HH:mm:ss").format(batchStatus.getBatchTime());
@@ -709,8 +723,8 @@ public class Context<E> {
 						+ "[" + batchStatus.getBatch() + "] created on " + time  + " completed.");
 			}
 			onBatchComplete(batchStatus.getBatch(), batchStatus.getBatchTime(), batchStatus.getList());
+			batchStatus.countDownCaculate();
 		}
-		
 	}
 
 	/**
@@ -780,12 +794,22 @@ public class Context<E> {
 
 		private final AtomicLong taskNotCompleted = new AtomicLong(1);
 
-		public void countDown(){
+		private final CountDownLatch caculateLatch = new CountDownLatch(1);
+
+		public void countDownSubmit(){
 			submitLatch.countDown();
 		}
 
-		public boolean hasCountDown() throws InterruptedException{
+		public boolean hasSubmitCountDown() throws InterruptedException{
 			return submitLatch.await(0, TimeUnit.MILLISECONDS);
+		}
+
+		public void countDownCaculate(){
+			caculateLatch.countDown();
+		}
+
+		public void waitCaculateCountDown() throws InterruptedException{
+			caculateLatch.await();
 		}
 
 		public BatchStatus(boolean isSchedul, long batch, long batchTime){

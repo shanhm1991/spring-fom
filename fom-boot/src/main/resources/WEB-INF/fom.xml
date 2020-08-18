@@ -23,7 +23,7 @@
 			<queueSize>200</queueSize>
 			<cancellable>false</cancellable>
 			<execOnLoad>true</execOnLoad>
-			<stopWithNoCron>false</stopWithNoCron>
+			<stopWithNoSchedule>false</stopWithNoSchedule>
 			以上为默认配置,可以在xml中覆盖默认值，以下为自定义配置
 		</context> -->
 		

@@ -58,7 +58,7 @@ public @interface FomContext {
 	 * 如果没有配置执行计划（cron/fixedRate/fixedDelay）,是否关闭，默认false，这种场景通常是将Context作为线程池来用
 	 * @return
 	 */
-	public boolean stopWithNoCron() default false;
+	public boolean stopWithNoSchedule() default false;
 
 	/**
 	 * 线程池核心线程数，default=4，min=1，max=100

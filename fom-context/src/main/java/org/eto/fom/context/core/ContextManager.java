@@ -255,6 +255,8 @@ public class ContextManager {
 						name = clazz.getSimpleName();
 					}
 					map.put(ContextConfig.CONF_CRON, fc.cron());
+					map.put(ContextConfig.CONF_FIXEDRATE, String.valueOf(fc.fixedRate()));
+					map.put(ContextConfig.CONF_FIXEDDELAY, String.valueOf(fc.fixedDelay()));
 					map.put(ContextConfig.CONF_THREADCORE, String.valueOf(fc.threadCore()));
 					map.put(ContextConfig.CONF_THREADMAX, String.valueOf(fc.threadMax()));
 					map.put(ContextConfig.CONF_QUEUESIZE, String.valueOf(fc.queueSize()));
@@ -262,7 +264,7 @@ public class ContextManager {
 					map.put(ContextConfig.CONF_ALIVETIME, String.valueOf(fc.threadAliveTime()));
 					map.put(ContextConfig.CONF_CANCELLABLE, String.valueOf(fc.cancellable()));
 					map.put(ContextConfig.CONF_EXECONLOAN, String.valueOf(fc.execOnLoad()));
-					map.put(ContextConfig.CONF_STOPWITHNOCRON, String.valueOf(fc.stopWithNoCron()));
+					map.put(ContextConfig.CONF_STOPWITHNOSCHEDULE, String.valueOf(fc.stopWithNoSchedule()));
 					map.put(ContextConfig.CONF_REMARK, String.valueOf(fc.remark()));
 				}else{
 					name = clazz.getSimpleName();
@@ -315,6 +317,8 @@ public class ContextManager {
 			FomContext fc = clazz.getAnnotation(FomContext.class);
 			ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
 			map.put(ContextConfig.CONF_CRON, fc.cron());
+			map.put(ContextConfig.CONF_FIXEDRATE, String.valueOf(fc.fixedRate()));
+			map.put(ContextConfig.CONF_FIXEDDELAY, String.valueOf(fc.fixedDelay()));
 			map.put(ContextConfig.CONF_THREADCORE, String.valueOf(fc.threadCore()));
 			map.put(ContextConfig.CONF_THREADMAX, String.valueOf(fc.threadMax()));
 			map.put(ContextConfig.CONF_QUEUESIZE, String.valueOf(fc.queueSize()));
@@ -322,7 +326,7 @@ public class ContextManager {
 			map.put(ContextConfig.CONF_ALIVETIME, String.valueOf(fc.threadAliveTime()));
 			map.put(ContextConfig.CONF_CANCELLABLE, String.valueOf(fc.cancellable()));
 			map.put(ContextConfig.CONF_EXECONLOAN, String.valueOf(fc.execOnLoad()));
-			map.put(ContextConfig.CONF_STOPWITHNOCRON, String.valueOf(fc.stopWithNoCron()));
+			map.put(ContextConfig.CONF_STOPWITHNOSCHEDULE, String.valueOf(fc.stopWithNoSchedule()));
 			map.put(ContextConfig.CONF_REMARK, String.valueOf(fc.remark()));
 
 			String name = fc.name();
@@ -399,6 +403,8 @@ public class ContextManager {
 		if(map == null){
 			map = new ConcurrentHashMap<>();
 			map.put(ContextConfig.CONF_CRON, cron);
+			map.put(ContextConfig.CONF_FIXEDRATE, String.valueOf(fc.fixedRate()));
+			map.put(ContextConfig.CONF_FIXEDDELAY, String.valueOf(fc.fixedDelay()));
 			map.put(ContextConfig.CONF_THREADCORE, String.valueOf(fc.threadCore()));
 			map.put(ContextConfig.CONF_THREADMAX, String.valueOf(fc.threadMax()));
 			map.put(ContextConfig.CONF_QUEUESIZE, String.valueOf(fc.queueSize()));
@@ -406,7 +412,7 @@ public class ContextManager {
 			map.put(ContextConfig.CONF_ALIVETIME, String.valueOf(fc.threadAliveTime()));
 			map.put(ContextConfig.CONF_CANCELLABLE, String.valueOf(fc.cancellable()));
 			map.put(ContextConfig.CONF_EXECONLOAN, String.valueOf(fc.execOnLoad()));
-			map.put(ContextConfig.CONF_STOPWITHNOCRON, String.valueOf(fc.stopWithNoCron()));
+			map.put(ContextConfig.CONF_STOPWITHNOSCHEDULE, String.valueOf(fc.stopWithNoSchedule()));
 			map.put(ContextConfig.CONF_REMARK, String.valueOf(fc.remark()));
 		}
 
@@ -477,8 +483,8 @@ public class ContextManager {
 			return;
 		}
 
-		FomSchedulBatch fom = clazz.getAnnotation(FomSchedulBatch.class);
-		String name = fom.name();
+		FomSchedulBatch fc = clazz.getAnnotation(FomSchedulBatch.class);
+		String name = fc.name();
 		if(StringUtils.isBlank(name)){
 			name = clazz.getSimpleName();
 		}
@@ -494,16 +500,18 @@ public class ContextManager {
 
 		if(map == null){
 			map = new ConcurrentHashMap<>();
-			map.put(ContextConfig.CONF_CRON, fom.cron());
-			map.put(ContextConfig.CONF_THREADCORE, String.valueOf(fom.threadCore()));
-			map.put(ContextConfig.CONF_THREADMAX, String.valueOf(fom.threadMax()));
-			map.put(ContextConfig.CONF_QUEUESIZE, String.valueOf(fom.queueSize()));
-			map.put(ContextConfig.CONF_OVERTIME, String.valueOf(fom.threadOverTime()));
-			map.put(ContextConfig.CONF_ALIVETIME, String.valueOf(fom.threadAliveTime()));
-			map.put(ContextConfig.CONF_CANCELLABLE, String.valueOf(fom.cancellable()));
-			map.put(ContextConfig.CONF_EXECONLOAN, String.valueOf(fom.execOnLoad()));
-			map.put(ContextConfig.CONF_STOPWITHNOCRON, String.valueOf(fom.stopWithNoCron()));
-			map.put(ContextConfig.CONF_REMARK, String.valueOf(fom.remark()));
+			map.put(ContextConfig.CONF_CRON, fc.cron());
+			map.put(ContextConfig.CONF_FIXEDRATE, String.valueOf(fc.fixedRate()));
+			map.put(ContextConfig.CONF_FIXEDDELAY, String.valueOf(fc.fixedDelay()));
+			map.put(ContextConfig.CONF_THREADCORE, String.valueOf(fc.threadCore()));
+			map.put(ContextConfig.CONF_THREADMAX, String.valueOf(fc.threadMax()));
+			map.put(ContextConfig.CONF_QUEUESIZE, String.valueOf(fc.queueSize()));
+			map.put(ContextConfig.CONF_OVERTIME, String.valueOf(fc.threadOverTime()));
+			map.put(ContextConfig.CONF_ALIVETIME, String.valueOf(fc.threadAliveTime()));
+			map.put(ContextConfig.CONF_CANCELLABLE, String.valueOf(fc.cancellable()));
+			map.put(ContextConfig.CONF_EXECONLOAN, String.valueOf(fc.execOnLoad()));
+			map.put(ContextConfig.CONF_STOPWITHNOSCHEDULE, String.valueOf(fc.stopWithNoSchedule()));
+			map.put(ContextConfig.CONF_REMARK, String.valueOf(fc.remark()));
 		}
 
 		Context.localName.set(name); 

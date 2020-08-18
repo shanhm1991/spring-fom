@@ -14,7 +14,7 @@ import org.eto.fom.context.core.Context;
  * @author shanhm
  *
  */
-@FomContext(cron = "0/15 * * * * ?", queueSize = 200)
+@FomContext(fixedDelay = 47 , queueSize = 200)
 public class BatchCompleteTest extends Context<Void> {
 	
 	public BatchCompleteTest(){
