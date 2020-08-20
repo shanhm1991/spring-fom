@@ -452,7 +452,7 @@ public class Context<E> {
 					stopSelf();
 					return;
 				}
-				
+
 				if(nextTime > 0) {
 					long waitTime = nextTime - System.currentTimeMillis();
 					if(waitTime > 0){ 
@@ -489,7 +489,7 @@ public class Context<E> {
 			}
 		}
 
-		private void caculateNextTime(BatchStatus<E> batchStatus) throws InterruptedException { 
+		private void caculateNextTime(ScheduleBatch<E> scheduleBatch) throws InterruptedException { 
 			Date last = new Date();
 			if(lastTime > 0){
 				last = new Date(lastTime);
@@ -497,20 +497,20 @@ public class Context<E> {
 
 			if(config.cronExpression != null){
 				nextTime = config.cronExpression.getTimeAfter(last).getTime();
-				if(batchStatus != null){
-					batchStatus.waitCaculateCountDown();
+				if(scheduleBatch != null){
+					scheduleBatch.waitCaculateCountDown();
 				}
 			}else if(config.getFixedRate() > 0){
 				nextTime = last.getTime() + config.getFixedRate() * UNIT;
-				if(batchStatus != null){
-					batchStatus.waitCaculateCountDown();
+				if(scheduleBatch != null){
+					scheduleBatch.waitCaculateCountDown();
 				}
 			}else if(config.getFixedDelay() > 0){
-				if(batchStatus == null){
+				if(scheduleBatch == null){
 					nextTime = last.getTime() + config.getFixedDelay() * UNIT; 
 				}else{
 					nextTime = 0;
-					batchStatus.waitCaculateCountDown();
+					scheduleBatch.waitCaculateCountDown();
 					nextTime = System.currentTimeMillis() + config.getFixedDelay() * UNIT;
 				}
 			}else{
@@ -522,17 +522,18 @@ public class Context<E> {
 			cleanFutures();
 
 			switchState(RUNNING);
-			lastTime = System.currentTimeMillis();
 			batchScheduls++;
-			Collection<? extends Task<E>> tasks = scheduleBatch();
-			if(!CollectionUtils.isEmpty(tasks)){
-				Iterator<? extends Task<E>> it = tasks.iterator();
-				BatchStatus<E> batchStatus = new BatchStatus<>(true, batchScheduls, lastTime);
-				Task<E> task = null;
-				try{
+			lastTime = System.currentTimeMillis();
+
+			ScheduleBatch<E> schedulebatch = new ScheduleBatch<>(true, batchScheduls, lastTime);
+			Task<E> task = null;
+			try{
+				Collection<? extends Task<E>> tasks = scheduleBatch();
+				if(!CollectionUtils.isEmpty(tasks)){
+					Iterator<? extends Task<E>> it = tasks.iterator();
 					while(it.hasNext()){
 						task = it.next();
-						task.batchStatus = batchStatus;
+						task.scheduleBatch = schedulebatch;
 						String taskId = task.getId();
 						if(isTaskAlive(taskId)){ 
 							log.warn("task[{}] is still alive, create canceled.", taskId); 
@@ -540,13 +541,13 @@ public class Context<E> {
 						}
 						submit(task);
 					}
-				} catch (RejectedExecutionException e) {
-					log.warn("task[" + task.getId() + "] submit rejected.", e);
-				}finally{ 
-					batchStatus.countDownSubmit();
-					checkBatchComplete(batchStatus);
-					caculateNextTime(batchStatus); 
 				}
+			} catch (RejectedExecutionException e) {
+				log.warn("task[" + task.getId() + "] submit rejected.", e);
+			}finally{ 
+				schedulebatch.countDownSubmit();
+				checkScheduleComplete(schedulebatch);
+				caculateNextTime(schedulebatch); 
 			}
 		}
 
@@ -595,15 +596,16 @@ public class Context<E> {
 			} catch (InterruptedException e) {
 				log.error("interrupted when stopping, which should never happened."); 
 			}
+
 			cleanFutures();
-			synchronized (Context.this) {
-				if(stopSucc){
-					state = STOPPED;
-					runOnStartup = true;
-					log.info("context[{}] stoped.", name);
-				}else{
-					log.warn("context[{}] is still stopping, though has waiting for a day.", name);
-				}
+
+			if(stopSucc){
+				onScheduleTerminate(); 
+				switchState(STOPPED); 
+				runOnStartup = true; // 线程临死前应该会将值同步到主内存，所以没有使用volatile修饰
+				log.info("context[{}] stoped.", name);
+			}else{
+				log.warn("context[{}] is still stopping, though has waiting for a day.", name);
 			}
 		}
 	}
@@ -630,12 +632,12 @@ public class Context<E> {
 		}
 
 		Iterator<? extends Task<E>> it = tasks.iterator();
-		BatchStatus<E> batchStatus = new BatchStatus<>(false, batchSubmits.incrementAndGet(), System.currentTimeMillis());
+		ScheduleBatch<E> scheduleBatch = new ScheduleBatch<>(false, batchSubmits.incrementAndGet(), System.currentTimeMillis());
 		Task<E> task = null;
 		try{
 			while(it.hasNext()){
 				task = it.next();
-				task.batchStatus = batchStatus;
+				task.scheduleBatch = scheduleBatch;
 				String taskId = task.getId();
 				if(isTaskAlive(taskId)){ 
 					log.warn("task[{}] is still alive, create canceled.", taskId); 
@@ -646,8 +648,8 @@ public class Context<E> {
 		} catch (RejectedExecutionException e) {
 			log.warn("task[" + task.getId() + "] submit rejected.", e);
 		}finally{ 
-			batchStatus.countDownSubmit();
-			checkBatchComplete(batchStatus);
+			scheduleBatch.countDownSubmit();
+			checkScheduleComplete(scheduleBatch);
 		}
 	}
 
@@ -668,8 +670,8 @@ public class Context<E> {
 		task.setContext(Context.this); 
 
 		TimedFuture future = config.pool.submit(task);
-		if(task.batchStatus != null){
-			task.batchStatus.increaseTaskNotCompleted();
+		if(task.scheduleBatch != null){
+			task.scheduleBatch.increaseTaskNotCompleted();
 		}
 
 		FUTUREMAP.put(taskId, future); 
@@ -701,39 +703,39 @@ public class Context<E> {
 	}
 
 	/**
-	 * stopWithNoSchedule = true，结束时触发
+	 * schedule终结时触发
 	 */
 	protected void onScheduleTerminate() {
 
 	}
 
-	void checkBatchComplete(BatchStatus<E> batchStatus) throws InterruptedException{
-		String s = batchStatus.isSchedul ? "schedul" : "submit";
-		boolean isLastTaskComplete = batchStatus.isLastTaskComplete();
-		boolean hasCountDown = batchStatus.hasSubmitCountDown();
+	void checkScheduleComplete(ScheduleBatch<E> scheduleBatch) throws InterruptedException{
+		String s = scheduleBatch.isSchedul ? "schedul" : "submit";
+		boolean isLastTaskComplete = scheduleBatch.isLastTaskComplete();
+		boolean hasCountDown = scheduleBatch.hasSubmitCountDown();
 		if(log.isDebugEnabled()){
-			log.debug(s + "[" + batchStatus.getBatch() + "], isSubmitFinished：" 
-					+ hasCountDown + ", taskNotCompleted：" + batchStatus.getTaskNotCompleted()); 
+			log.debug(s + "[" + scheduleBatch.getBatch() + "], isSubmitFinished：" 
+					+ hasCountDown + ", taskNotCompleted：" + scheduleBatch.getTaskNotCompleted()); 
 		}
 
 		if(isLastTaskComplete && hasCountDown){ 
 			if(log.isDebugEnabled()){
-				String time = new SimpleDateFormat("yyyyMMdd HH:mm:ss").format(batchStatus.getBatchTime());
-				log.debug(batchStatus.getList().size() +  " tasks of " + s 
-						+ "[" + batchStatus.getBatch() + "] created on " + time  + " completed.");
+				String time = new SimpleDateFormat("yyyyMMdd HH:mm:ss").format(scheduleBatch.getBatchTime());
+				log.debug(scheduleBatch.getList().size() +  " tasks of " + s 
+						+ "[" + scheduleBatch.getBatch() + "] created on " + time  + " completed.");
 			}
-			onBatchComplete(batchStatus.getBatch(), batchStatus.getBatchTime(), batchStatus.getList());
-			batchStatus.countDownCaculate();
+			onScheduleComplete(scheduleBatch.getBatch(), scheduleBatch.getBatchTime(), scheduleBatch.getList());
+			scheduleBatch.countDownCaculate();
 		}
 	}
 
 	/**
-	 * 周期性提交的任务都执行完时触发
+	 * schedule任务完成时触发
 	 * @param batch 批次
 	 * @param batchTime 周期执行的时间点 
 	 * @param results 任务执行的结果集
 	 */
-	protected void onBatchComplete(long batch, long batchTime, List<Result<E>> results) {
+	protected void onScheduleComplete(long batch, long batchTime, List<Result<E>> results) {
 
 	}
 
@@ -774,13 +776,13 @@ public class Context<E> {
 	}
 
 	/**
-	 * 定义BatchStatus是为了实现onBatchComplete，
-	 * 由于submit有一定步骤（任务执行非常快），要防止出现任务还在提交中，但是已提交的任务已经执行完，导致提前触发onBatchComplete
-	 * 上面的问题可以通过submitLatch控制，确保onBatchComplete一定在任务提交完成之后触发；
-	 * 但是还这样又可能出现全部任务已经执行完，但是submitLatch还没有countDown，导致onBatchComplete不被触发；
-	 * 所以需要taskNotCompleted提前置1，以便在全部提交完成时主动检查是否触发onBatchComplete
+	 * 定义ScheduleBatch是为了实现onScheduleComplete，
+	 * 由于submit有一定步骤（任务执行非常快），要防止出现任务还在提交中，但是已提交的任务已经执行完，导致提前触发onScheduleComplete
+	 * 上面的问题可以通过submitLatch控制，确保onScheduleComplete一定在任务提交完成之后触发；
+	 * 但是还这样又可能出现全部任务已经执行完，但是submitLatch还没有countDown，导致onScheduleComplete不被触发；
+	 * 所以需要taskNotCompleted提前置1，以便在全部提交完成时主动检查是否触发onScheduleComplete
 	 */
-	static class BatchStatus<E> {
+	static class ScheduleBatch<E> {
 
 		private final boolean isSchedul;
 
@@ -812,7 +814,7 @@ public class Context<E> {
 			caculateLatch.await();
 		}
 
-		public BatchStatus(boolean isSchedul, long batch, long batchTime){
+		public ScheduleBatch(boolean isSchedul, long batch, long batchTime){
 			this.isSchedul = isSchedul;
 			this.batch = batch;
 			this.batchTime = batchTime;

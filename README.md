@@ -5,11 +5,8 @@
    
 > fom也是借助于线程池实现的，同时自定义了一个定时线程来控制任务的执行计划，这样就可以自由地动态介入改变任务的执行计划或其他配置了，
 > 并对修改做了持久化，下次重启依然生效。 类似于spring schedule，fom也提供了cron、fixedRate、fixedDelay三种定时策略，
-> 并且提供了onBatchComplete接口，相当于一个CompletionService。
-> 最后，fom并不强制配置执行计划，如果没有配置，也可以当成一个纯粹的线程池使用 
-
-> 写这个工具也是因为在的团队经常有类似任务的需求，但限于当时的出差条件，每次都是随便找个人临时开发，所以代码质量真的是一言难尽，
-> 遂决定写这样一个工具，希望以后能将类似需求开发做到效率和质量兼顾，且简单好用。
+> 另外还提供了onScheduleComplete接口，在提交任务全部完成时触发，可以将其理解成一个CompletionService。
+> 并且，fom并不强制配置执行计划，如果没有配置，可以当成一个纯粹的线程池使用 。
 
 ##构建
 * fom-context: 相当于任务模块的上下文，负责创建和组织调度任务的执行；
@@ -26,10 +23,10 @@
 	<version>2.0.0</version>
 </dependency>
 ```
-配置包扫描路径`@FomScan(basePackages = "example.fom.fomschedulbatch")`，或者直接配置fom.xml
 
-##示例
-> fom-example
+> 配置包扫描路径`@FomScan(basePackages = "example.fom.fomschedulbatch")`，或者直接配置fom.xml
+
+> 详细示例可以参考：`fom-example`
 
 ##界面
 > `http://{ip}:{port}/fom.html`或者`http://{ip}:{port}/{context-path}/task.html`    

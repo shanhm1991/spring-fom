@@ -164,20 +164,20 @@ public class ContextHelper {
 			if(!cmap.containsKey(ContextConfig.CONF_CRON)){
 				cmap.put(ContextConfig.CONF_CRON, ""); 
 			}
-			
+
 			String exec = "";
 			if(context.lastTime > 0){
 				exec = format.format(context.lastTime);
 			}
 			cmap.put("lastTime", exec);
-			
+
 			String next = "";
 			if(context.nextTime > 0){
 				next = format.format(context.nextTime);
 			}
 			cmap.put("nextTime", next);
 			cmap.put("execTimes", String.valueOf(context.batchScheduls)); 
-			
+
 			cmap.put("loadTime", format.format(context.loadTime));
 			cmap.put("level", context.getLogLevel());
 			cmap.put("active", String.valueOf(context.getActives())); 
@@ -258,7 +258,7 @@ public class ContextHelper {
 			map.put("msg", "context[" + name + "] has nothing to chang.");
 			return map;
 		}
-		
+
 		if(serialize(name, context)){
 			map.put("msg", "context[" + name + "] changed.");
 		}else{
@@ -302,25 +302,21 @@ public class ContextHelper {
 						return false;
 					}
 				}).create();
-		
+
 		String file = cache + File.separator + name + "." + System.currentTimeMillis();
-		
-		
+
+
 		try(FileOutputStream output = new FileOutputStream(file)){
-			if(StringUtils.isBlank(context.fom_context)){
-				Map<String, Object> map = new HashMap<>(); //规避匿名类的序列化问题
-				map.put("name", context.name);
-				map.put("fom_context", context.fom_context);
-				map.put("fom_schedul", context.fom_schedul);
-				map.put("fom_schedulbatch", context.fom_schedulbatch);
-				
-				Map<String, Map<String, String>> config = new HashMap<>();
-				config.put("valueMap", context.config.valueMap);
-				map.put("config", config);
-				IOUtils.write(gson.toJson(map), output, "UTF-8");
-			}else{
-				IOUtils.write(gson.toJson(context), output, "UTF-8"); 
-			}
+			Map<String, Object> map = new HashMap<>(); //规避匿名类的序列化问题
+			map.put("name", context.name);
+			map.put("fom_context", context.fom_context);
+			map.put("fom_schedul", context.fom_schedul);
+			map.put("fom_schedulbatch", context.fom_schedulbatch);
+
+			Map<String, Map<String, String>> config = new HashMap<>();
+			config.put("valueMap", context.config.valueMap);
+			map.put("config", config);
+			IOUtils.write(gson.toJson(map), output, "UTF-8");
 			return true;
 		}catch(Exception e){
 			LOG.error("context[" + name + "] save failed: " + e);
@@ -458,7 +454,7 @@ public class ContextHelper {
 		Context.localName.set(name); 
 		ContextConfig.loadedConfig.putIfAbsent(name, map);
 		Context<?> context = (Context<?>)contextClass.newInstance();
-		
+
 		context.regist(false);
 		context.startup();
 		resMap.put("result", true);
@@ -689,15 +685,15 @@ public class ContextHelper {
 		}
 		return context.statistics.successDetail();
 	}
-	
+
 	private static final int LEVELINDEX0 = 0;
-	
+
 	private static final int LEVELINDEX1 = 1;
-	
+
 	private static final int LEVELINDEX2 = 2;
-	
+
 	private static final int LEVELINDEX3 = 3;
-	
+
 	private static final int LEVELINDEX4 = 4;
 
 	/**

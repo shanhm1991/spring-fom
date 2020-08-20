@@ -2,7 +2,7 @@ package org.eto.fom.context.core;
 
 import java.util.concurrent.Callable;
 
-import org.eto.fom.context.core.Context.BatchStatus;
+import org.eto.fom.context.core.Context.ScheduleBatch;
 import org.eto.fom.util.log.SlfLoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	/**
 	 * 批任务执行状态，提交线程设置
 	 */
-	volatile BatchStatus<E> batchStatus;
+	volatile ScheduleBatch<E> scheduleBatch;
 
 	private volatile Context<E> context;
 
@@ -144,9 +144,9 @@ public abstract class Task<E> implements Callable<Result<E>> {
 				log.warn("task failed, cost={}ms", result.costTime);
 			}
 
-			if(!isResultHandler && batchStatus != null){
-				batchStatus.addResult(result); 
-				context.checkBatchComplete(batchStatus);
+			if(!isResultHandler && scheduleBatch != null){
+				scheduleBatch.addResult(result); 
+				context.checkScheduleComplete(scheduleBatch);
 			}
 
 		}else{

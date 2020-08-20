@@ -438,6 +438,7 @@ public final class ContextConfig {
 	 */
 	public void setCron(String cron){
 		if(StringUtils.isBlank(cron)){
+			cronExpression = null; //允许置空
 			return;
 		}
 
@@ -473,7 +474,9 @@ public final class ContextConfig {
 	 * @param fixedRate
 	 */
 	public void setFixedRate(int fixedRate){
-		fixedRate = fixedRate > 0 ? fixedRate : 0;
+		if(fixedRate < 0){
+			throw new IllegalArgumentException("fixedRate cannot be less than 0");
+		}
 		valueMap.put(CONF_FIXEDRATE, String.valueOf(fixedRate));
 	}
 	
@@ -490,7 +493,9 @@ public final class ContextConfig {
 	 * @param fixedDelay
 	 */
 	public void setFixedDelay(int fixedDelay){
-		fixedDelay = fixedDelay > 0 ? fixedDelay : 0;
+		if(fixedDelay < 0){
+			throw new IllegalArgumentException("fixedDelay cannot be less than 0");
+		}
 		valueMap.put(CONF_FIXEDDELAY, String.valueOf(fixedDelay));
 	}
 
