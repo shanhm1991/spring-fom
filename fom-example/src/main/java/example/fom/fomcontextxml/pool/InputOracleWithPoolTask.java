@@ -17,7 +17,7 @@ import org.eto.fom.util.pool.handler.JdbcHandler;
  * @author shanhm
  *
  */
-public class InputOracleWithPoolTask extends ParseTextZipTask<Map<String, Object>> {
+public class InputOracleWithPoolTask extends ParseTextZipTask<Map<String, Object>, Boolean> {
 
 	private static final String POOL = "example_oracle";
 
@@ -55,5 +55,10 @@ public class InputOracleWithPoolTask extends ParseTextZipTask<Map<String, Object
 	@Override
 	public boolean matchEntryName(String entryName) {
 		return PatternUtil.match(pattern, entryName);
+	}
+
+	@Override
+	protected Boolean onParseComplete() throws Exception {
+		return true;
 	}
 }

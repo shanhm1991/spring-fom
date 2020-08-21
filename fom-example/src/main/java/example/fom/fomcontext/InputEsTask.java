@@ -17,7 +17,7 @@ import org.eto.fom.util.pool.handler.EsHandler;
  * @author shanhm
  *
  */
-public class InputEsTask extends ParseTextTask<Map<String, Object>> {
+public class InputEsTask extends ParseTextTask<Map<String, Object>, Boolean> {
 	
 	private static final String POOL = "example_es";
 	
@@ -68,6 +68,11 @@ public class InputEsTask extends ParseTextTask<Map<String, Object>> {
 		}
 		EsHandler.handler.bulkInsert(POOL, esIndex, esType, map); 
 		log.info("处理数据入库:" + map.size());
+	}
+
+	@Override
+	protected Boolean onTextComplete(String sourceUri, String sourceName) throws Exception {
+		return true;
 	}
 
 }

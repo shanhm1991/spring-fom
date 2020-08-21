@@ -17,7 +17,7 @@ import org.eto.fom.util.pool.handler.JdbcHandler;
  * @author shanhm
  *
  */
-public class InputMysqlWithPoolTask extends ParseExcelTask<Map<String, Object>> {
+public class InputMysqlWithPoolTask extends ParseExcelTask<Map<String, Object>, Boolean> {
 
 	private static final String POOL = "example_mysql";
 
@@ -53,6 +53,11 @@ public class InputMysqlWithPoolTask extends ParseExcelTask<Map<String, Object>> 
 	@Override
 	protected String getExcelType() {
 		return IExcelReader.EXCEL_XLSX;
+	}
+
+	@Override
+	protected Boolean onExcelComplete(String sourceUri, String sourceName) throws Exception {
+		return true;
 	}
 
 }

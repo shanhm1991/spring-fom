@@ -16,7 +16,7 @@ import example.fom.fomschedulbatch.mybatis.service.impl.InputMysqServiceImpl;
  * @author shanhm
  *
  */
-public class InputMysqlWithMybatisTask extends ParseTextTask<ExampleBean> {
+public class InputMysqlWithMybatisTask extends ParseTextTask<ExampleBean, Boolean> {
 	
 	private InputMysqServiceImpl service;
 	
@@ -42,6 +42,11 @@ public class InputMysqlWithMybatisTask extends ParseTextTask<ExampleBean> {
 	@Override
 	public void batchProcess(List<ExampleBean> lineDatas, long batchTime) throws Exception {
 		service.input(lineDatas);
+	}
+
+	@Override
+	protected Boolean onTextComplete(String sourceUri, String sourceName) throws Exception {
+		return true;
 	}
 
 }

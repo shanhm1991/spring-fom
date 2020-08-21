@@ -17,7 +17,7 @@ import example.fom.fomcontextxml.mybatis.service.InputOracleService;
  * @author shanhm
  *
  */
-public class InputOracleWithMybatisTask extends ParseTextZipTask<ExampleBean> {
+public class InputOracleWithMybatisTask extends ParseTextZipTask<ExampleBean, Boolean> {
 	
 	private final String pattern;
 	
@@ -51,6 +51,17 @@ public class InputOracleWithMybatisTask extends ParseTextZipTask<ExampleBean> {
 	@Override
 	public boolean matchEntryName(String entryName) {
 		return PatternUtil.match(pattern, entryName);
+	}
+
+	@Override
+	protected Boolean onParseComplete() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	protected Boolean onTextComplete(String sourceUri, String sourceName) throws Exception {
+		return true;
 	}
 	
 }

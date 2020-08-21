@@ -23,6 +23,21 @@
 					</compilerArguments>
 				</configuration>
 			</plugin>
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
+				<configuration>
+					<attach>true</attach>
+				</configuration>
+				<executions>
+					<execution>
+						<id>attach-source</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 

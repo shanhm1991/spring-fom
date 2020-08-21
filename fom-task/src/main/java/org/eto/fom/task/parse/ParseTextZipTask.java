@@ -36,11 +36,12 @@ import org.eto.fom.util.file.ZipUtil;
  * @see ParseTextTask
  * 
  * @param <V> 解析任务行数据解析结果类型
+ * @param <E> 任务执行结果类型
  * 
  * @author shanhm
  * 
  */
-public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
+public abstract class ParseTextZipTask<V, E> extends ParseTextTask<V, E> {
 
 	private File unzipDir;
 
@@ -73,7 +74,7 @@ public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
 	 * @param batch 批处理数
 	 * @param resultHandler ResultHandler
 	 */
-	public ParseTextZipTask(String sourceUri, int batch, ResultHandler<Boolean> resultHandler) {
+	public ParseTextZipTask(String sourceUri, int batch, ResultHandler<E> resultHandler) {
 		this(sourceUri, batch);
 		this.resultHandler = resultHandler;
 	}
@@ -85,7 +86,7 @@ public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
 	 * @param resultHandler ResultHandler
 	 */
 	public ParseTextZipTask(String sourceUri, int batch, 
-			ExceptionHandler exceptionHandler, ResultHandler<Boolean> resultHandler) {
+			ExceptionHandler exceptionHandler, ResultHandler<E> resultHandler) {
 		this(sourceUri, batch);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
@@ -189,12 +190,12 @@ public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
 	}
 
 	@Override
-	protected Boolean exec() throws Exception {
+	protected E exec() throws Exception {
 		return parseFiles();
 	}
 
 	@Override
-	protected boolean afterExec(Boolean execResult) throws Exception {
+	protected boolean afterExec(E execResult) throws Exception {
 		if(unzipDir.exists()){ 
 			File[] fileArray = unzipDir.listFiles();
 			if(!ArrayUtils.isEmpty(fileArray)){
@@ -273,7 +274,7 @@ public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
 		return true;
 	}
 
-	private boolean parseFiles() throws Exception {
+	private E parseFiles() throws Exception {
 		Iterator<String> it = matchedEntrys.iterator();
 		while(it.hasNext()){
 			long sTime = System.currentTimeMillis();
@@ -288,10 +289,20 @@ public abstract class ParseTextZipTask<V> extends ParseTextTask<V> {
 			log.info("finish file[{}({}KB)], cost={}ms", currentFileName, formatSize(getSourceSize(path)), System.currentTimeMillis() - sTime);
 			if(!file.delete()){ 
 				log.error("delete file failed: {}", currentFileName); 
-				return false;
+				throw new IllegalStateException("delete file failed: " + currentFileName);
 			}
 		}
-		return true;
+		return onParseComplete();
 	}
+	
+	@Override
+	protected E onTextComplete(String sourceUri, String sourceName) throws Exception {
+		return null;
+	}
+	
+	/**
+	 * zip解析完成时的动作
+	 */
+	protected abstract E onParseComplete() throws Exception;
 
 }
