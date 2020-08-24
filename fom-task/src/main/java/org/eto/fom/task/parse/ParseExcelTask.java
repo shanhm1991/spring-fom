@@ -282,7 +282,9 @@ public abstract class ParseExcelTask<V, E> extends ParseTask<V, E> {
 	protected abstract void batchProcess(List<V> batchData, long batchTime) throws Exception;
 
 	@Override
-	protected boolean afterExec(E execResult) throws Exception {
-		return deleteSource(id) && deleteProgressLog();
+	protected void afterExec(E execResult) throws Exception {
+		if(!(deleteSource(id) && deleteProgressLog())){
+			log.warn("clean failed.");
+		}
 	}
 }

@@ -117,12 +117,14 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		result.startTime = sTime;
 		result.createTime = this.createTime;
 
-		log.info("task started."); 
+		if(log.isDebugEnabled()){
+			log.debug("task started."); 
+		}
 		try {
 			result.success = beforeExec();
 			if(result.success){
 				result.content = exec();
-				result.success = afterExec(result.content);
+				afterExec(result.content);
 			}
 		} catch(Throwable e) {
 			log.error("", e); 
@@ -222,8 +224,8 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	 * @return isSuccess
 	 * @throws Exception Exception
 	 */
-	protected boolean afterExec(E e) throws Exception {
-		return true;
+	protected void afterExec(E e) throws Exception {
+		
 	}
 
 	/**

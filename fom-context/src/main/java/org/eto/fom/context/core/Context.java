@@ -81,7 +81,7 @@ public class Context<E> {
 	protected final ContextConfig config;
 
 	@Expose
-	protected Logger log;
+	protected final Logger log;
 
 	/**
 	 * 上次执行时间点
@@ -454,16 +454,16 @@ public class Context<E> {
 				}
 
 				if(nextTime > 0) {
-					long waitTime = nextTime - System.currentTimeMillis();
-					if(waitTime > 0){ 
-						switchState(SLEEPING);
-						synchronized (this) {
-							try {
+					long waitTime = 0;
+					try {
+						while((waitTime = nextTime - System.currentTimeMillis()) > 0){
+							switchState(SLEEPING);
+							synchronized (this) {
 								wait(waitTime);
-							} catch (InterruptedException e) {
-								//借助interrupted标记来中断睡眠，立即重新执行
 							}
 						}
+					} catch (InterruptedException e) {
+						//借助interrupted标记来中断睡眠，立即重新执行
 					}
 				}else{
 					synchronized(Context.this){
@@ -675,7 +675,9 @@ public class Context<E> {
 		}
 
 		FUTUREMAP.put(taskId, future); 
-		log.info("task[{}] created.", taskId); 
+		if(log.isDebugEnabled()){
+			log.debug("task[{}] created.", taskId); 
+		}
 		return future; 
 	}
 

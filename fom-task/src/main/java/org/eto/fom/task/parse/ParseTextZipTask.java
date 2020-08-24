@@ -195,31 +195,33 @@ public abstract class ParseTextZipTask<V, E> extends ParseTextTask<V, E> {
 	}
 
 	@Override
-	protected boolean afterExec(E execResult) throws Exception {
+	protected void afterExec(E execResult) throws Exception {
 		if(unzipDir.exists()){ 
 			File[] fileArray = unzipDir.listFiles();
 			if(!ArrayUtils.isEmpty(fileArray)){
 				for(File file : fileArray){
 					if(!file.delete()){
 						log.warn("clear temp file failed: {}", file.getName()); 
-						return false;
+						return;
 					}
 				}
 			}
+			
 			if(!unzipDir.delete()){
 				log.warn("clear temp directory failed."); 
-				return false;
+				return;
 			}
 		}
+		
 		//srcFile.exist = true
 		if(!deleteSource(id)){ 
 			log.warn("clear src file failed."); 
-			return false;
+			return;
 		}
+		
 		if(progressLog.exists() && !progressLog.delete()){
 			log.warn("clear progress log failed.");
 		}
-		return true;
 	}
 
 	/**

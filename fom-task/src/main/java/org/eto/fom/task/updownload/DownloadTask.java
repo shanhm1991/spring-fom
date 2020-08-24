@@ -155,19 +155,17 @@ public final class DownloadTask extends Task<Boolean> {
 	}
 
 	@Override
-	protected boolean afterExec(Boolean execResult) throws Exception {
+	protected void afterExec(Boolean execResult) throws Exception {
 		if(isWithTemp && downloadFile.exists() 
 				&& !downloadFile.renameTo(new File(destPath + File.separator + downloadFile.getName()))){
 			log.error("move file failed: {}", downloadFile.getName());
-			return false;
+			return;
 		}
 		if(isDelSrc){ 
 			int code = helper.delete(id);
 			if(code < SUCCESS_MIN || code > SUCCESS_MAX){
 				log.error("delete file failed: {}", id);
-				return false;
 			}
 		}
-		return true;
 	}
 }

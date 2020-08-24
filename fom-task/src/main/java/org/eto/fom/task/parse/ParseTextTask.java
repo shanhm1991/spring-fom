@@ -89,7 +89,7 @@ public abstract class ParseTextTask<V, E> extends ParseTask<V, E> {
 		if(!parentFile.exists() && !parentFile.mkdirs()){
 			throw new RuntimeException("cache directory create failed: " + parentFile);
 		}
-		
+
 		if(!progressLog.exists()){ 
 			if(!progressLog.createNewFile()){
 				log.error("progress log create failed.");
@@ -184,7 +184,7 @@ public abstract class ParseTextTask<V, E> extends ParseTask<V, E> {
 			IoUtil.close(reader);
 		}
 	}
-	
+
 	/**
 	 * 将行字段数据映射成对应的bean或者map
 	 * @param row row
@@ -210,7 +210,9 @@ public abstract class ParseTextTask<V, E> extends ParseTask<V, E> {
 	protected abstract E onTextComplete(String sourceUri, String sourceName) throws Exception;
 
 	@Override
-	protected boolean afterExec(E execResult) throws Exception {
-		return deleteSource(id) && deleteProgressLog();
+	protected void afterExec(E execResult) throws Exception {
+		if(!(deleteSource(id) && deleteProgressLog())){
+			log.warn("clean failed.");
+		}
 	}
 }

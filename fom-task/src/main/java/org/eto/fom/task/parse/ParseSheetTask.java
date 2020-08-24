@@ -187,9 +187,8 @@ public abstract class ParseSheetTask<E> extends ParseExcelTask<Map<String, Objec
 	}
 	
 	@Override
-	protected boolean afterExec(E execResult) throws Exception {
+	protected void afterExec(E execResult) throws Exception {
 		clean();
-		return true;
 	}
 
 	protected void clean() throws IOException { 
