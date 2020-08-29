@@ -12,7 +12,7 @@
 * fom-context: 相当于任务模块的上下文，负责创建和组织调度任务的执行；
 * fom-task: 一些文件处理的任务实现，比如Excel或者zip的解析（考虑了一些失败重试机制，比如进程重启）；
 * fom-util: 一些不依赖上下文的工具类，比如对Text、orc以及Excel的读取，适配了统一的Reader，使Excel的读取可以如文本文件一样简单；
-* fom-boot: 将fom的加载放到了springboot的启动过程中， 具体在spring组件加载完毕之后；
+* fom-boot: 将fom放到springboot的启动过程中加载；
 * fom-example: 一些使用示例
 
 ##使用

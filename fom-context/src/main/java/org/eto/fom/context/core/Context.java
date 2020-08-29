@@ -675,7 +675,7 @@ public class Context<E> {
 		}
 
 		FUTUREMAP.put(taskId, future); 
-		log.info("task[{}] created.", taskId); 
+		log.info("task[{}] submitted.", taskId); 
 		return future; 
 	}
 
@@ -722,7 +722,7 @@ public class Context<E> {
 			if(log.isDebugEnabled()){
 				String time = new SimpleDateFormat("yyyyMMdd HH:mm:ss").format(scheduleBatch.getBatchTime());
 				log.debug(scheduleBatch.getList().size() +  " tasks of " + s 
-						+ "[" + scheduleBatch.getBatch() + "] created on " + time  + " completed.");
+						+ "[" + scheduleBatch.getBatch() + "] submitted on " + time  + " completed.");
 			}
 			onScheduleComplete(scheduleBatch.getBatch(), scheduleBatch.getBatchTime(), scheduleBatch.getList());
 			scheduleBatch.countDownCaculate();

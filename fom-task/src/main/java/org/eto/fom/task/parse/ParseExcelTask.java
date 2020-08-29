@@ -178,8 +178,8 @@ public abstract class ParseExcelTask<V> extends ParseTask<V, Boolean> {
 					checkInterrupt();
 					int size = batchData.size();
 					batchProcess(batchData, batchTime); 
-					log.info("finish batch[file={}, sheet={}, size={}], cost={}ms",
-							sourceName, sheetName, size, System.currentTimeMillis() - batchTime);
+					log.info("finish batch[file={}, sheet={}, row={}, size={}], cost={}ms",
+							sourceName, sheetName, lineIndex, size, System.currentTimeMillis() - batchTime);
 					logProgress(sourceName, sheetIndex, sheetName, lineIndex, false); 
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
@@ -189,8 +189,8 @@ public abstract class ParseExcelTask<V> extends ParseTask<V, Boolean> {
 				checkInterrupt();
 				int size = batchData.size();
 				batchProcess(batchData, batchTime); 
-				log.info("finish batch[file={}, sheet={}, size={}], cost={}ms",
-						sourceName, sheetName, size, System.currentTimeMillis() - batchTime);
+				log.info("finish batch[file={}, sheet={}, row={}, size={}], cost={}ms",
+						sourceName, sheetName, lineIndex, size, System.currentTimeMillis() - batchTime);
 				logProgress(sourceName, sheetIndex, sheetName, lineIndex, false); 
 			}
 
@@ -222,10 +222,9 @@ public abstract class ParseExcelTask<V> extends ParseTask<V, Boolean> {
 	 * @param sheetName sheetName
 	 * @param row row
 	 * @param completed completed
-	 * @throws IOException IOException
-	 */
+	 * @throws IOException IOException TODO
+	 */ 
 	protected void logProgress(String file, int sheetIndex, String sheetName, long row, boolean completed) throws IOException {
-		log.info("process progress: file={},sheet={},row={},completed={}", file, sheetName, row, completed);
 		if(progressLog != null && progressLog.exists()){
 			FileUtils.writeStringToFile(progressLog, file + "\n" + sheetIndex + "\n" + row + "\n" + completed, false);
 		}
