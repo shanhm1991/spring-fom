@@ -28,11 +28,12 @@ import org.eto.fom.util.file.reader.IExcelReader;
  * <br>上述任何步骤失败或异常均会使任务提前失败结束
  * 
  * @param <V> 行数据解析结果类型
+ * @param <E> 任务执行结果类型
  * 
  * @author shanhm
  *
  */
-public abstract class ParseExcelTask<V> extends ParseTask<V, Boolean> {
+public abstract class ParseExcelTask<V, E> extends ParseTask<V, E> {
 
 	private boolean isBatchBySheet;
 
@@ -67,7 +68,7 @@ public abstract class ParseExcelTask<V> extends ParseTask<V, Boolean> {
 	 * @param isBatchBySheet isBatchBySheet
 	 * @param resultHandler ResultHandler
 	 */
-	public ParseExcelTask(String sourceUri, int batch, boolean isBatchBySheet, ResultHandler<Boolean> resultHandler) {
+	public ParseExcelTask(String sourceUri, int batch, boolean isBatchBySheet, ResultHandler<E> resultHandler) {
 		this(sourceUri, batch, isBatchBySheet);
 		this.resultHandler = resultHandler;
 	}
@@ -80,7 +81,7 @@ public abstract class ParseExcelTask<V> extends ParseTask<V, Boolean> {
 	 * @param resultHandler ResultHandler
 	 */
 	public ParseExcelTask(String sourceUri, int batch, boolean isBatchBySheet, 
-			ExceptionHandler exceptionHandler, ResultHandler<Boolean> resultHandler) {
+			ExceptionHandler exceptionHandler, ResultHandler<E> resultHandler) {
 		this(sourceUri, batch, isBatchBySheet);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
@@ -122,14 +123,14 @@ public abstract class ParseExcelTask<V> extends ParseTask<V, Boolean> {
 	}
 
 	@Override
-	protected Boolean exec() throws Exception {
+	protected E exec() throws Exception {
 		long sTime = System.currentTimeMillis();
-		parseExcel(id, getSourceName(id), rowIndex);
+		E e = parseExcel(id, getSourceName(id), rowIndex);
 		log.info("finish excel({}KB), cost={}ms", formatSize(getSourceSize(id)), System.currentTimeMillis() - sTime);
-		return true;
+		return e;
 	}
 
-	protected void parseExcel(String sourceUri, String sourceName, int lineIndex) throws Exception {
+	protected E parseExcel(String sourceUri, String sourceName, int lineIndex) throws Exception {
 		IExcelReader reader = null;
 		ExcelRow row = null;
 		String sheetName = null;
@@ -194,8 +195,9 @@ public abstract class ParseExcelTask<V> extends ParseTask<V, Boolean> {
 				logProgress(sourceName, sheetIndex, sheetName, lineIndex, false); 
 			}
 
-			onExcelComplete(sourceUri, sourceName);
+			E e = onExcelComplete(sourceUri, sourceName);
 			logProgress(sourceName, sheetIndex, sheetName, lineIndex, true); 
+			return e;
 		}finally{
 			IoUtil.close(reader);
 		}
@@ -211,9 +213,7 @@ public abstract class ParseExcelTask<V> extends ParseTask<V, Boolean> {
 	 * @param sourceName sourceName
 	 * @throws Exception Exception
 	 */
-	protected void onExcelComplete(String sourceUri, String sourceName) throws Exception {
-
-	}
+	protected abstract E onExcelComplete(String sourceUri, String sourceName) throws Exception;
 
 	/**
 	 * 纪录处理进度
@@ -281,7 +281,9 @@ public abstract class ParseExcelTask<V> extends ParseTask<V, Boolean> {
 	protected abstract void batchProcess(List<V> batchData, long batchTime) throws Exception;
 
 	@Override
-	protected boolean afterExec(Boolean execResult) throws Exception {
-		return deleteSource(id) && deleteProgressLog();
+	protected void afterExec(E execResult) throws Exception {
+		if(!(deleteSource(id) && deleteProgressLog())){
+			log.warn("clean failed.");
+		}
 	}
 }

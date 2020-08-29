@@ -25,11 +25,12 @@ import org.eto.fom.util.file.reader.IRow;
  * <br>上述任何步骤失败或异常均会使任务提前失败结束
  * 
  * @param <V> 解析任务行数据解析结果类型
+ * @param <E> 任务执行结果类型
  * 
  * @author shanhm
  *
  */
-public abstract class ParseTextTask<V> extends ParseTask<V, Boolean> {
+public abstract class ParseTextTask<V, E> extends ParseTask<V, E> {
 
 	private int rowIndex = 0;
 
@@ -56,7 +57,7 @@ public abstract class ParseTextTask<V> extends ParseTask<V, Boolean> {
 	 * @param batch 入库时的批处理数
 	 * @param resultHandler ResultHandler
 	 */
-	public ParseTextTask(String sourceUri, int batch, ResultHandler<Boolean> resultHandler) {
+	public ParseTextTask(String sourceUri, int batch, ResultHandler<E> resultHandler) {
 		this(sourceUri, batch);
 		this.resultHandler = resultHandler;
 	}
@@ -68,7 +69,7 @@ public abstract class ParseTextTask<V> extends ParseTask<V, Boolean> {
 	 * @param resultHandler ResultHandler
 	 */
 	public ParseTextTask(String sourceUri, int batch, 
-			ExceptionHandler exceptionHandler, ResultHandler<Boolean> resultHandler) {
+			ExceptionHandler exceptionHandler, ResultHandler<E> resultHandler) {
 		this(sourceUri, batch);
 		this.exceptionHandler = exceptionHandler;
 		this.resultHandler = resultHandler;
@@ -88,7 +89,7 @@ public abstract class ParseTextTask<V> extends ParseTask<V, Boolean> {
 		if(!parentFile.exists() && !parentFile.mkdirs()){
 			throw new RuntimeException("cache directory create failed: " + parentFile);
 		}
-		
+
 		if(!progressLog.exists()){ 
 			if(!progressLog.createNewFile()){
 				log.error("progress log create failed.");
@@ -108,11 +109,11 @@ public abstract class ParseTextTask<V> extends ParseTask<V, Boolean> {
 	}
 
 	@Override
-	protected Boolean exec() throws Exception {
+	protected E exec() throws Exception {
 		long sTime = System.currentTimeMillis();
-		parseTxt(id, getSourceName(id), rowIndex);
+		E e = parseTxt(id, getSourceName(id), rowIndex);
 		log.info("finish file({}KB), cost={}ms", formatSize(getSourceSize(id)), System.currentTimeMillis() - sTime);
-		return true;
+		return e;
 	}
 
 	/**
@@ -137,7 +138,7 @@ public abstract class ParseTextTask<V> extends ParseTask<V, Boolean> {
 	 */
 	protected abstract IReader getReader(String sourceUri) throws Exception;
 
-	protected void parseTxt(String sourceUri, String sourceName, int lineIndex) throws Exception {
+	protected E parseTxt(String sourceUri, String sourceName, int lineIndex) throws Exception {
 		IReader reader = null;
 		IRow row = null;
 		long batchTime = System.currentTimeMillis();
@@ -176,13 +177,14 @@ public abstract class ParseTextTask<V> extends ParseTask<V, Boolean> {
 				logProgress(sourceName, lineIndex, false);
 			}
 
-			onTextComplete(sourceUri, sourceName);
+			E e = onTextComplete(sourceUri, sourceName);
 			logProgress(sourceName, lineIndex, true);
+			return e;
 		}finally{
 			IoUtil.close(reader);
 		}
 	}
-	
+
 	/**
 	 * 将行字段数据映射成对应的bean或者map
 	 * @param row row
@@ -205,12 +207,12 @@ public abstract class ParseTextTask<V> extends ParseTask<V, Boolean> {
 	 * @param sourceUri sourceUri
 	 * @param sourceName sourceName
 	 */
-	protected void onTextComplete(String sourceUri, String sourceName) throws Exception {
-
-	}
+	protected abstract E onTextComplete(String sourceUri, String sourceName) throws Exception;
 
 	@Override
-	protected boolean afterExec(Boolean execResult) throws Exception {
-		return deleteSource(id) && deleteProgressLog();
+	protected void afterExec(E execResult) throws Exception {
+		if(!(deleteSource(id) && deleteProgressLog())){
+			log.warn("clean failed.");
+		}
 	}
 }

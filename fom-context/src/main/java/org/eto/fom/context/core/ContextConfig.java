@@ -4,7 +4,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -455,7 +454,7 @@ public final class ContextConfig {
 		}
 		
 		if(cronExpression == null
-				|| !(cronExpression.getCronExpression().equals(cron.toUpperCase(Locale.US)))){
+				|| !(cronExpression.getCronExpression().equals(cron))){
 			valueMap.put(CONF_CRON, cron);
 			cronExpression = c;
 		}

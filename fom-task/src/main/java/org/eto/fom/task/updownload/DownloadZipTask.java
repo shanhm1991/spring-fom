@@ -184,23 +184,21 @@ public class DownloadZipTask extends Task<Boolean> {
 	}
 
 	@Override
-	protected boolean afterExec(Boolean execResult) throws Exception {
+	protected void afterExec(Boolean execResult) throws Exception {
 		File tempDir = new File(cachePath);
 		File[] files = tempDir.listFiles();
 		if(ArrayUtils.isEmpty(files)){
-			return true;
+			return;
 		}
 		for(File f : files){
 			if(!f.renameTo(new File(destPath + File.separator + f.getName()))){
 				log.error("file move failed: {}", f.getName());
-				return false;
+				return;
 			}
 		}
 		if(!tempDir.delete()){
 			log.error("directory delete failed: {}", cachePath);
-			return false;
 		}
-		return true;
 	}
 
 	private boolean downloadIntoZip() throws Exception { 

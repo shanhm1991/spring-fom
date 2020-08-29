@@ -35,8 +35,10 @@ import org.eto.fom.util.file.reader.IExcelReader;
  * 
  * @author shanhm
  * 
+ * @param <E> 任务执行结果类型
+ * 
  */
-public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>> {
+public abstract class ParseSheetTask<E> extends ParseExcelTask<Map<String, Object>, E> {
 	
 	//<sheetName, <columnIndex, columName>>
 	private Map<String, LinkedHashMap<Integer,String>> columnIndexMap = new HashMap<>();
@@ -125,7 +127,9 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 		log.info("finish unzip({}KB), cost={}ms", size, cost);
 	}
 
-	protected abstract void initSheetHander(Map<String, SheetHandler> handlerMap);
+	protected void initSheetHander(Map<String, SheetHandler> handlerMap) {
+		
+	}
 
 	protected void initExcelRule() throws DocumentException, FileNotFoundException {  
 		if(StringUtils.isBlank(excelRule)){ //可以手动赋值excelRule或者将excelRule放在context的config中
@@ -183,9 +187,8 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 	}
 	
 	@Override
-	protected boolean afterExec(Boolean execResult) throws Exception {
+	protected void afterExec(E execResult) throws Exception {
 		clean();
-		return true;
 	}
 
 	protected void clean() throws IOException { 
@@ -358,7 +361,7 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 	}
 
 	@Override
-	protected final void onExcelComplete(String sourceUri, String sourceName) throws Exception {
+	protected final E onExcelComplete(String sourceUri, String sourceName) throws Exception {
 		Set<String> parsedSheet = excelData.keySet();
 		List<String> list = new ArrayList<>(necessarySheet.size());
 		for(String name : necessarySheet){
@@ -370,10 +373,10 @@ public abstract class ParseSheetTask extends ParseExcelTask<Map<String, Object>>
 			throw new IllegalArgumentException("缺少sheet数据:" + list);  
 		}
 
-		handlerData(excelData);
+		return handlerData(excelData);
 	}
 
-	protected abstract void handlerData(Map<String, Collection<Map<String, Object>>> excelData);
+	protected abstract E handlerData(Map<String, Collection<Map<String, Object>>> excelData) throws Exception;
 
 	@Override
 	protected boolean sheetFilter(int sheetIndex, String sheetName) { 

@@ -120,12 +120,10 @@ public class UploadTask extends Task<Boolean> {
 	}
 	
 	@Override
-	protected boolean afterExec(Boolean execResult) throws Exception {
+	protected void afterExec(Boolean execResult) throws Exception {
 		if(isDelSrc && !file.delete()){
 			log.warn("delete file failed.");
-			return false;
 		}
-		return true;
 	}
 	
 }
