@@ -4,8 +4,6 @@ import java.io.File;
 import java.text.DecimalFormat;
 
 import org.apache.commons.lang.StringUtils;
-import org.eto.fom.context.core.ExceptionHandler;
-import org.eto.fom.context.core.ResultHandler;
 import org.eto.fom.context.core.Task;
 import org.eto.fom.task.updownload.helper.UploadHelper;
 
@@ -54,47 +52,6 @@ public class UploadTask extends Task<Boolean> {
 		this.helper = helper;
 	}
 	
-	/**
-	 * @param sourceUri sourceUri
-	 * @param destUri destUri
-	 * @param isDelSrc isDelSrc
-	 * @param helper UploaderHelper
-	 * @param exceptionHandler ExceptionHandler
-	 */
-	public UploadTask(String sourceUri, String destUri, 
-			boolean isDelSrc, UploadHelper helper, ExceptionHandler exceptionHandler) {
-		this(sourceUri, destUri, isDelSrc, helper);
-		this.exceptionHandler = exceptionHandler;
-	}
-	
-	/**
-	 * @param sourceUri sourceUri
-	 * @param destUri destUri
-	 * @param isDelSrc isDelSrc
-	 * @param helper UploaderHelper
-	 * @param resultHandler ResultHandler
-	 */
-	public UploadTask(String sourceUri, String destUri, 
-			boolean isDelSrc, UploadHelper helper, ResultHandler<Boolean> resultHandler) {
-		this(sourceUri, destUri, isDelSrc, helper);
-		this.resultHandler = resultHandler;
-	}
-
-	/**
-	 * @param sourceUri sourceUri
-	 * @param destUri destUri
-	 * @param isDelSrc isDelSrc
-	 * @param helper UploaderHelper
-	 * @param exceptionHandler ExceptionHandler
-	 * @param resultHandler ResultHandler
-	 */
-	public UploadTask(String sourceUri, String destUri, 
-			boolean isDelSrc, UploadHelper helper, ExceptionHandler exceptionHandler, ResultHandler<Boolean> resultHandler) {
-		this(sourceUri, destUri, isDelSrc, helper);
-		this.exceptionHandler = exceptionHandler;
-		this.resultHandler = resultHandler;
-	}
-	
 	@Override
 	protected boolean beforeExec() throws Exception {
 		if(!file.exists()){
@@ -120,7 +77,7 @@ public class UploadTask extends Task<Boolean> {
 	}
 	
 	@Override
-	protected void afterExec(Boolean execResult) throws Exception {
+	protected void afterExec(boolean isExecSuccess, Boolean content, Throwable e) throws Exception {
 		if(isDelSrc && !file.delete()){
 			log.warn("delete file failed.");
 		}

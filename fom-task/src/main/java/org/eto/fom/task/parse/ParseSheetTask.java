@@ -99,7 +99,7 @@ public abstract class ParseSheetTask<E> extends ParseExcelTask<Map<String, Objec
 				+ File.separator + getName() + File.separator + sourceName);
 		if(!zipWorkHome.mkdirs()){
 			log.error("directory create failed: {}", zipWorkHome);
-			throw new IllegalArgumentException("解压目录创建失败," + zipWorkHome);
+			throw new IllegalArgumentException("directory creat failed: " + zipWorkHome);
 		}
 
 		unzip(new File(sourceUri), zipWorkHome);
@@ -111,7 +111,7 @@ public abstract class ParseSheetTask<E> extends ParseExcelTask<Map<String, Objec
 			}
 		});
 		if(array == null || array.length != 1  ){
-			throw new IllegalArgumentException("zip文件不合法，Excel(.xlsx)文件有且仅能有一个)");
+			throw new IllegalArgumentException("invalid zip: Excel(.xlsx) can only be one)");
 		}
 		return array[0];
 	}
@@ -119,7 +119,7 @@ public abstract class ParseSheetTask<E> extends ParseExcelTask<Map<String, Objec
 	protected void unzip(File zip, File unzipPath) throws Exception{
 		if(!ZipUtil.valid(sourceUri)){ 
 			log.error("invalid zip."); 
-			throw new IllegalArgumentException("非法zip.");
+			throw new IllegalArgumentException("invalid zip");
 		}
 		
 		long cost = ZipUtil.unZip(zip, unzipPath);
@@ -139,18 +139,18 @@ public abstract class ParseSheetTask<E> extends ParseExcelTask<Map<String, Objec
 		}
 		
 		if(StringUtils.isBlank(excelRule)){
-			throw new IllegalArgumentException("没有配置excel解析规则：excelRule");
+			throw new IllegalArgumentException("configuration of Excel not found.");
 		}
 		
 		File ruleXml = new File(excelRule);
 		if(!ruleXml.exists()){
 			ruleXml = new File(System.getProperty("webapp.root") + excelRule);
 			if(!ruleXml.exists()){
-				throw new IllegalArgumentException("未发现excel解析规则, target=" + excelRule);
+				throw new IllegalArgumentException("configuration of Excel not found, target=" + excelRule);
 			}
 		}
 
-		log.info("加载Excel解析规则, target=" + excelRule);
+		log.info("load configuration of Excel, target=" + excelRule);
 		SAXReader reader = new SAXReader();
 		reader.setEncoding("UTF-8");
 		Document doc = reader.read(new FileInputStream(ruleXml));
@@ -187,7 +187,7 @@ public abstract class ParseSheetTask<E> extends ParseExcelTask<Map<String, Objec
 	}
 	
 	@Override
-	protected void afterExec(E execResult) throws Exception {
+	protected void afterExec(boolean isExecSuccess, E content, Throwable e) throws Exception {
 		clean();
 	}
 
@@ -274,13 +274,13 @@ public abstract class ParseSheetTask<E> extends ParseExcelTask<Map<String, Objec
 					columnValue = defaultValue;
 				}else if("true".equals(notNull)){ 
 					throw new IllegalArgumentException(
-							buildError("字段不能为空", sheet, row.getRowIndex(), columnName));
+							buildError("columnValue cannot be null", sheet, row.getRowIndex(), columnName));
 				}
 			}
 
 			if(!PatternUtil.match(pattern, columnValue)){
 				throw new IllegalArgumentException(
-						buildError("数据验证失败", sheet, row.getRowIndex(), columnName));
+						buildError("invalid columnValue", sheet, row.getRowIndex(), columnName));
 			}
 			parseValue(columnValue, type, field, data, columnName);
 		}
@@ -301,11 +301,11 @@ public abstract class ParseSheetTask<E> extends ParseExcelTask<Map<String, Objec
 			String notNull = map.get("notnull"); 
 			if("true".equals(notNull)){ 
 				throw new IllegalArgumentException(
-						buildError("字段不能为空", sheet, row.getRowIndex(), entry.getKey()));
+						buildError("columnValue cannot be null", sheet, row.getRowIndex(), entry.getKey()));
 			}
 			if(!PatternUtil.match(pattern, defaultValue)){
 				throw new IllegalArgumentException(
-						buildError("数据验证失败", sheet, row.getRowIndex(), entry.getKey()));
+						buildError("invalid columnValue", sheet, row.getRowIndex(), entry.getKey()));
 			}
 			parseValue(defaultValue, type, field, data, entry.getKey());
 		}
@@ -321,7 +321,7 @@ public abstract class ParseSheetTask<E> extends ParseExcelTask<Map<String, Objec
 				continue;
 			}
 			if(!indexMap.containsValue(column)){ 
-				throw new IllegalArgumentException("缺少column数据:" + column + ", sheet=" + sheetName);
+				throw new IllegalArgumentException("column not found:" + column + ", sheet=" + sheetName);
 			}
 		}
 	}
@@ -370,7 +370,7 @@ public abstract class ParseSheetTask<E> extends ParseExcelTask<Map<String, Objec
 			}
 		}
 		if(!list.isEmpty()){
-			throw new IllegalArgumentException("缺少sheet数据:" + list);  
+			throw new IllegalArgumentException("sheet not found:" + list);  
 		}
 
 		return handlerData(excelData);

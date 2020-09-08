@@ -8,8 +8,6 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eto.fom.context.core.ExceptionHandler;
-import org.eto.fom.context.core.ResultHandler;
 import org.eto.fom.util.file.ZipUtil;
 
 /**
@@ -57,39 +55,6 @@ public abstract class ParseTextZipTask<V, E> extends ParseTextTask<V, E> {
 	 */
 	public ParseTextZipTask(String sourceUri, int batch) {
 		super(sourceUri, batch);
-	}
-
-	/**
-	 * @param sourceUri 资源uri
-	 * @param batch 批处理数
-	 * @param exceptionHandler ExceptionHandler
-	 */
-	public ParseTextZipTask(String sourceUri, int batch, ExceptionHandler exceptionHandler) { 
-		this(sourceUri, batch);
-		this.exceptionHandler = exceptionHandler;
-	}
-
-	/**
-	 * @param sourceUri 资源uri
-	 * @param batch 批处理数
-	 * @param resultHandler ResultHandler
-	 */
-	public ParseTextZipTask(String sourceUri, int batch, ResultHandler<E> resultHandler) {
-		this(sourceUri, batch);
-		this.resultHandler = resultHandler;
-	}
-
-	/**
-	 * @param sourceUri 资源uri
-	 * @param batch 批处理数
-	 * @param exceptionHandler ExceptionHandler
-	 * @param resultHandler ResultHandler
-	 */
-	public ParseTextZipTask(String sourceUri, int batch, 
-			ExceptionHandler exceptionHandler, ResultHandler<E> resultHandler) {
-		this(sourceUri, batch);
-		this.exceptionHandler = exceptionHandler;
-		this.resultHandler = resultHandler;
 	}
 
 	@Override
@@ -195,7 +160,7 @@ public abstract class ParseTextZipTask<V, E> extends ParseTextTask<V, E> {
 	}
 
 	@Override
-	protected void afterExec(E execResult) throws Exception {
+	protected void afterExec(boolean isExecSuccess, E content, Throwable e) throws Exception {
 		if(unzipDir.exists()){ 
 			File[] fileArray = unzipDir.listFiles();
 			if(!ArrayUtils.isEmpty(fileArray)){

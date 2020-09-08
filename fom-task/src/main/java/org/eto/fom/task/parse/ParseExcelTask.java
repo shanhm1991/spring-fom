@@ -8,9 +8,6 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eto.fom.context.core.ExceptionHandler;
-import org.eto.fom.context.core.ResultHandler;
-import org.eto.fom.util.IoUtil;
 import org.eto.fom.util.file.reader.ExcelEventReader;
 import org.eto.fom.util.file.reader.ExcelRow;
 import org.eto.fom.util.file.reader.ExcelSheetFilter;
@@ -51,42 +48,6 @@ public abstract class ParseExcelTask<V, E> extends ParseTask<V, E> {
 		this.isBatchBySheet = isBatchBySheet;
 	}
 
-	/**
-	 * @param sourceUri 资源uri
-	 * @param batch 入库时的批处理数
-	 * @param isBatchBySheet isBatchBySheet
-	 * @param exceptionHandler ExceptionHandler
-	 */
-	public ParseExcelTask(String sourceUri, int batch, boolean isBatchBySheet, ExceptionHandler exceptionHandler) {
-		this(sourceUri, batch, isBatchBySheet);
-		this.exceptionHandler = exceptionHandler;
-	}
-
-	/**
-	 * @param sourceUri 资源uri
-	 * @param batch 入库时的批处理数
-	 * @param isBatchBySheet isBatchBySheet
-	 * @param resultHandler ResultHandler
-	 */
-	public ParseExcelTask(String sourceUri, int batch, boolean isBatchBySheet, ResultHandler<E> resultHandler) {
-		this(sourceUri, batch, isBatchBySheet);
-		this.resultHandler = resultHandler;
-	}
-
-	/**
-	 * @param sourceUri 资源uri
-	 * @param batch 入库时的批处理数
-	 * @param isBatchBySheet isBatchBySheet
-	 * @param exceptionHandler ExceptionHandler
-	 * @param resultHandler ResultHandler
-	 */
-	public ParseExcelTask(String sourceUri, int batch, boolean isBatchBySheet, 
-			ExceptionHandler exceptionHandler, ResultHandler<E> resultHandler) {
-		this(sourceUri, batch, isBatchBySheet);
-		this.exceptionHandler = exceptionHandler;
-		this.resultHandler = resultHandler;
-	}
-
 	@Override
 	protected boolean beforeExec() throws Exception { 
 		String logName = new File(id).getName();
@@ -101,7 +62,7 @@ public abstract class ParseExcelTask<V, E> extends ParseTask<V, E> {
 		if(!parentFile.exists() && !parentFile.mkdirs()){
 			throw new RuntimeException("cache directory create failed: " + parentFile);
 		}
-		
+
 		if(!progressLog.exists()){ 
 			if(!progressLog.createNewFile()){
 				log.error("progress log create failed.");
@@ -124,33 +85,29 @@ public abstract class ParseExcelTask<V, E> extends ParseTask<V, E> {
 
 	@Override
 	protected E exec() throws Exception {
-		long sTime = System.currentTimeMillis();
-		E e = parseExcel(id, getSourceName(id), rowIndex);
-		log.info("finish excel({}KB), cost={}ms", formatSize(getSourceSize(id)), System.currentTimeMillis() - sTime);
-		return e;
+		return parseExcel(id, getSourceName(id), rowIndex);
 	}
 
 	protected E parseExcel(String sourceUri, String sourceName, int lineIndex) throws Exception {
-		IExcelReader reader = null;
-		ExcelRow row = null;
-		String sheetName = null;
-		try{
-			reader = getExcelReader(sourceUri);
+		long execTime = System.currentTimeMillis();
+		try(IExcelReader reader = getExcelReader(sourceUri)){
 			reader.setSheetFilter(new ExcelSheetFilter() {
 				@Override
 				public void resetSheetListForRead(List<String> nameList) {
 					ParseExcelTask.this.reRangeSheet(nameList);
 				}
-				
+
 				@Override
 				public boolean filter(int sheetIndex2, String sheetName) {
 					return sheetIndex2 >= ParseExcelTask.this.sheetIndex
 							&& ParseExcelTask.this.sheetFilter(sheetIndex2, sheetName); 
 				}
 			});
-			
+
 			List<V> batchData = new LinkedList<>(); 
 			long batchTime = System.currentTimeMillis();
+			ExcelRow row = null;
+			String sheetName = null;
 			while ((row = reader.readRow()) != null) {
 				if(sheetIndex < row.getSheetIndex()){
 					sheetIndex = row.getSheetIndex();
@@ -195,14 +152,12 @@ public abstract class ParseExcelTask<V, E> extends ParseTask<V, E> {
 				logProgress(sourceName, sheetIndex, sheetName, lineIndex, false); 
 			}
 
-			E e = onExcelComplete(sourceUri, sourceName);
+			log.info("finish excel({}KB), cost={}ms", formatSize(getSourceSize(id)), System.currentTimeMillis() - execTime);
 			logProgress(sourceName, sheetIndex, sheetName, lineIndex, true); 
-			return e;
-		}finally{
-			IoUtil.close(reader);
+			return onExcelComplete(sourceUri, sourceName);
 		}
 	}
-	
+
 	protected IExcelReader getExcelReader(String sourceUri) throws Exception {
 		return new ExcelEventReader(getExcelInputStream(sourceUri), IExcelReader.EXCEL_XLSX);
 	}
@@ -222,7 +177,7 @@ public abstract class ParseExcelTask<V, E> extends ParseTask<V, E> {
 	 * @param sheetName sheetName
 	 * @param row row
 	 * @param completed completed
-	 * @throws IOException IOException TODO
+	 * @throws IOException IOException 
 	 */ 
 	protected void logProgress(String file, int sheetIndex, String sheetName, long row, boolean completed) throws IOException {
 		if(progressLog != null && progressLog.exists()){
@@ -281,7 +236,7 @@ public abstract class ParseExcelTask<V, E> extends ParseTask<V, E> {
 	protected abstract void batchProcess(List<V> batchData, long batchTime) throws Exception;
 
 	@Override
-	protected void afterExec(E execResult) throws Exception {
+	protected void afterExec(boolean isExecSuccess, E content, Throwable e) throws Exception {
 		if(!(deleteSource(id) && deleteProgressLog())){
 			log.warn("clean failed.");
 		}

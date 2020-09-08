@@ -79,8 +79,16 @@ class ContextStatistics {
 		allCostMap.put(COSTLEVEL_5, new AtomicLong(0));
 		allCostMap.put(COSTMAX, new AtomicLong(0));
 	}
+	
+	public void statistics(Result<?> result){
+		if(result.isSuccess()){
+			successIncrease(result.getTaskId(), result.getCostTime(), result.getCreateTime(), result.getStartTime());
+		}else{
+			failedIncrease(result.getTaskId(), result); 
+		}
+	}
 
-	public void successIncrease(String taskId, long cost, long createTime, long startTime){
+	private void successIncrease(String taskId, long cost, long createTime, long startTime){
 		if(cost < COSTLEVEL_1){
 			allCostMap.get(COSTLEVEL_1).incrementAndGet();
 		}else if(cost < COSTLEVEL_2){
@@ -136,7 +144,7 @@ class ContextStatistics {
 		}
 	}
 
-	public void failedIncrease(String taskId, Result<?> result){
+	private void failedIncrease(String taskId, Result<?> result){
 		failedMap.put(taskId, result);
 		failedCount.incrementAndGet();
 	}

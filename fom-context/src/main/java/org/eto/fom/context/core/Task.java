@@ -8,8 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 任务
- * <br>Callable的抽象实现，在context中作为最小执行单位，也可以单独创建调用或者提交线程池
+ * 任务的抽象实现，在context中作为最小执行单位，也可以单独创建调用或者提交线程池
  * 
  * @param <E> 任务执行结果类型
  * 
@@ -32,16 +31,6 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	protected final String id;
 
 	/**
-	 * 异常处理器
-	 */
-	protected ExceptionHandler exceptionHandler;
-
-	/**
-	 * 结果处理器
-	 */
-	protected ResultHandler<E> resultHandler;
-
-	/**
 	 * 批任务执行状态，提交线程设置
 	 */
 	volatile ScheduleBatch<E> scheduleBatch;
@@ -52,59 +41,12 @@ public abstract class Task<E> implements Callable<Result<E>> {
 
 	private volatile long startTime;
 
-	private boolean isResultHandler = false;
-
 	/**
 	 * @param id Task唯一标识
 	 */
 	public Task(String id) { 
 		this.id = id;
 		this.createTime = System.currentTimeMillis();
-	}
-
-	/**
-	 * @param id 唯一标识
-	 * @param exceptionHandler 异常处理器
-	 */
-	public Task(String id, ExceptionHandler exceptionHandler) { 
-		this(id);
-		this.exceptionHandler = exceptionHandler;
-	}
-
-	/**
-	 * @param id 唯一标识
-	 * @param resultHandler 结果处理器
-	 */
-	public Task(String id, ResultHandler<E> resultHandler) { 
-		this(id);
-		this.resultHandler = resultHandler;
-	}
-
-	/**
-	 * @param id 唯一标识
-	 * @param exceptionHandler 异常处理器
-	 * @param resultHandler 结果处理器
-	 */
-	public Task(String id, ExceptionHandler exceptionHandler, ResultHandler<E> resultHandler) { 
-		this(id);
-		this.exceptionHandler = exceptionHandler;
-		this.resultHandler = resultHandler;
-	}
-
-	/**
-	 * 设置异常处理器
-	 * @param exceptionHandler exceptionHandler
-	 */
-	public void setExceptionHandler(ExceptionHandler exceptionHandler) {
-		this.exceptionHandler = exceptionHandler;
-	}
-
-	/**
-	 * 结果处理器
-	 * @param resultHandler resultHandler
-	 */
-	public void setResultHandler(ResultHandler<E> resultHandler) {
-		this.resultHandler = resultHandler;
 	}
 
 	@Override
@@ -124,82 +66,37 @@ public abstract class Task<E> implements Callable<Result<E>> {
 			result.success = beforeExec();
 			if(result.success){
 				result.content = exec();
-				afterExec(result.content);
 			}
 		} catch(Throwable e) {
 			log.error("", e); 
 			result.success = false;
 			result.throwable = e;
-			if(exceptionHandler != null){
-				exceptionHandler.handle(e); 
+		} finally{
+			try {
+				afterExec(result.success, result.content, result.throwable);
+			}catch(Throwable e) {
+				log.error("", e); 
+				result.success = false;
+				result.throwable = e; // exec的throwable已经交给afterExec处理过，所以这里覆盖掉也能接受
 			}
 		}
 		result.costTime = System.currentTimeMillis() - sTime;
-
+		
 		if(context != null){
-			// ResultHandler也算在统计内
-			if(result.success){
-				context.statistics.successIncrease(id, result.costTime, this.createTime, this.startTime); 
-				log.info("task success, cost={}ms", result.costTime);
-			}else{
-				context.statistics.failedIncrease(id, result);
-				log.warn("task failed, cost={}ms", result.costTime);
-			}
-
-			if(!isResultHandler && scheduleBatch != null){
+			if(scheduleBatch != null){
 				scheduleBatch.addResult(result); 
 				context.checkScheduleComplete(scheduleBatch);
 			}
-
+			context.statistics.statistics(result); 
+		}
+		
+		if(result.success){
+			log.info("task success, cost={}ms {}", result.costTime, result.content);
 		}else{
-			if(result.success){
-				log.info("task success, cost={}ms", result.costTime);
-			}else{
-				log.warn("task failed, cost={}ms", result.costTime);
-			}
+			log.warn("task failed, cost={}ms {}", result.costTime, result.content);
 		}
-
-		if(!isResultHandler){
-			try {
-				handleResult(result); 
-			} catch (Exception e) {
-				log.error("", e);
-			} 
-		}
+		
 		return result;
-	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void handleResult(Result<E> result) throws Exception{
-		if(resultHandler == null){
-			return;
-		}
-
-		final Result<E> res = result.clone(); //result交接
-		String tid = id + "-resultHandler";
-		if(context == null){
-			Thread t = new Thread(tid){
-				@Override
-				public void run() {
-					try {
-						resultHandler.handle(res);
-					} catch (Exception e) {
-						log.error("", e);
-					}
-				};
-			};
-			t.start();
-		}else{
-			Task task = new Task(tid){
-				@Override
-				protected Object exec() throws Exception {
-					Task.this.resultHandler.handle(res);
-					return null;
-				}
-			};
-			task.isResultHandler = true;
-			context.submit(task); 
-		}
 	}
 
 	/**
@@ -220,12 +117,13 @@ public abstract class Task<E> implements Callable<Result<E>> {
 
 	/**
 	 * 任务执行后的工作
-	 * @param e exec返回结果
-	 * @return isSuccess
-	 * @throws Exception Exception
+	 * @param isExecSuccess exec是否成功
+	 * @param content exec执行结果
+	 * @param e exec抛出异常
+	 * @throws Exception
 	 */
-	protected void afterExec(E e) throws Exception {
-		
+	protected void afterExec(boolean isExecSuccess,  E content, Throwable e) throws Exception {
+
 	}
 
 	/**

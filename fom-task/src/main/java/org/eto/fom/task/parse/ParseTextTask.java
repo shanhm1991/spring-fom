@@ -7,8 +7,6 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eto.fom.context.core.ExceptionHandler;
-import org.eto.fom.context.core.ResultHandler;
 import org.eto.fom.util.IoUtil;
 import org.eto.fom.util.file.reader.IReader;
 import org.eto.fom.util.file.reader.IRow;
@@ -40,39 +38,6 @@ public abstract class ParseTextTask<V, E> extends ParseTask<V, E> {
 	 */
 	public ParseTextTask(String sourceUri, int batch){
 		super(sourceUri, batch);
-	}
-
-	/**
-	 * @param sourceUri 资源uri
-	 * @param batch 入库时的批处理数
-	 * @param exceptionHandler ExceptionHandler
-	 */
-	public ParseTextTask(String sourceUri, int batch, ExceptionHandler exceptionHandler) {
-		this(sourceUri, batch);
-		this.exceptionHandler = exceptionHandler;
-	}
-
-	/**
-	 * @param sourceUri 资源uri
-	 * @param batch 入库时的批处理数
-	 * @param resultHandler ResultHandler
-	 */
-	public ParseTextTask(String sourceUri, int batch, ResultHandler<E> resultHandler) {
-		this(sourceUri, batch);
-		this.resultHandler = resultHandler;
-	}
-
-	/**
-	 * @param sourceUri 资源uri
-	 * @param batch 入库时的批处理数
-	 * @param exceptionHandler ExceptionHandler
-	 * @param resultHandler ResultHandler
-	 */
-	public ParseTextTask(String sourceUri, int batch, 
-			ExceptionHandler exceptionHandler, ResultHandler<E> resultHandler) {
-		this(sourceUri, batch);
-		this.exceptionHandler = exceptionHandler;
-		this.resultHandler = resultHandler;
 	}
 
 	@Override
@@ -124,7 +89,6 @@ public abstract class ParseTextTask<V, E> extends ParseTask<V, E> {
 	 * @throws IOException IOException
 	 */
 	protected void logProgress(String file, long row, boolean completed) throws IOException {
-		log.info("process progress: file={},row={},completed={}", file, row, completed);
 		if(progressLog != null && progressLog.exists()){
 			FileUtils.writeStringToFile(progressLog, file + "\n" + row + "\n" + completed, false);
 		}
@@ -163,7 +127,7 @@ public abstract class ParseTextTask<V, E> extends ParseTask<V, E> {
 					checkInterrupt();
 					int size = batchData.size();
 					batchProcess(batchData, batchTime); 
-					log.info("finish batch[file={}, size={}], cost={}ms", sourceName, size, System.currentTimeMillis() - batchTime);
+					log.info("finish batch[file={}, row={}, size={}], cost={}ms", sourceName, lineIndex, size, System.currentTimeMillis() - batchTime);
 					logProgress(sourceName, lineIndex, false);
 					batchData.clear();
 					batchTime = System.currentTimeMillis();
@@ -173,7 +137,7 @@ public abstract class ParseTextTask<V, E> extends ParseTask<V, E> {
 				checkInterrupt();
 				int size = batchData.size();
 				batchProcess(batchData, batchTime);  
-				log.info("finish batch[file={}, size={}], cost={}ms", sourceName, size, System.currentTimeMillis() - batchTime);
+				log.info("finish batch[file={}, row={}, size={}], cost={}ms", sourceName, lineIndex, size, System.currentTimeMillis() - batchTime);
 				logProgress(sourceName, lineIndex, false);
 			}
 
@@ -210,7 +174,7 @@ public abstract class ParseTextTask<V, E> extends ParseTask<V, E> {
 	protected abstract E onTextComplete(String sourceUri, String sourceName) throws Exception;
 
 	@Override
-	protected void afterExec(E execResult) throws Exception {
+	protected void afterExec(boolean isExecSuccess, E content, Throwable e) throws Exception {
 		if(!(deleteSource(id) && deleteProgressLog())){
 			log.warn("clean failed.");
 		}

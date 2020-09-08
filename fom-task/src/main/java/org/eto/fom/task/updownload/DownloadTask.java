@@ -4,8 +4,6 @@ import java.io.File;
 import java.text.DecimalFormat;
 
 import org.apache.commons.lang.StringUtils;
-import org.eto.fom.context.core.ExceptionHandler;
-import org.eto.fom.context.core.ResultHandler;
 import org.eto.fom.context.core.Task;
 import org.eto.fom.task.updownload.helper.DownloadHelper;
 
@@ -59,54 +57,6 @@ public final class DownloadTask extends Task<Boolean> {
 		this.helper = helper;
 	}
 
-	/**
-	 * @param sourceUri 资源uri
-	 * @param destName 下载文件命名
-	 * @param destPath 目标下载目录
-	 * @param isDelSrc 下载结束是否删除源文件
-	 * @param isWithTemp 是否先下载到临时目录
-	 * @param helper DownloaderHelper下载方法实现
-	 * @param exceptionHandler 异常处理器
-	 */
-	public DownloadTask(String sourceUri, String destName, String destPath, 
-			boolean isDelSrc, boolean isWithTemp, DownloadHelper helper, ExceptionHandler exceptionHandler) {
-		this(sourceUri, destName, destPath, isDelSrc, isWithTemp, helper);
-		this.exceptionHandler = exceptionHandler;
-	}
-
-	/**
-	 * @param sourceUri 资源uri
-	 * @param destName 下载文件命名
-	 * @param destPath 目标下载目录
-	 * @param isDelSrc 下载结束是否删除源文件
-	 * @param isWithTemp 是否先下载到临时目录
-	 * @param helper DownloaderHelper下载方法实现
-	 * @param resultHandler 结果处理器
-	 */
-	public DownloadTask(String sourceUri, String destName, String destPath, 
-			boolean isDelSrc, boolean isWithTemp, DownloadHelper helper, ResultHandler<Boolean> resultHandler) {
-		this(sourceUri, destName, destPath, isDelSrc, isWithTemp, helper);
-		this.resultHandler = resultHandler;
-	}
-
-	/**
-	 * @param sourceUri 资源uri
-	 * @param destName 下载文件命名
-	 * @param destPath 目标下载目录
-	 * @param isDelSrc 下载结束是否删除源文件
-	 * @param isWithTemp 是否先下载到临时目录
-	 * @param helper DownloaderHelper下载方法实现
-	 * @param exceptionHandler 异常处理器
-	 * @param resultHandler 结果处理器
-	 */
-	public DownloadTask(String sourceUri, String destName, String destPath, 
-			boolean isDelSrc, boolean isWithTemp, DownloadHelper helper, 
-			ExceptionHandler exceptionHandler, ResultHandler<Boolean> resultHandler) {
-		this(sourceUri, destName, destPath, isDelSrc, isWithTemp, helper);
-		this.exceptionHandler = exceptionHandler;
-		this.resultHandler = resultHandler;
-	}
-
 	@Override
 	protected boolean beforeExec() throws Exception {
 		File dest = new File(destPath);
@@ -155,7 +105,7 @@ public final class DownloadTask extends Task<Boolean> {
 	}
 
 	@Override
-	protected void afterExec(Boolean execResult) throws Exception {
+	protected void afterExec(boolean isExecSuccess, Boolean content, Throwable e) throws Exception {
 		if(isWithTemp && downloadFile.exists() 
 				&& !downloadFile.renameTo(new File(destPath + File.separator + downloadFile.getName()))){
 			log.error("move file failed: {}", downloadFile.getName());

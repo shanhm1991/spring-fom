@@ -12,8 +12,6 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eto.fom.context.core.ExceptionHandler;
-import org.eto.fom.context.core.ResultHandler;
 import org.eto.fom.context.core.Task;
 import org.eto.fom.task.updownload.helper.DownloadZipHelper;
 import org.eto.fom.util.IoUtil;
@@ -98,59 +96,6 @@ public class DownloadZipTask extends Task<Boolean> {
 		this.helper = helper;
 	}
 
-	/**
-	 * @param uriList 资源uri列表
-	 * @param zipName 打包zip的名称(不带后缀)
-	 * @param destPath 目标下载目录
-	 * @param zipEntryMax 打包zip的最大文件数(真实下载的文件)
-	 * @param zipSizeMax 打包zip的最大字节数
-	 * @param isDelSrc 下载结束是否删除资源文件
-	 * @param helper ZipDownloaderHelper下载方法实现
-	 * @param exceptionHandler ExceptionHandler
-	 */
-	public DownloadZipTask(List<String> uriList, String zipName, String destPath, 
-			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
-			DownloadZipHelper helper, ExceptionHandler exceptionHandler) {
-		this(uriList, zipName, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
-		this.exceptionHandler = exceptionHandler;
-	}
-
-	/**
-	 * @param uriList 资源uri列表
-	 * @param zipName 打包zip的名称(不带后缀)
-	 * @param destPath 目标下载目录
-	 * @param zipEntryMax 打包zip的最大文件数(真实下载的文件)
-	 * @param zipSizeMax 打包zip的最大字节数
-	 * @param isDelSrc 下载结束是否删除资源文件
-	 * @param helper ZipDownloaderHelper下载方法实现
-	 * @param resultHandler ResultHandler
-	 */
-	public DownloadZipTask(List<String> uriList, String zipName, String destPath, 
-			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
-			DownloadZipHelper helper, ResultHandler<Boolean> resultHandler) {
-		this(uriList, zipName, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
-		this.resultHandler = resultHandler;
-	}
-
-	/**
-	 * @param uriList 资源uri列表
-	 * @param zipName 打包zip的名称(不带后缀)
-	 * @param destPath 目标下载目录
-	 * @param zipEntryMax 打包zip的最大文件数(真实下载的文件)
-	 * @param zipSizeMax 打包zip的最大字节数
-	 * @param isDelSrc 下载结束是否删除资源文件
-	 * @param helper ZipDownloaderHelper下载方法实现
-	 * @param exceptionHandler ExceptionHandler
-	 * @param resultHandler ResultHandler
-	 */
-	public DownloadZipTask(List<String> uriList, String zipName, String destPath, 
-			int zipEntryMax, long zipSizeMax, boolean isDelSrc, 
-			DownloadZipHelper helper, ExceptionHandler exceptionHandler, ResultHandler<Boolean> resultHandler) {
-		this(uriList, zipName, destPath, zipEntryMax, zipSizeMax, isDelSrc, helper);
-		this.exceptionHandler = exceptionHandler;
-		this.resultHandler = resultHandler;
-	}
-
 	@Override
 	protected boolean beforeExec() throws Exception {
 		File dest = new File(destPath);
@@ -184,7 +129,7 @@ public class DownloadZipTask extends Task<Boolean> {
 	}
 
 	@Override
-	protected void afterExec(Boolean execResult) throws Exception {
+	protected void afterExec(boolean isExecSuccess, Boolean content, Throwable e) throws Exception {
 		File tempDir = new File(cachePath);
 		File[] files = tempDir.listFiles();
 		if(ArrayUtils.isEmpty(files)){
