@@ -2,6 +2,7 @@ package org.eto.fom.context.core;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONObject;
 import org.eto.fom.context.Loader;
+import org.eto.fom.context.SpringContext;
 import org.eto.fom.context.annotation.FomContext;
 import org.eto.fom.context.core.ContextStatistics.CostDetail;
 
@@ -37,6 +39,7 @@ import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * context的操作api
@@ -245,6 +248,8 @@ public class ContextHelper {
 			}
 		}
 
+		refreshField(context);
+
 		map.put("result", true);//已经更新成功
 		if(context.config.valueMap.equals(bakMap)){ 
 			map.put("msg", "context[" + name + "] has nothing to chang.");
@@ -257,6 +262,25 @@ public class ContextHelper {
 			map.put("msg", "context[" + name + "] changed, but save failed.");
 		}
 		return map;
+	}
+
+	private static void refreshField(Context context) throws Exception {
+		Class<?> clazz = context.getClass();
+		Object instance = context;
+		if(StringUtils.isNotBlank(context.fom_schedul)){
+			clazz = Class.forName(context.fom_schedul);
+			instance = SpringContext.getBean(clazz);
+		}else if(StringUtils.isNotBlank(context.fom_schedulbatch)){
+			clazz = Class.forName(context.fom_schedulbatch);
+			instance = SpringContext.getBean(clazz);
+		}
+
+		for(Field f : clazz.getDeclaredFields()){
+			Value v = f.getAnnotation(Value.class);
+			if(v != null){
+				ContextManager.valueField(f, instance, v.value(), context, false);
+			}
+		}
 	}
 
 	private static boolean serialize(String name, Context<?> context) {

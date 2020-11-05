@@ -28,20 +28,21 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.eto.fom.context.SpringContext;
 import org.eto.fom.context.SpringRegistry;
-import org.eto.fom.context.annotation.FomConfig;
 import org.eto.fom.context.annotation.FomContext;
 import org.eto.fom.context.annotation.FomSchedul;
 import org.eto.fom.context.annotation.FomSchedulBatch;
 import org.eto.fom.context.annotation.SchedulBatchFactory;
 import org.reflections.Reflections;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import com.google.gson.Gson;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * context实例的管理
- * 
+ *
  * @author shanhm
  *
  */
@@ -67,14 +68,14 @@ public class ContextManager {
 		}
 
 		SpringRegistry registry = SpringContext.getBean(SpringRegistry.class);
-		registry.regist(context.name, context); 
+		registry.regist(context.name, context);
 
 		Class<?> clazz = context.getClass();
 		//扫描FomContfig
 		for(Field f : clazz.getDeclaredFields()){
-			FomConfig c = f.getAnnotation(FomConfig.class);
-			if(c != null){
-				valueField(f, context, c.key(), c.value(), context, putConfig);
+			Value v = f.getAnnotation(Value.class);
+			if(v != null){
+				valueField(f, context, v.value(), context, putConfig);
 			}
 		}
 
@@ -90,14 +91,14 @@ public class ContextManager {
 
 	/**
 	 * 加载缓存以及xmlPath配置文件中的context
-	 * 
+	 *
 	 * @param xmlPath xmlPath
 	 * @throws Exception Exception
 	 */
-	public static void load(String xmlPath) throws Exception{ 
+	public static void load(String xmlPath) throws Exception{
 
-		loadCache(); 
-		
+		loadCache();
+
 		List<String> pckages = FomConfiguration.packages;
 
 		File xml = new File(xmlPath);
@@ -128,7 +129,7 @@ public class ContextManager {
 			return;
 		}
 
-		LOG.info("load context from cache：" + cache); 
+		LOG.info("load context from cache：" + cache);
 		Gson gson = new Gson();
 		for(File file : array){
 			try(FileInputStream input = new FileInputStream(file)){
@@ -140,12 +141,12 @@ public class ContextManager {
 				String fom_context = (String)map.get("fom_context");
 				String fom_schedul = (String)map.get("fom_schedul");
 				String fom_schedulbatch = (String)map.get("fom_schedulbatch");
-				
+
 				Map<String, Map<String, String>> config = (Map<String, Map<String, String>>) map.get("config");
 				Map<String, String> vMap= config.get("valueMap");
 				ConcurrentHashMap<String, String> valueMap = new ConcurrentHashMap<>(vMap);
 				if(StringUtils.isNotBlank(fom_context)){
-					Context.localName.set(name); 
+					Context.localName.set(name);
 					ContextConfig.loadedConfig.putIfAbsent(name, valueMap);
 					Class<?> clazz = Class.forName(fom_context);
 					Context<?> context = (Context<?>)clazz.newInstance();
@@ -155,7 +156,7 @@ public class ContextManager {
 				}else if(StringUtils.isNotBlank(fom_schedulbatch)){
 					loadFomSchedulBatch(Class.forName(fom_schedulbatch), valueMap, false);
 				}else{
-					LOG.warn("not valid cache file：" + file.getName()); 
+					LOG.warn("not valid cache file：" + file.getName());
 				}
 			}
 		}
@@ -223,9 +224,9 @@ public class ContextManager {
 		Element contexts = fom.element("contexts");
 		if(contexts == null){
 			return;
-		} 
+		}
 
-		LOG.info("load context from: " + xmlPath); 
+		LOG.info("load context from: " + xmlPath);
 		Iterator<?> it = contexts.elementIterator("context");
 		while(it.hasNext()){
 			Element element = (Element)it.next();
@@ -233,13 +234,13 @@ public class ContextManager {
 			String classname = element.attributeValue("class");
 
 			if(StringUtils.isBlank(classname)){
-				LOG.warn("ignore context[" + name + "], class can not be empty."); 
+				LOG.warn("ignore context[" + name + "], class can not be empty.");
 				continue;
 			}
 
 			ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
 			Class<?> clazz = Class.forName(classname);
-			if(StringUtils.isBlank(name)){ 
+			if(StringUtils.isBlank(name)){
 				FomContext fc = clazz.getAnnotation(FomContext.class);
 				if(fc != null){
 					name = fc.name();
@@ -264,7 +265,7 @@ public class ContextManager {
 			}
 
 			if(!Context.class.isAssignableFrom(clazz)){
-				LOG.warn("ignore context[" + name + "], " + classname + " isn't a Context."); 
+				LOG.warn("ignore context[" + name + "], " + classname + " isn't a Context.");
 				continue;
 			}
 
@@ -279,7 +280,7 @@ public class ContextManager {
 				}
 			}
 
-			Context.localName.set(name); 
+			Context.localName.set(name);
 			ContextConfig.loadedConfig.putIfAbsent(name, map);
 			Context<?> context = (Context<?>)clazz.newInstance();
 
@@ -299,7 +300,7 @@ public class ContextManager {
 			return;
 		}
 
-		LOG.info("load context with @FomContext"); 
+		LOG.info("load context with @FomContext");
 		for(Class<?> clazz : clazzs){
 			if(!Context.class.isAssignableFrom(clazz)){
 				LOG.warn("ignore context, " + clazz + " isn't a Context");
@@ -326,7 +327,7 @@ public class ContextManager {
 				name = clazz.getSimpleName();
 			}
 
-			Context.localName.set(name); 
+			Context.localName.set(name);
 			ContextConfig.loadedConfig.putIfAbsent(name, map);
 			Context<?> context = (Context<?>)clazz.newInstance();
 
@@ -346,7 +347,7 @@ public class ContextManager {
 			return;
 		}
 
-		LOG.info("load context with @FomSchedul"); 
+		LOG.info("load context with @FomSchedul");
 		for(Class<?> clazz : clazzs){
 			loadFomSchedul(clazz,  null, true);
 		}
@@ -368,7 +369,7 @@ public class ContextManager {
 		String cron = fc.cron();
 		long fixedRate = fc.fixedRate();
 		long fixedDelay = fc.fixedDelay();
-		
+
 		List<Method> methods = new ArrayList<>();
 		for(Method method : clazz.getMethods()){
 			Scheduled sch = method.getAnnotation(Scheduled.class);
@@ -399,7 +400,7 @@ public class ContextManager {
 
 		SpringRegistry registry = SpringContext.getBean(SpringRegistry.class);
 		final Object instance = clazz.newInstance();
-		registry.regist(name + "-task", instance); 
+		registry.regist(name + "-task", instance);
 
 		if(map == null){
 			map = new ConcurrentHashMap<>();
@@ -417,15 +418,15 @@ public class ContextManager {
 			map.put(ContextConfig.CONF_REMARK, fc.remark());
 		}
 
-		Context.localName.set(name); 
+		Context.localName.set(name);
 		ContextConfig.loadedConfig.putIfAbsent(name, map);
-		
+
 		Context<?> context = new Context<Object>(){
 			@Override
 			protected Collection<Task<Object>> scheduleBatch() {
 				Task<Object> task = new Task<Object>(name + "-task"){
 					@Override
-					protected Object exec() throws Exception { 
+					protected Object exec() throws Exception {
 						for(Method method : methods){
 							method.invoke(instance);
 						}
@@ -441,9 +442,9 @@ public class ContextManager {
 
 		//扫描FomContfig
 		for(Field f : clazz.getDeclaredFields()){
-			FomConfig c = f.getAnnotation(FomConfig.class);
-			if(c != null){
-				valueField(f, instance, c.key(), c.value(), context, putConfig);
+			Value v = f.getAnnotation(Value.class);
+			if(v != null){
+				valueField(f, instance, v.value(), context, putConfig);
 			}
 		}
 
@@ -470,7 +471,7 @@ public class ContextManager {
 			return;
 		}
 
-		LOG.info("load context with @FomSchedulBatch"); 
+		LOG.info("load context with @FomSchedulBatch");
 		for(Class<?> clazz : clazzs){
 			loadFomSchedulBatch(clazz, null, true);
 		}
@@ -496,7 +497,7 @@ public class ContextManager {
 
 		SpringRegistry registry = SpringContext.getBean(SpringRegistry.class);
 		final Object instance = clazz.newInstance();
-		registry.regist(name + "-task", instance); 
+		registry.regist(name + "-task", instance);
 
 		if(map == null){
 			map = new ConcurrentHashMap<>();
@@ -514,7 +515,7 @@ public class ContextManager {
 			map.put(ContextConfig.CONF_REMARK, fc.remark());
 		}
 
-		Context.localName.set(name); 
+		Context.localName.set(name);
 		ContextConfig.loadedConfig.putIfAbsent(name, map);
 		Context<Object> context = new Context<Object>(){
 			@SuppressWarnings("unchecked")
@@ -527,9 +528,9 @@ public class ContextManager {
 		//扫描FomContfig
 		Field[] fields = clazz.getDeclaredFields();
 		for(Field f : fields){
-			FomConfig c = f.getAnnotation(FomConfig.class);
-			if(c != null){
-				valueField(f, instance, c.key(), c.value(), context, putConfig);
+			Value v = f.getAnnotation(Value.class);
+			if(v != null){
+				valueField(f, instance, v.value(), context, putConfig);
 			}
 		}
 
@@ -545,51 +546,71 @@ public class ContextManager {
 		context.regist(putConfig);
 	}
 
-	private static void valueField(
-			Field field, Object instance, String key, String value, Context<?> context, boolean putConfig) throws Exception{
-		if(value.contains("${")){
-			value = SpringContext.getPropertiesValue(value);
-		}
+	static void valueField(
+			Field field, Object instance, String expression, Context<?> context, boolean putConfig) throws Exception{
+		List<String> list = getProperties(expression);
+		for(String ex : list){
+			String springValue = SpringContext.getPropertiesValue(ex);
 
-		field.setAccessible(true);
-		switch(field.getGenericType().toString()){
-		case "short":
-		case "class java.lang.Short":
-			field.set(instance, Short.valueOf(value));
-			break;
-		case "int":
-		case "class java.lang.Integer":
-			field.set(instance, Integer.valueOf(value));
-			break;
-		case "long":
-		case "class java.lang.Long":
-			field.set(instance, Long.valueOf(value));
-			break;
-		case "float":
-		case "class java.lang.Float":
-			field.set(instance, Float.valueOf(value));
-			break;
-		case "double":
-		case "class java.lang.Double":
-			field.set(instance, Double.valueOf(value));
-			break;
-		case "boolean":
-		case "class java.lang.Boolean":
-			field.set(instance, Boolean.valueOf(value));
-			break;
-		case "class java.lang.String":
-			field.set(instance, value);
-			break;
-		default:
-			throw new UnsupportedOperationException("不支持的配置类型：" + instance.getClass().getName() + "." + field.getName());
-		}
-
-		if(putConfig){
-			if(StringUtils.isBlank(key)){
-				key = field.getName();
+			int index = ex.indexOf(":");
+			if(index == -1){
+				index = ex.indexOf("}");
 			}
-			context.config.put(key, value); 
+			String key = ex.substring(2, index);
+			String confValue = context.config.get(key);
+
+			if(putConfig){
+				context.config.put(key, springValue);
+				expression = expression.replace(ex, springValue);
+			}else{
+				expression = expression.replace(ex, confValue);
+			}
 		}
+
+		ReflectionUtils.makeAccessible(field);
+		//ReflectionUtils.setField(field, instance, value);
+		switch(field.getGenericType().toString()){
+			case "short":
+			case "class java.lang.Short":
+				field.set(instance, Short.valueOf(expression));
+				break;
+			case "int":
+			case "class java.lang.Integer":
+				field.set(instance, Integer.valueOf(expression));
+				break;
+			case "long":
+			case "class java.lang.Long":
+				field.set(instance, Long.valueOf(expression));
+				break;
+			case "float":
+			case "class java.lang.Float":
+				field.set(instance, Float.valueOf(expression));
+				break;
+			case "double":
+			case "class java.lang.Double":
+				field.set(instance, Double.valueOf(expression));
+				break;
+			case "boolean":
+			case "class java.lang.Boolean":
+				field.set(instance, Boolean.valueOf(expression));
+				break;
+			case "class java.lang.String":
+				field.set(instance, expression);
+				break;
+			default:
+				throw new UnsupportedOperationException("不支持的配置类型：" + instance.getClass().getName() + "." + field.getName());
+		}
+	}
+
+	private static List<String> getProperties(String a){
+		List<String> list = new ArrayList<>();
+		int begin;
+		int end = 0;
+		while((begin = a.indexOf("${", end)) != -1){
+			end = a.indexOf("}", begin);
+			list.add(a.substring(begin, end + 1));
+		}
+		return list;
 	}
 
 }

@@ -49,7 +49,7 @@ class TimedExecutorPool extends ThreadPoolExecutor {
 	}
 
 	@Override
-	public TimedFuture<Boolean> submit(Runnable runnable) { 
+	public TimedFuture<Boolean> submit(Runnable runnable) {
 		if (runnable == null)
 			throw new NullPointerException();
 		TimedFuture<Boolean> future = newTaskFor(runnable, true);

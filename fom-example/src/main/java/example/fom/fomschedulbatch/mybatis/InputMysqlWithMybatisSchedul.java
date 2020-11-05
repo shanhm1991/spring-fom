@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eto.fom.context.SpringContext;
-import org.eto.fom.context.annotation.FomConfig;
 import org.eto.fom.context.annotation.FomSchedulBatch;
 import org.eto.fom.context.annotation.SchedulBatchFactory;
 import org.eto.fom.util.PatternUtil;
@@ -16,6 +15,7 @@ import org.eto.fom.util.file.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import example.fom.fomschedulbatch.mybatis.service.impl.InputMysqServiceImpl;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * 
@@ -25,13 +25,13 @@ import example.fom.fomschedulbatch.mybatis.service.impl.InputMysqServiceImpl;
 @FomSchedulBatch(cron = "0/15 * * * * ?", remark = "将指定目录下text文本解析导入Mysql")
 public class InputMysqlWithMybatisSchedul implements SchedulBatchFactory<Boolean> {
 
-	@FomConfig(key = "srcPath", value = "/source")
+	@Value("${input.srcPath:/source}")
 	private String srcPath;
 
-	@FomConfig("demo.txt")
+	@Value("${input.pattern:demo.txt}")
 	private String pattern;
 	
-	@FomConfig("5000")
+	@Value("${input.batch:5000}")
 	private int batch;
 	
 	@Autowired

@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.eto.fom.context.SpringContext;
-import org.eto.fom.context.annotation.FomConfig;
 import org.eto.fom.context.annotation.FomContext;
 import org.eto.fom.context.core.Context;
 import org.eto.fom.util.PatternUtil;
 import org.eto.fom.util.file.FileUtil;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * 
@@ -22,22 +22,22 @@ import org.eto.fom.util.file.FileUtil;
 @FomContext(cron = "0 0 18 * * ?", remark = "将指定目录下text文本解析导入ES")
 public class InputEsContext extends Context<Boolean> {
 
-	@FomConfig("/source")
+	@Value("${input.srcPath:/source}")
 	private String srcPath;
 
-	@FomConfig("demo.bcp")
+	@Value("${input.pattern:demo.bcp}")
 	private String pattern;
 
-	@FomConfig("demo")
+	@Value("${input.esIndex:demo}")
 	private String esIndex;
 
-	@FomConfig("demo")
+	@Value("${input.esType:demo}")
 	private String esType;
 	
-	@FomConfig("5000")
+	@Value("${input.batch:5000}")
 	private int batch;
 
-	@FomConfig("config/fomcontext/index.json")
+	@Value("${input.esJson:config/fomcontext/index.json}")
 	private String esJson;
 	
 	@Override

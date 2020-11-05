@@ -3,9 +3,9 @@ package example.fom.fomschedul;
 import java.io.File;
 
 import org.eto.fom.context.SpringContext;
-import org.eto.fom.context.annotation.FomConfig;
 import org.eto.fom.context.annotation.FomSchedul;
 import org.eto.fom.task.updownload.helper.impl.HttpHelper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 
 /**
@@ -16,7 +16,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 @FomSchedul(remark = "上传文件到http服务")
 public class UploadHttpSchedul {
 	
-	@FomConfig("${http.url:undefined}")
+	@Value("${http.url:undefined}")
 	private String url;
 
 	@Scheduled(cron = "0 0 21 * * ?")
