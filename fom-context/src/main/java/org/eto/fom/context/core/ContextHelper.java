@@ -1,7 +1,6 @@
 package org.eto.fom.context.core;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -22,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Appender;
 import org.apache.log4j.Category;
@@ -50,8 +48,6 @@ public class ContextHelper {
 
 	private static final Logger LOG = Logger.getLogger(ContextHelper.class);
 
-	private static final int BEGIN = 2;
-
 	/**
 	 * 替换字符串中的系统变量
 	 * @param val string
@@ -60,7 +56,6 @@ public class ContextHelper {
 	public static String replaceSystemProperty(String val) {
 		String begin = "${";
 		char   end  = '}';
-		int beginLen = BEGIN;
 		int endLen  = 1;
 		StringBuilder buffer = new StringBuilder();
 		int i = 0;
@@ -72,17 +67,17 @@ public class ContextHelper {
 				if(i==0) {
 					return val;
 				} else { 
-					buffer.append(val.substring(i, val.length()));
+					buffer.append(val.substring(i));
 					return buffer.toString();
 				}
 			} else {
-				buffer.append(val.substring(i, j));
+				buffer.append(val, i, j);
 				k = val.indexOf(end, j);
 				if(k == -1) {
 					throw new IllegalArgumentException('"' 
 							+ val + "\" has no closing brace. Opening brace at position " + j + '.');
 				} else {
-					j += beginLen;
+					j += 2;
 					String key = val.substring(j, k);
 					String replacement = System.getProperty(key);
 					if(replacement != null) {
@@ -100,9 +95,8 @@ public class ContextHelper {
 	 * @param contextName contextName
 	 * @param task task
 	 * @return TimedFuture
-	 * @throws Exception Exception
 	 */
-	public static <E> TimedFuture<Result<E>> submitTask(String contextName, Task<E> task) throws Exception { 
+	public static <E> TimedFuture<Result<E>> submitTask(String contextName, Task<E> task) {
 		@SuppressWarnings("unchecked")
 		Context<E> context = (Context<E>)ContextManager.loadedContext.get(contextName);
 		if(context == null){
@@ -156,8 +150,7 @@ public class ContextHelper {
 		List<Map<String, String>> list = new ArrayList<>();
 		for(Entry<String, Context<?>> entry : ContextManager.loadedContext.entrySet()){
 			Context<?> context = entry.getValue();
-			TreeMap<String,String> cmap = new TreeMap<>();
-			cmap.putAll(context.config.valueMap); 
+			TreeMap<String,String> cmap = new TreeMap<>(context.config.valueMap);
 
 			cmap.put("name", context.name);
 			cmap.put("state", context.getState().name().toLowerCase());
@@ -209,8 +202,7 @@ public class ContextHelper {
 			map.put("msg", "context[" + name + "] not exist.");
 			return map;
 		} 
-		Map<String,String> bakMap = new HashMap<>();
-		bakMap.putAll(context.config.valueMap);
+		Map<String,String> bakMap = new HashMap<>(context.config.valueMap);
 
 		json = json.replaceAll("\\\\", "\\\\\\\\");
 		JSONObject jsonObject = new JSONObject(json);
@@ -269,14 +261,9 @@ public class ContextHelper {
 
 	private static boolean serialize(String name, Context<?> context) {
 		String cache = System.getProperty("cache.context");
-		File[] array = new File(cache).listFiles(new FileFilter(){
-			@Override
-			public boolean accept(File file) {
-				return file.isFile();
-			}
-		});
+		File[] array = new File(cache).listFiles(File::isFile);
 
-		if(!ArrayUtils.isEmpty(array)){//将已有的缓存文件移到history
+		if(array != null){//将已有的缓存文件移到history
 			for(File file : array){
 				String fname = file.getName();
 				if(name.equals(fname.substring(0, fname.lastIndexOf('.')))){ 
@@ -419,7 +406,7 @@ public class ContextHelper {
 
 		Loader.refreshClassPath();//如果有添加新的jar包，则先刷新下
 
-		Class<?> contextClass = null;
+		Class<?> contextClass;
 		try {
 			contextClass = Class.forName(clazz);
 			if(!Context.class.isAssignableFrom(contextClass)){
@@ -514,7 +501,7 @@ public class ContextHelper {
 				appenderEnumeration = Logger.getRootLogger().getAllAppenders(); 
 				StringBuilder builder = new StringBuilder();
 				while(appenderEnumeration.hasMoreElements()){
-					builder.append(((Appender)appenderEnumeration.nextElement()).getName() + ",");
+					builder.append(((Appender)appenderEnumeration.nextElement()).getName()).append(",");
 				}
 				String append = builder.toString();
 				append = append.substring(0, append.length() - 1);
@@ -532,7 +519,7 @@ public class ContextHelper {
 		}else{
 			StringBuilder builder = new StringBuilder();
 			while(appenderEnumeration.hasMoreElements()){
-				builder.append(((Appender)appenderEnumeration.nextElement()).getName() + ",");
+				builder.append(((Appender)appenderEnumeration.nextElement()).getName()).append(",");
 			}
 			String append = builder.toString();
 			append = append.substring(0, append.length() - 1);
@@ -681,7 +668,7 @@ public class ContextHelper {
 	public static Map<String, Object> successDetail(String name) throws Exception {
 		Context<?> context = ContextManager.loadedContext.get(name);
 		if(context == null){
-			return new HashMap<String, Object>(); 
+			return new HashMap<>();
 		}
 		return context.statistics.successDetail();
 	}
@@ -763,9 +750,8 @@ public class ContextHelper {
 	/**
 	 * 获取成功任务明细,json形式
 	 * @param name name
-	 * @throws Exception Exception
 	 */
-	public static String dataDownload(String name) throws Exception {
+	public static String dataDownload(String name) {
 		Context<?> context = ContextManager.loadedContext.get(name);
 		if(context == null){
 			return "";
@@ -774,7 +760,7 @@ public class ContextHelper {
 		StringBuilder builder = new StringBuilder("[");
 		for(Entry<String, Queue<CostDetail>> entry : context.statistics.successMap.entrySet()){
 			String date = entry.getKey();
-			builder.append("{\"date\":\"").append(date + "\",\"details\":[");
+			builder.append("{\"date\":\"").append(date).append("\",\"details\":[");
 
 			Queue<CostDetail> queue = entry.getValue();
 			CostDetail[] array = new CostDetail[queue.size()];

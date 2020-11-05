@@ -1,2 +1,7 @@
 /.settings/
 .project
+/target/
+fom.iml
+/log/
+/data/
+/.idea/

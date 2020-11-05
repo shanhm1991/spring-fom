@@ -39,7 +39,7 @@ public enum State {
 	 */
 	STOPPED(5);
 	
-	private int value;
+	private final int value;
 
 	State(int value){
 		this.value = value;

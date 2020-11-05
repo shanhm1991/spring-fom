@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  */
 class TimedExecutorPool extends ThreadPoolExecutor { 
 
-	private Map<Task<?>, Thread> threadMap = new ConcurrentHashMap<>();
+	private final Map<Task<?>, Thread> threadMap = new ConcurrentHashMap<>();
 
 	public TimedExecutorPool(int core, int max, long aliveTime, BlockingQueue<Runnable> workQueue) {
 		super(core, max, aliveTime, TimeUnit.SECONDS, workQueue);
@@ -22,12 +22,12 @@ class TimedExecutorPool extends ThreadPoolExecutor {
 
 	@Override
 	protected <T> TimedFuture<T> newTaskFor(Runnable runnable, T value) {
-		return new TimedFuture<T>(runnable, value);
+		return new TimedFuture<>(runnable, value);
 	}
 
 	@Override
 	protected <T> TimedFuture<T> newTaskFor(Callable<T> callable) {
-		return new TimedFuture<T>(callable);
+		return new TimedFuture<>(callable);
 	}
 
 	@SuppressWarnings({"rawtypes" })
@@ -50,15 +50,15 @@ class TimedExecutorPool extends ThreadPoolExecutor {
 
 	@Override
 	public TimedFuture<Boolean> submit(Runnable runnable) { 
-		if (runnable == null) 
-			throw new NullPointerException(); 
+		if (runnable == null)
+			throw new NullPointerException();
 		TimedFuture<Boolean> future = newTaskFor(runnable, true);
 		execute(future);
 		return future;
 	}
 
 	@Override
-	public <T> TimedFuture<T> submit(Callable<T> callable) { 
+	public <T> TimedFuture<T> submit(Callable<T> callable) {
 		TimedFuture<T> future = newTaskFor(callable);
 		execute(future);
 		return future;

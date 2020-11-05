@@ -17,17 +17,17 @@ import org.apache.commons.lang.ArrayUtils;
  */
 public class Loader {
 	
-	static URLClassLoader systemLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+	static final URLClassLoader systemLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
 	
-	private static Set<String> classpathSet = new HashSet<>();
+	private static final Set<String> classpathSet = new HashSet<>();
 
-	private static String libPath = ClassLoader.getSystemResource("").getPath() + File.separator + "lib";
+	private static final String libPath = ClassLoader.getSystemResource("").getPath() + File.separator + "lib";
 	
-	private static Method method;
+	private static final Method method;
 
 	static{
 		try {
-			method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[] { URL.class });
+			method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
 			method.setAccessible(true);
 		}
 		catch (Exception e) {
@@ -55,7 +55,7 @@ public class Loader {
 			for(File jar : jarArray){
 				String path = jar.getPath();
 				if(!classpathSet.contains(path)){
-					method.invoke(systemLoader, new Object[] { jar.toURI().toURL() });
+					method.invoke(systemLoader, jar.toURI().toURL());
 					classpathSet.add(path);
 				}
 			}
@@ -71,7 +71,7 @@ public class Loader {
 					if(uri.getPath().equals(path)){
 						continue;
 					}
-					method.invoke(systemLoader, new Object[] { file.toURI().toURL() });
+					method.invoke(systemLoader, file.toURI().toURL());
 				}
 			}
 		}
@@ -86,7 +86,7 @@ public class Loader {
 					return;
 				}
 			}
-			method.invoke(systemLoader, new Object[] { file.toURI().toURL() });
+			method.invoke(systemLoader, file.toURI().toURL());
 		}
 	}
 
@@ -94,8 +94,10 @@ public class Loader {
 		String path = file.getPath();
 		if (file.isDirectory()) {
 			File[] array = file.listFiles();
-			for (File sub : array) {
-				loop(sub, list);
+			if(array != null){
+				for (File sub : array) {
+					loop(sub, list);
+				}
 			}
 		}else if(path.endsWith("jar")){
 			list.add(file);

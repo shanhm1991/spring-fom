@@ -35,6 +35,7 @@ import org.eto.fom.util.log.SlfLoggerFactory;
 import org.slf4j.Logger;
 
 import com.google.gson.annotations.Expose;
+import org.springframework.util.Assert;
 
 /**
  * 模块最小单位，相当于一个组织者的角色，负责创建和组织Task的运行
@@ -117,13 +118,13 @@ public class Context<E> {
 	 * 所有的任务提交总数数，每当次数达到1000时执行一次cleanFutures，定时线程和submit线程共享
 	 */
 	@Expose
-	private AtomicLong submits = new AtomicLong(); 
+	private final AtomicLong submits = new AtomicLong();
 
 	/**
 	 * 批任务提交次数
 	 */
 	@Expose
-	private AtomicLong batchSubmits = new AtomicLong(); 
+	private final AtomicLong batchSubmits = new AtomicLong();
 
 	public Context(){
 		String lname = localName.get();
@@ -160,8 +161,8 @@ public class Context<E> {
 
 	/**
 	 * 注册到容器
-	 * @param loadFrom
-	 * @throws Exception
+	 * @param putConfig putConfig
+	 * @throws Exception Exception
 	 */
 	void regist(boolean putConfig) throws Exception {
 		ContextManager.register(this, putConfig);  
@@ -353,16 +354,15 @@ public class Context<E> {
 					innerThread.interrupt();//尽快响应
 					map.put("result", true);
 					map.put("msg", "context[" + name + "] is stopping.");
-					log.info("context[{}] is stopping.", name); 
-					return map;
+					log.info("context[{}] is stopping.", name);
 				}else{
 					state = STOPPED;
 					runOnStartup = true;
 					map.put("result", true);
 					map.put("msg", "context[" + name + "] stopped.");
-					log.info("context[{}] stopped.", name); 
-					return map;
+					log.info("context[{}] stopped.", name);
 				}
+				return map;
 			default:
 				map.put("result", false);
 				map.put("msg", "invalid state.");
@@ -427,7 +427,7 @@ public class Context<E> {
 		@Override
 		public void run() {
 			while(true){
-				boolean isStopping = false;
+				boolean isStopping;
 				synchronized (Context.this) {
 					isStopping = state == STOPPING;
 				}
@@ -530,19 +530,19 @@ public class Context<E> {
 			try{
 				Collection<? extends Task<E>> tasks = scheduleBatch();
 				if(!CollectionUtils.isEmpty(tasks)){
-					Iterator<? extends Task<E>> it = tasks.iterator();
-					while(it.hasNext()){
-						task = it.next();
+					for (Task<E> t : tasks) {
+						task = t;
 						task.scheduleBatch = schedulebatch;
 						String taskId = task.getId();
-						if(isTaskAlive(taskId)){ 
-							log.warn("task[{}] is still alive, create canceled.", taskId); 
+						if (isTaskAlive(taskId)) {
+							log.warn("task[{}] is still alive, create canceled.", taskId);
 							continue;
 						}
 						submit(task);
 					}
 				}
 			} catch (RejectedExecutionException e) {
+				Assert.notNull(task, "");
 				log.warn("task[" + task.getId() + "] submit rejected.", e);
 			}finally{ 
 				schedulebatch.countDownSubmit();
@@ -622,9 +622,8 @@ public class Context<E> {
 
 	/**
 	 * 提交批任务
-	 * @param tasks
-	 * @throws InterruptedException 
-	 * @throws Exception
+	 * @param tasks tasks
+	 * @throws InterruptedException InterruptedException
 	 */
 	public void submitBatch(Collection<? extends Task<E>> tasks) throws InterruptedException  {
 		if(CollectionUtils.isEmpty(tasks)){
@@ -646,6 +645,7 @@ public class Context<E> {
 				submit(task);
 			}
 		} catch (RejectedExecutionException e) {
+			Assert.notNull(task, "");
 			log.warn("task[" + task.getId() + "] submit rejected.", e);
 		}finally{ 
 			scheduleBatch.countDownSubmit();
@@ -657,7 +657,6 @@ public class Context<E> {
 	 * 提交任务
 	 * @param task task
 	 * @return TimedFuture
-	 * @throws Exception Exception
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public TimedFuture<Result<E>> submit(Task<E> task) {
@@ -681,10 +680,9 @@ public class Context<E> {
 
 	/**
 	 * 周期执行任务
-	 * @return
-	 * @throws Exception
+	 * @return task
 	 */
-	protected Task<E> schedule() throws Exception {
+	protected Task<E> schedule() {
 		return null;
 	}
 

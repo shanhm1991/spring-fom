@@ -37,7 +37,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 
 	private volatile Context<E> context;
 
-	private volatile long createTime;
+	private final long createTime;
 
 	private volatile long startTime;
 
@@ -111,7 +111,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	/**
 	 * 任务执行
 	 * @return E
-	 * @throws Exception
+	 * @throws Exception Exception
 	 */
 	protected abstract E exec() throws Exception;
 
@@ -120,7 +120,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	 * @param isExecSuccess exec是否成功
 	 * @param content exec执行结果
 	 * @param e exec抛出异常
-	 * @throws Exception
+	 * @throws Exception Exception
 	 */
 	protected void afterExec(boolean isExecSuccess,  E content, Throwable e) throws Exception {
 

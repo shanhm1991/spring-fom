@@ -25,7 +25,7 @@ public class FomConfiguration implements ImportBeanDefinitionRegistrar{
 
 	@Override
 	public void registerBeanDefinitions(AnnotationMetadata meta, BeanDefinitionRegistry registry) {
-		AnnotationAttributes attrs = 
+		AnnotationAttributes attrs =
 				AnnotationAttributes.fromMap(meta.getAnnotationAttributes(FomScan.class.getName()));
 		if(attrs == null){
 			return;

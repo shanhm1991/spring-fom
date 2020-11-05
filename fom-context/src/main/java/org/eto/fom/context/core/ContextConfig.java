@@ -112,8 +112,6 @@ public final class ContextConfig {
 
 	public static final int QUEUESIZE_MIN = 1;
 
-	public static final int QUEUESIZE_MAX = Integer.MAX_VALUE;
-
 	//已加载的配置
 	static final Map<String, ConcurrentHashMap<String,String>> loadedConfig = new HashMap<>();
 
@@ -160,7 +158,7 @@ public final class ContextConfig {
 		int max = getInt(CONF_THREADMAX, THREADMAX_DEFAULT);
 		int aliveTime = getInt(CONF_ALIVETIME, ALIVETIME_DEFAULT);   
 		int queueSize = getInt(CONF_QUEUESIZE, QUEUESIZE_DEFAULT);  
-		pool = new TimedExecutorPool(core,max,aliveTime,new LinkedBlockingQueue<Runnable>(queueSize));
+		pool = new TimedExecutorPool(core,max,aliveTime,new LinkedBlockingQueue<>(queueSize));
 		pool.allowCoreThreadTimeOut(true);
 	}
 
@@ -215,17 +213,16 @@ public final class ContextConfig {
 
 	Map<Task<?>, Thread> getActiveThreads() {
 		if(pool == null){
-			return new HashMap<Task<?>, Thread>();
+			return new HashMap<>();
 		}
 		return pool.getActiveThreads();
 	}
 
-	int setQueueSize(int queueSize){
-		if(queueSize < QUEUESIZE_MIN || queueSize > QUEUESIZE_MAX){
+	void setQueueSize(int queueSize){
+		if(queueSize < QUEUESIZE_MIN){
 			queueSize = QUEUESIZE_DEFAULT;
 		}
 		valueMap.put(CONF_QUEUESIZE, String.valueOf(queueSize));
-		return queueSize;
 	}
 
 	/**
@@ -442,11 +439,11 @@ public final class ContextConfig {
 		}
 
 		//可能来自注解
-		if(cron.indexOf("${") != -1){ 
+		if(cron.contains("${")){
 			cron = SpringContext.getPropertiesValue(cron);
 		}
 
-		CronExpression c = null;
+		CronExpression c;
 		try {
 			c = new CronExpression(cron);
 		} catch (ParseException e) {
@@ -462,7 +459,7 @@ public final class ContextConfig {
 	
 	/**
 	 * 
-	 * @return
+	 * @return int
 	 */
 	public int getFixedRate(){
 		return Integer.parseInt(valueMap.get(CONF_FIXEDRATE)); 
@@ -470,18 +467,15 @@ public final class ContextConfig {
 	
 	/**
 	 * 
-	 * @param fixedRate
+	 * @param fixedRate fixedRate
 	 */
 	public void setFixedRate(int fixedRate){
-		if(fixedRate < 0){
-			throw new IllegalArgumentException("fixedRate cannot be less than 0");
-		}
 		valueMap.put(CONF_FIXEDRATE, String.valueOf(fixedRate));
 	}
 	
 	/**
 	 * 
-	 * @return
+	 * @return int
 	 */
 	public int getFixedDelay(){
 		return Integer.parseInt(valueMap.get(CONF_FIXEDDELAY));
@@ -489,18 +483,15 @@ public final class ContextConfig {
 	
 	/**
 	 * 
-	 * @param fixedDelay
+	 * @param fixedDelay fixedDelay
 	 */
 	public void setFixedDelay(int fixedDelay){
-		if(fixedDelay < 0){
-			throw new IllegalArgumentException("fixedDelay cannot be less than 0");
-		}
 		valueMap.put(CONF_FIXEDDELAY, String.valueOf(fixedDelay));
 	}
 
 	/**
 	 * 没有设置定时周期，是否在执行完批任务后就关闭
-	 * @param stopWithNoSchedule 
+	 * @param stopWithNoSchedule  stopWithNoSchedule
 	 */
 	public void setStopWithNoSchedule(boolean stopWithNoSchedule) {
 		valueMap.put(CONF_STOPWITHNOSCHEDULE, String.valueOf(stopWithNoSchedule));
@@ -508,7 +499,7 @@ public final class ContextConfig {
 
 	/**
 	 * 获取配置，是否在执行完批任务后就关闭
-	 * @return 
+	 * @return boolean
 	 */
 	public boolean getStopWithNoSchedule() {
 		return MapUtils.getBoolean(CONF_STOPWITHNOSCHEDULE, valueMap, false);

@@ -1,7 +1,6 @@
 package org.eto.fom.context.core;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -72,8 +71,7 @@ public class ContextManager {
 
 		Class<?> clazz = context.getClass();
 		//扫描FomContfig
-		Field[] fields = clazz.getDeclaredFields();
-		for(Field f : fields){
+		for(Field f : clazz.getDeclaredFields()){
 			FomConfig c = f.getAnnotation(FomConfig.class);
 			if(c != null){
 				valueField(f, context, c.key(), c.value(), context, putConfig);
@@ -93,8 +91,8 @@ public class ContextManager {
 	/**
 	 * 加载缓存以及xmlPath配置文件中的context
 	 * 
-	 * @param xmlPath
-	 * @throws Exception 
+	 * @param xmlPath xmlPath
+	 * @throws Exception Exception
 	 */
 	public static void load(String xmlPath) throws Exception{ 
 
@@ -125,13 +123,8 @@ public class ContextManager {
 	@SuppressWarnings("unchecked")
 	private static void loadCache() throws Exception {
 		String cache = System.getProperty("cache.context");
-		File[] array = new File(cache).listFiles(new FileFilter(){
-			@Override
-			public boolean accept(File file) {
-				return file.isFile();
-			}
-		});
-		if(ArrayUtils.isEmpty(array)){
+		File[] array = new File(cache).listFiles(File::isFile);
+		if(null == array){
 			return;
 		}
 
@@ -150,8 +143,7 @@ public class ContextManager {
 				
 				Map<String, Map<String, String>> config = (Map<String, Map<String, String>>) map.get("config");
 				Map<String, String> vMap= config.get("valueMap");
-				ConcurrentHashMap<String, String> valueMap = new ConcurrentHashMap<>();
-				valueMap.putAll(vMap);
+				ConcurrentHashMap<String, String> valueMap = new ConcurrentHashMap<>(vMap);
 				if(StringUtils.isNotBlank(fom_context)){
 					Context.localName.set(name); 
 					ContextConfig.loadedConfig.putIfAbsent(name, valueMap);
@@ -265,7 +257,7 @@ public class ContextManager {
 					map.put(ContextConfig.CONF_CANCELLABLE, String.valueOf(fc.cancellable()));
 					map.put(ContextConfig.CONF_EXECONLOAN, String.valueOf(fc.execOnLoad()));
 					map.put(ContextConfig.CONF_STOPWITHNOSCHEDULE, String.valueOf(fc.stopWithNoSchedule()));
-					map.put(ContextConfig.CONF_REMARK, String.valueOf(fc.remark()));
+					map.put(ContextConfig.CONF_REMARK, fc.remark());
 				}else{
 					name = clazz.getSimpleName();
 				}
@@ -327,7 +319,7 @@ public class ContextManager {
 			map.put(ContextConfig.CONF_CANCELLABLE, String.valueOf(fc.cancellable()));
 			map.put(ContextConfig.CONF_EXECONLOAN, String.valueOf(fc.execOnLoad()));
 			map.put(ContextConfig.CONF_STOPWITHNOSCHEDULE, String.valueOf(fc.stopWithNoSchedule()));
-			map.put(ContextConfig.CONF_REMARK, String.valueOf(fc.remark()));
+			map.put(ContextConfig.CONF_REMARK, fc.remark());
 
 			String name = fc.name();
 			if(StringUtils.isBlank(name)){
@@ -422,7 +414,7 @@ public class ContextManager {
 			map.put(ContextConfig.CONF_CANCELLABLE, String.valueOf(fc.cancellable()));
 			map.put(ContextConfig.CONF_EXECONLOAN, String.valueOf(fc.execOnLoad()));
 			map.put(ContextConfig.CONF_STOPWITHNOSCHEDULE, String.valueOf(fc.stopWithNoSchedule()));
-			map.put(ContextConfig.CONF_REMARK, String.valueOf(fc.remark()));
+			map.put(ContextConfig.CONF_REMARK, fc.remark());
 		}
 
 		Context.localName.set(name); 
@@ -430,7 +422,7 @@ public class ContextManager {
 		
 		Context<?> context = new Context<Object>(){
 			@Override
-			protected Collection<Task<Object>> scheduleBatch() throws Exception {
+			protected Collection<Task<Object>> scheduleBatch() {
 				Task<Object> task = new Task<Object>(name + "-task"){
 					@Override
 					protected Object exec() throws Exception { 
@@ -448,8 +440,7 @@ public class ContextManager {
 		};
 
 		//扫描FomContfig
-		Field[] fields = clazz.getDeclaredFields();
-		for(Field f : fields){
+		for(Field f : clazz.getDeclaredFields()){
 			FomConfig c = f.getAnnotation(FomConfig.class);
 			if(c != null){
 				valueField(f, instance, c.key(), c.value(), context, putConfig);
@@ -520,7 +511,7 @@ public class ContextManager {
 			map.put(ContextConfig.CONF_CANCELLABLE, String.valueOf(fc.cancellable()));
 			map.put(ContextConfig.CONF_EXECONLOAN, String.valueOf(fc.execOnLoad()));
 			map.put(ContextConfig.CONF_STOPWITHNOSCHEDULE, String.valueOf(fc.stopWithNoSchedule()));
-			map.put(ContextConfig.CONF_REMARK, String.valueOf(fc.remark()));
+			map.put(ContextConfig.CONF_REMARK, fc.remark());
 		}
 
 		Context.localName.set(name); 
@@ -556,7 +547,7 @@ public class ContextManager {
 
 	private static void valueField(
 			Field field, Object instance, String key, String value, Context<?> context, boolean putConfig) throws Exception{
-		if(value.indexOf("${") != -1){ 
+		if(value.contains("${")){
 			value = SpringContext.getPropertiesValue(value);
 		}
 

@@ -45,7 +45,7 @@ class MapUtils {
 	 * @param key key
 	 * @param map map
 	 * @param defaultValue defaultValue
-	 * @return
+	 * @return int
 	 */
 	@SuppressWarnings("rawtypes")
 	public static <T> int getInt(T key, Map map, int defaultValue){
@@ -54,7 +54,7 @@ class MapUtils {
 		}
 		
 		String v = String.valueOf(map.get(key));
-		if(v.indexOf("${") != -1){ 
+		if(v.contains("${")){
 			v = SpringContext.getPropertiesValue(v);
 		}
 		
@@ -70,7 +70,7 @@ class MapUtils {
 	 * @param key key
 	 * @param map map
 	 * @param defaultValue defaultValue
-	 * @return
+	 * @return long
 	 */
 	@SuppressWarnings("rawtypes")
 	public static <T> long getLong(T key, Map map, long defaultValue){
@@ -79,7 +79,7 @@ class MapUtils {
 		}
 		
 		String v = String.valueOf(map.get(key));
-		if(v.indexOf("${") != -1){ 
+		if(v.contains("${")){
 			v = SpringContext.getPropertiesValue(v);
 		}
 		
@@ -95,7 +95,7 @@ class MapUtils {
 	 * @param key key
 	 * @param map map
 	 * @param defaultValue defaultValue
-	 * @return
+	 * @return boolean
 	 */
 	@SuppressWarnings("rawtypes")
 	public static <T> boolean getBoolean(T key, Map map, boolean defaultValue){
@@ -104,7 +104,7 @@ class MapUtils {
 		}
 		
 		String v = String.valueOf(map.get(key));
-		if(v.indexOf("${") != -1){ 
+		if(v.contains("${")){
 			v = SpringContext.getPropertiesValue(v);
 		}
 		
@@ -120,7 +120,7 @@ class MapUtils {
 	 * @param key key
 	 * @param map map
 	 * @param defaultValue defaultValue
-	 * @return
+	 * @return String
 	 */
 	@SuppressWarnings("rawtypes")
 	public static <T> String getString(T key, Map map, String defaultValue){
@@ -129,7 +129,7 @@ class MapUtils {
 		}
 		
 		String v = String.valueOf(map.get(key));
-		if(v.indexOf("${") != -1){ 
+		if(v.contains("${")){
 			v = SpringContext.getPropertiesValue(v);
 		}
 		return v;

@@ -62,7 +62,7 @@ public class Monitor {
 				try {
 					INSTANCE.monitorJvm();
 				} catch (InterruptedException e) {
-					return;
+					LOG.error("", e);
 				}
 			}
 		};
@@ -133,7 +133,7 @@ public class Monitor {
 		builder.append("\nprocessors[available]: ").append(processors);
 
 		double rate = ((double) currUsedTime) / passedTime / processors;
-		builder.append("\nCPU[rate]: " + format.format(rate));
+		builder.append("\nCPU[rate]: ").append(format.format(rate));
 		LOG.info(builder.toString()); 
 	}
 
@@ -144,7 +144,7 @@ public class Monitor {
 				try {
 					INSTANCE.monitorDisk();
 				} catch (SigarException e) {
-					return;
+					LOG.error("", e);
 				}
 			}
 		};
@@ -182,7 +182,7 @@ public class Monitor {
 				try {
 					INSTANCE.monitorMemory();
 				} catch (SigarException e) {
-					return;
+					LOG.error("", e);
 				}
 			}
 		};
@@ -211,7 +211,7 @@ public class Monitor {
 				try {
 					INSTANCE.monitorCpu();
 				} catch (SigarException e) {
-					return;
+					LOG.error("", e);
 				}
 			}
 		};
@@ -222,12 +222,12 @@ public class Monitor {
 	private void monitorCpu() throws SigarException { 
 		Sigar sigar = new Sigar();
 		StringBuilder builder = new StringBuilder("======= cpu status: ");
-		CpuInfo infos[] = sigar.getCpuInfoList();
-		CpuPerc cpuList[] = sigar.getCpuPercList();
+		CpuInfo[] infos = sigar.getCpuInfoList();
+		CpuPerc[] cpuList = sigar.getCpuPercList();
 		for (int i = 0; i < infos.length; i++) {
 			CpuInfo info = infos[i];
 			CpuPerc perc = cpuList[i];
-			builder.append("\ncpu_" + (i + 1));
+			builder.append("\ncpu_").append(i + 1);
 			builder.append("\ncpu总量MHz: ").append(info.getMhz());
 			builder.append("\ncpu缓存数量: ").append(info.getCacheSize());
 			builder.append("\ncpu总的使用率: ").append(CpuPerc.format(perc.getCombined()));
@@ -247,7 +247,7 @@ public class Monitor {
 				try {
 					INSTANCE.monitorNetwork();
 				} catch (SigarException e) {
-					return;
+					LOG.error("", e);
 				}
 			}
 		};

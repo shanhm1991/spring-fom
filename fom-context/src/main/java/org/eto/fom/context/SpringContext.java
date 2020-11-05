@@ -36,8 +36,8 @@ public class SpringContext implements ApplicationContextAware, EmbeddedValueReso
 
 	/**
 	 * 获取spring环境配置
-	 * @param name
-	 * @return
+	 * @param name name
+	 * @return String
 	 */
 	public static String getPropertiesValue(String name) {
 		return stringValueResolver.resolveStringValue(name);
@@ -45,22 +45,19 @@ public class SpringContext implements ApplicationContextAware, EmbeddedValueReso
 	
 	/**
 	 * 获取应用下的资源路径
-	 * @param path
-	 * @return
-	 * @throws IOException 
+	 * @param path path
+	 * @return String
+	 * @throws IOException IOException
 	 */
 	public static String getPath(String path) throws IOException{
 		Resource resource = applicationContext.getResource(path);
-		if(resource != null){
-			return resource.getFile().getPath();
-		}
-		return "";
+		return resource.getFile().getPath();
 	}
 	
 	/**
 	 * 获取应用下的资源
-	 * @param path
-	 * @return
+	 * @param path path
+	 * @return Resource
 	 */
 	public static Resource getResource(String path){
 		return applicationContext.getResource(path);
@@ -68,9 +65,9 @@ public class SpringContext implements ApplicationContextAware, EmbeddedValueReso
 	
 	/**
 	 * 获取应用下的资源
-	 * @param path 
-	 * @return
-	 * @throws IOException 
+	 * @param path path
+	 * @return Resource[]
+	 * @throws IOException IOException
 	 */
 	public static Resource[] getResources(String path) throws IOException{
 		return applicationContext.getResources(path);
@@ -81,10 +78,9 @@ public class SpringContext implements ApplicationContextAware, EmbeddedValueReso
 	 * @param id id
 	 * @param clzz class
 	 * @return bean 
-	 * @throws Exception Exception
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T getBean(String id, Class<T> clzz) throws Exception {
+	public static <T> T getBean(String id, Class<T> clzz) {
 		return (T)applicationContext.getBean(id);
 	}
 

@@ -42,7 +42,7 @@ class ContextStatistics {
 
 	long allMax = 0;
 
-	private Object lock_all = new Object();
+	private final Object lock_all = new Object();
 
 	AtomicLong failedCount = new AtomicLong(0);
 
@@ -65,9 +65,9 @@ class ContextStatistics {
 
 	long level5 = COSTLEVEL_5;
 
-	private Object lock_level = new Object();
+	private final Object lock_level = new Object();
 
-	LinkedList<String> daysHaveSaved = new LinkedList<>(); 
+	final LinkedList<String> daysHaveSaved = new LinkedList<>();
 
 	ConcurrentHashMap<String, Queue<CostDetail>> successMap = new ConcurrentHashMap<>();
 
@@ -215,11 +215,11 @@ class ContextStatistics {
 	}
 
 	public void dayDetail(Map<String, Object> map, String day) throws Exception{
-		long l1 = 0;
-		long l2 = 0;
-		long l3 = 0;
-		long l4 = 0;
-		long l5 = 0;
+		long l1;
+		long l2;
+		long l3;
+		long l4;
+		long l5;
 		synchronized(lock_level){
 			l1 = this.level1;
 			l2 = this.level2;
