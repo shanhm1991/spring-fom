@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.net.SocketClient;
 import org.apache.log4j.Logger;
 

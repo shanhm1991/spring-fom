@@ -58,7 +58,7 @@ public final class DownloadTask extends Task<Boolean> {
 	}
 
 	@Override
-	protected boolean beforeExec() throws Exception {
+	public boolean beforeExec() throws Exception {
 		File dest = new File(destPath);
 		if(!dest.exists() && !dest.mkdirs()){
 			log.error("directory create failed: {}", dest); 
@@ -94,7 +94,7 @@ public final class DownloadTask extends Task<Boolean> {
 	}
 
 	@Override
-	protected Boolean exec() throws Exception {
+	public Boolean exec() throws Exception {
 		long sTime = System.currentTimeMillis();
 		helper.download(id, downloadFile);
 		String size = new DecimalFormat("#.###").format(downloadFile.length() / FILE_UNIT);
@@ -105,7 +105,7 @@ public final class DownloadTask extends Task<Boolean> {
 	}
 
 	@Override
-	protected void afterExec(boolean isExecSuccess, Boolean content, Throwable e) throws Exception {
+	public void afterExec(boolean isExecSuccess, Boolean content, Throwable e) throws Exception {
 		if(isWithTemp && downloadFile.exists() 
 				&& !downloadFile.renameTo(new File(destPath + File.separator + downloadFile.getName()))){
 			log.error("move file failed: {}", downloadFile.getName());

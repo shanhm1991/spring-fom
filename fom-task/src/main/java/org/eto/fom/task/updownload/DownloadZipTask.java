@@ -97,7 +97,7 @@ public class DownloadZipTask extends Task<Boolean> {
 	}
 
 	@Override
-	protected boolean beforeExec() throws Exception {
+	public boolean beforeExec() throws Exception {
 		File dest = new File(destPath);
 		if(!dest.exists() && !dest.mkdirs()){
 			log.error("directory create failed: {}", dest); 
@@ -122,14 +122,14 @@ public class DownloadZipTask extends Task<Boolean> {
 	}
 
 	@Override
-	protected Boolean exec() throws Exception {
+	public Boolean exec() throws Exception {
 		return indexDownloadZip(zip.exists(), false) 
 				&& downloadIntoZip() 
 				&& indexDownloadZip(false, true);
 	}
 
 	@Override
-	protected void afterExec(boolean isExecSuccess, Boolean content, Throwable e) throws Exception {
+	public void afterExec(boolean isExecSuccess, Boolean content, Throwable e) throws Exception {
 		File tempDir = new File(cachePath);
 		File[] files = tempDir.listFiles();
 		if(ArrayUtils.isEmpty(files)){

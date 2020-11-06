@@ -41,7 +41,7 @@ public abstract class ParseTextTask<V, E> extends ParseTask<V, E> {
 	}
 
 	@Override
-	protected boolean beforeExec() throws Exception { 
+	public boolean beforeExec() throws Exception { 
 		String logName = new File(id).getName();
 		if(StringUtils.isBlank(getName())){
 			this.progressLog = new File(System.getProperty("cache.parse") + File.separator + logName + ".log");
@@ -74,7 +74,7 @@ public abstract class ParseTextTask<V, E> extends ParseTask<V, E> {
 	}
 
 	@Override
-	protected E exec() throws Exception {
+	public E exec() throws Exception {
 		long sTime = System.currentTimeMillis();
 		E e = parseTxt(id, getSourceName(id), rowIndex);
 		log.info("finish file({}KB), cost={}ms", formatSize(getSourceSize(id)), System.currentTimeMillis() - sTime);
@@ -174,7 +174,7 @@ public abstract class ParseTextTask<V, E> extends ParseTask<V, E> {
 	protected abstract E onTextComplete(String sourceUri, String sourceName) throws Exception;
 
 	@Override
-	protected void afterExec(boolean isExecSuccess, E content, Throwable e) throws Exception {
+	public void afterExec(boolean isExecSuccess, E content, Throwable e) throws Exception {
 		if(!(deleteSource(id) && deleteProgressLog())){
 			log.warn("clean failed.");
 		}

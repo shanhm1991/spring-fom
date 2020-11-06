@@ -104,7 +104,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	 * @return isSuccess
 	 * @throws Exception Exception
 	 */
-	protected boolean beforeExec() throws Exception {
+	public boolean beforeExec() throws Exception {
 		return true;
 	}
 
@@ -113,7 +113,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	 * @return E
 	 * @throws Exception Exception
 	 */
-	protected abstract E exec() throws Exception;
+	public abstract E exec() throws Exception;
 
 	/**
 	 * 任务执行后的工作
@@ -122,7 +122,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	 * @param e exec抛出异常
 	 * @throws Exception Exception
 	 */
-	protected void afterExec(boolean isExecSuccess,  E content, Throwable e) throws Exception {
+	public void afterExec(boolean isExecSuccess,  E content, Throwable e) throws Exception {
 
 	}
 

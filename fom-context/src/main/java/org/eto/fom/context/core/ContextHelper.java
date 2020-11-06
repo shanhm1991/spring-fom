@@ -33,6 +33,7 @@ import org.eto.fom.context.Loader;
 import org.eto.fom.context.SpringContext;
 import org.eto.fom.context.annotation.FomContext;
 import org.eto.fom.context.core.ContextStatistics.CostDetail;
+import org.eto.fom.util.log.SlfLoggerFactory;
 
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
@@ -249,6 +250,8 @@ public class ContextHelper {
 		}
 
 		refreshField(context);
+		org.slf4j.Logger log = SlfLoggerFactory.getLogger(name);
+		log.info("config saved: " + context.config); 
 
 		map.put("result", true);//已经更新成功
 		if(context.config.valueMap.equals(bakMap)){ 
@@ -264,6 +267,7 @@ public class ContextHelper {
 		return map;
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static void refreshField(Context context) throws Exception {
 		Class<?> clazz = context.getClass();
 		Object instance = context;

@@ -682,7 +682,7 @@ public class Context<E> {
 	 * 周期执行任务
 	 * @return task
 	 */
-	protected Task<E> schedule() {
+	protected Task<E> schedule() throws Exception {
 		return null;
 	}
 

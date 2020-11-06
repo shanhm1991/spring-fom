@@ -58,7 +58,7 @@ public abstract class ParseTextZipTask<V, E> extends ParseTextTask<V, E> {
 	}
 
 	@Override
-	protected boolean beforeExec() throws Exception {
+	public boolean beforeExec() throws Exception {
 		String sourceName = new File(id).getName();
 		if(StringUtils.isBlank(getName())){
 			this.progressLog = new File(System.getProperty("cache.parse") + File.separator + sourceName + ".log");
@@ -155,12 +155,12 @@ public abstract class ParseTextZipTask<V, E> extends ParseTextTask<V, E> {
 	}
 
 	@Override
-	protected E exec() throws Exception {
+	public E exec() throws Exception {
 		return parseFiles();
 	}
 
 	@Override
-	protected void afterExec(boolean isExecSuccess, E content, Throwable e) throws Exception {
+	public void afterExec(boolean isExecSuccess, E content, Throwable e) throws Exception {
 		if(unzipDir.exists()){ 
 			File[] fileArray = unzipDir.listFiles();
 			if(!ArrayUtils.isEmpty(fileArray)){

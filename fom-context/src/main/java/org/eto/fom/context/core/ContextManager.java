@@ -426,7 +426,7 @@ public class ContextManager {
 			protected Collection<Task<Object>> scheduleBatch() {
 				Task<Object> task = new Task<Object>(name + "-task"){
 					@Override
-					protected Object exec() throws Exception {
+					public Object exec() throws Exception {
 						for(Method method : methods){
 							method.invoke(instance);
 						}

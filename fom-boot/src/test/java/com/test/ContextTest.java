@@ -30,7 +30,7 @@ public class ContextTest extends Context<Boolean> {
 		}
 
 		@Override
-		protected Boolean exec() throws Exception {
+		public Boolean exec() throws Exception {
 			System.out.println("task executing...");
 			Thread.sleep(20000); 
 			return true;

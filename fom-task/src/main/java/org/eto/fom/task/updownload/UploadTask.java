@@ -53,7 +53,7 @@ public class UploadTask extends Task<Boolean> {
 	}
 	
 	@Override
-	protected boolean beforeExec() throws Exception {
+	public boolean beforeExec() throws Exception {
 		if(!file.exists()){
 			log.warn("file not exist.");
 			return false;
@@ -62,7 +62,7 @@ public class UploadTask extends Task<Boolean> {
 	}
 
 	@Override
-	protected Boolean exec() throws Exception {
+	public Boolean exec() throws Exception {
 		long sTime = System.currentTimeMillis();
 		String size = new DecimalFormat("#.###").format(file.length() / FILE_UNIT);
 		int code = helper.upload(file, destUri);
@@ -77,7 +77,7 @@ public class UploadTask extends Task<Boolean> {
 	}
 	
 	@Override
-	protected void afterExec(boolean isExecSuccess, Boolean content, Throwable e) throws Exception {
+	public void afterExec(boolean isExecSuccess, Boolean content, Throwable e) throws Exception {
 		if(isDelSrc && !file.delete()){
 			log.warn("delete file failed.");
 		}

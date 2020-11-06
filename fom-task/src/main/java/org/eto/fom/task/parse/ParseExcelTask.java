@@ -49,7 +49,7 @@ public abstract class ParseExcelTask<V, E> extends ParseTask<V, E> {
 	}
 
 	@Override
-	protected boolean beforeExec() throws Exception { 
+	public boolean beforeExec() throws Exception { 
 		String logName = new File(id).getName();
 		if(StringUtils.isBlank(getName())){
 			this.progressLog = new File(System.getProperty("cache.parse") + File.separator + logName + ".log");
@@ -84,7 +84,7 @@ public abstract class ParseExcelTask<V, E> extends ParseTask<V, E> {
 	}
 
 	@Override
-	protected E exec() throws Exception {
+	public E exec() throws Exception {
 		return parseExcel(id, getSourceName(id), rowIndex);
 	}
 
@@ -236,7 +236,7 @@ public abstract class ParseExcelTask<V, E> extends ParseTask<V, E> {
 	protected abstract void batchProcess(List<V> batchData, long batchTime) throws Exception;
 
 	@Override
-	protected void afterExec(boolean isExecSuccess, E content, Throwable e) throws Exception {
+	public void afterExec(boolean isExecSuccess, E content, Throwable e) throws Exception {
 		if(!(deleteSource(id) && deleteProgressLog())){
 			log.warn("clean failed.");
 		}

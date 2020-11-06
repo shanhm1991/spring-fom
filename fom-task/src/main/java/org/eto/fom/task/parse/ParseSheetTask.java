@@ -83,7 +83,7 @@ public abstract class ParseSheetTask<E> extends ParseExcelTask<Map<String, Objec
 	 * 加载解析规则以及其他配置，解压zip找到需要处理的Excel
 	 */
 	@Override
-	protected boolean beforeExec() throws Exception {
+	public boolean beforeExec() throws Exception {
 
 		excel = findExcel();
 
@@ -134,7 +134,7 @@ public abstract class ParseSheetTask<E> extends ParseExcelTask<Map<String, Objec
 	protected void initExcelRule() throws DocumentException, FileNotFoundException {  
 		if(StringUtils.isBlank(excelRule)){ //可以手动赋值excelRule或者将excelRule放在context的config中
 			if(getConfig() != null){
-				excelRule = getConfig().getString("excelRule", "");
+				excelRule = getConfig().getString("parse.excel.rule", "");
 			}
 		}
 		
@@ -187,7 +187,7 @@ public abstract class ParseSheetTask<E> extends ParseExcelTask<Map<String, Objec
 	}
 	
 	@Override
-	protected void afterExec(boolean isExecSuccess, E content, Throwable e) throws Exception {
+	public void afterExec(boolean isExecSuccess, E content, Throwable e) throws Exception {
 		clean();
 	}
 
@@ -326,7 +326,7 @@ public abstract class ParseSheetTask<E> extends ParseExcelTask<Map<String, Objec
 		}
 	}
 
-	protected void parseValue(String value, String type, String field, Map<String,Object> data, String columnName){
+	protected void parseValue(String value, String type, String field, Map<String,Object> data, String columnName) throws Exception {
 		if(StringUtils.isBlank(value)){ 
 			return;
 		}
