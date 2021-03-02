@@ -393,11 +393,6 @@ public class ContextManager {
 			return;
 		}
 
-		if(StringUtils.isBlank(cron)){
-			LOG.warn("ignore context, " + clazz + " hasn't cron expression.");
-			return;
-		}
-
 		SpringRegistry registry = SpringContext.getBean(SpringRegistry.class);
 		final Object instance = clazz.newInstance();
 		registry.regist(name + "-task", instance);

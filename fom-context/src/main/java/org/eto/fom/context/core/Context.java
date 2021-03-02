@@ -5,7 +5,6 @@ import static org.eto.fom.context.core.State.RUNNING;
 import static org.eto.fom.context.core.State.SLEEPING;
 import static org.eto.fom.context.core.State.STOPPED;
 import static org.eto.fom.context.core.State.STOPPING;
-import static org.eto.fom.context.core.State.WAITING;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -23,6 +22,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -33,9 +33,9 @@ import org.eto.fom.context.Monitor;
 import org.eto.fom.context.annotation.FomContext;
 import org.eto.fom.util.log.SlfLoggerFactory;
 import org.slf4j.Logger;
+import org.springframework.util.Assert;
 
 import com.google.gson.annotations.Expose;
-import org.springframework.util.Assert;
 
 /**
  * 模块最小单位，相当于一个组织者的角色，负责创建和组织Task的运行
@@ -309,7 +309,7 @@ public class Context<E> {
 				log.warn("context[{}] is stopping, cann't startup.", name); 
 				return map;
 			case RUNNING:
-			case WAITING:
+//			case WAITING:
 			case SLEEPING:
 				map.put("result", true);
 				map.put("msg", "context[" + name + "] was already startup.");
@@ -347,7 +347,7 @@ public class Context<E> {
 				log.warn("context[{}] is stopping, cann't stop.", name); 
 				return map;
 			case RUNNING:
-			case WAITING:
+//			case WAITING:
 			case SLEEPING:
 				state = STOPPING;
 				if(innerThread.isAlive()){
@@ -395,11 +395,11 @@ public class Context<E> {
 				map.put("msg", "context[" + name + "] is executing, and will re-executr immediately after completion .");
 				log.info("context[{}] is executing, and will re-executr immediately after completion .", name); 
 				return map;
-			case WAITING:
-				map.put("result", false);
-				map.put("msg", "context[" + name + "] is waiting for task completion.");
-				log.info("context[{}] is waiting for task completion.", name); 
-				return map;
+//			case WAITING:
+//				map.put("result", false);
+//				map.put("msg", "context[" + name + "] is waiting for task completion.");
+//				log.info("context[{}] is waiting for task completion.", name); 
+//				return map;
 			case SLEEPING:
 				innerThread.interrupt();
 				map.put("result", true);
@@ -472,19 +472,8 @@ public class Context<E> {
 						}
 					}
 
-					if(config.getStopWithNoSchedule()){
-						terminate();
-						return;
-					}else{
-						switchState(SLEEPING);
-						synchronized (this) {
-							try {
-								wait();
-							} catch (InterruptedException e) {
-								//借助interrupted标记来中断睡眠，立即重新执行
-							}
-						}
-					}
+					terminate(); // 一次性任务结束
+					return;
 				}
 			}
 		}
@@ -514,6 +503,9 @@ public class Context<E> {
 					nextTime = System.currentTimeMillis() + config.getFixedDelay() * UNIT;
 				}
 			}else{
+				if(scheduleBatch != null){
+					scheduleBatch.waitCaculateCountDown();
+				}
 				nextTime = 0;
 			}
 		}
@@ -545,14 +537,14 @@ public class Context<E> {
 				Assert.notNull(task, "");
 				log.warn("task[" + task.getId() + "] submit rejected.", e);
 			}finally{ 
-				schedulebatch.countDownSubmit();
+				schedulebatch.completeSubmit();
 				checkScheduleComplete(schedulebatch);
 				caculateNextTime(schedulebatch); 
 			}
 		}
 
 		private void terminate(){
-			switchState(WAITING);
+			//switchState(WAITING);
 			config.pool.shutdown();
 
 			if(waitTask()){
@@ -567,6 +559,13 @@ public class Context<E> {
 		private boolean waitTask(){
 			boolean isStopping = false;
 			while(true){
+				synchronized (Context.this) {
+					if(state == STOPPING){
+						isStopping = true;
+						config.pool.shutdownNow();
+					}
+				}
+				
 				try {
 					if(config.pool.awaitTermination(1, TimeUnit.DAYS)){
 						log.info("context[{}] stoped.", name);
@@ -576,14 +575,7 @@ public class Context<E> {
 						return false;
 					}
 				} catch (InterruptedException e) {
-					log.warn("interrupted when waiting executing task."); 
-				}
-
-				synchronized (Context.this) {
-					if(state == STOPPING){
-						isStopping = true;
-						config.pool.shutdownNow();
-					}
+					log.warn("interrupt ignore when waiting task completetion."); 
 				}
 			}
 		}
@@ -648,7 +640,7 @@ public class Context<E> {
 			Assert.notNull(task, "");
 			log.warn("task[" + task.getId() + "] submit rejected.", e);
 		}finally{ 
-			scheduleBatch.countDownSubmit();
+			scheduleBatch.completeSubmit();
 			checkScheduleComplete(scheduleBatch);
 		}
 	}
@@ -710,7 +702,7 @@ public class Context<E> {
 	void checkScheduleComplete(ScheduleBatch<E> scheduleBatch) throws InterruptedException{
 		String s = scheduleBatch.isSchedul ? "schedul" : "submit";
 		boolean isLastTaskComplete = scheduleBatch.isLastTaskComplete();
-		boolean hasCountDown = scheduleBatch.hasSubmitCountDown();
+		boolean hasCountDown = scheduleBatch.hasSubmitCompleted();
 		if(log.isDebugEnabled()){
 			log.debug(s + "[" + scheduleBatch.getBatch() + "], isSubmitFinished：" 
 					+ hasCountDown + ", taskNotCompleted：" + scheduleBatch.getTaskNotCompleted()); 
@@ -790,18 +782,18 @@ public class Context<E> {
 
 		private final List<Result<E>> list = new ArrayList<>();
 
-		private final CountDownLatch submitLatch = new CountDownLatch(1);
+		private volatile boolean hasSubmitCompleted = false;
 
-		private final AtomicLong taskNotCompleted = new AtomicLong(1);
+		private final AtomicInteger taskNotCompleted = new AtomicInteger(1);
 
 		private final CountDownLatch caculateLatch = new CountDownLatch(1);
 
-		public void countDownSubmit(){
-			submitLatch.countDown();
+		public void completeSubmit(){
+			hasSubmitCompleted = true;
 		}
 
-		public boolean hasSubmitCountDown() throws InterruptedException{
-			return submitLatch.await(0, TimeUnit.MILLISECONDS);
+		public boolean hasSubmitCompleted(){
+			return hasSubmitCompleted;
 		}
 
 		public void countDownCaculate(){

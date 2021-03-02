@@ -82,13 +82,13 @@ class ContextStatistics {
 	
 	public void statistics(Result<?> result){
 		if(result.isSuccess()){
-			successIncrease(result.getTaskId(), result.getCostTime(), result.getCreateTime(), result.getStartTime());
+			successIncrease(result.getTaskId(), result.getCostTime(), result.getCreateTime(), result.getStartTime(), result.getContent());
 		}else{
 			failedIncrease(result.getTaskId(), result); 
 		}
 	}
 
-	private void successIncrease(String taskId, long cost, long createTime, long startTime){
+	private void successIncrease(String taskId, long cost, long createTime, long startTime, Object content){
 		if(cost < COSTLEVEL_1){
 			allCostMap.get(COSTLEVEL_1).incrementAndGet();
 		}else if(cost < COSTLEVEL_2){
@@ -129,6 +129,7 @@ class ContextStatistics {
 		costDetail.cost = cost;
 		costDetail.createTime = createTime;
 		costDetail.startTime = startTime;
+		costDetail.result = content;
 		queue.offer(costDetail); 
 
 		failedMap.remove(taskId);
@@ -316,6 +317,8 @@ class ContextStatistics {
 		public long startTime;
 
 		public long cost;
+		
+		public Object result;
 
 	}
 }

@@ -795,6 +795,7 @@ public class ContextHelper {
 			array = queue.toArray(array);
 			for(int i = 0;i < array.length;i++){
 				builder.append("{\"id\":\"").append(array[i].id).append("\",");
+				builder.append("\"result\":\"").append(array[i].result).append("\",");
 				builder.append("\"createTime\":\"").append(array[i].createTime).append("\",");
 				builder.append("\"startTime\":\"").append(array[i].startTime).append("\",");
 				builder.append("\"costTime\":\"").append(array[i].cost).append("\"}");

@@ -17,7 +17,7 @@ public class SimpleDemo {
 		
 		Task<Boolean> task = new Task<Boolean>("SimpleTask"){
 			@Override
-			protected Boolean exec() throws Exception {
+			public Boolean exec() throws Exception {
 				Thread.sleep(5000); 
 				return true;
 			}

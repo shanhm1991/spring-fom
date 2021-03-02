@@ -35,7 +35,7 @@ public class InputEsTask extends ParseTextTask<Map<String, Object>, Boolean> {
 	}
 
 	@Override
-	protected boolean beforeExec() throws Exception {
+	public boolean beforeExec() throws Exception {
 		if(super.beforeExec() && EsHandler.handler.synCreateIndex(POOL, esIndex, esType, esJson)){
 			log.info("创建ES索引[index=" + "demo" + ", type=" + "demo" + "]");
 			return true;
