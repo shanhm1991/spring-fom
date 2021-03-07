@@ -17,7 +17,7 @@ import org.eto.fom.context.core.Task;
 public class ContextTest extends Context<Boolean> {
 	
 	@Override
-	protected Collection<SelfTask> scheduleBatch() throws Exception {
+	public Collection<SelfTask> newSchedulTasks() throws Exception {
 		Set<SelfTask> set = new HashSet<>();
 		set.add(new SelfTask("demoTask"));
 		return set;

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- 加载优先级：cache > xml > 注解（@FomContext > @FomSchedul > @FomSchedulBatch） -->
+<!-- 加载优先级：cache > xml > 注解（@FomContext > @FomSchedul） -->
 <fom>
 	<includes>
 		<include>**/fom*.xml</include>

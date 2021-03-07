@@ -11,6 +11,7 @@
 		<module>fom-task</module>
 		<module>fom-util</module>
 		<module>fom-boot</module>
+		<module>fom-example</module>
 	</modules>
 
 	<properties>
