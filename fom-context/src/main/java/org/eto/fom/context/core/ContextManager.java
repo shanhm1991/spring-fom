@@ -30,15 +30,16 @@ import org.eto.fom.context.SpringContext;
 import org.eto.fom.context.SpringRegistry;
 import org.eto.fom.context.annotation.FomContext;
 import org.eto.fom.context.annotation.FomSchedul;
-import org.eto.fom.context.annotation.FomSchedulBatch;
-import org.eto.fom.context.annotation.SchedulBatchFactory;
+import org.eto.fom.context.annotation.SchedulCompleter;
+import org.eto.fom.context.annotation.SchedulFactory;
+import org.eto.fom.context.annotation.SchedulTerminator;
 import org.reflections.Reflections;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.util.ReflectionUtils;
 
 import com.google.gson.Gson;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * context实例的管理
@@ -114,8 +115,6 @@ public class ContextManager {
 
 		loadFomSchedul(pckages);
 
-		loadFomSchedulBatch(pckages);
-
 		for(Entry<String, Context<?>> entry : loadedContext.entrySet()){
 			entry.getValue().startup();
 		}
@@ -140,7 +139,6 @@ public class ContextManager {
 				String name = (String)map.get("name");
 				String fom_context = (String)map.get("fom_context");
 				String fom_schedul = (String)map.get("fom_schedul");
-				String fom_schedulbatch = (String)map.get("fom_schedulbatch");
 
 				Map<String, Map<String, String>> config = (Map<String, Map<String, String>>) map.get("config");
 				Map<String, String> vMap= config.get("valueMap");
@@ -153,8 +151,6 @@ public class ContextManager {
 					context.regist(false);
 				}else if(StringUtils.isNotBlank(fom_schedul)){
 					loadFomSchedul(Class.forName(fom_schedul), valueMap, false);
-				}else if(StringUtils.isNotBlank(fom_schedulbatch)){
-					loadFomSchedulBatch(Class.forName(fom_schedulbatch), valueMap, false);
 				}else{
 					LOG.warn("not valid cache file：" + file.getName());
 				}
@@ -257,7 +253,6 @@ public class ContextManager {
 					map.put(ContextConfig.CONF_ALIVETIME, String.valueOf(fc.threadAliveTime()));
 					map.put(ContextConfig.CONF_CANCELLABLE, String.valueOf(fc.cancellable()));
 					map.put(ContextConfig.CONF_EXECONLOAN, String.valueOf(fc.execOnLoad()));
-					map.put(ContextConfig.CONF_STOPWITHNOSCHEDULE, String.valueOf(fc.stopWithNoSchedule()));
 					map.put(ContextConfig.CONF_REMARK, fc.remark());
 				}else{
 					name = clazz.getSimpleName();
@@ -319,7 +314,6 @@ public class ContextManager {
 			map.put(ContextConfig.CONF_ALIVETIME, String.valueOf(fc.threadAliveTime()));
 			map.put(ContextConfig.CONF_CANCELLABLE, String.valueOf(fc.cancellable()));
 			map.put(ContextConfig.CONF_EXECONLOAN, String.valueOf(fc.execOnLoad()));
-			map.put(ContextConfig.CONF_STOPWITHNOSCHEDULE, String.valueOf(fc.stopWithNoSchedule()));
 			map.put(ContextConfig.CONF_REMARK, fc.remark());
 
 			String name = fc.name();
@@ -387,14 +381,8 @@ public class ContextManager {
 			}
 		}
 
-		//没有@Scheduled方法，或者没有设置cron的就忽略
-		if(methods.isEmpty()){
-			LOG.warn("ignore context, " + clazz + " hasn't Scheduled method");
-			return;
-		}
-
-		SpringRegistry registry = SpringContext.getBean(SpringRegistry.class);
 		final Object instance = clazz.newInstance();
+		SpringRegistry registry = SpringContext.getBean(SpringRegistry.class);
 		registry.regist(name + "-task", instance);
 
 		if(map == null){
@@ -409,29 +397,50 @@ public class ContextManager {
 			map.put(ContextConfig.CONF_ALIVETIME, String.valueOf(fc.threadAliveTime()));
 			map.put(ContextConfig.CONF_CANCELLABLE, String.valueOf(fc.cancellable()));
 			map.put(ContextConfig.CONF_EXECONLOAN, String.valueOf(fc.execOnLoad()));
-			map.put(ContextConfig.CONF_STOPWITHNOSCHEDULE, String.valueOf(fc.stopWithNoSchedule()));
 			map.put(ContextConfig.CONF_REMARK, fc.remark());
 		}
 
 		Context.localName.set(name);
 		ContextConfig.loadedConfig.putIfAbsent(name, map);
-
-		Context<?> context = new Context<Object>(){
+		Context<Object> context = new Context<Object>(){
+			@SuppressWarnings("unchecked")
 			@Override
-			protected Collection<Task<Object>> scheduleBatch() {
-				Task<Object> task = new Task<Object>(name + "-task"){
-					@Override
-					public Object exec() throws Exception {
-						for(Method method : methods){
-							method.invoke(instance);
-						}
-						return null;
-					}
-				};
-
+			public Collection<Task<Object>> newSchedulTasks() throws Exception {
 				List<Task<Object>> list = new ArrayList<>();
-				list.add(task);
+				// 创建所有Scheduled方法对应的任务，但是共用一个定时计划
+				int index = 0;
+				for(Method method : methods){
+					Task<Object> task = new Task<Object>(name + "-task-" + ++index){
+						@Override
+						public Object exec() throws Exception {
+							return method.invoke(instance);
+						}
+					}; 
+					list.add(task);
+				}
+				
+				// 如果实现了SchedulFactory，将其创建的任务也算入
+				Collection<? extends Task<Object>> newTasks;
+				if(SchedulFactory.class.isAssignableFrom(clazz)
+						&& (newTasks = ((SchedulFactory<Object>)instance).newSchedulTasks()) != null){
+					list.addAll(newTasks);
+				}
 				return list;
+			}
+			
+			@SuppressWarnings("unchecked")
+			@Override
+			public void onScheduleComplete(long batch, long batchTime, List<Result<Object>> results) throws Exception {
+				if(SchedulCompleter.class.isAssignableFrom(clazz)){
+					((SchedulCompleter<Object>)instance).onScheduleComplete(batch, batchTime, results);  
+				}
+			}
+			
+			@Override
+			public void onScheduleTerminate(long schedulTimes, long lastTime) {
+				if(SchedulTerminator.class.isAssignableFrom(clazz)){
+					((SchedulTerminator)instance).onScheduleTerminate(schedulTimes, lastTime);
+				}
 			}
 		};
 
@@ -452,92 +461,6 @@ public class ContextManager {
 		}
 
 		context.fom_schedul = clazz.getName();
-		context.regist(putConfig);
-	}
-
-	private static void loadFomSchedulBatch(List<String> pckages) throws Exception {
-		Set<Class<?>> clazzs = new HashSet<>();
-		for(String pack : pckages){
-			Reflections reflections = new Reflections(pack.trim());
-			clazzs.addAll(reflections.getTypesAnnotatedWith(FomSchedulBatch.class));
-		}
-
-		if(clazzs.isEmpty()){
-			return;
-		}
-
-		LOG.info("load context with @FomSchedulBatch");
-		for(Class<?> clazz : clazzs){
-			loadFomSchedulBatch(clazz, null, true);
-		}
-	}
-
-	private static void loadFomSchedulBatch(
-			Class<?> clazz, ConcurrentHashMap<String, String> map, boolean putConfig) throws Exception {
-		if(!SchedulBatchFactory.class.isAssignableFrom(clazz)){
-			LOG.warn("ignore context, " + clazz + " isn't a implements of SchedulBatchFactory.");
-			return;
-		}
-
-		FomSchedulBatch fc = clazz.getAnnotation(FomSchedulBatch.class);
-		String name = fc.name();
-		if(StringUtils.isBlank(name)){
-			name = clazz.getSimpleName();
-		}
-
-		if(loadedContext.containsKey(name)){
-			LOG.warn("context[" + name + "] already exist, load ignored.");
-			return;
-		}
-
-		SpringRegistry registry = SpringContext.getBean(SpringRegistry.class);
-		final Object instance = clazz.newInstance();
-		registry.regist(name + "-task", instance);
-
-		if(map == null){
-			map = new ConcurrentHashMap<>();
-			map.put(ContextConfig.CONF_CRON, fc.cron());
-			map.put(ContextConfig.CONF_FIXEDRATE, String.valueOf(fc.fixedRate()));
-			map.put(ContextConfig.CONF_FIXEDDELAY, String.valueOf(fc.fixedDelay()));
-			map.put(ContextConfig.CONF_THREADCORE, String.valueOf(fc.threadCore()));
-			map.put(ContextConfig.CONF_THREADMAX, String.valueOf(fc.threadMax()));
-			map.put(ContextConfig.CONF_QUEUESIZE, String.valueOf(fc.queueSize()));
-			map.put(ContextConfig.CONF_OVERTIME, String.valueOf(fc.threadOverTime()));
-			map.put(ContextConfig.CONF_ALIVETIME, String.valueOf(fc.threadAliveTime()));
-			map.put(ContextConfig.CONF_CANCELLABLE, String.valueOf(fc.cancellable()));
-			map.put(ContextConfig.CONF_EXECONLOAN, String.valueOf(fc.execOnLoad()));
-			map.put(ContextConfig.CONF_STOPWITHNOSCHEDULE, String.valueOf(fc.stopWithNoSchedule()));
-			map.put(ContextConfig.CONF_REMARK, fc.remark());
-		}
-
-		Context.localName.set(name);
-		ContextConfig.loadedConfig.putIfAbsent(name, map);
-		Context<Object> context = new Context<Object>(){
-			@SuppressWarnings("unchecked")
-			@Override
-			protected Collection<? extends Task<Object>> scheduleBatch() throws Exception {
-				return ((SchedulBatchFactory<Object>)instance).creatTasks();
-			}
-		};
-
-		//扫描FomContfig
-		Field[] fields = clazz.getDeclaredFields();
-		for(Field f : fields){
-			Value v = f.getAnnotation(Value.class);
-			if(v != null){
-				valueField(f, instance, v.value(), context, putConfig);
-			}
-		}
-
-		//扫描PostConstruct
-		for(Method method : clazz.getMethods()){
-			PostConstruct con = method.getAnnotation(PostConstruct.class);
-			if(con != null){
-				method.invoke(instance);
-			}
-		}
-
-		context.fom_schedulbatch = clazz.getName();
 		context.regist(putConfig);
 	}
 

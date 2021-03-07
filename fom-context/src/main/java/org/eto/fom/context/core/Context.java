@@ -31,6 +31,9 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.eto.fom.context.Monitor;
 import org.eto.fom.context.annotation.FomContext;
+import org.eto.fom.context.annotation.SchedulCompleter;
+import org.eto.fom.context.annotation.SchedulFactory;
+import org.eto.fom.context.annotation.SchedulTerminator;
 import org.eto.fom.util.log.SlfLoggerFactory;
 import org.slf4j.Logger;
 import org.springframework.util.Assert;
@@ -45,9 +48,9 @@ import com.google.gson.annotations.Expose;
  * @param <E> 任务执行结果类型
  *
  */
-public class Context<E> {
+public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, SchedulTerminator {
 
-	private static final long UNIT = 1000;
+	private static final int SECOND_UNIT = 1000;
 
 	/**
 	 * 所有的Context共用，防止两个Context创建针对同一个文件的任务
@@ -100,13 +103,13 @@ public class Context<E> {
 	 * 周期执行次数
 	 */
 	@Expose
-	volatile long batchScheduls;
+	volatile long schedulTimes;
 
 	/**
 	 * 是否是在启动时执行
 	 */
 	@Expose
-	private boolean runOnStartup = true;
+	private boolean isFirstRun = true;
 
 	/**
 	 * 状态
@@ -115,10 +118,10 @@ public class Context<E> {
 	private State state = INITED; 
 
 	/**
-	 * 所有的任务提交总数数，每当次数达到1000时执行一次cleanFutures，定时线程和submit线程共享
+	 * 所有的任务提交总数数
 	 */
 	@Expose
-	private final AtomicLong submits = new AtomicLong();
+	private static final AtomicLong SUBMITS = new AtomicLong();
 
 	/**
 	 * 批任务提交次数
@@ -278,7 +281,7 @@ public class Context<E> {
 		synchronized (this) {
 			if(state == STOPPING && config.pool.isTerminated()){
 				state = STOPPED;
-				runOnStartup = true;
+				isFirstRun = true;
 			}
 			return state;
 		}
@@ -309,7 +312,7 @@ public class Context<E> {
 				log.warn("context[{}] is stopping, cann't startup.", name); 
 				return map;
 			case RUNNING:
-//			case WAITING:
+				//			case WAITING:
 			case SLEEPING:
 				map.put("result", true);
 				map.put("msg", "context[" + name + "] was already startup.");
@@ -347,7 +350,7 @@ public class Context<E> {
 				log.warn("context[{}] is stopping, cann't stop.", name); 
 				return map;
 			case RUNNING:
-//			case WAITING:
+				//			case WAITING:
 			case SLEEPING:
 				state = STOPPING;
 				if(innerThread.isAlive()){
@@ -357,7 +360,7 @@ public class Context<E> {
 					log.info("context[{}] is stopping.", name);
 				}else{
 					state = STOPPED;
-					runOnStartup = true;
+					isFirstRun = true;
 					map.put("result", true);
 					map.put("msg", "context[" + name + "] stopped.");
 					log.info("context[{}] stopped.", name);
@@ -395,11 +398,11 @@ public class Context<E> {
 				map.put("msg", "context[" + name + "] is executing, and will re-executr immediately after completion .");
 				log.info("context[{}] is executing, and will re-executr immediately after completion .", name); 
 				return map;
-//			case WAITING:
-//				map.put("result", false);
-//				map.put("msg", "context[" + name + "] is waiting for task completion.");
-//				log.info("context[{}] is waiting for task completion.", name); 
-//				return map;
+				//			case WAITING:
+				//				map.put("result", false);
+				//				map.put("msg", "context[" + name + "] is waiting for task completion.");
+				//				log.info("context[{}] is waiting for task completion.", name); 
+				//				return map;
 			case SLEEPING:
 				innerThread.interrupt();
 				map.put("result", true);
@@ -432,13 +435,13 @@ public class Context<E> {
 					isStopping = state == STOPPING;
 				}
 				if(isStopping){
-					stopSelf();
+					terminate();
 					return;
 				}
 
 				try{
-					if(runOnStartup && !config.getExecOnLoad()){
-						runOnStartup = false;
+					if(isFirstRun && !config.getExecOnLoad()){
+						isFirstRun = false;
 						caculateNextTime(null); 
 					}else{
 						runSchedul();
@@ -449,7 +452,7 @@ public class Context<E> {
 					log.error("", e);
 				}catch(Throwable e){
 					log.error("context[" + name + "] terminated unexpectedly", e); 
-					stopSelf();
+					terminate();
 					return;
 				}
 
@@ -490,17 +493,17 @@ public class Context<E> {
 					scheduleBatch.waitCaculateCountDown();
 				}
 			}else if(config.getFixedRate() > 0){
-				nextTime = last.getTime() + config.getFixedRate() * UNIT;
+				nextTime = last.getTime() + config.getFixedRate() * SECOND_UNIT;
 				if(scheduleBatch != null){
 					scheduleBatch.waitCaculateCountDown();
 				}
 			}else if(config.getFixedDelay() > 0){
 				if(scheduleBatch == null){
-					nextTime = last.getTime() + config.getFixedDelay() * UNIT; 
+					nextTime = last.getTime() + config.getFixedDelay() * SECOND_UNIT; 
 				}else{
 					nextTime = 0;
 					scheduleBatch.waitCaculateCountDown();
-					nextTime = System.currentTimeMillis() + config.getFixedDelay() * UNIT;
+					nextTime = System.currentTimeMillis() + config.getFixedDelay() * SECOND_UNIT;
 				}
 			}else{
 				if(scheduleBatch != null){
@@ -514,13 +517,15 @@ public class Context<E> {
 			cleanFutures();
 
 			switchState(RUNNING);
-			batchScheduls++;
+
+			schedulTimes++;
+
 			lastTime = System.currentTimeMillis();
 
-			ScheduleBatch<E> schedulebatch = new ScheduleBatch<>(true, batchScheduls, lastTime);
+			ScheduleBatch<E> schedulebatch = new ScheduleBatch<>(true, schedulTimes, lastTime);
 			Task<E> task = null;
 			try{
-				Collection<? extends Task<E>> tasks = scheduleBatch();
+				Collection<? extends Task<E>> tasks = newSchedulTasks();
 				if(!CollectionUtils.isEmpty(tasks)){
 					for (Task<E> t : tasks) {
 						task = t;
@@ -548,9 +553,13 @@ public class Context<E> {
 			config.pool.shutdown();
 
 			if(waitTask()){
-				onScheduleTerminate();
+				try{
+					onScheduleTerminate(schedulTimes, lastTime);
+				}catch(Exception e){
+					log.error("", e); 
+				}
 				switchState(STOPPED);
-				runOnStartup = true;
+				isFirstRun = true;
 			}
 
 			cleanFutures();
@@ -559,45 +568,25 @@ public class Context<E> {
 		private boolean waitTask(){
 			boolean isStopping = false;
 			while(true){
-				synchronized (Context.this) {
-					if(state == STOPPING){
-						isStopping = true;
-						config.pool.shutdownNow();
+				if(!isStopping){
+					synchronized (Context.this) {
+						if(state == STOPPING){
+							isStopping = true;
+							config.pool.shutdownNow();
+						}
 					}
 				}
-				
+
 				try {
 					if(config.pool.awaitTermination(1, TimeUnit.DAYS)){
 						log.info("context[{}] stoped.", name);
 						return true;
 					}else if(isStopping){
 						log.warn("context[{}] is still stopping, though has waiting for a day.", name);
-						return false;
 					}
 				} catch (InterruptedException e) {
 					log.warn("interrupt ignore when waiting task completetion."); 
 				}
-			}
-		}
-
-		private void stopSelf(){
-			config.pool.shutdownNow();
-			boolean stopSucc = false;
-			try {
-				stopSucc = config.pool.awaitTermination(1, TimeUnit.DAYS);
-			} catch (InterruptedException e) {
-				log.error("interrupted when stopping, which should never happened."); 
-			}
-
-			cleanFutures();
-
-			if(stopSucc){
-				onScheduleTerminate(); 
-				switchState(STOPPED); 
-				runOnStartup = true; // 线程临死前应该会将值同步到主内存，所以没有使用volatile修饰
-				log.info("context[{}] stoped.", name);
-			}else{
-				log.warn("context[{}] is still stopping, though has waiting for a day.", name);
 			}
 		}
 	}
@@ -652,9 +641,8 @@ public class Context<E> {
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public TimedFuture<Result<E>> submit(Task<E> task) {
-		if(submits.incrementAndGet() % UNIT == 0){
+		if(SUBMITS.incrementAndGet() % SECOND_UNIT == 0){
 			Monitor.jvm();
-			cleanFutures(); 
 		}
 
 		String taskId = task.getId();
@@ -678,12 +666,8 @@ public class Context<E> {
 		return null;
 	}
 
-	/**
-	 * 周期执行批量任务
-	 * @return task set
-	 * @throws Exception Exception
-	 */
-	protected Collection<? extends Task<E>> scheduleBatch() throws Exception {
+	@Override
+	public Collection<? extends Task<E>> newSchedulTasks() throws Exception {
 		List<Task<E>> list = new LinkedList<>();
 		Task<E> task = schedule();
 		if(task != null){
@@ -692,40 +676,37 @@ public class Context<E> {
 		return list;
 	}
 
-	/**
-	 * schedule终结时触发
-	 */
-	protected void onScheduleTerminate() {
+	@Override
+	public void onScheduleTerminate(long schedulTimes, long lastTime) {
 
 	}
 
 	void checkScheduleComplete(ScheduleBatch<E> scheduleBatch) throws InterruptedException{
 		String s = scheduleBatch.isSchedul ? "schedul" : "submit";
-		boolean isLastTaskComplete = scheduleBatch.isLastTaskComplete();
-		boolean hasCountDown = scheduleBatch.hasSubmitCompleted();
+		boolean isLastTaskComplete = scheduleBatch.hasTaskCompleted();
+		boolean hasSubmitCompleted = scheduleBatch.hasSubmitCompleted();
 		if(log.isDebugEnabled()){
-			log.debug(s + "[" + scheduleBatch.getBatch() + "], isSubmitFinished：" 
-					+ hasCountDown + ", taskNotCompleted：" + scheduleBatch.getTaskNotCompleted()); 
+			log.debug(s + "[" + scheduleBatch.getSchedulTimes() + "], isSubmitFinished：" 
+					+ hasSubmitCompleted + ", taskNotCompleted：" + scheduleBatch.getTaskNotCompleted()); 
 		}
 
-		if(isLastTaskComplete && hasCountDown){ 
+		if(isLastTaskComplete && hasSubmitCompleted){ 
 			if(log.isDebugEnabled()){
-				String time = new SimpleDateFormat("yyyyMMdd HH:mm:ss").format(scheduleBatch.getBatchTime());
+				String time = new SimpleDateFormat("yyyyMMdd HH:mm:ss").format(scheduleBatch.getSchedulTime());
 				log.debug(scheduleBatch.getList().size() +  " tasks of " + s 
-						+ "[" + scheduleBatch.getBatch() + "] submitted on " + time  + " completed.");
+						+ "[" + scheduleBatch.getSchedulTimes() + "] submitted on " + time  + " completed.");
 			}
-			onScheduleComplete(scheduleBatch.getBatch(), scheduleBatch.getBatchTime(), scheduleBatch.getList());
+			try{
+				onScheduleComplete(scheduleBatch.getSchedulTimes(), scheduleBatch.getSchedulTime(), scheduleBatch.getList());
+			}catch(Exception e){
+				log.error("", e); 
+			}
 			scheduleBatch.countDownCaculate();
 		}
 	}
 
-	/**
-	 * schedule任务完成时触发
-	 * @param batch 批次
-	 * @param batchTime 周期执行的时间点 
-	 * @param results 任务执行的结果集
-	 */
-	protected void onScheduleComplete(long batch, long batchTime, List<Result<E>> results) {
+	@Override
+	public void onScheduleComplete(long batchTimes, long batchTime, List<Result<E>> results) throws Exception {
 
 	}
 
@@ -743,26 +724,26 @@ public class Context<E> {
 				while(it.hasNext()){
 					Entry<String, TimedFuture<Result<?>>> entry = it.next();
 					TimedFuture<Result<?>> future = entry.getValue();
-					//只检测自己提交的任务
-					if(name.equals(future.getContextName())){   
-						String taskId = entry.getKey(); 
-						if(future.getStartTime() > 0 && !future.isDone()){
-							long existTime = (System.currentTimeMillis() - future.getStartTime()) / UNIT;
-							int threadOverTime = Integer.parseInt(config.get(ContextConfig.CONF_OVERTIME)); 
-							if(existTime > threadOverTime) {
-								log.warn("task overtime[{}], {}s", taskId, existTime);
-								if(Boolean.parseBoolean(config.get(ContextConfig.CONF_CANCELLABLE))) { 
-									future.cancel(true);
-								}
-							}
-							continue;
-						}
+					if(future.isDone()){
 						it.remove();
+						continue;
+					}
+
+					// 提示或取消超时任务
+					if(name.equals(future.getContextName()) && future.getStartTime() > 0){   
+						String taskId = entry.getKey(); 
+						long existTime = (System.currentTimeMillis() - future.getStartTime()) / SECOND_UNIT;
+						int threadOverTime = Integer.parseInt(config.get(ContextConfig.CONF_OVERTIME)); 
+						if(existTime > threadOverTime) {
+							log.warn("task overtime[{}], {}s", taskId, existTime);
+							if(Boolean.parseBoolean(config.get(ContextConfig.CONF_CANCELLABLE))) { 
+								future.cancel(true);
+							}
+						}
 					}
 				}
 			}
 		}.start();
-
 	}
 
 	/**
@@ -776,9 +757,9 @@ public class Context<E> {
 
 		private final boolean isSchedul;
 
-		private final long batch;
+		private final long schedulTimes;
 
-		private final long batchTime;
+		private final long schedulTime;
 
 		private final List<Result<E>> list = new ArrayList<>();
 
@@ -800,26 +781,30 @@ public class Context<E> {
 			caculateLatch.countDown();
 		}
 
-		public void waitCaculateCountDown() throws InterruptedException{
-			caculateLatch.await();
+		public void waitCaculateCountDown(){
+			try {
+				caculateLatch.await();
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt(); // 保留中断请求，留给后面wait处理
+			}
 		}
 
-		public ScheduleBatch(boolean isSchedul, long batch, long batchTime){
+		public ScheduleBatch(boolean isSchedul, long schedulTimes, long schedulTime){
 			this.isSchedul = isSchedul;
-			this.batch = batch;
-			this.batchTime = batchTime;
+			this.schedulTimes = schedulTimes;
+			this.schedulTime = schedulTime;
 		}
 
 		public boolean isSchedul() {
 			return isSchedul;
 		}
 
-		public long getBatch() {
-			return batch;
+		public long getSchedulTimes() {
+			return schedulTimes;
 		}
 
-		public long getBatchTime() {
-			return batchTime;
+		public long getSchedulTime() {
+			return schedulTime;
 		}
 
 		public synchronized void addResult(Result<E> result){
@@ -834,7 +819,7 @@ public class Context<E> {
 			return taskNotCompleted.incrementAndGet();
 		}
 
-		public boolean isLastTaskComplete(){
+		public boolean hasTaskCompleted(){
 			return taskNotCompleted.decrementAndGet() == 0;
 		}
 
@@ -848,7 +833,4 @@ public class Context<E> {
 	String fom_context;
 
 	String fom_schedul;
-
-	String fom_schedulbatch;
-
 }

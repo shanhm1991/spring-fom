@@ -58,6 +58,7 @@ public @interface FomSchedul {
 	 * 如果没有配置执行计划（cron/fixedRate/fixedDelay）,是否关闭，默认false，这种场景通常是将Context作为线程池来用
 	 * @return
 	 */
+	@Deprecated
 	public boolean stopWithNoSchedule() default false;
 
 	/**

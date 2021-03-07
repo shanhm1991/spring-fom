@@ -173,7 +173,7 @@ public class ContextHelper {
 				next = format.format(context.nextTime);
 			}
 			cmap.put("nextTime", next);
-			cmap.put("execTimes", String.valueOf(context.batchScheduls)); 
+			cmap.put("execTimes", String.valueOf(context.schedulTimes)); 
 
 			cmap.put("loadTime", format.format(context.loadTime));
 			cmap.put("level", context.getLogLevel());
@@ -274,9 +274,6 @@ public class ContextHelper {
 		if(StringUtils.isNotBlank(context.fom_schedul)){
 			clazz = Class.forName(context.fom_schedul);
 			instance = SpringContext.getBean(clazz);
-		}else if(StringUtils.isNotBlank(context.fom_schedulbatch)){
-			clazz = Class.forName(context.fom_schedulbatch);
-			instance = SpringContext.getBean(clazz);
 		}
 
 		for(Field f : clazz.getDeclaredFields()){
@@ -326,7 +323,6 @@ public class ContextHelper {
 			map.put("name", context.name);
 			map.put("fom_context", context.fom_context);
 			map.put("fom_schedul", context.fom_schedul);
-			map.put("fom_schedulbatch", context.fom_schedulbatch);
 
 			Map<String, Map<String, String>> config = new HashMap<>();
 			config.put("valueMap", context.config.valueMap);

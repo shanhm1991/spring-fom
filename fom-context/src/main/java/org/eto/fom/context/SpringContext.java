@@ -80,7 +80,7 @@ public class SpringContext implements ApplicationContextAware, EmbeddedValueReso
 	 * @return bean 
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T getBean(String id, Class<T> clzz) {
+	public static <T> T getBean(String id) {
 		return (T)applicationContext.getBean(id);
 	}
 
