@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fom>
-	<contexts>
+<!-- 	<contexts>
 		<context class="example.fom.fomcontextxml.mybatis.InputOracleWithMybatisContext">
 			<remark>将指定目录下zip包解析导入Oracle</remark>
 			<cron>0/30 * * * * ?</cron>
@@ -20,5 +20,5 @@
 			<isDelMatchFail>false</isDelMatchFail>
 			<zipEntryPattern>.*[.]bcp</zipEntryPattern>
 		</context>
-	</contexts>
+	</contexts> -->
 </fom>

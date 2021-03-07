@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
@@ -116,6 +115,11 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 	 */
 	@Expose
 	private State state = INITED; 
+
+	/**
+	 * 当前schedul提交的任务id
+	 */
+	private List<String> taskIdList = new ArrayList<>();
 
 	/**
 	 * 所有的任务提交总数数
@@ -475,13 +479,13 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 						}
 					}
 
-					terminate(); // 一次性任务结束
+					terminate(); 
 					return;
 				}
 			}
 		}
 
-		private void caculateNextTime(ScheduleBatch<E> scheduleBatch) throws InterruptedException { 
+		private void caculateNextTime(ScheduleBatch<E> scheduleBatch) { 
 			Date last = new Date();
 			if(lastTime > 0){
 				last = new Date(lastTime);
@@ -489,32 +493,48 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 
 			if(config.cronExpression != null){
 				nextTime = config.cronExpression.getTimeAfter(last).getTime();
-				if(scheduleBatch != null){
-					scheduleBatch.waitCaculateCountDown();
-				}
+				waitTaskCompleted(scheduleBatch);
 			}else if(config.getFixedRate() > 0){
 				nextTime = last.getTime() + config.getFixedRate() * SECOND_UNIT;
-				if(scheduleBatch != null){
-					scheduleBatch.waitCaculateCountDown();
-				}
+				waitTaskCompleted(scheduleBatch);
 			}else if(config.getFixedDelay() > 0){
-				if(scheduleBatch == null){
-					nextTime = last.getTime() + config.getFixedDelay() * SECOND_UNIT; 
-				}else{
-					nextTime = 0;
-					scheduleBatch.waitCaculateCountDown();
-					nextTime = System.currentTimeMillis() + config.getFixedDelay() * SECOND_UNIT;
-				}
+				waitTaskCompleted(scheduleBatch);
+				nextTime = System.currentTimeMillis() + config.getFixedDelay() * SECOND_UNIT;
 			}else{
-				if(scheduleBatch != null){
-					scheduleBatch.waitCaculateCountDown();
-				}
+				waitTaskCompleted(scheduleBatch);
 				nextTime = 0;
 			}
 		}
 
+		private void waitTaskCompleted(ScheduleBatch<E> scheduleBatch){
+			if(scheduleBatch == null){
+				return;
+			}
+
+			try {
+				while(true){
+					if(scheduleBatch.waitTaskCompleted(config.getOverTime())){ 
+						cleanCompletedFutures();
+						return;
+					}else if(config.getCancellable()){
+						Iterator<String> it = taskIdList.iterator();
+						while(it.hasNext()){
+							String taskId = it.next();
+							TimedFuture<Result<?>> future = FUTUREMAP.get(taskId);
+							if(!future.isDone() && !future.isCancelled()){
+								long existTime = System.currentTimeMillis() - future.getStartTime();
+								log.warn("task[{}] has time out, cost {}ms", taskId, existTime);
+								future.cancel(true);
+							}
+						}
+					}
+				}
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt(); // 保留中断请求，留给后面wait检测处理
+			}
+		}
+
 		private void runSchedul() throws Exception { 
-			cleanFutures();
 
 			switchState(RUNNING);
 
@@ -536,13 +556,14 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 							continue;
 						}
 						submit(task);
+						taskIdList.add(taskId);
 					}
 				}
 			} catch (RejectedExecutionException e) {
 				Assert.notNull(task, "");
 				log.warn("task[" + task.getId() + "] submit rejected.", e);
 			}finally{ 
-				schedulebatch.completeSubmit();
+				schedulebatch.submitCompleted();
 				checkScheduleComplete(schedulebatch);
 				caculateNextTime(schedulebatch); 
 			}
@@ -562,7 +583,21 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 				isFirstRun = true;
 			}
 
-			cleanFutures();
+			cleanCompletedFutures();
+		}
+
+		// 走到这里，task必然已经结束，但是可能有其它地方用同样的taskId提交新的任务，
+		// 所以清除前还是要检测下是否在运行，尽管如此，还是存在先取出再判断的线程安全问题，
+		// 不过考虑到概率极小，暂且忽略
+		private void cleanCompletedFutures(){
+			for(String taskId : taskIdList){
+				TimedFuture<Result<?>> future = FUTUREMAP.get(taskId);
+				if(future.isDone()){ 
+					// 问题场景：在检测为完成之后，执行删除之前，又以同样taskId提交了一个新任务
+					FUTUREMAP.remove(taskId);
+				}
+			}
+			taskIdList.clear();
 		}
 
 		private boolean waitTask(){
@@ -629,7 +664,7 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 			Assert.notNull(task, "");
 			log.warn("task[" + task.getId() + "] submit rejected.", e);
 		}finally{ 
-			scheduleBatch.completeSubmit();
+			scheduleBatch.submitCompleted();
 			checkScheduleComplete(scheduleBatch);
 		}
 	}
@@ -701,49 +736,13 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 			}catch(Exception e){
 				log.error("", e); 
 			}
-			scheduleBatch.countDownCaculate();
+			scheduleBatch.taskCompleted();
 		}
 	}
 
 	@Override
 	public void onScheduleComplete(long batchTimes, long batchTime, List<Result<E>> results) throws Exception {
 
-	}
-
-	/**
-	 * 检测时机：
-	 * <p>1.定时任务每次开始时
-	 * <p>2.定时模块关闭(shutdown)时，或者自行结束时
-	 * <p>3.每当提交过的任务数达到1000的整数倍时（考虑到主动submit任务的常见）
-	 */
-	private void cleanFutures(){
-		new Thread(name + "-clean"){
-			@Override
-			public void run() {
-				Iterator<Map.Entry<String, TimedFuture<Result<?>>>> it = FUTUREMAP.entrySet().iterator();
-				while(it.hasNext()){
-					Entry<String, TimedFuture<Result<?>>> entry = it.next();
-					TimedFuture<Result<?>> future = entry.getValue();
-					if(future.isDone()){
-						it.remove();
-						continue;
-					}
-
-					// 提示或取消超时任务
-					if(name.equals(future.getContextName()) && future.getStartTime() > 0){   
-						String taskId = entry.getKey(); 
-						long existTime = (System.currentTimeMillis() - future.getStartTime()) / SECOND_UNIT;
-						int threadOverTime = Integer.parseInt(config.get(ContextConfig.CONF_OVERTIME)); 
-						if(existTime > threadOverTime) {
-							log.warn("task overtime[{}], {}s", taskId, existTime);
-							if(Boolean.parseBoolean(config.get(ContextConfig.CONF_CANCELLABLE))) { 
-								future.cancel(true);
-							}
-						}
-					}
-				}
-			}
-		}.start();
 	}
 
 	/**
@@ -767,9 +766,9 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 
 		private final AtomicInteger taskNotCompleted = new AtomicInteger(1);
 
-		private final CountDownLatch caculateLatch = new CountDownLatch(1);
+		private final CountDownLatch completeLatch = new CountDownLatch(1);
 
-		public void completeSubmit(){
+		public void submitCompleted(){
 			hasSubmitCompleted = true;
 		}
 
@@ -777,16 +776,12 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 			return hasSubmitCompleted;
 		}
 
-		public void countDownCaculate(){
-			caculateLatch.countDown();
-		}
+		public void taskCompleted(){
+			completeLatch.countDown();
+		} 
 
-		public void waitCaculateCountDown(){
-			try {
-				caculateLatch.await();
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt(); // 保留中断请求，留给后面wait处理
-			}
+		public boolean waitTaskCompleted(long taskOverTime) throws InterruptedException{
+			return completeLatch.await(taskOverTime, TimeUnit.SECONDS);
 		}
 
 		public ScheduleBatch(boolean isSchedul, long schedulTimes, long schedulTime){
@@ -829,7 +824,7 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 		}
 	}
 
-	// 记住class,反序列化时使用
+	// 记住class, 方便序列化
 	String fom_context;
 
 	String fom_schedul;
