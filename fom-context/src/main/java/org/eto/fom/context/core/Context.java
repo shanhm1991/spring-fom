@@ -512,8 +512,9 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 			}
 
 			try {
+				long overTime = config.getOverTime();
 				while(true){
-					if(scheduleBatch.waitTaskCompleted(config.getOverTime())){ 
+					if(scheduleBatch.waitTaskCompleted(overTime)){ 
 						cleanCompletedFutures();
 						return;
 					}else if(config.getCancellable()){
@@ -522,9 +523,16 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 							String taskId = it.next();
 							TimedFuture<Result<?>> future = FUTUREMAP.get(taskId);
 							if(!future.isDone() && !future.isCancelled()){
-								long existTime = System.currentTimeMillis() - future.getStartTime();
-								log.warn("task[{}] has time out, cost {}ms", taskId, existTime);
-								future.cancel(true);
+								long cost = System.currentTimeMillis() - future.getStartTime(); 
+								if(cost >= overTime * SECOND_UNIT){
+									log.warn("cancle task[{}] which has time out, cost={}ms", taskId, cost);
+									future.cancel(true);
+								}else{
+									long leftTime = overTime - cost / SECOND_UNIT;
+									if(leftTime < overTime){
+										overTime = leftTime;
+									}
+								}
 							}
 						}
 					}
