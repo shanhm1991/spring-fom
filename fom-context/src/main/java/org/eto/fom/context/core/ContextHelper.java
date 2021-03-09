@@ -17,9 +17,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,13 +31,13 @@ import org.eto.fom.context.SpringContext;
 import org.eto.fom.context.annotation.FomContext;
 import org.eto.fom.context.core.ContextStatistics.CostDetail;
 import org.eto.fom.util.log.SlfLoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  * context的操作api
@@ -107,42 +104,6 @@ public class ContextHelper {
 			throw new IllegalArgumentException("context[" + contextName + "] not exist.");
 		} 
 		return context.submit(task);
-	}
-
-	/**
-	 * 获取任务结果
-	 * @param taskId taskId
-	 * @param clzz clzz
-	 * @return E
-	 * @throws InterruptedException InterruptedException
-	 * @throws ExecutionException ExecutionException
-	 */
-	@SuppressWarnings("unchecked")
-	public static <E> E getTaskResult(String taskId, Class<E> clzz) throws InterruptedException, ExecutionException{ 
-		TimedFuture<Result<?>> future = Context.FUTUREMAP.get(taskId);
-		if(future == null){
-			return null;
-		}
-		return (E)future.get().getContent();
-	}
-
-	/**
-	 * 获取任务结果
-	 * @param taskId taskId
-	 * @param overTime overTime
-	 * @param clzz clzz
-	 * @return E
-	 * @throws InterruptedException InterruptedException
-	 * @throws ExecutionException ExecutionException
-	 */
-	@SuppressWarnings("unchecked")
-	public static <E> E getTaskResult(String taskId, long overTime, Class<E> clzz)  
-			throws InterruptedException, ExecutionException, TimeoutException{ 
-		TimedFuture<Result<?>> future = Context.FUTUREMAP.get(taskId);
-		if(future == null){
-			return null;
-		}
-		return (E)future.get(overTime, TimeUnit.MILLISECONDS).getContent();
 	}
 
 	/**

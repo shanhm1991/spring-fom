@@ -9,14 +9,13 @@ import static org.eto.fom.context.core.State.STOPPING;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
@@ -37,8 +36,6 @@ import org.eto.fom.util.log.SlfLoggerFactory;
 import org.slf4j.Logger;
 import org.springframework.util.Assert;
 
-import com.google.gson.annotations.Expose;
-
 /**
  * 模块最小单位，相当于一个组织者的角色，负责创建和组织Task的运行
  * 
@@ -51,87 +48,50 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 
 	private static final int SECOND_UNIT = 1000;
 
-	/**
-	 * 所有的Context共用，防止两个Context创建针对同一个文件的任务
-	 */
-	static final Map<String,TimedFuture<Result<?>>> FUTUREMAP = new ConcurrentHashMap<>(1000);
-
-	/**
-	 * 当前构造的context的名称
-	 */
+	// 当前构造的context的name
 	static final ThreadLocal<String> localName = new ThreadLocal<>();
 
-	/**
-	 * 加载时间点
-	 */
-	@Expose
-	final long loadTime = System.currentTimeMillis();
-
-	/**
-	 * 统计信息
-	 */
-	@Expose
-	final ContextStatistics statistics = new ContextStatistics();
-
-	/**
-	 * 名称，不可变
-	 */
-	protected final String name;
-
-	/**
-	 * 配置池
-	 */
-	protected final ContextConfig config;
-
-	@Expose
-	protected Logger log;
-
-	/**
-	 * 上次执行时间点
-	 */
-	@Expose
-	volatile long lastTime;
-
-	/**
-	 * 下次执行时间点
-	 */
-	@Expose
-	volatile long nextTime;
-
-	/**
-	 * 周期执行次数
-	 */
-	@Expose
-	volatile long schedulTimes;
-
-	/**
-	 * 是否是在启动时执行
-	 */
-	@Expose
-	private boolean isFirstRun = true;
-
-	/**
-	 * 状态
-	 */
-	@Expose
-	private State state = INITED; 
-
-	/**
-	 * 当前schedul提交的任务id
-	 */
-	private List<String> taskIdList = new ArrayList<>();
-
-	/**
-	 * 所有的任务提交总数数
-	 */
-	@Expose
+	// 所有的任务提交总数
 	private static final AtomicLong SUBMITS = new AtomicLong();
 
-	/**
-	 * 批任务提交次数
-	 */
-	@Expose
+	// 所有Context共用，以便根据id实现任务冲突检测
+	private static final Map<String,TimedFuture<Result<?>>> SUBMITMAP = new HashMap<>(1024);
+
+	// 当前Context当前提交的任务Future
+	private List<TimedFuture<Result<E>>> submitFutures = new ArrayList<>();
+
+	// 批任务提交次数，与定时任务无关，记录外部线程主动批任务提交次数
 	private final AtomicLong batchSubmits = new AtomicLong();
+
+	// context加载时间
+	final long loadTime = System.currentTimeMillis();
+
+	// 任务统计信息
+	final ContextStatistics statistics = new ContextStatistics();
+
+	// context名称
+	protected final String name;
+
+	// context配置
+	protected final ContextConfig config;
+
+	// 日志根据name初始化
+	protected Logger log;
+
+	// 最近一次定时任务执行时间
+	volatile long lastTime;
+
+	// 下次定时任务执行时间
+	volatile long nextTime;
+
+	// 定时任务执行次数
+	volatile long schedulTimes;
+
+	// 是否是启动后的第一次执行
+	private boolean isFirstRun = true;
+
+	// 状态
+	private State state = INITED; 
 
 	public Context(){
 		String lname = localName.get();
@@ -167,9 +127,9 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 	}
 
 	/**
-	 * 注册到容器
-	 * @param putConfig putConfig
-	 * @throws Exception Exception
+	 * 注册自己
+	 * @param putConfig
+	 * @throws Exception
 	 */
 	void regist(boolean putConfig) throws Exception {
 		ContextManager.register(this, putConfig);  
@@ -177,7 +137,7 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 
 	/**
 	 * 获取正在执行的任务数
-	 * @return 正在执行的任务数
+	 * @return 
 	 */
 	public final long getActives(){
 		return config.getActives();
@@ -185,7 +145,7 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 
 	/**
 	 * 获取等待队列中的任务数
-	 * @return 等待队列中的任务数
+	 * @return 
 	 */
 	public final int getWaitings(){
 		return config.getWaitings();
@@ -193,7 +153,7 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 
 	/**
 	 * 获取等待队列中任务的id-createTime
-	 * @return map
+	 * @return 
 	 */
 	public final Map<String, Object> getWaitingDetail(){
 		return config.getWaitingDetail();
@@ -201,7 +161,7 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 
 	/**
 	 * 获取所有创建过的任务数
-	 * @return 所有创建过的任务数
+	 * @return 
 	 */
 	public final long getCreated(){
 		return config.getCreated();
@@ -209,7 +169,7 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 
 	/**
 	 * 获取已完成的任务数
-	 * @return 已完成的任务数
+	 * @return 
 	 */
 	public final long getCompleted(){
 		return config.getCompleted();
@@ -225,7 +185,7 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 
 	/**
 	 * 获取成功的任务数
-	 * @return 成功的任务数
+	 * @return 
 	 */
 	public final long getSuccess(){
 		return statistics.getSuccess();
@@ -233,7 +193,7 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 
 	/**
 	 * 获取失败的任务数
-	 * @return 失败的任务数
+	 * @return 
 	 */
 	public final long getFailed(){
 		return statistics.getFailed();
@@ -316,7 +276,6 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 				log.warn("context[{}] is stopping, cann't startup.", name); 
 				return map;
 			case RUNNING:
-				//			case WAITING:
 			case SLEEPING:
 				map.put("result", true);
 				map.put("msg", "context[" + name + "] was already startup.");
@@ -354,7 +313,6 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 				log.warn("context[{}] is stopping, cann't stop.", name); 
 				return map;
 			case RUNNING:
-				//			case WAITING:
 			case SLEEPING:
 				state = STOPPING;
 				if(innerThread.isAlive()){
@@ -402,11 +360,6 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 				map.put("msg", "context[" + name + "] is executing, and will re-executr immediately after completion .");
 				log.info("context[{}] is executing, and will re-executr immediately after completion .", name); 
 				return map;
-				//			case WAITING:
-				//				map.put("result", false);
-				//				map.put("msg", "context[" + name + "] is waiting for task completion.");
-				//				log.info("context[{}] is waiting for task completion.", name); 
-				//				return map;
 			case SLEEPING:
 				innerThread.interrupt();
 				map.put("result", true);
@@ -421,7 +374,7 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 		}
 	}
 
-	private transient InnerThread innerThread;
+	private InnerThread innerThread;
 
 	private class InnerThread extends Thread implements  Serializable {
 
@@ -518,14 +471,11 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 						cleanCompletedFutures();
 						return;
 					}else if(config.getCancellable()){
-						Iterator<String> it = taskIdList.iterator();
-						while(it.hasNext()){
-							String taskId = it.next();
-							TimedFuture<Result<?>> future = FUTUREMAP.get(taskId);
+						for(TimedFuture<Result<E>> future : submitFutures){
 							if(!future.isDone() && !future.isCancelled()){
 								long cost = System.currentTimeMillis() - future.getStartTime(); 
 								if(cost >= overTime * SECOND_UNIT){
-									log.warn("cancle task[{}] which has time out, cost={}ms", taskId, cost);
+									log.warn("cancle task[{}] which has time out, cost={}ms", future.getTaskId(), cost);
 									future.cancel(true);
 								}else{
 									long leftTime = overTime - cost / SECOND_UNIT;
@@ -542,6 +492,7 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 			}
 		}
 
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		private void runSchedul() throws Exception { 
 
 			switchState(RUNNING);
@@ -555,16 +506,20 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 			try{
 				Collection<? extends Task<E>> tasks = newSchedulTasks();
 				if(!CollectionUtils.isEmpty(tasks)){
-					for (Task<E> t : tasks) {
-						task = t;
-						task.scheduleBatch = schedulebatch;
-						String taskId = task.getId();
-						if (isTaskAlive(taskId)) {
-							log.warn("task[{}] is still alive, create canceled.", taskId);
-							continue;
+					synchronized (SUBMITMAP){
+						for (Task<E> t : tasks) {
+							task = t;
+							task.scheduleBatch = schedulebatch;
+							String taskId = task.getId();
+							if (isTaskAlive(taskId)) {
+								log.warn("task[{}] is still alive, create canceled.", taskId);
+								continue;
+							}
+
+							TimedFuture future = submit(task);
+							SUBMITMAP.put(taskId, future);    
+							submitFutures.add(future);
 						}
-						submit(task);
-						taskIdList.add(taskId);
 					}
 				}
 			} catch (RejectedExecutionException e) {
@@ -578,10 +533,9 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 		}
 
 		private void terminate(){
-			//switchState(WAITING);
 			config.pool.shutdown();
 
-			if(waitTask()){
+			if(waitShutDown()){
 				try{
 					onScheduleTerminate(schedulTimes, lastTime);
 				}catch(Exception e){
@@ -594,21 +548,7 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 			cleanCompletedFutures();
 		}
 
-		// 走到这里，task必然已经结束，但是可能有其它地方用同样的taskId提交新的任务，
-		// 所以清除前还是要检测下是否在运行，尽管如此，还是存在先取出再判断的线程安全问题，
-		// 不过考虑到概率极小，暂且忽略
-		private void cleanCompletedFutures(){
-			for(String taskId : taskIdList){
-				TimedFuture<Result<?>> future = FUTUREMAP.get(taskId);
-				if(future.isDone()){ 
-					// 问题场景：在检测为完成之后，执行删除之前，又以同样taskId提交了一个新任务
-					FUTUREMAP.remove(taskId);
-				}
-			}
-			taskIdList.clear();
-		}
-
-		private boolean waitTask(){
+		private boolean waitShutDown(){
 			boolean isStopping = false;
 			while(true){
 				if(!isStopping){
@@ -634,20 +574,31 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 		}
 	}
 
-	/**
-	 * null 没有创建过任务
-	 * done 创建过任务，但远程文件没删除
-	 * else 任务还没结束
-	 */
+	private void cleanCompletedFutures(){ 
+		// 可能当前Context本次提交的task完成后，又有其它Context用同样的taskId提交了任务并正在执行
+		// 使用同步，是因为存在先获取后判断的线程安全问题，ConcurrentHashMap并不能解决问题
+		// 之所以将当前提交的future都在taskIdList中记录了一份，是为了方便在waitTaskCompleted中检测超时时不需要参与FUTUREMAP的同步
+		synchronized (SUBMITMAP) {
+			for(TimedFuture<Result<E>> currentFuture : submitFutures){
+				String taskId = currentFuture.getTaskId();
+				TimedFuture<Result<?>> otherFuture = SUBMITMAP.get(taskId);
+				if(otherFuture.isDone()){ 
+					SUBMITMAP.remove(taskId);
+				}
+			}
+		}
+		submitFutures.clear();
+	}
+
 	private boolean isTaskAlive(String key){
-		Future<Result<?>> future = FUTUREMAP.get(key);
+		Future<Result<?>> future = SUBMITMAP.get(key);
 		return future != null && !future.isDone();
 	}
 
 	/**
 	 * 提交批任务
-	 * @param tasks tasks
-	 * @throws InterruptedException InterruptedException
+	 * @param tasks
+	 * @throws InterruptedException
 	 */
 	public void submitBatch(Collection<? extends Task<E>> tasks) throws InterruptedException  {
 		if(CollectionUtils.isEmpty(tasks)){
@@ -661,11 +612,6 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 			while(it.hasNext()){
 				task = it.next();
 				task.scheduleBatch = scheduleBatch;
-				String taskId = task.getId();
-				if(isTaskAlive(taskId)){ 
-					log.warn("task[{}] is still alive, create canceled.", taskId); 
-					continue;
-				}
 				submit(task);
 			}
 		} catch (RejectedExecutionException e) {
@@ -679,10 +625,9 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 
 	/**
 	 * 提交任务
-	 * @param task task
-	 * @return TimedFuture
+	 * @param task
+	 * @return
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public TimedFuture<Result<E>> submit(Task<E> task) {
 		if(SUBMITS.incrementAndGet() % SECOND_UNIT == 0){
 			Monitor.jvm();
@@ -691,32 +636,25 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 		String taskId = task.getId();
 		task.setContext(Context.this); 
 
-		TimedFuture future = config.pool.submit(task);
+		TimedFuture<Result<E>> future = config.pool.submit(task);
 		if(task.scheduleBatch != null){
 			task.scheduleBatch.increaseTaskNotCompleted();
 		}
-
-		FUTUREMAP.put(taskId, future); 
 		log.info("task[{}] submitted.", taskId); 
 		return future; 
 	}
 
-	/**
-	 * 周期执行任务
-	 * @return task
-	 */
-	protected Task<E> schedule() throws Exception {
+	@Override
+	public Collection<? extends Task<E>> newSchedulTasks() throws Exception {
+		Task<E> task = newSchedulTask();
+		if(task != null){
+			return Arrays.asList(task);
+		}
 		return null;
 	}
 
-	@Override
-	public Collection<? extends Task<E>> newSchedulTasks() throws Exception {
-		List<Task<E>> list = new LinkedList<>();
-		Task<E> task = schedule();
-		if(task != null){
-			list.add(task);
-		}
-		return list;
+	public Task<E> newSchedulTask() throws Exception {
+		return null;
 	}
 
 	@Override
