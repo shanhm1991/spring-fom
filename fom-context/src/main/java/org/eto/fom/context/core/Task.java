@@ -87,7 +87,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 				scheduleBatch.addResult(result); 
 				context.checkScheduleComplete(scheduleBatch);
 			}
-			context.statistics.statistics(result); 
+			context.getStatistics().statistics(result); 
 		}
 		
 		if(result.success){

@@ -67,7 +67,7 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 	final long loadTime = System.currentTimeMillis();
 
 	// 任务统计信息
-	final ContextStatistics statistics = new ContextStatistics();
+	private final ContextStatistics statistics = new ContextStatistics();
 
 	// context名称
 	protected final String name;
@@ -135,68 +135,12 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 		ContextManager.register(this, putConfig);  
 	}
 
-	/**
-	 * 获取正在执行的任务数
-	 * @return 
-	 */
-	public final long getActives(){
-		return config.getActives();
+	public final ContextConfig getConfig(){
+		return config;
 	}
 
-	/**
-	 * 获取等待队列中的任务数
-	 * @return 
-	 */
-	public final int getWaitings(){
-		return config.getWaitings();
-	}
-
-	/**
-	 * 获取等待队列中任务的id-createTime
-	 * @return 
-	 */
-	public final Map<String, Object> getWaitingDetail(){
-		return config.getWaitingDetail();
-	}
-
-	/**
-	 * 获取所有创建过的任务数
-	 * @return 
-	 */
-	public final long getCreated(){
-		return config.getCreated();
-	}
-
-	/**
-	 * 获取已完成的任务数
-	 * @return 
-	 */
-	public final long getCompleted(){
-		return config.getCompleted();
-	}
-
-	/**
-	 * 获取正在执行任务的Thead
-	 * @return taskId-Thread
-	 */ 
-	public final Map<Task<?>, Thread> getActiveThreads() {
-		return config.getActiveThreads();
-	}
-
-	/**
-	 * 获取成功的任务数
-	 * @return 
-	 */
-	public final long getSuccess(){
-		return statistics.getSuccess();
-	}
-
-	/**
-	 * 获取失败的任务数
-	 * @return 
-	 */
-	public final long getFailed(){
-		return statistics.getFailed();
+	public final ContextStatistics getStatistics(){
+		return statistics;
 	}
 
 	/**
@@ -415,7 +359,7 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 
 				if(nextTime > 0) {
 					long waitTime = nextTime - System.currentTimeMillis();
-					if(waitTime > 0){ 
+					if(!Thread.interrupted() && waitTime > 0){ 
 						switchState(SLEEPING);
 						synchronized (this) {
 							try {
@@ -488,7 +432,7 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 					}
 				}
 			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt(); // 保留中断请求，留给后面wait检测处理
+				Thread.currentThread().interrupt(); // 保留中断请求，后面还要检测处理
 			}
 		}
 
@@ -600,7 +544,7 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 	 * @param tasks
 	 * @throws InterruptedException
 	 */
-	public void submitBatch(Collection<? extends Task<E>> tasks) throws InterruptedException  {
+	public void submitBatch(Collection<? extends Task<E>> tasks) {
 		if(CollectionUtils.isEmpty(tasks)){
 			return;
 		}
@@ -691,13 +635,6 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 
 	}
 
-	/**
-	 * 定义ScheduleBatch是为了实现onScheduleComplete，
-	 * 由于submit有一定步骤（任务执行非常快），要防止出现任务还在提交中，但是已提交的任务已经执行完，导致提前触发onScheduleComplete
-	 * 上面的问题可以通过submitLatch控制，确保onScheduleComplete一定在任务提交完成之后触发；
-	 * 但是还这样又可能出现全部任务已经执行完，但是submitLatch还没有countDown，导致onScheduleComplete不被触发；
-	 * 所以需要taskNotCompleted提前置1，以便在全部提交完成时主动检查是否触发onScheduleComplete
-	 */
 	static class ScheduleBatch<E> {
 
 		private final boolean isSchedul;

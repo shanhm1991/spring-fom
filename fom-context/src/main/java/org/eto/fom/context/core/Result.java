@@ -92,4 +92,10 @@ public class Result<E> implements Cloneable{
 	public Result<E> clone() throws CloneNotSupportedException {
 		return (Result<E>)super.clone();
 	}
+	
+	@Override
+	public String toString() {
+		return "{taskId=" + taskId + ", success=" + success + ", createTime=" + createTime + ", startTime="
+				+ startTime + ", costTime=" + costTime + ", content=" + content + ", throwable=" + throwable + "}";
+	}
 }

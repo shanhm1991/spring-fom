@@ -138,11 +138,11 @@ public class ContextHelper {
 
 			cmap.put("loadTime", format.format(context.loadTime));
 			cmap.put("level", context.getLogLevel());
-			cmap.put("active", String.valueOf(context.getActives())); 
-			cmap.put("waiting", String.valueOf(context.getWaitings()));
-			cmap.put("failed", String.valueOf(context.statistics.getFailed()));
-			cmap.put("failedDetails", String.valueOf(context.statistics.getfailedDetails()));
-			cmap.put("success", String.valueOf(context.getSuccess()));
+			cmap.put("active", String.valueOf(context.getConfig().getActives())); 
+			cmap.put("waiting", String.valueOf(context.getConfig().getWaitings()));
+			cmap.put("failed", String.valueOf(context.getStatistics().getFailed()));
+			cmap.put("failedDetails", String.valueOf(context.getStatistics().getfailedDetails()));
+			cmap.put("success", String.valueOf(context.getStatistics().getSuccess()));
 
 			// 不允许编辑的参数
 			cmap.remove(ContextConfig.CONF_STOPWITHNOSCHEDULE);
@@ -570,7 +570,7 @@ public class ContextHelper {
 		}
 
 		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss SSS");
-		for(Entry<Task<?>, Thread> entry : context.getActiveThreads().entrySet()){
+		for(Entry<Task<?>, Thread> entry : context.getConfig().getActiveThreads().entrySet()){
 			Task<?> task = entry.getKey();
 			Thread thread = entry.getValue();
 
@@ -603,7 +603,7 @@ public class ContextHelper {
 		} 
 
 		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss SSS");
-		for(Entry<String, Result<?>> entry : context.statistics.failedMap.entrySet()){
+		for(Entry<String, Result<?>> entry : context.getStatistics().failedMap.entrySet()){
 			Result<?> result = entry.getValue();
 
 			Map<String, Object> subMap = new HashMap<>();
@@ -639,7 +639,7 @@ public class ContextHelper {
 			map.put("size", 0);
 			return map;
 		} 
-		Map<String,Object> map = context.getWaitingDetail();
+		Map<String,Object> map = context.getConfig().getWaitingDetail();
 		map.put("size", map.size());
 		return map;
 	}
@@ -655,7 +655,7 @@ public class ContextHelper {
 		if(context == null){
 			return new HashMap<>();
 		}
-		return context.statistics.successDetail();
+		return context.getStatistics().successDetail();
 	}
 
 	private static final int LEVELINDEX0 = 0;
@@ -687,11 +687,11 @@ public class ContextHelper {
 
 		map.put("isSuccess", true);
 		int day = Integer.parseInt(saveDay);
-		if(context.statistics.saveDay != day){
+		if(context.getStatistics().saveDay != day){
 			//认为页面请求只是辅助，几乎不存在并发，所有尽量不使用同步
-			context.statistics.saveDay = day; 
+			context.getStatistics().saveDay = day; 
 		}
-		map.put("saveDay", context.statistics.saveDay);
+		map.put("saveDay", context.getStatistics().saveDay);
 
 		String[] array = levelStr.split(",");
 		long v1 = Long.parseLong(array[LEVELINDEX0]);
@@ -704,13 +704,13 @@ public class ContextHelper {
 			return map;
 		}
 
-		if(!context.statistics.levelChange(v1, v2, v3, v4, v5)){
+		if(!context.getStatistics().levelChange(v1, v2, v3, v4, v5)){
 			map.put("isChange", false);
 			return map;
 		}
 
 		map.put("isChange", true);
-		context.statistics.dayDetail(map, date);
+		context.getStatistics().dayDetail(map, date);
 		return map;
 	}
 
@@ -728,7 +728,7 @@ public class ContextHelper {
 			map.put("isSuccess", false);
 			return map;
 		} 
-		context.statistics.dayDetail(map, date);
+		context.getStatistics().dayDetail(map, date);
 		return map;
 	}
 
@@ -743,7 +743,7 @@ public class ContextHelper {
 		} 
 
 		StringBuilder builder = new StringBuilder("[");
-		for(Entry<String, Queue<CostDetail>> entry : context.statistics.successMap.entrySet()){
+		for(Entry<String, Queue<CostDetail>> entry : context.getStatistics().successMap.entrySet()){
 			String date = entry.getKey();
 			builder.append("{\"date\":\"").append(date).append("\",\"details\":[");
 

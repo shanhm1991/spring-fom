@@ -418,7 +418,7 @@ public class ContextManager {
 					}; 
 					list.add(task);
 				}
-				
+
 				// 如果实现了SchedulFactory，将其创建的任务也算入
 				Collection<? extends Task<Object>> newTasks;
 				if(SchedulFactory.class.isAssignableFrom(clazz)
@@ -427,7 +427,7 @@ public class ContextManager {
 				}
 				return list;
 			}
-			
+
 			@SuppressWarnings("unchecked")
 			@Override
 			public void onScheduleComplete(long batch, long batchTime, List<Result<Object>> results) throws Exception {
@@ -435,7 +435,7 @@ public class ContextManager {
 					((SchedulCompleter<Object>)instance).onScheduleComplete(batch, batchTime, results);  
 				}
 			}
-			
+
 			@Override
 			public void onScheduleTerminate(long schedulTimes, long lastTime) {
 				if(SchedulTerminator.class.isAssignableFrom(clazz)){
@@ -488,35 +488,35 @@ public class ContextManager {
 		ReflectionUtils.makeAccessible(field);
 		//ReflectionUtils.setField(field, instance, value);
 		switch(field.getGenericType().toString()){
-			case "short":
-			case "class java.lang.Short":
-				field.set(instance, Short.valueOf(expression));
-				break;
-			case "int":
-			case "class java.lang.Integer":
-				field.set(instance, Integer.valueOf(expression));
-				break;
-			case "long":
-			case "class java.lang.Long":
-				field.set(instance, Long.valueOf(expression));
-				break;
-			case "float":
-			case "class java.lang.Float":
-				field.set(instance, Float.valueOf(expression));
-				break;
-			case "double":
-			case "class java.lang.Double":
-				field.set(instance, Double.valueOf(expression));
-				break;
-			case "boolean":
-			case "class java.lang.Boolean":
-				field.set(instance, Boolean.valueOf(expression));
-				break;
-			case "class java.lang.String":
-				field.set(instance, expression);
-				break;
-			default:
-				throw new UnsupportedOperationException("不支持的配置类型：" + instance.getClass().getName() + "." + field.getName());
+		case "short":
+		case "class java.lang.Short":
+			field.set(instance, Short.valueOf(expression));
+			break;
+		case "int":
+		case "class java.lang.Integer":
+			field.set(instance, Integer.valueOf(expression));
+			break;
+		case "long":
+		case "class java.lang.Long":
+			field.set(instance, Long.valueOf(expression));
+			break;
+		case "float":
+		case "class java.lang.Float":
+			field.set(instance, Float.valueOf(expression));
+			break;
+		case "double":
+		case "class java.lang.Double":
+			field.set(instance, Double.valueOf(expression));
+			break;
+		case "boolean":
+		case "class java.lang.Boolean":
+			field.set(instance, Boolean.valueOf(expression));
+			break;
+		case "class java.lang.String":
+			field.set(instance, expression);
+			break;
+		default:
+			throw new UnsupportedOperationException("不支持的配置类型：" + instance.getClass().getName() + "." + field.getName());
 		}
 	}
 
