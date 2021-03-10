@@ -574,10 +574,10 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 		}
 	}
 
+	// 可能当前Context本次提交的task完成后，又有其它Context用同样的taskId提交了任务并正在执行，所以在真正从SUBMITMAP中删除时还需要在检测一下
+	// 对SUBMITMAP的同步共用两处，一是任务提交时，二是这里，两处同步的动作都很小，开销可以接受
+	// 使用submitFutures是为了在waitTaskCompleted中检测超时时不需要参与FUTUREMAP的同步
 	private void cleanCompletedFutures(){ 
-		// 可能当前Context本次提交的task完成后，又有其它Context用同样的taskId提交了任务并正在执行
-		// 使用同步，是因为存在先获取后判断的线程安全问题，ConcurrentHashMap并不能解决问题
-		// 之所以将当前提交的future都在taskIdList中记录了一份，是为了方便在waitTaskCompleted中检测超时时不需要参与FUTUREMAP的同步
 		synchronized (SUBMITMAP) {
 			for(TimedFuture<Result<E>> currentFuture : submitFutures){
 				String taskId = currentFuture.getTaskId();
@@ -590,8 +590,8 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 		submitFutures.clear();
 	}
 
-	private boolean isTaskAlive(String key){
-		Future<Result<?>> future = SUBMITMAP.get(key);
+	private boolean isTaskAlive(String taskId){
+		Future<Result<?>> future = SUBMITMAP.get(taskId);
 		return future != null && !future.isDone();
 	}
 
@@ -646,14 +646,14 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 
 	@Override
 	public Collection<? extends Task<E>> newSchedulTasks() throws Exception {
-		Task<E> task = newSchedulTask();
+		Task<E> task = schedul();
 		if(task != null){
 			return Arrays.asList(task);
 		}
 		return null;
 	}
 
-	public Task<E> newSchedulTask() throws Exception {
+	public Task<E> schedul() throws Exception {
 		return null;
 	}
 
@@ -662,7 +662,7 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 
 	}
 
-	void checkScheduleComplete(ScheduleBatch<E> scheduleBatch) throws InterruptedException{
+	void checkScheduleComplete(ScheduleBatch<E> scheduleBatch) {
 		String s = scheduleBatch.isSchedul ? "schedul" : "submit";
 		boolean isLastTaskComplete = scheduleBatch.hasTaskCompleted();
 		boolean hasSubmitCompleted = scheduleBatch.hasSubmitCompleted();
