@@ -164,7 +164,11 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 			throw new NullPointerException();
 		}
 		org.apache.log4j.Logger logger = LogManager.exists(name);
-		return logger.getLevel().toString();
+		Level level = logger.getLevel();
+		if(level == null){
+			return "INFO";
+		}
+		return level.toString();
 	}
 
 	/**

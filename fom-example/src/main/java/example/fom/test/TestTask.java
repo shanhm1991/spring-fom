@@ -2,8 +2,6 @@ package example.fom.test;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.eto.fom.context.core.Task;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -12,8 +10,6 @@ import org.slf4j.LoggerFactory;
  */
 public class TestTask extends Task<Long> {
 	
-	private static final Logger LOG = LoggerFactory.getLogger("test");
-
 	public TestTask(int i) {
 		super("TestTask-" + i);
 	}
@@ -24,7 +20,7 @@ public class TestTask extends Task<Long> {
 		try {
 			Thread.sleep(sleep);
 		} catch (InterruptedException e) {
-			LOG.info("task[{}] cancled due to interrupt.", id);
+			log.info("task cancled due to interrupt.", id);
 			return sleep;
 		} 
 		return sleep;

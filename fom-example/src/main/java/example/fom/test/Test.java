@@ -23,7 +23,7 @@ public class Test {
 	private static final Logger LOG = LoggerFactory.getLogger("test");
 
 	public static void main(String[] args) throws InterruptedException, ExecutionException {
-		 test3();
+		 test1();
 	}
 	
 	/**

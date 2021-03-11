@@ -1,9 +1,9 @@
 package example.fom.fomschedul;
 
-import java.text.SimpleDateFormat;
-
 import org.apache.commons.lang3.RandomUtils;
 import org.eto.fom.context.annotation.FomSchedul;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
 /**
@@ -14,14 +14,15 @@ import org.springframework.scheduling.annotation.Scheduled;
 @FomSchedul(remark = "定时单任务测试")
 public class SingleScheduleTest {
 	
+	private static final Logger LOG = LoggerFactory.getLogger("SingleScheduleTest");
+	
 	@Scheduled(fixedDelay = 7)
 	public long test(){
-		String now = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis());
 		long sleep = RandomUtils.nextLong(1000, 5000);
 		try {
 			Thread.sleep(sleep);
 		} catch (InterruptedException e) {
-			System.out.println(now + " task cancled due to interrupt.");
+			LOG.info("task cancled due to interrupt.");
 			return sleep;
 		} 
 		return sleep;
