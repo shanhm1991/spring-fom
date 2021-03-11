@@ -530,7 +530,7 @@ public class Context<E> implements SchedulFactory<E>, SchedulCompleter<E>, Sched
 			for(TimedFuture<Result<E>> currentFuture : submitFutures){
 				String taskId = currentFuture.getTaskId();
 				TimedFuture<Result<?>> otherFuture = SUBMITMAP.get(taskId);
-				if(otherFuture.isDone()){ 
+				if(otherFuture != null && otherFuture.isDone()){ 
 					SUBMITMAP.remove(taskId);
 				}
 			}

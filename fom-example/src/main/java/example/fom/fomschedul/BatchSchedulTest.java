@@ -28,7 +28,7 @@ public class BatchSchedulTest implements SchedulFactory<Long>, SchedulCompleter<
 	@Override
 	public Collection<TestTask> newSchedulTasks() throws Exception {
 		List<TestTask> list = new ArrayList<>();
-		for(int i = 0; i < 5; i++){
+		for(int i = 0; i < 12; i++){
 			list.add(new TestTask(i));
 		}
 		return list;
