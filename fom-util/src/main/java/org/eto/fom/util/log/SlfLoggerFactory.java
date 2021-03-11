@@ -26,7 +26,7 @@ public class SlfLoggerFactory {
 
 		logger = org.apache.log4j.Logger.getLogger(name); 
 		logger.setLevel(Level.INFO);  
-		logger.setAdditivity(false); 
+		logger.setAdditivity(true); 
 		//logger.removeAllAppenders();
 
 		final PatternLayout layout = new PatternLayout();  

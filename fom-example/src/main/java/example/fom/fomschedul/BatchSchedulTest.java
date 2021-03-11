@@ -59,9 +59,5 @@ public class BatchSchedulTest implements SchedulFactory<String>, SchedulComplete
 			Thread.sleep(RandomUtils.nextInt(1000, 3000));
 			return id;
 		}
-		
 	}
-
-	
-	
 }

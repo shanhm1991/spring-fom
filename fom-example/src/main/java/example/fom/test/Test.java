@@ -10,11 +10,20 @@ import org.eto.fom.context.core.Context;
 import org.eto.fom.context.core.ContextConfig;
 import org.eto.fom.context.core.Result;
 import org.eto.fom.context.core.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * @author shanhm
+ *
+ */
 public class Test {
+	
+	private static final Logger LOG = LoggerFactory.getLogger("test");
 
 	public static void main(String[] args) throws InterruptedException, ExecutionException {
-		 test4();
+		 test3();
 	}
 	
 	/**
@@ -25,7 +34,8 @@ public class Test {
 	public static void test1() throws InterruptedException, ExecutionException{
 		Context<Long> context = new Context<>("test");
 		Future<Result<Long>> future = context.submit(new TestTask(1));
-		System.out.println(future.get()); 
+		Result<Long> result = future.get();
+		LOG.info("任务结束，结果为{}", result);
 	}
 	
 	/**
@@ -35,9 +45,7 @@ public class Test {
 		Context<Long> context = new Context<Long>("test"){
 			@Override
 			public void onScheduleComplete(long batchTimes, long batchTime, List<Result<Long>> results) throws Exception {
-				String now = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis());
-				String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(batchTime);
-				System.out.println(now + " 第" + batchTimes + "次在时间" + date + "提交的任务全部完成，结果为" + results);
+				log.info( "第{}次在{}提交的任务全部完成，结果为{}", batchTimes, batchTime, results);
 			}
 		}; 
 		
@@ -61,9 +69,8 @@ public class Test {
 			 
 			@Override
 			public void onScheduleTerminate(long schedulTimes, long lastTime) {
-				String now = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis());
 				String last = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(lastTime);
-				System.out.println(now + " 定时任务关闭，共执行" + schedulTimes + "次任务，最后一次执行时间为" + last);
+				log.info("定时任务关闭，共执行{}次任务，最后一次执行时间为{}", schedulTimes, last);
 			}
 		}; 
 		
@@ -93,9 +100,8 @@ public class Test {
 			
 			@Override
 			public void onScheduleComplete(long batchTimes, long batchTime, List<Result<Long>> results) throws Exception {
-				String now = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis());
 				String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(batchTime);
-				System.out.println(now +" 第" + batchTimes + "次在时间" + date + "提交的任务全部完成");
+				log.info( "第{}次在{}提交的任务全部完成，结果为{}", batchTimes, date, results);
 			}
 		}; 
 		

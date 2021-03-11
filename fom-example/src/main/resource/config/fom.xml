@@ -2,8 +2,29 @@
 
 <!-- 加载优先级：cache > xml > 注解（@FomContext > @FomSchedul） -->
 <fom>
-	<includes>
-		<include>**/fom*.xml</include>
-	</includes>
+	<!-- 配置包名，多值逗号分隔，加载所有包下面标记为@FomContext的context -->
+	<fom-scan></fom-scan>
+
+	<!-- 包含配置文件，相对路径 -->
+	<includes></includes>
+
+	<contexts>
+		<!-- name可以缺省，默认取class名称；同一个class可以配多个context，只要name不一样 -->
+		<context name="xmlContextSingleTest" class="example.fom.xml.XmlContextSingleTest">
+			<remark>备注</remark>
+			<cron>0/5 * * * * ?</cron>
+			<!-- <fixedRate></fixedRate> -->
+			<!-- <fixedDelay></fixedDelay> -->
+			<threadCore>4</threadCore>
+			<threadMax>20</threadMax>
+			<threadAliveTime>30</threadAliveTime>
+			<threadOverTime>3600</threadOverTime>
+			<queueSize>200</queueSize>
+			<cancellable>false</cancellable>
+			<execOnLoad>true</execOnLoad>
+			<!-- 下面可以添加其它自定义配置 -->
+			<selfConf>testconf</selfConf>
+		</context>
+	</contexts>
 </fom>
 

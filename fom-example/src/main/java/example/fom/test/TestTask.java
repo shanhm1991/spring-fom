@@ -1,9 +1,9 @@
 package example.fom.test;
 
-import java.text.SimpleDateFormat;
-
 import org.apache.commons.lang3.RandomUtils;
 import org.eto.fom.context.core.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -11,6 +11,8 @@ import org.eto.fom.context.core.Task;
  *
  */
 public class TestTask extends Task<Long> {
+	
+	private static final Logger LOG = LoggerFactory.getLogger("test");
 
 	public TestTask(int i) {
 		super("TestTask-" + i);
@@ -18,15 +20,13 @@ public class TestTask extends Task<Long> {
 
 	@Override
 	public Long exec() { 
-		String now = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis());
 		long sleep = RandomUtils.nextLong(1000, 5000);
 		try {
 			Thread.sleep(sleep);
 		} catch (InterruptedException e) {
-			System.out.println(now + " task[" + id + "] cancled due to interrupt.");
+			LOG.info("task[{}] cancled due to interrupt.", id);
 			return sleep;
 		} 
-		System.out.println(now + " task[" + id + "] finished, and cost time " + sleep);
 		return sleep;
 	}
 }
