@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.junit.Assert;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.fom.Result;
 import org.springframework.fom.Task;
 import org.springframework.fom.annotation.FomSchedule;
@@ -15,6 +16,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 @FomSchedule
 public class TestScheduleBean implements ScheduleCompleter<Long>, ScheduleFactory<Long>, ScheduleTerminator{ 
+	
+	@Value("${conf.user}@${conf.address}")
+	private String email;
 	
 	@Override
 	public void onScheduleComplete(long execTimes, long lastExecTime, List<Result<Long>> results) throws Exception {

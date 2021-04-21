@@ -65,7 +65,7 @@ public class ScheduleConfig {
 	 * 线程空闲存活时间：min
 	 */
 	public static final int THREAD_ALIVETIME_MIN = 1;
-	
+
 	/**
 	 * 任务队列长度：default
 	 */
@@ -90,7 +90,7 @@ public class ScheduleConfig {
 	 * 定时计划：fixedDelay 默认值：0
 	 */
 	public static final int FIXED_DELAY_DEFAULT = 0;
-	
+
 	/**
 	 * 启动时默认不执行
 	 */
@@ -135,12 +135,12 @@ public class ScheduleConfig {
 	 * 线程池任务线程最长空闲时间
 	 */
 	public static final String CONF_THREAD_ALIVETIME = "threadAliveTime";
-	
+
 	/**
 	 * 任务超时时间
 	 */
 	public static final String CONF_TASK_OVERTIME = "taskOverTime";
-	
+
 	/**
 	 * 启动时是否执行
 	 */
@@ -167,7 +167,7 @@ public class ScheduleConfig {
 	private final ConcurrentHashMap<String, Object> confMap = new ConcurrentHashMap<>();
 
 	private TimedExecutorPool pool;
-	
+
 	void init(){
 		int core = getThreadCore(); 
 		int max = getThreadMax();
@@ -180,7 +180,11 @@ public class ScheduleConfig {
 	public ConcurrentHashMap<String, Object> getConfMap() {
 		return confMap;
 	} 
-	
+
+	public boolean containsKey(String key){
+		return confMap.containsKey(key);
+	}
+
 	/** info of pool  **/
 	long getActives(){
 		return pool == null ? 0 : pool.getActiveCount();
@@ -189,7 +193,7 @@ public class ScheduleConfig {
 	int getWaitings(){
 		return pool == null ? 0 : pool.getQueue().size();
 	}
-	
+
 	long getCreated(){
 		return pool == null ? 0 : pool.getTaskCount();
 	}
@@ -213,7 +217,7 @@ public class ScheduleConfig {
 		if(ArrayUtils.isEmpty(array)){
 			return map;
 		}
-		
+
 		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss SSS");
 		for(Object obj : array){
 			if(obj instanceof TimedFuture){
@@ -223,19 +227,24 @@ public class ScheduleConfig {
 		}
 		return map;
 	}
-	
-	/** config get/set **/
-	public void set(String key, Object value) {
+
+	// get/set of config  下面的set方法其实都有先获取后判断的线程安全问题，不过对于配置更新来说，这个影响可以忽略
+	public boolean set(String key, Object value) {
 		if(internalConf.contains(key)){
 			throw new UnsupportedOperationException("cannot override internal config:" + key);
 		}
+
+		if(value.equals(get(key))){
+			return false;
+		}
 		confMap.put(key, value);
+		return true;
 	}
 
 	public Object get(String key){
 		return confMap.get(key);
 	}
-	
+
 	public String getString(String key, String defaultValue){
 		return MapUtils.getString(confMap, key, defaultValue);
 	}
@@ -260,7 +269,7 @@ public class ScheduleConfig {
 		return builder.toString();
 	}
 
-	/** internal config get/set **/
+	// get/set of internal config 
 	public String getCron(){
 		CronExpression exp = (CronExpression)confMap.get(CONF_CRON);
 		if(exp != null){
@@ -269,9 +278,9 @@ public class ScheduleConfig {
 		return null;
 	}
 
-	public void setCron(String cron){
+	public boolean setCron(String cron){
 		if(StringUtils.isBlank(cron)){
-			return;
+			return false;
 		}
 
 		CronExpression cronExpression;
@@ -281,101 +290,135 @@ public class ScheduleConfig {
 			throw new IllegalArgumentException("cronExpression cannot parsed", e);
 		}
 
-		// 此处忽略了线程安全问题（先获取后判断），其实影响也不大
 		if(!cron.equals(getCron())){
 			confMap.put(CONF_CRON, cronExpression);
+			return true;
 		}
+		return false;
 	}
 
 	public long getFixedRate(){
 		return MapUtils.getLongValue(confMap, CONF_FIXEDRATE, FIXED_RATE_DEFAULT);
 	}
 
-	public void setFixedRate(long fixedRate){
-		Assert.isTrue(fixedRate >= 0, buildMsg(CONF_FIXEDRATE, " cannot be less than ", FIXED_RATE_DEFAULT)); 
-		confMap.put(CONF_FIXEDRATE, fixedRate);
+	public boolean setFixedRate(long fixedRate){
+		if(fixedRate > FIXED_RATE_DEFAULT && fixedRate != getFixedRate()){
+			confMap.put(CONF_FIXEDRATE, fixedRate);
+			return true;
+		}
+		return false;
 	}
 
 	public long getFixedDelay(){
 		return MapUtils.getLongValue(confMap, CONF_FIXEDDELAY, FIXED_DELAY_DEFAULT);
 	}
 
-	public void setFixedDelay(long fixedDelay){
-		Assert.isTrue(fixedDelay >= 0, buildMsg(CONF_FIXEDDELAY, " cannot be less than ", FIXED_DELAY_DEFAULT)); 
-		confMap.put(CONF_FIXEDDELAY, fixedDelay);
+	public boolean setFixedDelay(long fixedDelay){
+		if(fixedDelay > FIXED_DELAY_DEFAULT && fixedDelay != getFixedDelay()){
+			confMap.put(CONF_FIXEDDELAY, fixedDelay);
+			return true;
+		}
+		return false;
 	}
 
 	public String getRemark(){
-		return MapUtils.getString(confMap, CONF_REMARK);
+		return MapUtils.getString(confMap, CONF_REMARK, "");
 	}
 
-	public void setRemark(String remark){
+	public boolean setRemark(String remark){
+		if(remark.equals(getRemark())){
+			return false;
+		}
 		confMap.put(CONF_REMARK, remark);
+		return true;
 	}
 
 	public int getThreadCore(){
 		return MapUtils.getIntValue(confMap, CONF_THREAD_CORE, THREAD_CORE_DEFAULT);
 	}
 
-	public void setThreadCore(int threadCore){
+	public boolean setThreadCore(int threadCore){
 		Assert.isTrue(threadCore >= THREAD_CORE_MIN, buildMsg(CONF_THREAD_CORE, " cannot be less than ", THREAD_CORE_MIN)); 
 		Assert.isTrue(threadCore <= THREAD_CORE_MAX, buildMsg(CONF_THREAD_CORE, " cannot be greater than ", THREAD_CORE_MAX)); 
+		if(threadCore == getThreadCore()){
+			return false;
+		}
 		confMap.put(CONF_THREAD_CORE, threadCore);
 		if(pool != null && pool.getCorePoolSize() != threadCore){
 			pool.setCorePoolSize(threadCore);
 		}
+		return true;
 	}
 
 	public int getThreadMax(){
 		return MapUtils.getIntValue(confMap, CONF_THREAD_MAX, THREAD_MAX_DEFAULT);
 	}
 
-	public void setThreadMax(int threadMax){
+	public boolean setThreadMax(int threadMax){
 		Assert.isTrue(threadMax >= THREAD_MAX_MIN, buildMsg(CONF_THREAD_MAX, " cannot be less than ", THREAD_MAX_MIN)); 
 		Assert.isTrue(threadMax <= THREAD_MAX_MAX, buildMsg(CONF_THREAD_MAX + " cannot be greater than " + THREAD_MAX_MAX)); 
+		if(threadMax == getThreadMax()){
+			return false;
+		}
 		confMap.put(CONF_THREAD_MAX, threadMax);
 		if(pool != null && pool.getMaximumPoolSize() != threadMax){
 			pool.setMaximumPoolSize(threadMax);
 		}
+		return true;
 	}
 
 	public int getThreadAliveTime(){
 		return MapUtils.getIntValue(confMap, CONF_THREAD_ALIVETIME, THREAD_ALIVETIME_DEFAULT);
 	}
 
-	public void setThreadAliveTime(int aliveTime){
+	public boolean setThreadAliveTime(int aliveTime){
 		Assert.isTrue(aliveTime >= THREAD_ALIVETIME_MIN, buildMsg(CONF_THREAD_ALIVETIME, " cannot be less than ", THREAD_ALIVETIME_MIN)); 
+		if(aliveTime == getThreadAliveTime()){
+			return false;
+		}
 		confMap.put(CONF_THREAD_ALIVETIME, aliveTime);
 		if(pool != null && pool.getKeepAliveTime(TimeUnit.SECONDS) != aliveTime){ 
 			pool.setKeepAliveTime(aliveTime, TimeUnit.SECONDS);
 		}
+		return true;
 	}
 
 	public int getTaskOverTime(){
 		return MapUtils.getIntValue(confMap, CONF_TASK_OVERTIME, TASK_OVERTIME_DEFAULT);
 	}
 
-	public int setTaskOverTime(int overTime){
+	public boolean setTaskOverTime(int overTime){
 		Assert.isTrue(overTime >= TASK_OVERTIME_DEFAULT, buildMsg(CONF_TASK_OVERTIME, " cannot be less than ", TASK_OVERTIME_DEFAULT)); 
+		if(overTime == getTaskOverTime()){
+			return false;
+		}
 		confMap.put(CONF_TASK_OVERTIME, TASK_OVERTIME_DEFAULT);
-		return overTime;
+		return true;
 	}
 
 	public boolean getExecOnLoad(){
 		return MapUtils.getBoolean(confMap, CONF_EXECONLOAN, EXECONLOAN_DEFAULT);
 	}
-	
-	public void setExecOnLoad(boolean execOnLoad) {
+
+	public boolean setExecOnLoad(boolean execOnLoad) {
+		if(execOnLoad == getExecOnLoad()){
+			return false;
+		}
 		confMap.put(CONF_EXECONLOAN, execOnLoad);
+		return true;
 	}
-	
+
 	int getQueueSize(){
 		return MapUtils.getIntValue(confMap, CONF_QUEUESIZE, QUEUE_SIZE_DEFAULT);
 	}
-	
-	void setQueueSize(int queueSize){
+
+	boolean setQueueSize(int queueSize){
 		Assert.isTrue(queueSize >= QUEUE_SIZE_MIN, buildMsg(CONF_QUEUESIZE, " cannot be less than ", QUEUE_SIZE_MIN)); 
+		if(queueSize == getQueueSize()){
+			return false;
+		}
 		confMap.put(CONF_QUEUESIZE, queueSize);
+		return true;
 	}
 
 	@Override

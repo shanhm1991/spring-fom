@@ -47,7 +47,7 @@ public class ScheduleProxy implements MethodInterceptor {
 		}else if("newSchedulTasks".equals(methodName)){
 			return newSchedulTasks(object, method, args, methodProxy);
 		}else{
-			return methodProxy.invokeSuper(object, args);
+			return methodProxy.invoke(scheduleContext, args);
 		}
 	}
 

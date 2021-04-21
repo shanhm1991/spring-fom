@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.fom.ScheduleConfig;
 import org.springframework.fom.ScheduleContext;
 import org.springframework.fom.Task;
 import org.springframework.test.context.ContextConfiguration;
@@ -49,5 +50,9 @@ public class SpringTest implements ApplicationContextAware{
 		for(Task<Long> task : tasks2){
 			task.exec();
 		}
+		
+		ScheduleConfig scheduleConfig = scheduleContext.getScheduleConfig();
+		Assert.assertEquals(scheduleConfig.getString("conf.user", ""), "shanhm1991");
+		Assert.assertEquals(scheduleConfig.getString("conf.address", ""), "163.com");
 	}
 }

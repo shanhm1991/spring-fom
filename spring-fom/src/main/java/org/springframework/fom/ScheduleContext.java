@@ -15,7 +15,7 @@ import org.springframework.fom.interceptor.ScheduleTerminator;
  */
 public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter<E>, ScheduleTerminator {
 
-	private final ScheduleConfig ScheduleConfig = new ScheduleConfig();
+	protected final ScheduleConfig ScheduleConfig = new ScheduleConfig();
 	
 	private String scheduleBeanName;
 	
