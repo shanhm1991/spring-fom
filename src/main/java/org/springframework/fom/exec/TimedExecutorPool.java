@@ -32,7 +32,7 @@ public class TimedExecutorPool extends ThreadPoolExecutor {
 		return new TimedFuture<>(callable);
 	}
 
-	@SuppressWarnings({"rawtypes" })
+	@SuppressWarnings({"rawtypes"})
 	@Override
 	protected void beforeExecute(Thread t, Runnable r) { 
 		if(r instanceof TimedFuture){

@@ -38,7 +38,7 @@ public class TestScheduleBean implements ScheduleCompleter<Long>, ScheduleFactor
 		list.add(new Task<Long>("test"){
 			@Override
 			public Long exec() throws Exception {
-				return 0L;
+				return 10L;
 			}
 		});
 		return list;
@@ -46,7 +46,7 @@ public class TestScheduleBean implements ScheduleCompleter<Long>, ScheduleFactor
 
 	
 	@Scheduled
-	public void hello(){
-		System.out.println("hello test");
+	public long test(){
+		return 10;
 	}
 }

@@ -5,14 +5,18 @@ import java.util.Collection;
 import java.util.List;
 
 import org.junit.Assert;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.fom.Result;
 import org.springframework.fom.ScheduleContext;
 import org.springframework.fom.Task;
 import org.springframework.fom.annotation.FomSchedule;
 import org.springframework.scheduling.annotation.Scheduled;
 
-@FomSchedule
+@FomSchedule(cron = "0/15 * * * * ?", threadCore = 10, threadMax = 20, remark="备注测试")
 public class TestContextBean extends ScheduleContext<Long> {
+	
+	@Value("${conf.user}@${conf.address}")
+	private String email;
 	
 	@Override
 	public void onScheduleComplete(long execTimes, long lastExecTime, List<Result<Long>> results) throws Exception {
@@ -31,7 +35,7 @@ public class TestContextBean extends ScheduleContext<Long> {
 		Task<Long> task = new Task<Long>("testTask"){ 
 			@Override
 			public Long exec() throws Exception {
-				return 1L;
+				return 20L;
 			}
 		};
 		
@@ -41,7 +45,7 @@ public class TestContextBean extends ScheduleContext<Long> {
 	}
 	
 	@Scheduled
-	public void testMethod(){
-		System.out.println("test method");
+	public long test(){
+		return 20;
 	}
 }

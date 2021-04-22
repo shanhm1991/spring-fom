@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -59,16 +61,22 @@ public class SchedulePostProcessor implements BeanPostProcessor, BeanFactoryAwar
 			scheduleBean = beanFactory.getBean(scheduleBeanName);
 		}
 
+		Logger logger;
 		FomSchedule fomSchedule = clazz.getAnnotation(FomSchedule.class);
 		if(fomSchedule == null){ // 如果scheduleBean本身就是一个代理类，那么就获取不到FomSchedule.class
 			fomSchedule = scheduleBean.getClass().getAnnotation(FomSchedule.class);
+			logger = LoggerFactory.getLogger(scheduleBean.getClass());
+		}else{
+			logger = LoggerFactory.getLogger(clazz);
 		}
 
+		scheduleContext.setLogger(logger); 
 		ScheduleConfig scheduleConfig = scheduleContext.getScheduleConfig();
 		if(fomSchedule != null){ // 注解引入
 			setCronConf(scheduleConfig, fomSchedule, scheduleContext, scheduleBean);
 			setOtherConf(scheduleConfig, fomSchedule);
 			setValue(scheduleConfig, scheduleContext, scheduleBean);
+			
 		}else{ // xml配置
 
 		}
@@ -198,7 +206,7 @@ public class SchedulePostProcessor implements BeanPostProcessor, BeanFactoryAwar
 		if(scheduleBean != null){
 			fields = scheduleBean.getClass().getDeclaredFields();
 		}else{
-			fields = scheduleContext.getClass().getFields();
+			fields = scheduleContext.getClass().getDeclaredFields();
 		}
 
 		for(Field field : fields){

@@ -1,7 +1,7 @@
 /.settings/
-.project
 /target/
-fom.iml
-/log/
-/data/
-/.idea/
+.project
+.classpath
+.checkstyle
+/bin/
+spring-fom.iml

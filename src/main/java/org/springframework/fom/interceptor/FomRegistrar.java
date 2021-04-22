@@ -39,21 +39,19 @@ public class FomRegistrar implements ImportBeanDefinitionRegistrar{
 
 			FomSchedule fomSchedule = clazz.getAnnotation(FomSchedule.class);
 			if(fomSchedule != null){
-				parseFomSchedule(beanName, clazz, fomSchedule, registry);
+				parseFomSchedule(beanName, clazz, beanDefinition, fomSchedule, registry);
 			}
 		}
 	}
 
-	public void parseFomSchedule(String beanName, Class<?> clazz, FomSchedule fomSchedule, BeanDefinitionRegistry registry){
-		
-		// 配置 spring配置放到map中
-		
+	public void parseFomSchedule(String beanName, Class<?> clazz, BeanDefinition beanDefinition, FomSchedule fomSchedule, BeanDefinitionRegistry registry){
 		if(ScheduleContext.class.isAssignableFrom(clazz)){
+			beanDefinition.getPropertyValues().add("scheduleName", beanName);
 			registry.registerAlias(beanName,  "$" + beanName); 
 		}else{
 			RootBeanDefinition fomBeanDefinition = new RootBeanDefinition(ScheduleContext.class);
 			fomBeanDefinition.getPropertyValues().add("scheduleBeanName", beanName);
-			
+			fomBeanDefinition.getPropertyValues().add("scheduleName", beanName);
 			registry.registerBeanDefinition("$" + beanName, fomBeanDefinition); 
 		}
 	}

@@ -202,8 +202,9 @@ public class ScheduleConfig {
 		return pool == null ? 0 : pool.getCompletedTaskCount();
 	}
 
+	@SuppressWarnings("unchecked")
 	Map<Task<?>, Thread> getActiveThreads() {
-		return pool == null ? new HashMap<>() : pool.getActiveThreads();
+		return (Map<Task<?>, Thread>) (pool == null ? new HashMap<>() : pool.getActiveThreads());
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -270,10 +271,14 @@ public class ScheduleConfig {
 	}
 
 	// get/set of internal config 
-	public String getCron(){
-		CronExpression exp = (CronExpression)confMap.get(CONF_CRON);
-		if(exp != null){
-			return exp.getCronExpression();
+	public CronExpression getCron(){
+		return (CronExpression)confMap.get(CONF_CRON);
+	}
+	
+	public String getCronExpression(){
+		CronExpression cron = getCron();
+		if(cron != null){
+			return cron.getCronExpression();
 		}
 		return null;
 	}
