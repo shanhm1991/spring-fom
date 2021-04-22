@@ -11,86 +11,76 @@ package org.springframework.fom;
  */
 public class Result<E> implements Cloneable{
 
-	final String taskId;
+	private final String taskId;
 
-	boolean success;
+	private final long createTime;
 
-	long createTime;
+	private final long startTime;
 
-	long startTime;
+	private boolean success = true;
 
-	long costTime;
-	
-	E content;
+	private long costTime;
 
-	Throwable throwable;
+	private E content;
 
-	Result(String sourceUri) {
+	private Throwable throwable;
+
+	Result(String sourceUri, long createTime, long startTime) {
 		this.taskId = sourceUri;
+		this.createTime = createTime;
+		this.startTime = startTime;
 	}
 
-	/**
-	 * 获取任务id
-	 * @return id
-	 */
 	public String getTaskId() {
 		return taskId;
 	}
 
-	/**
-	 * 任务是否成功
-	 * @return isSuccess
-	 */
-	public boolean isSuccess() {
-		return success;
-	}
-
-	/**
-	 * 获取任务创建时间
-	 * @return createTime
-	 */
 	public long getCreateTime() {
 		return createTime;
 	}
 
-	/**
-	 * 获取任务开始时间
-	 * @return startTime
-	 */
 	public long getStartTime() {
 		return startTime;
 	}
 
-	/**
-	 * 获取任务耗时
-	 * @return costTime
-	 */
+	void setSuccess(boolean success) {
+		this.success = success;
+	}
+
+	public boolean isSuccess() {
+		return success;
+	}
+
+	void setCostTime(long costTime) {
+		this.costTime = costTime;
+	}
+
 	public long getCostTime() {
 		return costTime;
 	}
 
-	/**
-	 * 获取任务异常信息
-	 * @return throwable
-	 */
+	void setThrowable(Throwable throwable) {
+		this.throwable = throwable;
+	}
+
 	public Throwable getThrowable() {
 		return throwable;
+	}
+
+	void setContent(E content) {
+		this.content = content;
 	}
 
 	public E getContent() {
 		return content;
 	}
 
-	public void setContent(E content) {
-		this.content = content;
-	}
-	
 	@SuppressWarnings("unchecked")
 	@Override
 	public Result<E> clone() throws CloneNotSupportedException {
 		return (Result<E>)super.clone();
 	}
-	
+
 	@Override
 	public String toString() {
 		return "{taskId=" + taskId + ", success=" + success + ", createTime=" + createTime + ", startTime="

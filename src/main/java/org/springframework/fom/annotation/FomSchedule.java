@@ -57,18 +57,18 @@ public @interface FomSchedule {
 	String execOnLoadString() default "";
 
 	/**
-	 * 线程池核心线程数：default=1，min=1，max=1000
+	 * 线程池核心线程数：default=1，min=1，max=2147483647
 	 * @return
 	 */
-	int threadCore() default ScheduleConfig.THREAD_CORE_DEFAULT;
+	int threadCore() default ScheduleConfig.THREAD_MIN;
 	
 	String threadCoreString() default "";
 
 	/**
-	 * 线程池最大线程数，default=200，min=100，max=1000
+	 * 线程池最大线程数，default=1，min=1，max=2147483647
 	 * @return
 	 */
-	int threadMax() default ScheduleConfig.THREAD_MAX_DEFAULT;
+	int threadMax() default ScheduleConfig.THREAD_MIN;
 	
 	String threadMaxString() default "";
 

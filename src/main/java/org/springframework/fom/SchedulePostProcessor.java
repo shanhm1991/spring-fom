@@ -31,7 +31,7 @@ public class SchedulePostProcessor implements BeanPostProcessor, BeanFactoryAwar
 
 	private BeanFactory beanFactory;
 
-	private StringValueResolver stringValueResolver;
+	private StringValueResolver valueResolver;
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -40,7 +40,7 @@ public class SchedulePostProcessor implements BeanPostProcessor, BeanFactoryAwar
 
 	@Override
 	public void setEmbeddedValueResolver(StringValueResolver stringValueResolver) {
-		this.stringValueResolver = stringValueResolver;
+		this.valueResolver = stringValueResolver;
 	}
 
 	// handleTimeOut TODO
@@ -80,7 +80,7 @@ public class SchedulePostProcessor implements BeanPostProcessor, BeanFactoryAwar
 		}else{ // xml配置
 
 		}
-		scheduleConfig.init();
+		scheduleConfig.reset();
 
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(clazz);
@@ -128,7 +128,7 @@ public class SchedulePostProcessor implements BeanPostProcessor, BeanFactoryAwar
 
 	private boolean setCron(ScheduleConfig scheduleConfig, String cron){
 		if(StringUtils.isNotBlank(cron)){
-			cron = stringValueResolver.resolveStringValue(cron);
+			cron = valueResolver.resolveStringValue(cron);
 			scheduleConfig.setCron(cron); 
 			return true;
 		}
@@ -137,7 +137,7 @@ public class SchedulePostProcessor implements BeanPostProcessor, BeanFactoryAwar
 
 	private boolean setFixedRate(ScheduleConfig scheduleConfig, long fixedRate, String fixedRateString){
 		if(StringUtils.isNotBlank(fixedRateString)){
-			fixedRateString = stringValueResolver.resolveStringValue(fixedRateString);
+			fixedRateString = valueResolver.resolveStringValue(fixedRateString);
 			if(scheduleConfig.setFixedRate(Long.parseLong(fixedRateString))){
 				return true;
 			}
@@ -150,7 +150,7 @@ public class SchedulePostProcessor implements BeanPostProcessor, BeanFactoryAwar
 
 	private boolean setFixedDelay(ScheduleConfig scheduleConfig, long fixedDelay, String fixedDelayString){
 		if(StringUtils.isNotBlank(fixedDelayString)){
-			fixedDelayString = stringValueResolver.resolveStringValue(fixedDelayString);
+			fixedDelayString = valueResolver.resolveStringValue(fixedDelayString);
 			if(scheduleConfig.setFixedDelay(Long.parseLong(fixedDelayString))){
 				return true;
 			}
@@ -163,40 +163,50 @@ public class SchedulePostProcessor implements BeanPostProcessor, BeanFactoryAwar
 
 	private void setOtherConf(ScheduleConfig scheduleConfig, FomSchedule fomSchedule){
 		String threadCoreString = fomSchedule.threadCoreString();
-		if(StringUtils.isBlank(threadCoreString) 
-				|| !scheduleConfig.setThreadCore(Integer.parseInt(threadCoreString))){
+		if(StringUtils.isNotBlank(threadCoreString)){
+			threadCoreString = valueResolver.resolveStringValue(threadCoreString);
+			int threadCore = Integer.parseInt(threadCoreString);
+			if(ScheduleConfig.THREAD_MIN != threadCore){
+				scheduleConfig.setThreadCore(threadCore);
+			}
+		}else if(ScheduleConfig.THREAD_MIN != fomSchedule.threadCore()){
 			scheduleConfig.setThreadCore(fomSchedule.threadCore());
 		}
 
 		String threadMaxString = fomSchedule.threadMaxString();
-		if(StringUtils.isBlank(threadMaxString) 
-				|| !scheduleConfig.setThreadMax(Integer.parseInt(threadMaxString))){
+		if(StringUtils.isNotBlank(threadMaxString)){
+			threadMaxString = valueResolver.resolveStringValue(threadMaxString);
+			int threadMax = Integer.parseInt(threadMaxString);
+			if(ScheduleConfig.THREAD_MIN != threadMax){
+				scheduleConfig.setThreadMax(threadMax);
+			}
+		}else{
 			scheduleConfig.setThreadMax(fomSchedule.threadMax());
 		}
 
 		String queueSizeString = fomSchedule.queueSizeString();
 		if(StringUtils.isBlank(queueSizeString) 
-				|| !scheduleConfig.setQueueSize(Integer.parseInt(queueSizeString))){
+				|| !scheduleConfig.setQueueSize(Integer.parseInt(valueResolver.resolveStringValue(queueSizeString)))){
 			scheduleConfig.setQueueSize(fomSchedule.queueSize());
 		}
 
 		String threadAliveTimeString = fomSchedule.threadAliveTimeString(); 
 		if(StringUtils.isBlank(threadAliveTimeString) 
-				|| !scheduleConfig.setThreadAliveTime(Integer.parseInt(threadAliveTimeString))){
+				|| !scheduleConfig.setThreadAliveTime(Integer.parseInt(valueResolver.resolveStringValue(threadAliveTimeString)))){
 			scheduleConfig.setThreadAliveTime(fomSchedule.threadAliveTime());
 		}
 
-		scheduleConfig.setRemark(fomSchedule.remark());
+		scheduleConfig.setRemark(valueResolver.resolveStringValue(fomSchedule.remark()));
 
 		String execOnLoadString = fomSchedule.execOnLoadString();
 		if(StringUtils.isBlank(execOnLoadString) 
-				|| !scheduleConfig.setExecOnLoad(Boolean.parseBoolean(execOnLoadString))){
+				|| !scheduleConfig.setExecOnLoad(Boolean.parseBoolean(valueResolver.resolveStringValue(execOnLoadString)))){
 			scheduleConfig.setExecOnLoad(fomSchedule.execOnLoad()); 
 		}
 
 		String taskOverTimeString = fomSchedule.taskOverTimeString();
 		if(StringUtils.isBlank(taskOverTimeString) 
-				|| !scheduleConfig.setTaskOverTime(Integer.parseInt(taskOverTimeString))){
+				|| !scheduleConfig.setTaskOverTime(Integer.parseInt(valueResolver.resolveStringValue(taskOverTimeString)))){
 			scheduleConfig.setTaskOverTime(fomSchedule.taskOverTime());
 		}
 	}
@@ -214,7 +224,7 @@ public class SchedulePostProcessor implements BeanPostProcessor, BeanFactoryAwar
 			if(value != null){
 				List<String> list = getProperties(value.value());
 				for(String ex : list){
-					String confValue = stringValueResolver.resolveStringValue(ex);
+					String confValue = valueResolver.resolveStringValue(ex);
 					int index = ex.indexOf(":");
 					if(index == -1){
 						index = ex.indexOf("}");

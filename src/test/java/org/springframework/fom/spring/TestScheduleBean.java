@@ -14,18 +14,33 @@ import org.springframework.fom.interceptor.ScheduleFactory;
 import org.springframework.fom.interceptor.ScheduleTerminator;
 import org.springframework.scheduling.annotation.Scheduled;
 
-@FomSchedule
+@FomSchedule(
+		threadCoreString="${testScheduleBean.threadCore}",
+		threadMaxString="${testScheduleBean.threadMax}",
+		queueSizeString="${testScheduleBean.queueSize}",
+		threadAliveTimeString="${testScheduleBean.threadAliveTime}",
+		taskOverTimeString="${testScheduleBean.taskOverTime}",
+		execOnLoadString="${testScheduleBean.execOnLoad}",
+		remark="${testScheduleBean.remark}")
 public class TestScheduleBean implements ScheduleCompleter<Long>, ScheduleFactory<Long>, ScheduleTerminator{ 
-	
+
 	@Value("${conf.user}@${conf.address}")
 	private String email;
-	
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
 	@Override
 	public void onScheduleComplete(long execTimes, long lastExecTime, List<Result<Long>> results) throws Exception {
 		Assert.assertEquals(execTimes, 100); 
 		Assert.assertEquals(lastExecTime, 100); 
 	}
-	
+
 	@Override
 	public void onScheduleTerminate(long execTimes, long lastExecTime) {
 		Assert.assertEquals(execTimes, 200); 
@@ -44,8 +59,8 @@ public class TestScheduleBean implements ScheduleCompleter<Long>, ScheduleFactor
 		return list;
 	}
 
-	
-	@Scheduled
+
+	@Scheduled(fixedRateString="${testScheduleBean.fixedRate}")
 	public long test(){
 		return 10;
 	}

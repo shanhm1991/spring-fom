@@ -15,8 +15,6 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.CronExpression;
-import org.springframework.fom.exec.TimedExecutorPool;
-import org.springframework.fom.exec.TimedFuture;
 import org.springframework.util.Assert;
 
 /**
@@ -27,34 +25,9 @@ import org.springframework.util.Assert;
 public class ScheduleConfig {
 
 	/**
-	 * 核心线程数：default
+	 * 最小线程数：min
 	 */
-	public static final int THREAD_CORE_DEFAULT = 1;
-
-	/**
-	 * 核心线程数：min
-	 */
-	public static final int THREAD_CORE_MIN = 1;
-
-	/**
-	 * 核心线程数：max
-	 */
-	public static final int THREAD_CORE_MAX = 100;
-
-	/**
-	 * 最大线程数：default
-	 */
-	public static final int THREAD_MAX_DEFAULT = 200;
-
-	/**
-	 * 最大线程数：min
-	 */
-	public static final int THREAD_MAX_MIN = 100;
-
-	/**
-	 * 最大线程数：max
-	 */
-	public static final int THREAD_MAX_MAX = 1000;
+	public static final int THREAD_MIN = 1;
 
 	/**
 	 * 线程空闲存活时间：default
@@ -167,14 +140,18 @@ public class ScheduleConfig {
 	private final ConcurrentHashMap<String, Object> confMap = new ConcurrentHashMap<>();
 
 	private TimedExecutorPool pool;
-
-	void init(){
+	
+	public void reset(){
 		int core = getThreadCore(); 
 		int max = getThreadMax();
 		int aliveTime = getThreadAliveTime();   
 		int queueSize = getQueueSize();  
 		pool = new TimedExecutorPool(core, max, aliveTime, new LinkedBlockingQueue<Runnable>(queueSize));
 		pool.allowCoreThreadTimeOut(true);
+	}
+
+	TimedExecutorPool getPool() {
+		return pool;
 	}
 
 	public ConcurrentHashMap<String, Object> getConfMap() {
@@ -223,7 +200,7 @@ public class ScheduleConfig {
 		for(Object obj : array){
 			if(obj instanceof TimedFuture){
 				TimedFuture future = (TimedFuture)obj;
-				map.put(future.getTaskId(), format.format(future.getCreateTime()));
+				map.put(future.getId(), format.format(future.getCreateTime()));
 			}
 		}
 		return map;
@@ -242,8 +219,9 @@ public class ScheduleConfig {
 		return true;
 	}
 
-	public Object get(String key){
-		return confMap.get(key);
+	@SuppressWarnings("unchecked")
+	public <V> V get(String key){
+		return (V)confMap.get(key);
 	}
 
 	public String getString(String key, String defaultValue){
@@ -274,7 +252,7 @@ public class ScheduleConfig {
 	public CronExpression getCron(){
 		return (CronExpression)confMap.get(CONF_CRON);
 	}
-	
+
 	public String getCronExpression(){
 		CronExpression cron = getCron();
 		if(cron != null){
@@ -339,34 +317,48 @@ public class ScheduleConfig {
 	}
 
 	public int getThreadCore(){
-		return MapUtils.getIntValue(confMap, CONF_THREAD_CORE, THREAD_CORE_DEFAULT);
+		return MapUtils.getIntValue(confMap, CONF_THREAD_CORE, THREAD_MIN);
 	}
 
 	public boolean setThreadCore(int threadCore){
-		Assert.isTrue(threadCore >= THREAD_CORE_MIN, buildMsg(CONF_THREAD_CORE, " cannot be less than ", THREAD_CORE_MIN)); 
-		Assert.isTrue(threadCore <= THREAD_CORE_MAX, buildMsg(CONF_THREAD_CORE, " cannot be greater than ", THREAD_CORE_MAX)); 
+		Assert.isTrue(threadCore >= THREAD_MIN, buildMsg(CONF_THREAD_CORE, " cannot be less than ", THREAD_MIN)); 
 		if(threadCore == getThreadCore()){
 			return false;
 		}
+
 		confMap.put(CONF_THREAD_CORE, threadCore);
+		int threadMax = getThreadMax();
+		if(threadMax < threadCore){ 
+			threadMax = threadCore;
+			confMap.put(CONF_THREAD_MAX, threadMax);
+		}
+
 		if(pool != null && pool.getCorePoolSize() != threadCore){
 			pool.setCorePoolSize(threadCore);
+			pool.setMaximumPoolSize(threadMax); 
 		}
 		return true;
 	}
 
 	public int getThreadMax(){
-		return MapUtils.getIntValue(confMap, CONF_THREAD_MAX, THREAD_MAX_DEFAULT);
+		return MapUtils.getIntValue(confMap, CONF_THREAD_MAX, THREAD_MIN);
 	}
 
 	public boolean setThreadMax(int threadMax){
-		Assert.isTrue(threadMax >= THREAD_MAX_MIN, buildMsg(CONF_THREAD_MAX, " cannot be less than ", THREAD_MAX_MIN)); 
-		Assert.isTrue(threadMax <= THREAD_MAX_MAX, buildMsg(CONF_THREAD_MAX + " cannot be greater than " + THREAD_MAX_MAX)); 
+		Assert.isTrue(threadMax >= THREAD_MIN, buildMsg(CONF_THREAD_MAX, " cannot be less than ", THREAD_MIN)); 
 		if(threadMax == getThreadMax()){
 			return false;
 		}
+
 		confMap.put(CONF_THREAD_MAX, threadMax);
+		int threadCore = getThreadCore();
+		if(threadCore > threadMax){
+			threadCore = threadMax;
+			confMap.put(CONF_THREAD_CORE, threadCore);
+		}
+
 		if(pool != null && pool.getMaximumPoolSize() != threadMax){
+			pool.setCorePoolSize(threadCore);
 			pool.setMaximumPoolSize(threadMax);
 		}
 		return true;
@@ -397,7 +389,7 @@ public class ScheduleConfig {
 		if(overTime == getTaskOverTime()){
 			return false;
 		}
-		confMap.put(CONF_TASK_OVERTIME, TASK_OVERTIME_DEFAULT);
+		confMap.put(CONF_TASK_OVERTIME, overTime);
 		return true;
 	}
 
@@ -413,7 +405,7 @@ public class ScheduleConfig {
 		return true;
 	}
 
-	int getQueueSize(){
+	public int getQueueSize(){
 		return MapUtils.getIntValue(confMap, CONF_QUEUESIZE, QUEUE_SIZE_DEFAULT);
 	}
 

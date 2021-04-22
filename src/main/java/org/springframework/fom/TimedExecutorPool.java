@@ -1,4 +1,4 @@
-package org.springframework.fom.exec;
+package org.springframework.fom;
 
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -7,14 +7,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.fom.Task;
-
 /**
  * 
  * @author shanhm1991@163.com
  *
  */
-public class TimedExecutorPool extends ThreadPoolExecutor { 
+class TimedExecutorPool extends ThreadPoolExecutor { 
 
 	private final Map<Task<?>, Thread> threadMap = new ConcurrentHashMap<>();
 

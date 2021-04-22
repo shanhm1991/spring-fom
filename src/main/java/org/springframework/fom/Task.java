@@ -2,13 +2,11 @@ package org.springframework.fom;
 
 import java.util.concurrent.Callable;
 
-//import org.eto.fom.context.core.Context.ScheduleBatch;
-//import org.eto.fom.util.log.SlfLoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.fom.ScheduleContext.ScheduleBatch;
 
 /**
- * 任务的抽象实现
  * 
  * @param <E> 任务执行结果类型
  * 
@@ -17,33 +15,20 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class Task<E> implements Callable<Result<E>> {
 
-	protected volatile Logger log = LoggerFactory.getLogger(Task.class);
+	protected volatile Logger logger = LoggerFactory.getLogger(Task.class);
 
-	public static final float FILE_UNIT = 1024.0f;
-
-	public static final int SUCCESS_MIN = 200;
-
-	public static final int SUCCESS_MAX = 207;
-
-	/**
-	 * 任务唯一标识
-	 */
 	protected final String id;
-
-	/**
-	 * 批任务执行状态，提交线程设置
-	 */
-//	volatile ScheduleBatch<E> scheduleBatch;
-//
-//	private volatile Context<E> context;
 
 	private final long createTime;
 
-	private volatile long startTime;
+	private long startTime;
 
-	/**
-	 * @param id Task唯一标识
-	 */
+	// set by ScheduleContext
+	private volatile ScheduleContext<E> scheduleContext;
+
+	// set by ScheduleContext
+	private volatile ScheduleBatch<E> scheduleBatch;
+
 	public Task(String id) { 
 		this.id = id;
 		this.createTime = System.currentTimeMillis();
@@ -51,135 +36,109 @@ public abstract class Task<E> implements Callable<Result<E>> {
 
 	@Override
 	public final Result<E> call() throws InterruptedException {   
-		Thread.currentThread().setName(id);
-		long sTime = System.currentTimeMillis();
-		this.startTime = sTime;
+		Thread.currentThread().setName(getTaskId());
+		logger.debug("task started."); 
 
-		final Result<E> result = new Result<>(id); 
-		result.startTime = sTime;
-		result.createTime = this.createTime;
+		this.startTime = System.currentTimeMillis();
+		final Result<E> result = new Result<>(id, createTime, startTime); 
+		doCall(result);
+		result.setCostTime(System.currentTimeMillis() - startTime); 
 
-		if(log.isDebugEnabled()){
-			log.debug("task started."); 
-		}
-		try {
-			result.success = beforeExec();
-			if(result.success){
-				result.content = exec();
+		if(scheduleContext != null){
+			if(scheduleBatch != null){
+				scheduleBatch.addResult(result); 
+				scheduleContext.checkScheduleComplete(scheduleBatch);
 			}
-		} catch(Throwable e) {
-			log.error("", e); 
-			result.success = false;
-			result.throwable = e;
-		} finally{
-			try {
-				afterExec(result.success, result.content, result.throwable);
-			}catch(Throwable e) {
-				log.error("", e); 
-				result.success = false;
-				result.throwable = e; // exec的throwable已经交给afterExec处理过，所以这里覆盖掉也能接受
-			}
+			scheduleContext.getScheduleStatistics().record(result); 
 		}
-		result.costTime = System.currentTimeMillis() - sTime;
-		
-//		if(context != null){
-//			if(scheduleBatch != null){
-//				scheduleBatch.addResult(result); 
-//				context.checkScheduleComplete(scheduleBatch);
-//			}
-//			context.getStatistics().statistics(result); 
-//		}
-		
-		if(result.success){
-			log.info("task success, cost={}ms {}", result.costTime, result.content);
+
+		if(result.isSuccess()){
+			logger.info("task success, cost={}ms {}", result.getCostTime(), result.getContent());
 		}else{
-			log.warn("task failed, cost={}ms {}", result.costTime, result.content);
+			logger.warn("task failed, cost={}ms {}", result.getCostTime(), result.getContent());
 		}
-		
 		return result;
 	}
 
-	/**
-	 * 任务执行前的工作
-	 * @return isSuccess
-	 * @throws Exception Exception
-	 */
+	private void doCall(Result<E> result){
+		try {
+			if(!beforeExec()){
+				result.setSuccess(false); 
+				return;
+			}
+			result.setContent(exec());
+		} catch(Throwable e) {
+			logger.error("", e); 
+			result.setSuccess(false); 
+			result.setThrowable(e);
+		} finally{
+			try {
+				afterExec(result.isSuccess(), result.getContent(), result.getThrowable());
+			}catch(Throwable e) {
+				logger.error("", e); 
+				result.setSuccess(false); 
+				result.setThrowable(e);; // exec的异常已经交给afterExec处理过，这里覆盖掉也能接受
+			}
+		}
+	}
+
 	public boolean beforeExec() throws Exception {
 		return true;
 	}
 
-	/**
-	 * 任务执行
-	 * @return E
-	 * @throws Exception Exception
-	 */
 	public abstract E exec() throws Exception;
 
-	/**
-	 * 任务执行后的工作
-	 * @param isExecSuccess exec是否成功
-	 * @param content exec执行结果
-	 * @param e exec抛出异常
-	 * @throws Exception Exception
-	 */
 	public void afterExec(boolean isExecSuccess,  E content, Throwable e) throws Exception {
 
 	}
 
-	/**
-	 * 获取任务id
-	 * @return id
-	 */
 	public final String getId() {
 		return id;
 	}
+	
+	public final String getTaskId() {
+		return scheduleContext == null ? id : scheduleContext.getScheduleName() + "-" + id;
+	}
 
-	/**
-	 * 获取任务创建时间
-	 * @return createTime
-	 */
 	public final long getCreateTime() {
 		return createTime;
 	}
 
-	/**
-	 * 获取任务开始时间
-	 * @return startTime
-	 */
 	public final long getStartTime() {
 		return startTime;
 	}
 
-//	final void setContext(Context<E> context){
-//		if(context == null){
-//			return;
-//		}
-//		this.context = context;
-//		this.log = SlfLoggerFactory.getLogger(context.name); 
-//	}
-//
-//	/**
-//	 * 只有在context中使用时才会赋值，否则将为null
-//	 * @return context name
-//	 */
-	public final String getName(){
-//		if(context == null){
-//			return null;
-//		}
-//		return context.getName();
-		return "";
+	ScheduleBatch<E> getScheduleBatch() {
+		return scheduleBatch;
 	}
 
-	/**
-	 * 只有在context中使用时才会赋值，否则将为null
-	 * @return ContextConfig
-	 */
-//	protected final ContextConfig getConfig(){
-//		if(context == null){
-//			return null;
-//		}
-//		return context.config;
-//	}
+	void setScheduleBatch(ScheduleBatch<E> scheduleBatch) {
+		this.scheduleBatch = scheduleBatch;
+	}
+
+	ScheduleContext<E> getScheduleContext() {
+		return scheduleContext;
+	}
+
+	void setScheduleContext(ScheduleContext<E> scheduleContext) {
+		this.scheduleContext = scheduleContext;
+		this.logger = scheduleContext.getLogger();
+	}
+
+	public String getScheduleName(){
+		if(scheduleContext != null){
+			return scheduleContext.getScheduleName();
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <V> V getConfig(String key){
+		if(scheduleContext != null){
+			return (V)scheduleContext.getScheduleConfig().get(key);
+		}
+		return null;
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override

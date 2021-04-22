@@ -35,11 +35,18 @@ public class SpringTest implements ApplicationContextAware{
 		logger.info("TestContextBean：测试属性"); 
 		Assert.assertEquals(testContext.getScheduleName(), "testContextBean");
 		Assert.assertEquals(testContext.getScheduleBeanName(), null);
+		Assert.assertEquals(testContext.getEmail(), "shanhm1991@163.com");
 		
 		ScheduleConfig scheduleConfig = testContext.getScheduleConfig();
 		logger.info("TestContextBean：测试配置"); 
 		Assert.assertEquals(scheduleConfig.getCronExpression(), "0/15 * * * * ?");
 		Assert.assertEquals(scheduleConfig.getRemark(), "备注测试");
+		Assert.assertEquals(scheduleConfig.getThreadCore(), 10);
+		Assert.assertEquals(scheduleConfig.getThreadMax(), 20);
+		Assert.assertEquals(scheduleConfig.getQueueSize(), 500);
+		Assert.assertEquals(scheduleConfig.getThreadAliveTime(), 100);
+		Assert.assertEquals(scheduleConfig.getTaskOverTime(), 300);
+		Assert.assertEquals(scheduleConfig.getExecOnLoad(), true);
 
 		logger.info("TestContextBean：测试配置中的spring环境变量");
 		Assert.assertEquals(scheduleConfig.getString("conf.user", ""), "shanhm1991");
@@ -59,6 +66,9 @@ public class SpringTest implements ApplicationContextAware{
 	@SuppressWarnings("unchecked")
 	@Test 
 	public void test2() throws Exception{
+		TestScheduleBean testScheduleBean = (TestScheduleBean)context.getBean("testScheduleBean");
+		Assert.assertEquals(testScheduleBean.getEmail(), "shanhm1991@163.com");
+		
 		ScheduleContext<Long> scheduleContext = (ScheduleContext<Long>)context.getBean("$testScheduleBean");
 		Logger logger = scheduleContext.getLogger();
 
@@ -66,8 +76,18 @@ public class SpringTest implements ApplicationContextAware{
 		Assert.assertEquals(scheduleContext.getScheduleName(), "testScheduleBean");
 		Assert.assertEquals(scheduleContext.getScheduleBeanName(), "testScheduleBean");
 
-		logger.info("TestScheduleBean：测试配置中的spring环境变量");
 		ScheduleConfig scheduleConfig = scheduleContext.getScheduleConfig();
+		logger.info("TestContextBean：测试配置"); 
+		Assert.assertEquals(scheduleConfig.getFixedRate(), 30);
+		Assert.assertEquals(scheduleConfig.getRemark(), "备注配置");
+		Assert.assertEquals(scheduleConfig.getThreadCore(), 40);
+		Assert.assertEquals(scheduleConfig.getThreadMax(), 40);
+		Assert.assertEquals(scheduleConfig.getQueueSize(), 600);
+		Assert.assertEquals(scheduleConfig.getThreadAliveTime(), 400);
+		Assert.assertEquals(scheduleConfig.getTaskOverTime(), 3600);
+		Assert.assertEquals(scheduleConfig.getExecOnLoad(), true);
+		
+		logger.info("TestScheduleBean：测试配置中的spring环境变量");
 		Assert.assertEquals(scheduleConfig.getString("conf.user", ""), "shanhm1991");
 		Assert.assertEquals(scheduleConfig.getString("conf.address", ""), "163.com");
 

@@ -12,12 +12,28 @@ import org.springframework.fom.Task;
 import org.springframework.fom.annotation.FomSchedule;
 import org.springframework.scheduling.annotation.Scheduled;
 
-@FomSchedule(cron = "0/15 * * * * ?", threadCore = 10, threadMax = 20, remark="备注测试")
+@FomSchedule(
+		cron = "0/15 * * * * ?", 
+		threadCore=10, 
+		threadMax=20, 
+		queueSize=500, 
+		threadAliveTime=100, 
+		taskOverTime=300, 
+		execOnLoad=true, 
+		remark="备注测试")
 public class TestContextBean extends ScheduleContext<Long> {
-	
+
 	@Value("${conf.user}@${conf.address}")
 	private String email;
 	
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
 	@Override
 	public void onScheduleComplete(long execTimes, long lastExecTime, List<Result<Long>> results) throws Exception {
 		Assert.assertEquals(execTimes, 100); 
@@ -29,7 +45,7 @@ public class TestContextBean extends ScheduleContext<Long> {
 		Assert.assertEquals(execTimes, 200); 
 		Assert.assertEquals(lastExecTime, 200); 
 	}
-	
+
 	@Override
 	public Collection<? extends Task<Long>> newSchedulTasks() throws Exception {
 		Task<Long> task = new Task<Long>("testTask"){ 
@@ -38,12 +54,12 @@ public class TestContextBean extends ScheduleContext<Long> {
 				return 20L;
 			}
 		};
-		
+
 		List<Task<Long>> list = new ArrayList<>();
 		list.add(task);
 		return list;
 	}
-	
+
 	@Scheduled
 	public long test(){
 		return 20;

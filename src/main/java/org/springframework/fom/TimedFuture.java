@@ -1,9 +1,7 @@
-package org.springframework.fom.exec;
+package org.springframework.fom;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
-
-import org.springframework.fom.Task;
 
 /**
  * 
@@ -11,7 +9,7 @@ import org.springframework.fom.Task;
  *
  * @param <T> 结果类型
  */
-public class TimedFuture<T> extends FutureTask<T> {
+class TimedFuture<T> extends FutureTask<T> {
 	
 	private Task<?> task;
 
@@ -34,12 +32,16 @@ public class TimedFuture<T> extends FutureTask<T> {
 		return task.getStartTime();
 	}
 
-	public String getContextName(){
-		return task.getName();
+	public String getScheduleName(){
+		return task.getScheduleName();
 	}
 
-	public String getTaskId() {
+	public String getId() {
 		return task.getId();
+	}
+	
+	public String getTaskId() {
+		return task.getTaskId(); 
 	}
 
 	public Task<?> getTask(){
