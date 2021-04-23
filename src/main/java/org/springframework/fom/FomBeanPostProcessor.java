@@ -18,7 +18,6 @@ import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.fom.annotation.FomSchedule;
 import org.springframework.fom.interceptor.ScheduleProxy;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -26,8 +25,7 @@ import org.springframework.util.StringValueResolver;
  * @author shanhm1991@163.com
  *
  */
-@Component
-public class SchedulePostProcessor implements BeanPostProcessor, BeanFactoryAware, EmbeddedValueResolverAware {
+public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware, EmbeddedValueResolverAware {
 
 	private BeanFactory beanFactory;
 

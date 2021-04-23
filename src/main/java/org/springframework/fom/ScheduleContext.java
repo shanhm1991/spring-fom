@@ -22,7 +22,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
-import org.springframework.context.Lifecycle;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.fom.interceptor.ScheduleCompleter;
 import org.springframework.fom.interceptor.ScheduleFactory;
 import org.springframework.fom.interceptor.ScheduleTerminator;
@@ -34,7 +36,7 @@ import org.springframework.util.Assert;
  * @author shanhm1991@163.com
  *
  */
-public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter<E>, ScheduleTerminator, Lifecycle {
+public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter<E>, ScheduleTerminator, ApplicationContextAware {
 
 	private static final int SECOND_UNIT = 1000;
 
@@ -70,6 +72,13 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 	private boolean isFirstRun = true;
 
 	private State state = INITED; 
+	
+	private ApplicationContext applicationContext;
+	
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
+	}
 	
 	public ScheduleInfo getScheduleInfo(){
 		return new ScheduleInfo(this);
@@ -107,17 +116,33 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 		return scheduleStatistics;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void onScheduleTerminate(long execTimes, long lastExecTime) {
+		// 这里要从原对象方法调用到代理对象中的方法
+		ScheduleContext<E> scheduleContext;
+		if(applicationContext != null && (scheduleContext = (ScheduleContext<E>)applicationContext.getBean(scheduleName)) != null){
+			scheduleContext.onScheduleTerminate(execTimes, lastExecTime); 
+		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void onScheduleComplete(long execTimes, long lastExecTime, List<Result<E>> results) throws Exception {
-
+		ScheduleContext<E> scheduleContext;
+		if(applicationContext != null && (scheduleContext = (ScheduleContext<E>)applicationContext.getBean(scheduleName)) != null){
+			scheduleContext.onScheduleComplete(execTimes, lastExecTime, results);
+		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<? extends Task<E>> newSchedulTasks() throws Exception {
+		ScheduleContext<E> scheduleContext;
+		if(applicationContext != null && (scheduleContext = (ScheduleContext<E>)applicationContext.getBean(scheduleName)) != null){
+			return scheduleContext.newSchedulTasks();
+		}
+		
 		Task<E> task = schedul();
 		if(task != null){
 			return Arrays.asList(task);
@@ -129,26 +154,11 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 		return null;
 	}
 
-	@Override
-	public void start() {
-		scheduleStart();
-	}
-
-	@Override
-	public void stop() {
-		scheduleShutdown();
-	}
-
-	@Override
-	public boolean isRunning() {
-		return false;
-	}
-
 	private synchronized void switchState(State state) {
 		this.state = state; 
 	}
 
-	public final synchronized State getState(){
+	public synchronized State getState(){
 		if(state == STOPPING && scheduleConfig.getPool().isTerminated()){
 			state = STOPPED;
 			isFirstRun = true;
@@ -156,7 +166,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 		return state;
 	}
 
-	public final Response<Void> scheduleStart(){
+	public Response<Void> scheduleStart(){
 		synchronized (this) {
 			switch(state){
 			case INITED:
@@ -181,7 +191,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 		}
 	}
 
-	public final Response<Void> scheduleShutdown(){
+	public Response<Void> scheduleShutdown(){
 		synchronized (this) {
 			switch(state){
 			case INITED:
@@ -209,7 +219,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 		}
 	}
 	
-	public final Response<Void> scheduleExecNow(){
+	public Response<Void> scheduleExecNow(){
 		synchronized (this) {
 			switch(state){
 			case INITED:
@@ -252,6 +262,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 					return;
 				}
 
+				logger.info("{} run ...", scheduleName); 
 				try{
 					if(isFirstRun && !scheduleConfig.getExecOnLoad()){
 						isFirstRun = false;
@@ -287,7 +298,6 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 							return;
 						}
 					}
-
 					terminate(); 
 					return;
 				}
@@ -548,5 +558,4 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 			return taskNotCompleted.get();
 		}
 	}
-
 }

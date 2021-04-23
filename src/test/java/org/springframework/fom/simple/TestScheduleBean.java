@@ -1,10 +1,11 @@
-package org.springframework.fom.spring;
+package org.springframework.fom.simple;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.fom.Result;
 import org.springframework.fom.Task;
@@ -14,6 +15,11 @@ import org.springframework.fom.interceptor.ScheduleFactory;
 import org.springframework.fom.interceptor.ScheduleTerminator;
 import org.springframework.scheduling.annotation.Scheduled;
 
+/**
+ * 
+ * @author shanhm1991@163.com
+ *
+ */
 @FomSchedule(
 		threadCoreString="${testScheduleBean.threadCore}",
 		threadMaxString="${testScheduleBean.threadMax}",
@@ -23,6 +29,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 		execOnLoadString="${testScheduleBean.execOnLoad}",
 		remark="${testScheduleBean.remark}")
 public class TestScheduleBean implements ScheduleCompleter<Long>, ScheduleFactory<Long>, ScheduleTerminator{ 
+	
+	private static Logger logger = LoggerFactory.getLogger(TestScheduleBean.class);
 
 	@Value("${conf.user}@${conf.address}")
 	private String email;
@@ -37,14 +45,12 @@ public class TestScheduleBean implements ScheduleCompleter<Long>, ScheduleFactor
 
 	@Override
 	public void onScheduleComplete(long execTimes, long lastExecTime, List<Result<Long>> results) throws Exception {
-		Assert.assertEquals(execTimes, 100); 
-		Assert.assertEquals(lastExecTime, 100); 
+		logger.info("schedule complete: execTimes={}, lastExecTime={}, results={}", execTimes, lastExecTime, results);
 	}
 
 	@Override
 	public void onScheduleTerminate(long execTimes, long lastExecTime) {
-		Assert.assertEquals(execTimes, 200); 
-		Assert.assertEquals(lastExecTime, 200); 
+		logger.info("schedule terminate: execTimes={}, lastExecTime={}", execTimes, lastExecTime);
 	}
 
 	@Override
@@ -53,6 +59,7 @@ public class TestScheduleBean implements ScheduleCompleter<Long>, ScheduleFactor
 		list.add(new Task<Long>("test"){
 			@Override
 			public Long exec() throws Exception {
+				logger.info("task execute...");
 				return 10L;
 			}
 		});
@@ -62,6 +69,7 @@ public class TestScheduleBean implements ScheduleCompleter<Long>, ScheduleFactor
 
 	@Scheduled(fixedRateString="${testScheduleBean.fixedRate}")
 	public long test(){
+		logger.info("task execute...");
 		return 10;
 	}
 }

@@ -8,6 +8,8 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.fom.FomBeanPostProcessor;
+import org.springframework.fom.FomScheduleStarter;
 import org.springframework.fom.ScheduleContext;
 import org.springframework.fom.annotation.FomSchedule;
 
@@ -16,7 +18,7 @@ import org.springframework.fom.annotation.FomSchedule;
  * @author shanhm1991@163.com
  *
  */
-public class FomRegistrar implements ImportBeanDefinitionRegistrar{
+public class FomBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar{
 
 	private static AtomicBoolean registed = new AtomicBoolean(false);
 
@@ -25,7 +27,16 @@ public class FomRegistrar implements ImportBeanDefinitionRegistrar{
 		if(!registed.compareAndSet(false, true)){
 			return;
 		}
+		
+		// 注册SchedulePostProcessor
+		RootBeanDefinition fomBeanPostProcessor = new RootBeanDefinition(FomBeanPostProcessor.class);
+		registry.registerBeanDefinition("schedulePostProcessor", fomBeanPostProcessor); 
 
+		// 注册FomScheduleStarter
+		RootBeanDefinition fomScheduleStarter = new RootBeanDefinition(FomScheduleStarter.class);
+		registry.registerBeanDefinition("fomScheduleStarter", fomScheduleStarter); 
+		
+		// 注册FomBeanDefinition
 		String[] beanNames = registry.getBeanDefinitionNames();
 		Class<?> clazz;
 		for(String beanName : beanNames){
@@ -51,7 +62,7 @@ public class FomRegistrar implements ImportBeanDefinitionRegistrar{
 		}else{
 			RootBeanDefinition fomBeanDefinition = new RootBeanDefinition(ScheduleContext.class);
 			fomBeanDefinition.getPropertyValues().add("scheduleBeanName", beanName);
-			fomBeanDefinition.getPropertyValues().add("scheduleName", beanName);
+			fomBeanDefinition.getPropertyValues().add("scheduleName", "$" + beanName);
 			registry.registerBeanDefinition("$" + beanName, fomBeanDefinition); 
 		}
 	}

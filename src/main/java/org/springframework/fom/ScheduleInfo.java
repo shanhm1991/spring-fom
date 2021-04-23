@@ -30,5 +30,9 @@ public class ScheduleInfo {
 	public String getState() {
 		return state;
 	}
-	
+
+	@Override
+	public String toString() {
+		return "{scheduleName=" + scheduleName + ", scheduleBeanName=" + scheduleBeanName + ", state=" + state + "}";
+	}
 }

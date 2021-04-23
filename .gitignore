@@ -1,7 +1,9 @@
 /.settings/
 /target/
+/bin/
+/log/
+*.log
 .project
 .classpath
 .checkstyle
-/bin/
 spring-fom.iml

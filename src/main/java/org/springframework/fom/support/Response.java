@@ -57,4 +57,11 @@ public class Response<T> {
 	public String getMsg() {
 		return msg;
 	}
+
+	@Override
+	public String toString() {
+		return "{requestId=" + requestId + ", code=" + code + ", msg=" + msg + ", result=" + result + "}";
+	}
+	
+	
 }

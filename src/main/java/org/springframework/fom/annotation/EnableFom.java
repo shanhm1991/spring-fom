@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Import;
-import org.springframework.fom.interceptor.FomRegistrar;
+import org.springframework.fom.interceptor.FomBeanDefinitionRegistrar;
 
 /**
  * 
@@ -17,7 +17,7 @@ import org.springframework.fom.interceptor.FomRegistrar;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import(FomRegistrar.class)
+@Import(FomBeanDefinitionRegistrar.class)
 public @interface EnableFom {
 
 }

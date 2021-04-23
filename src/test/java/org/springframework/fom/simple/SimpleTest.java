@@ -1,4 +1,4 @@
-package org.springframework.fom.spring;
+package org.springframework.fom.simple;
 
 import java.util.Collection;
 
@@ -15,9 +15,14 @@ import org.springframework.fom.Task;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-@ContextConfiguration(classes = {SpringConfiguration.class})
+/**
+ * 
+ * @author shanhm1991@163.com
+ *
+ */
+@ContextConfiguration(classes = {SimpleConfiguration.class})
 @RunWith(SpringJUnit4ClassRunner.class)
-public class SpringTest implements ApplicationContextAware{
+public class SimpleTest implements ApplicationContextAware{
 
 	ApplicationContext context;
 
@@ -39,7 +44,7 @@ public class SpringTest implements ApplicationContextAware{
 		
 		ScheduleConfig scheduleConfig = testContext.getScheduleConfig();
 		logger.info("TestContextBean：测试配置"); 
-		Assert.assertEquals(scheduleConfig.getCronExpression(), "0/15 * * * * ?");
+		Assert.assertEquals(scheduleConfig.getCronExpression(), "0/3 * * * * ?");
 		Assert.assertEquals(scheduleConfig.getRemark(), "备注测试");
 		Assert.assertEquals(scheduleConfig.getThreadCore(), 10);
 		Assert.assertEquals(scheduleConfig.getThreadMax(), 20);
@@ -100,6 +105,5 @@ public class SpringTest implements ApplicationContextAware{
 			long result = task.exec();
 			Assert.assertEquals(10, result);
 		}
-
 	}
 }

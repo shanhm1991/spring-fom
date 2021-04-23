@@ -21,7 +21,7 @@ import org.springframework.util.CollectionUtils;
 public class ScheduleProxy implements MethodInterceptor {
 
 	private ScheduleContext<?> scheduleContext;
-	
+
 	private String beanName;
 
 	private Object scheduleBean;
@@ -47,59 +47,57 @@ public class ScheduleProxy implements MethodInterceptor {
 		}else if("newSchedulTasks".equals(methodName)){
 			return newSchedulTasks(object, method, args, methodProxy);
 		}else{
-			return methodProxy.invoke(scheduleContext, args);
+			return method.invoke(scheduleContext, args);
 		}
 	}
-
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Object onScheduleComplete(Object object, Method method, Object[] args, MethodProxy methodProxy) throws Throwable{
 		Class<?>[] parameterTypes = method.getParameterTypes();
-		if(scheduleBean == null 
-				|| !(ScheduleCompleter.class.isAssignableFrom(scheduleBeanClass))
-				|| parameterTypes.length != 3){
-			return methodProxy.invokeSuper(object, args);
+		// scheduleBean为空代表是继承的ScheduleContext
+		if(scheduleBean == null || parameterTypes.length != 3
+				|| !long.class.isAssignableFrom(parameterTypes[0])
+				|| !long.class.isAssignableFrom(parameterTypes[1])
+				|| !List.class.isAssignableFrom(parameterTypes[2])){
+			return method.invoke(scheduleContext, args);
 		}
 
-		if(long.class.isAssignableFrom(parameterTypes[0])
-				&& long.class.isAssignableFrom(parameterTypes[1])
-				&& List.class.isAssignableFrom(parameterTypes[2])){
-			ScheduleCompleter scheduleCompleter = (ScheduleCompleter)scheduleBean;
-			scheduleCompleter.onScheduleComplete((long)args[0], (long)args[1], (List)args[2]); 
+		// 直接断开调用
+		if(!(ScheduleCompleter.class.isAssignableFrom(scheduleBeanClass))){
 			return null;
-		}else{
-			return methodProxy.invokeSuper(object, args);
 		}
+
+		// 调用scheduleBean的行为
+		((ScheduleCompleter)scheduleBean).onScheduleComplete((long)args[0], (long)args[1], (List)args[2]); 
+		return null;
 	}
 
 	private Object onScheduleTerminate(Object object, Method method, Object[] args, MethodProxy methodProxy) throws Throwable{
 		Class<?>[] parameterTypes = method.getParameterTypes();
-		if(scheduleBean == null 
-				|| !(ScheduleTerminator.class.isAssignableFrom(scheduleBeanClass))
-				|| parameterTypes.length != 2){
-			return methodProxy.invokeSuper(object, args);
+		if(scheduleBean == null || parameterTypes.length != 2
+				|| !(long.class.isAssignableFrom(parameterTypes[0]))
+				|| !(long.class.isAssignableFrom(parameterTypes[1]))){
+			return method.invoke(scheduleContext, args);
 		}
 
-		if(long.class.isAssignableFrom(parameterTypes[0])
-				&& long.class.isAssignableFrom(parameterTypes[1])){
-			ScheduleTerminator scheduleTerminator = (ScheduleTerminator)scheduleBean;
-			scheduleTerminator.onScheduleTerminate((long)args[0], (long)args[1]);
+		if(!(ScheduleTerminator.class.isAssignableFrom(scheduleBeanClass))){
 			return null;
-		}else{
-			return methodProxy.invokeSuper(object, args);
 		}
+
+		((ScheduleTerminator)scheduleBean).onScheduleTerminate((long)args[0], (long)args[1]);
+		return null;
 	}
 
-	// TODO 这里对于添加了@Scheduled的method，还应该对本身的方法做个过滤，比如在newSchedulTasks上添加@Scheduled则忽略
+	// TODO 这里应该过滤掉本身自带的方法，比如在newSchedulTasks上添加@Scheduled则忽略
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Object newSchedulTasks(Object object, Method method, Object[] args, MethodProxy methodProxy) throws Throwable{
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		if(parameterTypes.length != 0){
-			return methodProxy.invokeSuper(object, args);
+			return method.invoke(scheduleContext, args);
 		}
-		
+
 		Collection<Task<?>> tasks = new ArrayList<>();
-		if(scheduleBean == null){ // 已经是继承ScheduleContext实现的
+		if(scheduleBean == null){ 
 			tasks.addAll((Collection<Task<?>>)methodProxy.invokeSuper(object, args)); 
 			List<Method> methods = new ArrayList<>();
 			for(Method m : scheduleContext.getClass().getMethods()){
@@ -108,7 +106,7 @@ public class ScheduleProxy implements MethodInterceptor {
 					methods.add(m);
 				}
 			}
-			
+
 			int index = 0;
 			for(final Method m : methods){
 				Task<Object> task = new Task<Object>(beanName + "-task-" + ++index){
@@ -119,7 +117,7 @@ public class ScheduleProxy implements MethodInterceptor {
 				}; 
 				tasks.add(task);
 			}
-		}else{ // 普通类上面添加了FomSchedule
+		}else{ 
 			if((ScheduleFactory.class.isAssignableFrom(scheduleBeanClass))){
 				ScheduleFactory scheduleFactory = (ScheduleFactory)scheduleBean;
 				Collection<Task<?>> collection =  (Collection<Task<?>>)scheduleFactory.newSchedulTasks();
@@ -149,6 +147,6 @@ public class ScheduleProxy implements MethodInterceptor {
 		}
 		return tasks;
 	}
-	
-	
+
+
 }
