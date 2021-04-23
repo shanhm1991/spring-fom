@@ -7,11 +7,16 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.fom.FomBeanPostProcessor;
 import org.springframework.fom.FomScheduleStarter;
 import org.springframework.fom.ScheduleContext;
+import org.springframework.fom.annotation.EnableFom;
 import org.springframework.fom.annotation.FomSchedule;
+import org.springframework.fom.support.FomAdvice;
+import org.springframework.fom.support.controller.FomController;
+import org.springframework.fom.support.service.FomServiceImpl;
 
 /**
  * 
@@ -28,6 +33,18 @@ public class FomBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar
 			return;
 		}
 		
+		AnnotationAttributes attrs = 
+				AnnotationAttributes.fromMap(meta.getAnnotationAttributes(EnableFom.class.getName()));
+		if((boolean)attrs.get("enableFomView")){
+			// 注册FomController
+			RootBeanDefinition fomController = new RootBeanDefinition(FomController.class);
+			registry.registerBeanDefinition("fomController", fomController); 
+			
+			// 注册FomAdvice
+			RootBeanDefinition fomAdvice = new RootBeanDefinition(FomAdvice.class);
+			registry.registerBeanDefinition("fomAdvice", fomAdvice); 
+		}
+
 		// 注册SchedulePostProcessor
 		RootBeanDefinition fomBeanPostProcessor = new RootBeanDefinition(FomBeanPostProcessor.class);
 		registry.registerBeanDefinition("schedulePostProcessor", fomBeanPostProcessor); 
@@ -35,7 +52,11 @@ public class FomBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar
 		// 注册FomScheduleStarter
 		RootBeanDefinition fomScheduleStarter = new RootBeanDefinition(FomScheduleStarter.class);
 		registry.registerBeanDefinition("fomScheduleStarter", fomScheduleStarter); 
-		
+
+		// 注册FomServiceImpl
+		RootBeanDefinition fomServiceImpl = new RootBeanDefinition(FomServiceImpl.class);
+		registry.registerBeanDefinition("fomService", fomServiceImpl); 
+
 		// 注册FomBeanDefinition
 		String[] beanNames = registry.getBeanDefinitionNames();
 		Class<?> clazz;

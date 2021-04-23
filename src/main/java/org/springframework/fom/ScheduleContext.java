@@ -51,7 +51,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 	private final ScheduleStatistics scheduleStatistics = new ScheduleStatistics();
 
 	// schedule加载时间
-	//private final long loadTime = System.currentTimeMillis();
+	private final long loadTime = System.currentTimeMillis();
 
 	private String scheduleName;
 
@@ -98,6 +98,10 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 
 	public String getScheduleBeanName() {
 		return scheduleBeanName;
+	}
+	
+	public long getLoadTime() {
+		return loadTime;
 	}
 
 	public Logger getLogger() {

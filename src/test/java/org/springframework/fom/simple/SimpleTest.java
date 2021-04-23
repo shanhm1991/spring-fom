@@ -78,7 +78,7 @@ public class SimpleTest implements ApplicationContextAware{
 		Logger logger = scheduleContext.getLogger();
 
 		logger.info("TestScheduleBean：测试属性"); 
-		Assert.assertEquals(scheduleContext.getScheduleName(), "testScheduleBean");
+		Assert.assertEquals(scheduleContext.getScheduleName(), "$testScheduleBean");
 		Assert.assertEquals(scheduleContext.getScheduleBeanName(), "testScheduleBean");
 
 		ScheduleConfig scheduleConfig = scheduleContext.getScheduleConfig();

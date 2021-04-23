@@ -16,7 +16,7 @@ public class SingleScheduleTest {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(SingleScheduleTest.class);
 	
-	@Scheduled(fixedDelay = 7)
+	@Scheduled(fixedDelay = 70)
 	public long test(){
 		long sleep = RandomUtils.nextLong(1000, 5000);
 		try {

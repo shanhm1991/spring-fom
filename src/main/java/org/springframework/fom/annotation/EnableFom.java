@@ -20,4 +20,5 @@ import org.springframework.fom.interceptor.FomBeanDefinitionRegistrar;
 @Import(FomBeanDefinitionRegistrar.class)
 public @interface EnableFom {
 
+	boolean enableFomView() default true;
 }

@@ -19,7 +19,7 @@ import org.springframework.fom.interceptor.ScheduleTerminator;
  * @author shanhm1991@163.com
  *
  */
-@FomSchedule(remark = "定时批任务测试", fixedRate = 11)
+@FomSchedule(remark = "定时批任务测试", fixedRate = 30)
 public class BatchSchedulTest implements ScheduleFactory<Long>, ScheduleCompleter<Long>, ScheduleTerminator {
 
 	private static final Logger LOG = LoggerFactory.getLogger(BatchSchedulTest.class);
