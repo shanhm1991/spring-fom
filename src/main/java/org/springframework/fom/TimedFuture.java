@@ -36,10 +36,6 @@ class TimedFuture<T> extends FutureTask<T> {
 		return task.getScheduleName();
 	}
 
-	public String getId() {
-		return task.getId();
-	}
-	
 	public String getTaskId() {
 		return task.getTaskId(); 
 	}

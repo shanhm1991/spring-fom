@@ -36,24 +36,32 @@
 			<pattern>${pattern}</pattern>
 		</encoder>
 	</appender>
+	
+	<appender name="root" class="ch.qos.logback.core.FileAppender">
+		<file>log/root.log</file>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>${pattern}</pattern>
+		</encoder>
+	</appender>
 
 	<root level="info">
 		<appender-ref ref="consoleAppender" />
+		<appender-ref ref="root" />
 	</root>
 	
-	<logger name="org.springframework.fom.boot.schedules.BatchFomContextTest" level="info" additivity="true">
+	<logger name="org.springframework.fom.boot.schedules.BatchFomContextTest" level="info" additivity="false">
 		<appender-ref ref="batchFomContextTest" />
 	</logger>
 	
-	<logger name="org.springframework.fom.boot.schedules.BatchSchedulTest" level="info" additivity="true">
+	<logger name="org.springframework.fom.boot.schedules.BatchSchedulTest" level="info" additivity="false">
 		<appender-ref ref="batchSchedulTest" />
 	</logger>
 	
-	<logger name="org.springframework.fom.boot.schedules.MultiSchedulTest" level="info" additivity="true">
+	<logger name="org.springframework.fom.boot.schedules.MultiSchedulTest" level="info" additivity="false">
 		<appender-ref ref="multiSchedulTest" />
 	</logger>
 	
-	<logger name="org.springframework.fom.boot.schedules.SingleScheduleTest" level="info" additivity="true">
+	<logger name="org.springframework.fom.boot.schedules.SingleScheduleTest" level="info" additivity="false">
 		<appender-ref ref="singleScheduleTest" />
 	</logger>
 </configuration>

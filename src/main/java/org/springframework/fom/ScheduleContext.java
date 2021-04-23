@@ -262,7 +262,6 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 					return;
 				}
 
-				logger.info("{} run ...", scheduleName); 
 				try{
 					if(isFirstRun && !scheduleConfig.getExecOnLoad()){
 						isFirstRun = false;
@@ -340,7 +339,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 							if(!future.isDone() && !future.isCancelled()){
 								long cost = System.currentTimeMillis() - future.getStartTime(); 
 								if(cost >= overTime * SECOND_UNIT){
-									logger.warn("cancle task[{}] which has time out, cost={}ms", future.getId(), cost);
+									logger.warn("cancle task[{}] which has time out, cost={}ms", future.getTaskId(), cost);
 									future.cancel(true);
 								}else{
 									long leftTime = overTime - cost / SECOND_UNIT;
@@ -374,21 +373,22 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 					synchronized(submitMap){
 						for (Task<E> t : tasks) {
 							task = t;
+							String taskId = task.getTaskId();
 							task.setScheduleBatch(scheduleBatch);
-							if (isTaskAlive(task.getId())) {
-								logger.warn("task[{}] is still alive, create canceled.", task.getTaskId());
+							if (isTaskAlive(taskId)) {
+								logger.warn("task[{}] is still alive, create canceled.", taskId);
 								continue;
 							}
 
 							TimedFuture future = submit(task);
-							submitMap.put(task.getId(), future);    
+							submitMap.put(taskId, future);    
 							submitFutures.add(future);
 						}
 					}
 				}
 			} catch (RejectedExecutionException e) {
 				Assert.notNull(task, "");
-				logger.warn("task[" + task.getTaskId() + "] submit rejected.", e); 
+				logger.warn("task[{}] submit rejected.", task.getTaskId(), e); 
 			}finally{ 
 				scheduleBatch.submitCompleted();
 				checkScheduleComplete(scheduleBatch);
@@ -478,7 +478,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 	private void cleanCompletedFutures(){ 
 		synchronized(submitMap) {
 			for(TimedFuture<Result<E>> currentFuture : submitFutures){
-				String taskId = currentFuture.getId();
+				String taskId = currentFuture.getTaskId();
 				TimedFuture<Result<?>> future = submitMap.get(taskId);
 				if(future != null && future.isDone()){ 
 					submitMap.remove(taskId);

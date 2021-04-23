@@ -36,7 +36,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 
 	@Override
 	public final Result<E> call() throws InterruptedException {   
-		Thread.currentThread().setName(getTaskId());
+		Thread.currentThread().setName("task[" + id + "]");
 		logger.debug("task started."); 
 
 		this.startTime = System.currentTimeMillis();
@@ -91,13 +91,9 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	public void afterExec(boolean isExecSuccess,  E content, Throwable e) throws Exception {
 
 	}
-
-	public final String getId() {
-		return id;
-	}
 	
 	public final String getTaskId() {
-		return scheduleContext == null ? id : scheduleContext.getScheduleName() + "-" + id;
+		return id;
 	}
 
 	public final long getCreateTime() {

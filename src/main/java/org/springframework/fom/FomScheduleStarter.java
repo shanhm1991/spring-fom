@@ -14,7 +14,7 @@ import org.springframework.context.SmartLifecycle;
  */
 public class FomScheduleStarter implements SmartLifecycle, ApplicationContextAware {
 	
-	protected static Logger logger = LoggerFactory.getLogger(FomScheduleStarter.class);
+	private static Logger logger = LoggerFactory.getLogger(FomScheduleStarter.class);
 
 	private ApplicationContext applicationContext;
 
@@ -29,6 +29,7 @@ public class FomScheduleStarter implements SmartLifecycle, ApplicationContextAwa
 		String[] scheduleNames = applicationContext.getBeanNamesForType(ScheduleContext.class);
 		for(String scheduleName : scheduleNames){
 			ScheduleContext<?> schedule = (ScheduleContext)applicationContext.getBean(scheduleName);
+			logger.info("start schedule[{}]: {}", scheduleName, schedule.getScheduleConfig().getConfMap()); 
 			schedule.scheduleStart();
 		}
 	}
@@ -39,6 +40,7 @@ public class FomScheduleStarter implements SmartLifecycle, ApplicationContextAwa
 		String[] scheduleNames = applicationContext.getBeanNamesForType(ScheduleContext.class);
 		for(String scheduleName : scheduleNames){
 			ScheduleContext<?> schedule = (ScheduleContext)applicationContext.getBean(scheduleName);
+			logger.info("stop schedule[{}]", scheduleName);
 			schedule.scheduleShutdown();
 		}
 	}

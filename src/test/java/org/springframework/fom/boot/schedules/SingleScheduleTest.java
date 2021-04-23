@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 @FomSchedule(remark = "定时单任务测试")
 public class SingleScheduleTest {
 	
-	private static final Logger LOG = LoggerFactory.getLogger("SingleScheduleTest");
+	private static final Logger LOG = LoggerFactory.getLogger(SingleScheduleTest.class);
 	
 	@Scheduled(fixedDelay = 7)
 	public long test(){

@@ -200,7 +200,7 @@ public class ScheduleConfig {
 		for(Object obj : array){
 			if(obj instanceof TimedFuture){
 				TimedFuture future = (TimedFuture)obj;
-				map.put(future.getId(), format.format(future.getCreateTime()));
+				map.put(future.getTaskId(), format.format(future.getCreateTime()));
 			}
 		}
 		return map;

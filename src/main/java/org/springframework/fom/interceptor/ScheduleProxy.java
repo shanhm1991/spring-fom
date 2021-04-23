@@ -109,7 +109,7 @@ public class ScheduleProxy implements MethodInterceptor {
 
 			int index = 0;
 			for(final Method m : methods){
-				Task<Object> task = new Task<Object>(beanName + "-task-" + ++index){
+				Task<Object> task = new Task<Object>(beanName + "-" + ++index){
 					@Override
 					public Object exec() throws Exception {
 						return m.invoke(scheduleContext);
@@ -136,7 +136,7 @@ public class ScheduleProxy implements MethodInterceptor {
 
 			int index = 0;
 			for(final Method m : methods){
-				Task<Object> task = new Task<Object>(beanName + "-task-" + ++index){
+				Task<Object> task = new Task<Object>(beanName + "-" + ++index){
 					@Override
 					public Object exec() throws Exception {
 						return m.invoke(scheduleBean);
