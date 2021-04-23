@@ -2,7 +2,6 @@ package org.springframework.fom.support.controller;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.ValidationException;
 
 import org.slf4j.Logger;
@@ -49,14 +48,14 @@ public class FomController {
 	
 	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
 	@ResponseBody
-	public Response<Void> handle(HttpServletRequest request, HttpRequestMethodNotSupportedException e){
+	public Response<Void> handle(HttpRequestMethodNotSupportedException e){
 		logger.error("", e); 
 		return new Response<>(Response.ILLEGAL, "request not support");
 	}
 	
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseBody
-	public Response<Void> handle(HttpServletRequest request, MethodArgumentNotValidException e){
+	public Response<Void> handle(MethodArgumentNotValidException e){
 		logger.error("", e); 
 		BindingResult binding = e.getBindingResult();
         if (binding.hasErrors()) {
@@ -71,21 +70,21 @@ public class FomController {
 	
 	@ExceptionHandler(IllegalArgumentException.class)
 	@ResponseBody
-	public Response<Void> handle(HttpServletRequest request, IllegalArgumentException e){
+	public Response<Void> handle(IllegalArgumentException e){
 		logger.error("", e); 
 		return new Response<>(Response.ILLEGAL, e.getMessage());
 	}
 	
 	@ExceptionHandler(ValidationException.class)
 	@ResponseBody
-	public Response<Void> handle(HttpServletRequest request, ValidationException e){
+	public Response<Void> handle(ValidationException e){
 		logger.error("", e);
 		return new Response<>(Response.ILLEGAL, e.getMessage());
 	}
 	
 	@ExceptionHandler(Exception.class)
 	@ResponseBody
-	public Response<Void> handle(HttpServletRequest request, Exception e){
+	public Response<Void> handle(Exception e){
 		logger.error("", e); 
 		return new Response<>(Response.ERROR, e.getMessage());
 	}
