@@ -6,6 +6,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.fom.ScheduleInfo;
+import org.springframework.fom.support.Response;
 
 /**
  * 
@@ -49,4 +50,26 @@ public interface FomService {
 	void setLoggerLevel(
 			@NotBlank(message="scheduleName cannot be empty.") String scheduleName,
 			@NotBlank(message="levelName cannot be empty.") String levelName);
+	
+	/**
+	 * schedule启动
+	 * @param scheduleName
+	 * @return
+	 */
+	Response<Void> start(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName);
+	
+	/**
+	 * schedule停止
+	 * @param scheduleName
+	 * @return
+	 */
+	Response<Void> shutdown(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName);
+	
+	/**
+	 * schedule立即执行
+	 * @param scheduleName
+	 * @return
+	 */
+	Response<Void> exec(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName);
+	
 }

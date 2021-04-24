@@ -59,8 +59,25 @@ public class FomController {
 		return new Response<>(Response.SUCCESS, ""); 
 	}
 	
+	@RequestMapping("/schedule/start")
+	@ResponseBody
+	public Response<Void> start(String scheduleName) {
+		return fomService.start(scheduleName);
+	}
 	
-	// handlers
+	@RequestMapping("/schedule/shutdown")
+	@ResponseBody
+	public Response<Void> shutdown(String scheduleName) {
+		return fomService.shutdown(scheduleName);
+	}
+	
+	@RequestMapping("/schedule/exec")
+	@ResponseBody
+	public Response<Void> exec(String scheduleName) {
+		return fomService.exec(scheduleName);
+	}
+	
+	/*************************Handlers************************************/
 	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
 	@ResponseBody
 	public Response<Void> handle(HttpRequestMethodNotSupportedException e){

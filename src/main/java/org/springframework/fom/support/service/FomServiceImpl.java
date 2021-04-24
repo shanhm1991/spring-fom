@@ -16,6 +16,7 @@ import org.springframework.fom.ScheduleInfo;
 import org.springframework.fom.logging.LogLevel;
 import org.springframework.fom.logging.LoggerConfiguration;
 import org.springframework.fom.logging.LoggingSystem;
+import org.springframework.fom.support.Response;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 
@@ -139,5 +140,23 @@ public class FomServiceImpl implements FomService, ApplicationContextAware{
 		}catch(IllegalArgumentException e){
 			throw new UnsupportedOperationException(levelName + " is not a support LogLevel.");
 		}
+	}
+	
+	public Response<Void> start(String scheduleName) {
+		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
+		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
+		return schedule.scheduleStart();
+	}
+
+	public Response<Void> shutdown(String scheduleName){
+		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
+		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
+		return schedule.scheduleShutdown();
+	}
+
+	public Response<Void> exec(String scheduleName) {
+		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
+		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
+		return schedule.scheduleExecNow();
 	}
 }
