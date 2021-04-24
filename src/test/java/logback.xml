@@ -49,7 +49,7 @@
 		<appender-ref ref="root" />
 	</root>
 	
-	<logger name="org.springframework.fom.boot.schedules.BatchFomContextTest" level="info" additivity="false">
+	<logger name="org.springframework.fom.boot.schedules.BatchFomContextTest" level="warn" additivity="false">
 		<appender-ref ref="batchFomContextTest" />
 	</logger>
 	

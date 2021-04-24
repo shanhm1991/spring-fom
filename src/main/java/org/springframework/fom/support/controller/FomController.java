@@ -33,19 +33,34 @@ public class FomController {
 	@Autowired
 	private FomService fomService;
 
-	@RequestMapping("/list")
+	@RequestMapping("/schedule/list")
 	@ResponseBody
 	public Response<Page<ScheduleInfo>> list() {
 		List<ScheduleInfo> list = fomService.list();
 		return new Response<>(Response.SUCCESS, "", new Page<>(list, list.size()));
 	}
 	
-	@RequestMapping("/info")
+	@RequestMapping("/schedule/info")
 	@ResponseBody
-	public Response<ScheduleInfo> list(String scheduleName) {
+	public Response<ScheduleInfo> info(String scheduleName) {
 		return new Response<>(Response.SUCCESS, "", fomService.info(scheduleName)); 
 	}
 	
+	@RequestMapping("/schedule/logger/level")
+	@ResponseBody
+	public Response<String> loggerLevel(String scheduleName) {
+		return new Response<>(Response.SUCCESS, "", fomService.getLoggerLevel(scheduleName)); 
+	}
+	
+	@RequestMapping("/schedule/logger/level/set")
+	@ResponseBody
+	public Response<Void> loggerLevel(String scheduleName, String levelName) {
+		fomService.setLoggerLevel(scheduleName, levelName);
+		return new Response<>(Response.SUCCESS, ""); 
+	}
+	
+	
+	// handlers
 	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
 	@ResponseBody
 	public Response<Void> handle(HttpRequestMethodNotSupportedException e){

@@ -55,7 +55,7 @@ public class FomAdvice {
 
 		String requestId = request.getHeader("requestId");
 		if(StringUtils.isBlank(requestId)){ 
-			requestId = idGenerator.getId();
+			requestId = idGenerator.generateIdWithDate(null, "-", "yyyyMMddHHmmss", 1000);
 		} 
 
 		localid.set(requestId); 

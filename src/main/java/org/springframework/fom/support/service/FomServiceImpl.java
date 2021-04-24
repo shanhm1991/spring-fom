@@ -6,12 +6,16 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.validation.constraints.NotBlank;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.fom.ScheduleContext;
 import org.springframework.fom.ScheduleInfo;
+import org.springframework.fom.logging.LogLevel;
+import org.springframework.fom.logging.LoggerConfiguration;
+import org.springframework.fom.logging.LoggingSystem;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 
@@ -26,6 +30,16 @@ public class FomServiceImpl implements FomService, ApplicationContextAware{
 	private ApplicationContext applicationContext;
 
 	private final Map<String, ScheduleContext<?>> scheduleMap = new HashMap<>();
+
+	private static LoggingSystem loggingSystem; 
+
+	static{
+		try{
+			loggingSystem = LoggingSystem.get(FomServiceImpl.class.getClassLoader());
+		}catch(IllegalStateException e){
+			System.err.println(e.getMessage()); 
+		}
+	}
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -72,5 +86,58 @@ public class FomServiceImpl implements FomService, ApplicationContextAware{
 		Assert.notNull(scheduleContext, "schedule of " + clazz + " not exist.");
 
 		return scheduleContext.getScheduleInfo();
+	}
+
+	@Override
+	public String getLoggerLevel(String scheduleName) {
+		if(loggingSystem == null){
+			throw new UnsupportedOperationException("No suitable logging system located");
+		}
+
+		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
+		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
+		
+		String loggerName = schedule.getLogger().getName();
+		LoggerConfiguration loggerConfiguration = loggingSystem.getLoggerConfiguration(loggerName);
+		if(loggerConfiguration != null){
+			LogLevel logLevel = loggerConfiguration.getConfiguredLevel();
+			if(logLevel != null){
+				return logLevel.name();
+			}
+			return "INFO";
+		}else{
+			// 随便找一个配置了的父Logger的级别
+			List<LoggerConfiguration> list =loggingSystem.getLoggerConfigurations();
+			for(LoggerConfiguration logger : list){
+				String name = logger.getName();
+				if(name.startsWith(loggerName)){
+					LogLevel logLevel = logger.getConfiguredLevel();
+					if(logLevel != null){
+						return logLevel.name();
+					}
+				}
+			}
+			return "INFO";
+		}
+	}
+
+	@Override
+	public void setLoggerLevel(
+			@NotBlank(message = "scheduleName cannot be empty.") String scheduleName,
+			@NotBlank(message = "levelName cannot be empty.") String levelName) {
+		if(loggingSystem == null){
+			throw new UnsupportedOperationException("No suitable logging system located");
+		}
+		
+		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
+		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
+		
+		String loggerName = schedule.getLogger().getName();
+		try{
+			LogLevel level = LogLevel.valueOf(levelName);
+			loggingSystem.setLogLevel(loggerName, level);
+		}catch(IllegalArgumentException e){
+			throw new UnsupportedOperationException(levelName + " is not a support LogLevel.");
+		}
 	}
 }
