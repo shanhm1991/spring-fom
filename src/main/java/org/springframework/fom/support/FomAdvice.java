@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -71,8 +70,6 @@ public class FomAdvice {
 			}else{
 				Class<?> clazz = args[i].getClass();
 				if ("requestId".equals(params[i]) 
-						|| MultipartFile[].class.isAssignableFrom(clazz) 
-						|| MultipartFile.class.isAssignableFrom(clazz) 
 						|| HttpServletRequest.class.isAssignableFrom(clazz) 
 						|| HttpServletResponse.class.isAssignableFrom(clazz)
 						|| BeanPropertyBindingResult.class.equals(clazz)){
