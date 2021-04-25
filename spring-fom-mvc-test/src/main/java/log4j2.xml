@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="WARN" monitorInterval="1800">
+	<Properties>
+		<property name="pattern">%d{yyyy-MM-dd HH:mm:ss:SSS} %thread [%level] %c:%L %m%n</property>
+	</Properties>
+
+	<appenders>
+		<Console name="console" target="SYSTEM_OUT">
+			<ThresholdFilter level="info" />
+			<PatternLayout pattern="${pattern}" />
+		</Console>
+
+		<RollingFile name="batchFomContextTest" fileName="log4j2/batchFomContextTest.log"
+			filePattern="log4j2/batchFomContextTest-%d{yyyy-MM-dd}-%i.log">
+			<ThresholdFilter level="info" />
+			<PatternLayout pattern="${pattern}" />
+			<Policies>
+				<SizeBasedTriggeringPolicy size="20MB" />
+			</Policies>
+		</RollingFile>
+		
+		<RollingFile name="batchSchedulTest" fileName="log4j2/batchSchedulTest.log"
+			filePattern="log4j2/batchSchedulTest-%d{yyyy-MM-dd}-%i.log">
+			<ThresholdFilter level="info" />
+			<PatternLayout pattern="${pattern}" />
+			<Policies>
+				<SizeBasedTriggeringPolicy size="20MB" />
+			</Policies>
+		</RollingFile>
+		
+		<RollingFile name="multiSchedulTest" fileName="log4j2/multiSchedulTest.log"
+			filePattern="log4j2/multiSchedulTest-%d{yyyy-MM-dd}-%i.log">
+			<ThresholdFilter level="info" />
+			<PatternLayout pattern="${pattern}" />
+			<Policies>
+				<SizeBasedTriggeringPolicy size="20MB" />
+			</Policies>
+		</RollingFile>
+		
+		<RollingFile name="singleScheduleTest" fileName="log4j2/singleScheduleTest.log"
+			filePattern="log4j2/singleScheduleTest-%d{yyyy-MM-dd}-%i.log">
+			<ThresholdFilter level="info" />
+			<PatternLayout pattern="${pattern}" />
+			<Policies>
+				<SizeBasedTriggeringPolicy size="20MB" />
+			</Policies>
+		</RollingFile>
+		
+		<RollingFile name="root" fileName="log4j2/root.log"
+			filePattern="log4j2/root-%d{yyyy-MM-dd}-%i.log">
+			<ThresholdFilter level="info" />
+			<PatternLayout pattern="${pattern}" />
+			<Policies>
+				<SizeBasedTriggeringPolicy size="20MB" />
+			</Policies>
+		</RollingFile>
+	</appenders>
+
+	<loggers>
+		<root level="info">
+			<appender-ref ref="console" />
+			<appender-ref ref="root" />
+		</root>
+
+		<logger name="org.springframework.fom.test.schedules.BatchFomContextTest" level="info" additivity="false">
+			<appender-ref ref="console" />
+			<appender-ref ref="batchFomContextTest" />
+		</logger>
+		
+		<logger name="org.springframework.fom.test.schedules.BatchSchedulTest" level="info" additivity="false">
+			<appender-ref ref="console" />
+			<appender-ref ref="batchSchedulTest" />
+		</logger>
+		
+		<logger name="org.springframework.fom.test.schedules.MultiSchedulTest" level="info" additivity="false">
+			<appender-ref ref="console" />
+			<appender-ref ref="multiSchedulTest" />
+		</logger>
+		
+		<logger name="org.springframework.fom.test.schedules.SingleScheduleTest" level="info" additivity="false">
+			<appender-ref ref="console" />
+			<appender-ref ref="singleScheduleTest" />
+		</logger>
+	</loggers>
+</configuration>

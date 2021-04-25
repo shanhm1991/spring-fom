@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+	<property name="pattern" value="%d{yyyy-MM-dd HH:mm:ss:SSS} %thread [%level] %m%n" />
+
+	<appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>${pattern}</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="batchFomContextTest" class="ch.qos.logback.core.FileAppender">
+		<file>log/batchFomContextTest.log</file>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>${pattern}</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="batchSchedulTest" class="ch.qos.logback.core.FileAppender">
+		<file>log/batchSchedulTest.log</file>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>${pattern}</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="multiSchedulTest" class="ch.qos.logback.core.FileAppender">
+		<file>log/multiSchedulTest.log</file>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>${pattern}</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="singleScheduleTest" class="ch.qos.logback.core.FileAppender">
+		<file>log/singleScheduleTest.log</file>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>${pattern}</pattern>
+		</encoder>
+	</appender>
+	
+	<appender name="root" class="ch.qos.logback.core.FileAppender">
+		<file>log/root.log</file>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>${pattern}</pattern>
+		</encoder>
+	</appender>
+
+	<root level="info">
+		<appender-ref ref="consoleAppender" />
+		<appender-ref ref="root" />
+	</root>
+	
+	<logger name="org.springframework.fom.boot.test.schedules.BatchFomContextTest" level="info" additivity="false">
+		<appender-ref ref="batchFomContextTest" />
+		<appender-ref ref="consoleAppender" />
+	</logger>
+	
+	<logger name="org.springframework.fom.boot.test.schedules.BatchSchedulTest" level="info" additivity="false">
+		<appender-ref ref="batchSchedulTest" />
+		<appender-ref ref="consoleAppender" />
+	</logger>
+	
+	<logger name="org.springframework.fom.boot.test.schedules.MultiSchedulTest" level="info" additivity="false">
+		<appender-ref ref="multiSchedulTest" />
+		<appender-ref ref="consoleAppender" />
+	</logger>
+	
+	<logger name="org.springframework.fom.boot.test.schedules.SingleScheduleTest" level="info" additivity="false">
+		<appender-ref ref="singleScheduleTest" />
+		<appender-ref ref="consoleAppender" />
+	</logger>
+</configuration>
