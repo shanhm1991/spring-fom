@@ -11,8 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.collections.MapUtils;
 import org.quartz.CronExpression;
+import org.springframework.fom.collections.MapUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 

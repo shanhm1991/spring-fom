@@ -20,7 +20,6 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -373,7 +372,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 			Task<E> task = null;
 			try{
 				Collection<? extends Task<E>> tasks = newSchedulTasks();
-				if(!CollectionUtils.isEmpty(tasks)){
+				if(tasks != null && !tasks.isEmpty()){
 					synchronized(submitMap){
 						for (Task<E> t : tasks) {
 							task = t;

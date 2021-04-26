@@ -53,10 +53,10 @@ public class FomController {
 		return new Response<>(Response.SUCCESS, "", fomService.getLoggerLevel(scheduleName)); 
 	}
 	
-	@RequestMapping("/schedule/logger/level/set")
+	@RequestMapping("/schedule/logger/level/update")
 	@ResponseBody
-	public Response<Void> loggerLevel(String scheduleName, String levelName) {
-		fomService.setLoggerLevel(scheduleName, levelName);
+	public Response<Void> updateloggerLevel(String scheduleName, String levelName) {
+		fomService.updateloggerLevel(scheduleName, levelName);
 		return new Response<>(Response.SUCCESS, ""); 
 	}
 	

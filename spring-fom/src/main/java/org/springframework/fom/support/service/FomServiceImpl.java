@@ -16,6 +16,7 @@ import org.springframework.fom.ScheduleInfo;
 import org.springframework.fom.logging.LogLevel;
 import org.springframework.fom.logging.LoggerConfiguration;
 import org.springframework.fom.logging.LoggingSystem;
+import org.springframework.fom.logging.log4j.Log4jLoggingSystem;
 import org.springframework.fom.support.Response;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
@@ -99,6 +100,10 @@ public class FomServiceImpl implements FomService, ApplicationContextAware{
 		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
 		
 		String loggerName = schedule.getLogger().getName();
+		if(loggingSystem instanceof Log4jLoggingSystem){
+			//TODO
+		}
+		
 		LoggerConfiguration loggerConfiguration = loggingSystem.getLoggerConfiguration(loggerName);
 		if(loggerConfiguration != null){
 			LogLevel logLevel = loggerConfiguration.getConfiguredLevel();
@@ -123,7 +128,7 @@ public class FomServiceImpl implements FomService, ApplicationContextAware{
 	}
 
 	@Override
-	public void setLoggerLevel(
+	public void updateloggerLevel(
 			@NotBlank(message = "scheduleName cannot be empty.") String scheduleName,
 			@NotBlank(message = "levelName cannot be empty.") String levelName) {
 		if(loggingSystem == null){

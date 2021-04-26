@@ -47,7 +47,7 @@ public interface FomService {
 	 * @param scheduleName
 	 * @return
 	 */
-	void setLoggerLevel(
+	void updateloggerLevel(
 			@NotBlank(message="scheduleName cannot be empty.") String scheduleName,
 			@NotBlank(message="levelName cannot be empty.") String levelName);
 	

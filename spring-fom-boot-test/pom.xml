@@ -38,7 +38,7 @@
 				<version>2.5</version>
 				<configuration>
 					<forkMode>once</forkMode>
-					<argLine>-Dfile.encoding=UTF-8</argLine>
+					<argLine>-Dfile.encoding=GBK</argLine>
 					<includes>
 						<include>**/SimpleTest.java</include>
 					</includes>
