@@ -139,7 +139,7 @@ public class ScheduleConfig {
 	private final ConcurrentHashMap<String, Object> confMap = new ConcurrentHashMap<>();
 
 	private TimedExecutorPool pool;
-	
+
 	public void reset(){
 		int core = getThreadCore(); 
 		int max = getThreadMax();
@@ -153,7 +153,7 @@ public class ScheduleConfig {
 		return pool;
 	}
 
-	public ConcurrentHashMap<String, Object> getConfMap() {
+	ConcurrentHashMap<String, Object> getConfMap() {
 		return confMap;
 	} 
 

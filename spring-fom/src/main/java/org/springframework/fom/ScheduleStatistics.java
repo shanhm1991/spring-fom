@@ -18,13 +18,14 @@ public class ScheduleStatistics {
 
 	private final Map<Long, Long> successCostMap = new ConcurrentHashMap<>();
 
-	private final Map<String, Queue<Result<?>>> successDetailMap = new ConcurrentHashMap<>();
+	private final AtomicLong all = new AtomicLong(0);
 
-	private final AtomicLong allCount = new AtomicLong(0);
+	private final AtomicLong success = new AtomicLong(0);
 
-	private final AtomicLong successCount = new AtomicLong(0);
-
-	private final AtomicLong failedCount = new AtomicLong(0);
+	private final AtomicLong failed = new AtomicLong(0);
+	
+	// map<day, queue>
+	private final Map<String, Queue<Result<?>>> successMap = new ConcurrentHashMap<>();
 
 	private final Map<String, Result<?>> failedMap = new ConcurrentHashMap<>();
 
@@ -43,7 +44,7 @@ public class ScheduleStatistics {
 	}
 
 	void record(Result<?> result){
-		allCount.incrementAndGet();
+		all.incrementAndGet();
 		if(result.isSuccess()){
 			recordSuccess(result);
 		}else{
@@ -52,21 +53,21 @@ public class ScheduleStatistics {
 	}
 
 	private void recordSuccess(Result<?> result){
-		successCount.incrementAndGet();
+		success.incrementAndGet();
 
 		long cost = result.getCostTime();
 		successCostMap.merge(cost, 1L, Long::sum);
 
 		String day = new SimpleDateFormat("yyyyMMdd").format(System.currentTimeMillis());
-		Queue<Result<?>> queue = successDetailMap.get(day);
+		Queue<Result<?>> queue = successMap.get(day);
 		if(queue == null){
-			queue = successDetailMap.computeIfAbsent(day, k -> new ConcurrentLinkedQueue<>());
+			queue = successMap.computeIfAbsent(day, k -> new ConcurrentLinkedQueue<>());
 		}
 	}
 
 	private void recordFailed(Result<?> result){
 		failedMap.put(result.getTaskId(), result);
-		failedCount.incrementAndGet();
+		failed.incrementAndGet();
 	}
 
 	public boolean setLevel(long lv1, long lv2, long lv3, long lv4, long lv5){
@@ -85,4 +86,26 @@ public class ScheduleStatistics {
 			return true;
 		}
 	}
+
+	public Map<Long, Long> getSuccessCostMap() {
+		return successCostMap;
+	}
+
+	public AtomicLong getAll() {
+		return all;
+	}
+
+	public AtomicLong getSuccess() {
+		return success;
+	}
+
+	public AtomicLong getFailed() {
+		return failed;
+	}
+
+	public Map<String, Queue<Result<?>>> getSuccessMap() {
+		return successMap;
+	}
+	
+	
 }

@@ -71,14 +71,14 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 	private boolean isFirstRun = true;
 
 	private State state = INITED; 
-	
+
 	private ApplicationContext applicationContext;
-	
+
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
 	}
-	
+
 	public ScheduleInfo getScheduleInfo(){
 		return new ScheduleInfo(this);
 	}
@@ -98,9 +98,21 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 	public String getScheduleBeanName() {
 		return scheduleBeanName;
 	}
-	
+
 	public long getLoadTime() {
 		return loadTime;
+	}
+	
+	public long getLastTime() {
+		return lastTime;
+	}
+	
+	public long getNextTime() {
+		return nextTime;
+	}
+
+	public long getSchedulTimes() {
+		return schedulTimes;
 	}
 
 	public Logger getLogger() {
@@ -145,7 +157,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 		if(applicationContext != null && (scheduleContext = (ScheduleContext<E>)applicationContext.getBean(scheduleName)) != null){
 			return scheduleContext.newSchedulTasks();
 		}
-		
+
 		Task<E> task = schedul();
 		if(task != null){
 			return Arrays.asList(task);
@@ -221,7 +233,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 			}
 		}
 	}
-	
+
 	public Response<Void> scheduleExecNow(){
 		synchronized (this) {
 			switch(state){

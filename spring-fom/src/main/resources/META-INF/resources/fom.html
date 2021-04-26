@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="icon" href="images/favicon.ico">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fom</title>
+<script src="js/jquery-3.3.1.js"></script>
+<script src="js/datatables.js"></script>
+<script src="js/tinybox.js"></script>
+<script src="layui/layui.js"></script>
+<script src="layui/lay/modules/layer.js"></script>
+<script src="highcharts/highcharts.js"></script>
+<script src="highcharts/modules/exporting.js"></script>
+<!-- <script src="highcharts-plugins/highcharts-zh_CN.js"></script> -->
+<script src="highcharts/themes/grid-light.js"></script>
+<link href="js/datatables.css" rel="stylesheet" />
+<link href="layui/css/layui.css" rel="stylesheet" />
+<link href="layui/css/modules/layer/default/layer.css" rel="stylesheet" />
+<style type="text/css">
+td.details-control {
+	cursor: pointer;
+}
+
+img {
+	background: no-repeat center center;
+	cursor: pointer;
+}
+
+#tinybox {
+	position: absolute;
+	display: none;
+	padding: 10px;
+	background: #ffffff url(images/load.gif) no-repeat 50% 50%;
+	border: 10px solid #e3e3e3;
+	z-index: 2000;
+}
+
+#tinymask {
+	position: absolute;
+	display: none;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	background: #000000;
+	z-index: 1500;
+}
+
+#tinycontent {
+	background: #ffffff;
+	font-size: 1.1em;
+}
+
+.boxbtn {
+	cursor: pointer;
+	font-size: 15px;
+	margin-left: 2px;
+	color: #000;
+}
+
+.detailbtn {
+	cursor: pointer;
+	font-size: 18px;
+	margin-left: 15px;
+	color: #000;
+	font-weight: bolder;
+}
+
+.rowadd {
+	cursor: pointer;
+	height: 20px;
+	line-height: 20px;
+	background: url('images/details_open.png') no-repeat center center;
+}
+
+.rowdel {
+	cursor: pointer;
+	height: 20px;
+	line-height: 20px;
+	background: url('images/details_close.png') no-repeat center center;
+}
+</style>
+</head>
+<body>
+	<div class="layui-input-inline" style="float: right;">
+		other log level: <select id="logger" style="margin: 10px 1px 5px 1px"
+			onchange="queryLevel(this);"></select>- <select id="level"
+			style="margin: 10px 1px 5px 1px;" onchange="saveLevel(this);">
+			<option value="ALL">ALL</option>
+			<option value="NULL">NULL</option>
+			<option value="DEBUG">DEBUG</option>
+			<option value="INFO">INFO</option>
+			<option value="WARN">WARN</option>
+			<option value="ERROR">ERROR</option>
+		</select>
+	</div>
+	<button class="layui-btn" style="margin: 10px 10px 10px 10px"
+		onclick="create();">
+		<i class="layui-icon layui-icon-add-circle" /></i>New
+	</button>
+	<table class="display nowrap" style="width: 100%">
+		<tr>
+			<td>
+				<table id="fom" class="display nowrap" style="width: 100%; text-align: center;">
+					<thead>
+						<tr>
+							<th></th>
+							<th>name</th>
+							<th>load time</th>
+							<th>schedule times</th>
+							<th>last time</th>
+							<th>next time</th>
+							<th>success</th>
+							<th>failed</th>
+							<th>waiting</th>
+							<th>active</th>
+							<th>state</th>
+							<th>log</th>
+							<th>option</th>
+						</tr>
+					</thead>
+				</table>
+			</td>
+		</tr>
+	</table>
+</body>
+<script type="text/javascript">
+	var table;
+	var created = 0;
+	$(document)
+		.ready(
+			function() {
+				table = $('#fom')
+					.DataTable(
+						{
+							"ajax" : "/list",
+							"aLengthMenu" : [
+								[ 15, 30, 50, 100 ],
+								[ 15, 30, 50, 100 ] ],
+							"columns" : [
+								{
+									"class" : "details-control",
+									"data" : null,
+									"orderable" : false,
+									"defaultContent" : "<i class='layui-icon layui-icon-triangle-r boxbtn' title='expand'/></i>"
+								},
+								{
+									"data" : "name"
+								},
+								{
+									"data" : "loadTime"
+								},
+								{
+									"data" : "execTimes"
+								},
+								{
+									"data" : "lastTime"
+								},
+								{
+									"data" : "nextTime"
+								},
+								{
+									"data" : "success"
+								},
+								{
+									"data" : "failed"
+								},
+								{
+									"data" : "waiting"
+								},
+								{
+									"data" : "active"
+								},
+								{
+									"data" : "state"
+								},
+								{
+									"data" : "level"
+								},
+								{
+									"data" : null,
+									"defaultContent" : 
+										  "<i class='layui-icon layui-icon-play boxbtn' title='startup' onclick='operation(this, 1)'/></i>"
+										+ "<i class='layui-icon layui-icon-pause boxbtn' title='shutdown' onclick='operation(this, 2)'/></i>"
+										+ "<i class='layui-icon layui-icon-refresh boxbtn' title='execute immediately' onclick='operation(this, 3)'/></i>",
+									"orderable" : false
+								}, ],
+							"createdRow" : function(row, data,
+								index) {
+								var name,
+									level,
+									state,
+									actives = 0,
+									failed = 0,
+									failedDetails = 0,
+									waiting = 0,
+									success = 0,
+									execTimes=0;
+								
+								for (var key in data) {
+									if (key == "name") {
+										name = data[key];
+									} else if (key == "level") {
+										level = data[key];
+									} else if (key == "state") {
+										state = data[key];
+									} else if (key == "active") {
+										actives = data[key];
+									} else if (key == "failed") {
+										failed = data[key];
+									} else if (key == "failedDetails") {
+										failedDetails = data[key];
+									} else if (key == "waiting") {
+										waiting = data[key];
+									} else if (key == "success") {
+										success = data[key];
+									} else if(key == "execTimes"){
+										execTimes = data[key];
+										
+									}
+								}
+								
+								$('td', row)
+								.eq(1)
+								.css("text-align", "left")
+								.html(name);
+								
+								var select = "<select id='select_"
+									+ name
+									+ "' value='"
+									+ level
+									+ "' onchange='log(this)' >";
+								if (level == "DEBUG") {
+									select = select
+										+ "<option value='DEBUG' selected='selected'>DEBUG</option>"
+										+ "<option value='INFO'>INFO</option>"
+										+ "<option value='WARN'>WARN</option>"
+										+ "<option value='ERROR'>ERROR</option>"
+										+ "</select>"
+								} else if (level == "INFO") {
+									select = select
+										+ "<option value='DEBUG'>DEBUG</option>"
+										+ "<option value='INFO' selected='selected'>INFO</option>"
+										+ "<option value='WARN'>WARN</option>"
+										+ "<option value='ERROR'>ERROR</option>"
+										+ "</select>"
+								} else if (level == "WARN") {
+									select = select
+										+ "<option value='DEBUG'>DEBUG</option>"
+										+ "<option value='INFO'>INFO</option>"
+										+ "<option value='WARN' selected='selected'>WARN</option>"
+										+ "<option value='ERROR'>ERROR</option>"
+										+ "</select>"
+								} else {
+									select = select
+										+ "<option value='DEBUG'>DEBUG</option>"
+										+ "<option value='INFO'>INFO</option>"
+										+ "<option value='WARN'>WARN</option>"
+										+ "<option value='ERROR' selected='selected'>ERROR</option>"
+										+ "</select>"
+								}
+								$('td', row).eq(11)
+									.html(select);
+
+								var img;
+								if (state == "running") {
+									img = "<img src='images/running.png' title='running'>"
+								} else if (state == "waiting") {
+									img = "<img src='images/waiting.png' title='waiting for completion'>"
+								} else if (state == "sleeping") {
+									img = "<img src='images/sleeping.png' title='waiting for next time'>"
+								} else if (state == "stopping") {
+									img = "<img src='images/stopping.png' title='stopping'>"
+								} else if (state == "stopped") {
+									img = "<img src='images/stopped.png' title='stopped'>"
+								} else {
+									img = "<img src='images/inited.png' title='inited'>"
+								}
+								$('td', row).eq(10).css("text-align", "center").html(img);
+
+								if (success > 0) {
+									$('td', row)
+										.eq(6)
+										.css("text-align", "center")
+										.html(
+											"<a style='color:red;' id='"
+											+ name
+											+ "' onclick='successdetail(this)' href='#'>"
+											+ success
+											+ "</a>");
+								} else {
+									$('td', row)
+										.eq(6)
+										.css("text-align", "center")
+										.html(success);
+								}
+								
+								if (failedDetails > 0) {
+									$('td', row)
+										.eq(7)
+										.css("text-align", "center")
+										.html(
+											"<a style='color:red;' id='"
+											+ name
+											+ "' onclick='faileddetail(this)' href='#'>"
+											+ failed + "(" + failedDetails
+											+ ")</a>");
+								} else {
+									$('td', row)
+										.eq(7)
+										.css("text-align", "center")
+										.html(failed);
+								}
+								
+								if (waiting > 0) { //text-align:center;
+									$('td', row)
+										.eq(8)
+										.css("text-align", "center")
+										.html(
+											"<a style='color:red;' id='"
+											+ name
+											+ "' onclick='waitingdetail(this)' href='#'>"
+											+ waiting
+											+ "</a>");
+								} else {
+									$('td', row)
+										.eq(8)
+										.css("text-align", "center")
+										.html(waiting);
+								}
+								
+								if (actives > 0) {
+									$('td', row)
+										.eq(9)
+										.css("text-align", "center")
+										.html(
+											"<a style='color:red;' id='"
+											+ name
+											+ "' onclick='activedetail(this)' href='#'>"
+											+ actives
+											+ "</a>");
+								} else {
+									$('td', row)
+										.eq(9)
+										.css("text-align", "center")
+										.html(actives);
+								}
+
+							},
+							"order" : [ [ 1, 'asc' ] ]
+						});
+
+				$('#fom tbody')
+					.on(
+						'click',
+						'td.details-control',
+						function() {
+							var tr = $(this).closest('tr');
+							var row = table.row(tr);
+							if (row.child.isShown()) {
+								$(this)
+									.html(
+										"<i class='layui-icon layui-icon-triangle-r boxbtn' title='expand'/></i>");
+								row.child.hide();
+								tr.removeClass('shown');
+							} else {
+								$(this)
+									.html(
+										"<i class='layui-icon layui-icon-triangle-d boxbtn' title='collapse'/></i>");
+								row.child(format(row.data()))
+									.show();
+								tr.addClass('shown');
+							}
+						});
+
+				layui.use([ 'layer', 'laydate' ], function() {
+					var layer = layui.layer;
+					var laydate = layui.laydate;
+				});
+
+				initLogger();
+			});
+
+	function initLogger() {
+		$
+			.ajax({
+				url : "/listOtherLogs",
+				type : "POST",
+				dataType : "json",
+				success : function(data) {
+					for (var key in data) {
+						$("#logger").append(
+							"<option value='" + key + "'>" + key
+							+ "</option>");
+					}
+					$("#logger").trigger("change");
+				}
+			});
+	}
+
+	function queryLevel(e) {
+		var logger = $(e).val();
+		$.ajax({
+			url : "/queryLevel",
+			type : "POST",
+			dataType : "json",
+			data : {
+				"logger" : logger
+			},
+			success : function(data) {
+				$("#level").val(data.level);
+			}
+		});
+	}
+
+	function saveLevel(e) {
+		var level = $(e).val();
+		var logger = $("#logger").val();
+		$.ajax({
+			url : "/saveLevel",
+			type : "POST",
+			dataType : "json",
+			data : {
+				"logger" : logger,
+				"level" : level
+			}
+		});
+	}
+
+	function format(data) {
+		var Tb = $('<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px; width:100%; text-align:left;" />');
+		var row1 = $('<tr><td style="width:10%;"><i class="layui-icon layui-icon-ok detailbtn" title="save" onclick="save(this)"/></i></td>'
+			+ '<td style="width:90%;"><i class="layui-icon layui-icon-edit detailbtn" title="edit" onclick="edit(this)"/></i></td></tr>');
+		Tb.append(row1);
+
+		for (var key in data) {
+			if (key == "name") {
+				Tb.attr("id", data[key]);
+				continue;
+			} else if (key == "execTime" || key == "state" || key == "level" || key == "failedDetails"
+				|| key == "loadTime" || key == "success" 
+				|| key == "failed" || key == "active" || key == "waiting" 
+				|| key == "lastTime" || key == "nextTime" || key == "execTimes") {
+				continue;
+			}
+
+			var value = data[key];
+			var r = (value.split('\r')).length - 1;
+			var n = (value.split('\n')).length - 1;
+			var rn = r + n + 1;
+
+			var textarea = $('<textarea disabled="disabled" rows=' + rn + ' style="width:100%;"/>');
+			textarea.text(value);
+
+			var Td = $('<td/>');
+			Td.append(textarea);
+
+			var Tr = $('<tr><td>' + key + '</td></tr>');
+			Tr.append(Td);
+
+			Tb.append(Tr);
+		}
+		return Tb;
+	}
+
+	function operation(e, opid) {
+		var Tr = $(e).parent().parent();
+		var name = Tr.find('td').eq(1).html();
+		if (opid == null || name == "") {
+			return;
+		}
+		$
+			.ajax({
+				url : "/operation",
+				type : "POST",
+				dataType : "json",
+				data : {
+					"name" : name,
+					"opid" : opid
+				},
+				success : function(data) {
+					if (data.result) {
+						TINY.box
+							.show(
+								"success, " + data.msg,
+								0,
+								0,
+								0,
+								0,
+								4,
+								function() {
+									table.ajax.reload();
+								});
+					} else {
+						TINY.box.show("failed, " + data.msg, 0, 0, 0, 0, 4);
+					}
+				},
+				error : function(XMLHttpRequest, textStatus, errorThrown) {
+					TINY.box.show(XMLHttpRequest.responseText, 0, 0, 0, 0,
+						4);
+				}
+			});
+	}
+
+	function edit(e) {
+		var Tb = $(e).parent().parent().parent();
+		Tb.find("textarea").attr("disabled", false);
+	}
+
+	function save(e) {
+		var Tb = $(e).parent().parent().parent();
+		var disabled = Tb.find("textarea").attr("disabled");
+		if (disabled == true || disabled == "disabled") {
+			return;
+		}
+
+		Tb.find("textarea").attr("disabled", true);
+		var json = '{';
+		Tb.find("tr").each(function(i) {
+			if (i == 0) {
+				return;
+			}
+			var key = $(this).find("td").eq(0).html();
+			var value = $(this).find("td").eq(1).find("textarea").val();
+			json = json + '"' + key + '":"' + value + '",';
+		});
+		json = json.substr(0, json.length - 1) + '}';
+		//Tb = tbody
+		var name = Tb.attr("id");
+		$.ajax({
+			url : "/save",
+			type : "POST",
+			dataType : "json",
+			data : {
+				"name" : name,
+				"data" : json
+			},
+			success : function(data) {
+				if (data.result) {
+					TINY.box.show("success, " + data.msg, 0, 0, 0, 0, 4,
+						function() {
+							table.ajax.reload();
+						});
+				} else {
+					TINY.box.show("failed, " + data.msg, 0, 0, 0, 0, 4);
+				}
+			},
+			error : function(XMLHttpRequest, textStatus, errorThrown) {
+				TINY.box.show(XMLHttpRequest.responseText, 0, 0, 0, 0, 4);
+			}
+		});
+	}
+
+	function log(e) {
+		var name = $(e).attr("id").split("_")[1];
+		var level = $(e).val();
+		$.ajax({
+			url : "/log",
+			type : "POST",
+			dataType : "json",
+			data : {
+				"name" : name,
+				"level" : level
+			}
+		});
+	}
+
+	function create() {
+		var created = 0;
+		var html = '<table class="layui-table" id="layui-table">'
+			+ '<thead><tr><th>key</th><th>value</th><th>remark</th></tr></thead><tbody>'
+			+ '<tr><td><input type="text" value="name" readonly="readonly"/></td><td><input type="text"/></td><td>名称</td></tr>'
+			+ '<tr><td><input type="text" value="class" readonly="readonly"/></td><td>'
+			+ '<input type="text"/></td><td>com.fom.context.Context的实现类,若有新的jar包，请先手动拷贝到classpath下的lib目录中</td></tr>'
+			+ '<tr><td><input type="text" value="remark" readonly="readonly"/></td><td><input type="text"/></td><td>备注</td></tr>'
+			+ '<tr><td><input type="text" value="cron" readonly="readonly"/></td><td><input type="text"/></td><td>执行周期(quartz定时表达式)</td></tr>'
+			+ '<tr><td><input type="text" value="threadCore" readonly="readonly"/></td><td><input type="text" value="4"/></td><td>线程池核心线程数</td></tr>'
+			+ '<tr><td><input type="text" value="threadMax" readonly="readonly"/></td><td><input type="text" value="20"/></td><td>线程池最大线程数</td></tr>'
+			+ '<tr><td><input type="text" value="queueSize" readonly="readonly"/></td><td><input type="text" value="200"/></td><td>线程池任务队列长度</td></tr>'
+			+ '<tr><td><input type="text" value="threadAliveTime" readonly="readonly"/></td><td><input type="text" value="30"/></td><td>任务线程最长空闲时间</td></tr>'
+			+ '<tr><td><input type="text" value="threadOverTime" readonly="readonly"/></td><td><input type="text" value="3600"/></td><td>任务线程执行超时时间</td></tr>'
+			+ '<tr><td><input type="text" value="cancellable" readonly="readonly"/></td><td><input type="text" value="false"/></td><td>任务线程执行超时是否尝试中断</td></tr>'
+			+ '<tr><td title="add row" onclick="rowadd(this)" class="rowadd"/></tr>'
+			+ '</tbody></table>';
+		layer.open({
+			title : 'new',
+			type : 1,
+			skin : 'layui-layer-demo',
+			area : [ '800px', '500px' ],
+			maxmin : true,
+			closeBtn : 2,
+			anim : 2,
+			content : html,
+			btn : [ 'save' ],
+			btn1 : function(index, layero) {
+				var trList = layero.find("table tbody").children("tr");
+				var json = '{';
+				for (var i = 0; i < trList.length - 1; i++) {
+					var tdArr = trList.eq(i).find("td");
+					var key = tdArr.eq(0).find('input').val();
+					var value = tdArr.eq(1).find('input').val();
+					json = json + '"' + key + '":"' + value + '",';
+				}
+				json = json.substr(0, json.length - 1) + '}';
+				$.ajax({
+					url : "/create",
+					type : "POST",
+					dataType : "json",
+					data : {
+						"json" : json
+					},
+					success : function(data) {
+						if (data.result) {
+							created = 1;
+							layer.open({
+								title : 'result',
+								content : 'success, ' + data.msg
+							});
+						} else {
+							layer.open({
+								title : 'result',
+								content : 'failed, ' + data.msg
+							});
+						}
+					},
+					error : function(XMLHttpRequest, textStatus, errorThrown) {
+						layer.open({
+							title : 'result',
+							content : 'failed, ' + XMLHttpRequest.responseText
+						});
+					}
+				});
+			},
+			cancel : function(index, layero) {
+				if (created == 1) {
+					table.ajax.reload();
+				}
+				return true;
+			}
+		});
+	}
+
+	function rowadd(e) {
+		$(e)
+			.parent()
+			.before(
+				"<tr><td><input type='text'/></td><td><input type='text'/></td>"
+				+ "<td title='delete row' onclick='rowdel(this)' class='rowdel'/></tr>");
+	}
+
+	function rowdel(e) {
+		$(e).parent().remove();
+	}
+
+	function activedetail(e) {
+		var name = $(e).attr("id");
+		$
+			.ajax({
+				url : "/activedetail",
+				type : "POST",
+				dataType : "json",
+				data : {
+					"name" : name,
+				},
+				success : function(data) {
+					if (data.size == 0) {
+						return;
+					}
+					var html = "<table width='100%' border='1' cellpadding='20px' style='height:100%;'>";
+					html += "<thead><tr><th>id</th><th>create Time</th><th>start Time</th><th>Thread Stack</th></tr></thead>";
+					for (var key in data) {
+						if (key == "size") {
+							continue;
+						}
+						var subdata = data[key];
+						html = html + "<tr><td>" + key
+							+ "</td><td>" + subdata.createTime
+							+ "</td><td>" + subdata.startTime
+							+ "</td><td>" + subdata.stack + "</td></tr>"
+					}
+					html = html + "</table>";
+					layer.open({
+						title : 'Thread stack of active tasks[' + data.size + ']',
+						type : 1,
+						skin : 'layui-layer-demo',
+						area : [ '1400px', '600px' ],
+						maxmin : true,
+						closeBtn : 2,
+						anim : 2,
+						content : html
+					});
+				},
+				error : function(XMLHttpRequest, textStatus, errorThrown) {
+					layer.msg(XMLHttpRequest.responseText);
+				}
+			});
+	}
+
+	function faileddetail(e) {
+		var name = $(e).attr("id");
+		$
+			.ajax({
+				url : "/faileddetail",
+				type : "POST",
+				dataType : "json",
+				data : {
+					"name" : name,
+				},
+				success : function(data) {
+					if (data.size == 0) {
+						return;
+					}
+					var html = "<table width='100%' border='1' cellpadding='20px' style='height:100%;'>";
+					html += "<thead><tr><th>id</th><th>create Time</th><th>start Time</th><th>cost Time</th><th>Throwable</th></tr></thead>";
+					for (var key in data) {
+						if (key == "size") {
+							continue;
+						}
+						var subdata = data[key];
+						html = html + "<tr><td>" + key
+							+ "</td><td>" + subdata.createTime
+							+ "</td><td>" + subdata.startTime
+							+ "</td><td>" + subdata.costTime
+							+ "ms</td><td>" + subdata.throwable + "</td></tr>"
+					}
+					html = html + "</table>";
+
+					layer.open({
+						title : 'Throwable of failed tasks[' + data.size + ']',
+						type : 1,
+						skin : 'layui-layer-demo',
+						area : [ '1500px', '600px' ],
+						maxmin : true,
+						closeBtn : 2,
+						anim : 2,
+						content : html
+					});
+				},
+				error : function(XMLHttpRequest, textStatus, errorThrown) {
+					layer.msg(XMLHttpRequest.responseText);
+				}
+			});
+	}
+
+	function waitingdetail(e) {
+		var name = $(e).attr("id");
+		$
+			.ajax({
+				url : "/waitingdetail",
+				type : "POST",
+				dataType : "json",
+				data : {
+					"name" : name,
+				},
+				success : function(data) {
+					if (data.size == 0) {
+						return;
+					}
+					var html = "<table width='100%' border='1' cellpadding='20px' style='height:100%;'>";
+					html += "<thead><tr><th>id</th><th>create Time</th></tr></thead>";
+					for (var key in data) {
+						if (key == "size") {
+							continue;
+						}
+						html = html + "<tr><td><div>" + key
+							+ "</div></td><td><div>" + data[key]
+							+ "</div></td></tr>"
+					}
+					html = html + "</table>";
+					layer.open({
+						title : 'create time of waiting tasks[' + data.size + ']',
+						type : 1,
+						skin : 'layui-layer-demo',
+						area : [ '1200px', '600px' ],
+						maxmin : true,
+						closeBtn : 2,
+						anim : 2,
+						content : html
+					});
+				},
+				error : function(XMLHttpRequest, textStatus, errorThrown) {
+					layer.msg(XMLHttpRequest.responseText);
+				}
+			});
+	}
+
+	function successdetail(e) {
+		var name = $(e).attr("id");
+		$
+			.ajax({
+				url : "/successdetail",
+				type : "POST",
+				dataType : "json",
+				data : {
+					"name" : name,
+				},
+				success : function(data) {
+					var all = data.all;
+					var html = '<div><div id="HighchartsAll" style="width:23%;height:500px;float:left;"></div>'
+						+ '<div style="width:77%;float:left;"><div class="layui-input-inline"> '
+						+ '起止日期：<input name="' + name + '" id="costDate" type="text"'
+						+ ' style="width:270px;" readonly="readonly" placeholder="yyyyMMdd" onchange="changeDate(this)"> '
+						+ '区间设置ms：<input id="levelInput" style="width:300px;"/> '
+						+ '数据保存天数：<input id="saveDay" style="width:40px;"/> '
+						+ '<button id="' + name + '" onclick="saveCostLevel(this);" style="margin-left:5px;">保存</button>'
+						+ '<button id="' + name + '" onclick="dataDownload(this);" style="margin-left:5px;">下载数据</button>'
+						+ '</div><div style="height:500px;" id="HighchartsAll10day"></div></div></div>';
+
+					layer.open({
+						title : 'Time cost of success task',
+						type : 1,
+						skin : 'layui-layer-demo',
+						area : [ '1500px', '650px' ],
+						maxmin : true,
+						closeBtn : 2,
+						anim : 2,
+						content : html
+					});
+
+					$("#saveDay").val(data.saveDay);
+					$("#levelInput").val(data.level1 + "," + data.level2 + "," + data.level3 + "," + data.level4 + "," + data.level5);
+
+					layui.laydate.render({
+						elem : '#costDate',
+						format : 'yyyyMMdd',
+						value : data.day,
+						isInitValue : true,
+						showBottom : false,
+						done : function(value, date) {
+							var name = $("#costDate").attr("name");
+							$.ajax({
+								url : "/changeDate",
+								type : "POST",
+								dataType : "json",
+								data : {
+									"name" : name,
+									"date" : value
+								},
+								success : function(data) {
+									day10Highcharts(data);
+								},
+								error : function(XMLHttpRequest, textStatus, errorThrown) {
+									layer.msg(XMLHttpRequest.responseText);
+								}
+							});
+						}
+					});
+
+					Highcharts.chart('HighchartsAll', {
+						chart : {
+							type : 'column'
+						},
+						title : {
+							text : ''
+						},
+						subtitle : {
+							text : 'statistics of all'
+						},
+						xAxis : {
+							categories : [
+								'<table>'
+								+ 'count = ' + all.successCount
+								+ '<br>min=' + all.minCost
+								+ 'ms<br>max=' + all.maxCost
+								+ 'ms<br>avg=' + all.avgCost + 'ms'
+							],
+							crosshair : true
+						},
+						yAxis : {
+							min : 0,
+							title : {
+								text : '任务耗时区间统计'
+							}
+						},
+						tooltip : {
+							// head + 每个 point + footer 拼接成完整的 table
+							headerFormat : '<span style="font-size:10px">{point.key}</span><table>',
+							pointFormat : '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+								'<td style="padding:0"><b>{point.y}</b></td></tr>',
+							footerFormat : '</table>',
+							shared : true,
+							useHTML : true
+						},
+						plotOptions : {
+							column : {
+								borderWidth : 0
+							}
+						},
+						series : [ {
+							name : '0~1s',
+							data : [ all.level1 ]
+						}, {
+							name : '1s~10s',
+							data : [ all.level2 ]
+						}, {
+							name : '10s~1min',
+							data : [ all.level3 ]
+						}, {
+							name : '1min~10min',
+							data : [ all.level4 ]
+						}, {
+							name : '10min~1h',
+							data : [ all.level5 ]
+						}, {
+							name : '>1h',
+							data : [ all.level6 ]
+						} ]
+					});
+
+					day10Highcharts(data);
+				},
+				error : function(XMLHttpRequest, textStatus, errorThrown) {
+					layer.msg(XMLHttpRequest.responseText);
+				}
+			});
+	}
+
+	function day10Highcharts(data) {
+		var day1 = data.day1;
+		var day2 = data.day2;
+		var day3 = data.day3;
+		var day4 = data.day4;
+		var day5 = data.day5;
+		var day6 = data.day6;
+		var day7 = data.day7;
+		var day8 = data.day8;
+		var day9 = data.day9;
+		var day10 = data.day10;
+
+		Highcharts.chart('HighchartsAll10day', {
+			chart : {
+				type : 'column'
+			},
+			title : {
+				text : ''
+			},
+			subtitle : {
+				text : 'statistics of 10 days'
+			},
+			xAxis : {
+				categories : [
+					day1.day + '<br>count=' + day1.successCount + '<br>min='
+					+ day1.minCost + 'ms<br>max= ' + day1.maxCost + 'ms<br>avg= ' + day1.avgCost + 'ms',
+					day2.day + '<br>count=' + day2.successCount + '<br>min='
+					+ day2.minCost + 'ms<br>max= ' + day2.maxCost + 'ms<br>avg= ' + day2.avgCost + 'ms',
+					day3.day + '<br>count=' + day3.successCount + '<br>min='
+					+ day3.minCost + 'ms<br>max= ' + day3.maxCost + 'ms<br>avg= ' + day3.avgCost + 'ms',
+					day4.day + '<br>count=' + day4.successCount + '<br>min='
+					+ day4.minCost + 'ms<br>max= ' + day4.maxCost + 'ms<br>avg= ' + day4.avgCost + 'ms',
+					day5.day + '<br>count=' + day5.successCount + '<br>min='
+					+ day5.minCost + 'ms<br>max= ' + day5.maxCost + 'ms<br>avg= ' + day5.avgCost + 'ms',
+					day6.day + '<br>count=' + day6.successCount + '<br>min='
+					+ day6.minCost + 'ms<br>max= ' + day6.maxCost + 'ms<br>avg= ' + day6.avgCost + 'ms',
+					day7.day + '<br>count=' + day7.successCount + '<br>min='
+					+ day7.minCost + 'ms<br>max= ' + day7.maxCost + 'ms<br>avg= ' + day7.avgCost + 'ms',
+					day8.day + '<br>count=' + day8.successCount + '<br>min='
+					+ day8.minCost + 'ms<br>max= ' + day8.maxCost + 'ms<br>avg= ' + day8.avgCost + 'ms',
+					day9.day + '<br>count=' + day9.successCount + '<br>min='
+					+ day9.minCost + 'ms<br>max= ' + day9.maxCost + 'ms<br>avg= ' + day9.avgCost + 'ms',
+					day10.day + '<br>count=' + day10.successCount + '<br>min='
+					+ day10.minCost + 'ms<br>max= ' + day10.maxCost + 'ms<br>avg= ' + day10.avgCost + 'ms',
+				],
+				crosshair : true
+			},
+			yAxis : {
+				min : 0,
+				title : {
+					text : '任务耗时区间统计'
+				}
+			},
+			tooltip : {
+				// head + 每个 point + footer 拼接成完整的 table
+				headerFormat : '<span style="font-size:10px">{point.key}</span><table>',
+				pointFormat : '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+					'<td style="padding:0"><b>{point.y}</b></td></tr>',
+				footerFormat : '</table>',
+				shared : true,
+				useHTML : true
+			},
+			plotOptions : {
+				column : {
+					borderWidth : 0
+				}
+			},
+			series : [ {
+				name : '0~' + data.level1 + 'ms',
+				data : [ day1.level1, day2.level1, day3.level1, day4.level1, day5.level1, day6.level1, day7.level1, day8.level1, day9.level1, day10.level1 ]
+			}, {
+				name : data.level1 + '~' + data.level2 + 'ms',
+				data : [ day1.level2, day2.level2, day3.level2, day4.level2, day5.level2, day6.level2, day7.level2, day8.level2, day9.level2, day10.level2 ]
+			}, {
+				name : data.level2 + '~' + data.level3 + 'ms',
+				data : [ day1.level3, day2.level3, day3.level3, day4.level3, day5.level3, day6.level3, day7.level3, day8.level3, day9.level3, day10.level3 ]
+			}, {
+				name : data.level3 + '~' + data.level4 + 'ms',
+				data : [ day1.level4, day2.level4, day3.level4, day4.level4, day5.level4, day6.level4, day7.level4, day8.level4, day9.level4, day10.level4 ]
+			}, {
+				name : data.level4 + '~' + data.level5 + 'ms',
+				data : [ day1.level5, day2.level5, day3.level5, day4.level5, day5.level5, day6.level5, day7.level5, day8.level5, day9.level5, day10.level5 ]
+			}, {
+				name : '>' + data.level5 + 'ms',
+				data : [ day1.level6, day2.level6, day3.level6, day4.level6, day5.level6, day6.level6, day7.level6, day8.level6, day9.level6, day10.level6 ]
+			} ]
+		});
+	}
+
+	function saveCostLevel(e) {
+		var levelStr = $("#levelInput").val();
+		var saveDay = $("#saveDay").val();
+		var date = $("#costDate").val();
+		var name = $(e).attr("id");
+		$.ajax({
+			url : "/saveCostLevel",
+			type : "POST",
+			dataType : "json",
+			data : {
+				"name" : name,
+				"levelStr" : levelStr,
+				"saveDay" : saveDay,
+				"date" : date
+			},
+			success : function(data) {
+				if (!data.isSuccess) {
+					return
+				}
+				$("#saveDay").val(data.saveDay);
+
+				if (!data.isChange) {
+					return
+				}
+				$("#levelInput").val(data.level1 + "," + data.level2 + "," + data.level3 + "," + data.level4 + "," + data.level5);
+				day10Highcharts(data);
+			},
+			error : function(XMLHttpRequest, textStatus, errorThrown) {
+				layer.msg(XMLHttpRequest.responseText);
+			}
+		});
+	}
+
+	function dataDownload(e) {
+		var name = $(e).attr("id");
+		window.open("/dataDownload?name=" + name);
+	}
+</script>
+</html>

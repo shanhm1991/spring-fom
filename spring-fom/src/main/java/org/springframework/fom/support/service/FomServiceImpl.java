@@ -60,7 +60,9 @@ public class FomServiceImpl implements FomService, ApplicationContextAware{
 	public List<ScheduleInfo> list() {
 		List<ScheduleInfo> list = new ArrayList<>(scheduleMap.size());
 		for(ScheduleContext<?> schedule : scheduleMap.values()){
-			list.add(schedule.getScheduleInfo());
+			ScheduleInfo scheduleInfo = schedule.getScheduleInfo();
+			scheduleInfo.setLoggerLevel(getLoggerLevel(schedule.getScheduleName())); 
+			list.add(scheduleInfo);
 		}
 		return list;
 	}
@@ -98,19 +100,20 @@ public class FomServiceImpl implements FomService, ApplicationContextAware{
 
 		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
 		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
-		
+
 		String loggerName = schedule.getLogger().getName();
 		if(loggingSystem instanceof Log4jLoggingSystem){
-			//TODO
+			Log4jLoggingSystem log4jLoggingSystem = (Log4jLoggingSystem)loggingSystem;
+			return log4jLoggingSystem.getLogLevel(loggerName);
 		}
-		
+
 		LoggerConfiguration loggerConfiguration = loggingSystem.getLoggerConfiguration(loggerName);
 		if(loggerConfiguration != null){
 			LogLevel logLevel = loggerConfiguration.getConfiguredLevel();
 			if(logLevel != null){
 				return logLevel.name();
 			}
-			return "INFO";
+			return "NULL";
 		}else{
 			// 随便找一个配置了的父Logger的级别
 			List<LoggerConfiguration> list =loggingSystem.getLoggerConfigurations();
@@ -123,7 +126,7 @@ public class FomServiceImpl implements FomService, ApplicationContextAware{
 					}
 				}
 			}
-			return "INFO";
+			return "NULL";
 		}
 	}
 
@@ -134,11 +137,17 @@ public class FomServiceImpl implements FomService, ApplicationContextAware{
 		if(loggingSystem == null){
 			throw new UnsupportedOperationException("No suitable logging system located");
 		}
-		
+
 		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
 		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
-		
+
 		String loggerName = schedule.getLogger().getName();
+		if(loggingSystem instanceof Log4jLoggingSystem){
+			Log4jLoggingSystem log4jLoggingSystem = (Log4jLoggingSystem)loggingSystem;
+			log4jLoggingSystem.setLogLevel(loggerName, levelName);
+			return;
+		}
+
 		try{
 			LogLevel level = LogLevel.valueOf(levelName);
 			loggingSystem.setLogLevel(loggerName, level);
@@ -146,7 +155,7 @@ public class FomServiceImpl implements FomService, ApplicationContextAware{
 			throw new UnsupportedOperationException(levelName + " is not a support LogLevel.");
 		}
 	}
-	
+
 	public Response<Void> start(String scheduleName) {
 		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
 		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
