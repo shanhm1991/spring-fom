@@ -1,6 +1,8 @@
 package org.springframework.fom.support.controller;
 
+import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.ValidationException;
 
@@ -76,6 +78,24 @@ public class FomController {
 	@ResponseBody
 	public Response<Void> exec(String scheduleName) {
 		return fomService.exec(scheduleName);
+	}
+	
+	@RequestMapping("/schedule/waitings")
+	@ResponseBody
+	public Response<Map<String, String>> waitingTasks(String scheduleName) {
+		return new Response<>(Response.SUCCESS, "", fomService.getWaitingTasks(scheduleName));  
+	}
+	
+	@RequestMapping("/schedule/actives")
+	@ResponseBody
+	public Response<List<Map<String, String>>> activeTasks(String scheduleName) {
+		return new Response<>(Response.SUCCESS, "", fomService.getActiveTasks(scheduleName));  
+	}
+	
+	@RequestMapping("/schedule/success")
+	@ResponseBody
+	public Response<Map<String, Object>> successStat(String scheduleName, String endDay) throws ParseException { 
+		return new Response<>(Response.SUCCESS, "", fomService.getSuccessStat(scheduleName, endDay)); 
 	}
 	
 	/*************************Handlers************************************/

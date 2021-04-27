@@ -36,7 +36,7 @@ public class BatchSchedulTest implements ScheduleFactory<Long>, ScheduleComplete
 	@Override
 	public void onScheduleComplete(long schedulTimes, long schedulTime, List<Result<Long>> results) throws Exception {
 		String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(schedulTime);
-		LOG.info( "第{}次在{}提交的任务全部完成，结果为{}", date, date, results);
+		LOG.info( "第{}次在{}提交的任务全部完成，结果为{}", schedulTimes, date, results);
 	}
 	
 	@Override

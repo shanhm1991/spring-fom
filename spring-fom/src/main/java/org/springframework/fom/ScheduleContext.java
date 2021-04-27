@@ -6,6 +6,7 @@ import static org.springframework.fom.State.SLEEPING;
 import static org.springframework.fom.State.STOPPED;
 import static org.springframework.fom.State.STOPPING;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -136,7 +137,8 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 	public void onScheduleTerminate(long execTimes, long lastExecTime) {
 		// 这里要从原对象方法调用到代理对象中的方法
 		ScheduleContext<E> scheduleContext;
-		if(applicationContext != null && (scheduleContext = (ScheduleContext<E>)applicationContext.getBean(scheduleName)) != null){
+		if(applicationContext != null && scheduleBeanName != null
+				&& (scheduleContext = (ScheduleContext<E>)applicationContext.getBean(scheduleName)) != null){
 			scheduleContext.onScheduleTerminate(execTimes, lastExecTime); 
 		}
 	}
@@ -145,7 +147,8 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 	@Override
 	public void onScheduleComplete(long execTimes, long lastExecTime, List<Result<E>> results) throws Exception {
 		ScheduleContext<E> scheduleContext;
-		if(applicationContext != null && (scheduleContext = (ScheduleContext<E>)applicationContext.getBean(scheduleName)) != null){
+		if(applicationContext != null && scheduleBeanName != null 
+				&& (scheduleContext = (ScheduleContext<E>)applicationContext.getBean(scheduleName)) != null){
 			scheduleContext.onScheduleComplete(execTimes, lastExecTime, results);
 		}
 	}
@@ -154,7 +157,8 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 	@Override
 	public Collection<? extends Task<E>> newSchedulTasks() throws Exception {
 		ScheduleContext<E> scheduleContext;
-		if(applicationContext != null && (scheduleContext = (ScheduleContext<E>)applicationContext.getBean(scheduleName)) != null){
+		if(applicationContext != null 
+				&& (scheduleContext = (ScheduleContext<E>)applicationContext.getBean(scheduleName)) != null){
 			return scheduleContext.newSchedulTasks();
 		}
 
@@ -572,5 +576,17 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 		public long getTaskNotCompleted(){
 			return taskNotCompleted.get();
 		}
+	}
+	
+	public Map<String, String> getWaitingTasks(){
+		return scheduleConfig.getWaitingTasks();
+	}
+	
+	public List<Map<String, String>> getActiveTasks(){
+		return scheduleConfig.getActiveTasks();
+	}
+	
+	public Map<String, Object> getSuccessStat(String endDay) throws ParseException {  
+		return scheduleStatistics.getSuccessStat(endDay);
 	}
 }

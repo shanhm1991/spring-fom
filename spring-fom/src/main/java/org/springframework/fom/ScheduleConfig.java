@@ -3,9 +3,12 @@ package org.springframework.fom;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -420,5 +423,51 @@ public class ScheduleConfig {
 	@Override
 	public String toString() {
 		return confMap.toString();
+	}
+	
+	Map<String, String> getWaitingTasks(){
+		Map<String, String> map = new HashMap<>();
+		if(pool == null){
+			return map;
+		}
+		Object[] array = pool.getQueue().toArray();
+		if(array == null || array.length == 0){
+			return map;
+		}
+		
+		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss SSS");
+		for(Object obj : array){
+			if(obj instanceof TimedFuture){
+				TimedFuture<?> future = (TimedFuture<?>)obj;
+				map.put(future.getTaskId(), format.format(future.getCreateTime()));
+			}
+		}
+		return map;
+	}
+	
+	List<Map<String, String>> getActiveTasks(){
+		List<Map<String, String>> list = new ArrayList<>();
+		if(pool == null){
+			return list;
+		}
+		
+		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		for(Entry<Task<?>, Thread> entry : pool.getActiveThreads().entrySet()){
+			Task<?> task = entry.getKey();
+			Thread thread = entry.getValue();
+			
+			Map<String, String> map = new HashMap<>();
+			map.put("id", task.getTaskId());
+			map.put("createTime", format.format(task.getCreateTime()));
+			map.put("startTime", format.format(task.getStartTime()));
+			
+			StringBuilder builder = new StringBuilder();
+			for(StackTraceElement stack : thread.getStackTrace()){
+				builder.append(stack).append("<br>");
+			}
+			map.put("stack", builder.toString());
+			list.add(map);
+		}
+		return list;
 	}
 }

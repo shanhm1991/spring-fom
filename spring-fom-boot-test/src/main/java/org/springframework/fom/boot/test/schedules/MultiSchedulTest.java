@@ -48,6 +48,6 @@ public class MultiSchedulTest implements ScheduleCompleter<Object> {
 	@Override
 	public void onScheduleComplete(long schedulTimes, long schedulTime, List<Result<Object>> results) throws Exception {
 		String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(schedulTime);
-		LOG.info( "第{}次在{}提交的任务全部完成，结果为{}", date, date, results);
+		LOG.info( "第{}次在{}提交的任务全部完成，结果为{}", schedulTimes, date, results);
 	}
 }

@@ -79,7 +79,7 @@ public class ScheduleProxy implements MethodInterceptor {
 				|| !(long.class.isAssignableFrom(parameterTypes[1]))){
 			return method.invoke(scheduleContext, args);
 		}
-
+		
 		if(!(ScheduleTerminator.class.isAssignableFrom(scheduleBeanClass))){
 			return null;
 		}

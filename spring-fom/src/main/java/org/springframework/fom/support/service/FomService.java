@@ -1,6 +1,8 @@
 package org.springframework.fom.support.service;
 
+import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -72,4 +74,26 @@ public interface FomService {
 	 */
 	Response<Void> exec(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName);
 	
+	/**
+	 * 获取正在等待的任务
+	 * @param scheduleName 
+	 * @return 
+	 */
+	Map<String, String> getWaitingTasks(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName);
+	
+	/**
+	 * 获取正在执行的任务
+	 * @param scheduleName 
+	 * @return 
+	 */
+	List<Map<String, String>> getActiveTasks(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName);
+	
+	/**
+	 *  获取成功的任务统计
+	 * @param scheduleName
+	 * @param endDay
+	 * @return
+	 * @throws ParseException
+	 */
+	Map<String, Object> getSuccessStat(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName, String endDay) throws ParseException;
 }

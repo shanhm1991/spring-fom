@@ -14,7 +14,7 @@ import org.springframework.fom.boot.test.TestTask;
  * @author shanhm1991@163.com
  *
  */
-@FomSchedule(fixedRate = 15, threadCore = 5)
+@FomSchedule(fixedRate = 15, threadCore = 4)
 public class BatchFomContextTest extends ScheduleContext<Long> {
 
 	@Override

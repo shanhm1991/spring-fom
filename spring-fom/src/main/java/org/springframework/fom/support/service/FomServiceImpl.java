@@ -1,5 +1,6 @@
 package org.springframework.fom.support.service;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -156,21 +157,45 @@ public class FomServiceImpl implements FomService, ApplicationContextAware{
 		}
 	}
 
+	@Override
 	public Response<Void> start(String scheduleName) {
 		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
 		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
 		return schedule.scheduleStart();
 	}
 
+	@Override
 	public Response<Void> shutdown(String scheduleName){
 		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
 		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
 		return schedule.scheduleShutdown();
 	}
 
+	@Override
 	public Response<Void> exec(String scheduleName) {
 		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
 		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
 		return schedule.scheduleExecNow();
+	}
+	
+	@Override
+	public Map<String, String> getWaitingTasks(String scheduleName) { 
+		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
+		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
+		return schedule.getWaitingTasks();
+	}
+
+	@Override
+	public List<Map<String, String>> getActiveTasks(String scheduleName) {
+		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
+		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
+		return schedule.getActiveTasks();
+	}
+
+	@Override
+	public Map<String, Object> getSuccessStat(String scheduleName, String endDay) throws ParseException { 
+		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
+		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
+		return schedule.getSuccessStat(endDay);
 	}
 }
