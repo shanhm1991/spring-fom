@@ -16,7 +16,7 @@ import org.springframework.scheduling.annotation.Scheduled;
  * @author shanhm1991@163.com
  *
  */
-@FomSchedule(remark = "定时多任务测试", cron = "0 0/5 * * * ?", threadCore = 2, taskOverTime = 4)
+@FomSchedule(remark = "定时多任务测试", cron = "0/10 * * * * ?", threadCore = 2, taskOverTime = 4)
 public class MultiSchedulTest implements ScheduleCompleter<Object> {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(MultiSchedulTest.class);
@@ -31,7 +31,7 @@ public class MultiSchedulTest implements ScheduleCompleter<Object> {
 		} catch (InterruptedException e) {
 			LOG.info("task cancled due to interrupt.");
 		} 
-		return System.currentTimeMillis();
+		throw new IllegalArgumentException("reason 1");
 	}
 	
 	@Scheduled
@@ -42,7 +42,7 @@ public class MultiSchedulTest implements ScheduleCompleter<Object> {
 		} catch (InterruptedException e) {
 			LOG.info("task cancled due to interrupt.");
 		} 
-		return "test2";
+		throw new IllegalArgumentException("reason 2");
 	}
 
 	@Override

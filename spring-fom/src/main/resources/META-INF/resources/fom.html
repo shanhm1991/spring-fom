@@ -170,7 +170,7 @@ table = $("#fom").DataTable({
 					"render": function (data, type, row, meta){
 						 if(data > 0){  
 							return "<a style='color:#F99116; 'schedule='" + row.scheduleName 
-							     + "' onclick='scheduleWaitings(this)' href='#'>" + data + "</a>";
+							     + "' onclick='failedTasks(this)' href='#'>" + data + "</a>";
 						 }else{
 							return "0";
 						}  
@@ -346,7 +346,7 @@ table = $("#fom").DataTable({
 						return;
 					}
 					
-					var html = "<table class='detailTb' width='100%' border='1' style='width=90%; margin=10px;'>"
+					var html = "<table class='detailTb' width='100%' border='1' style='margin=10px;'>"
 					         + "<thead><tr><th>id</th><th>create time</th></tr></thead>";
 					var count = 0;         
 					for (var key in data) {
@@ -356,7 +356,7 @@ table = $("#fom").DataTable({
 					html += "</table>";
 					
 					layer.open({
-						title : 'create time of waiting tasks( ' + count + ' )',
+						title : 'create time of waiting tasks[ ' + count + ' ]',
 						type : 1,
 						skin : 'layui-layer-demo',
 						area : [ '1200px', '600px' ],
@@ -386,7 +386,7 @@ table = $("#fom").DataTable({
 					return;
 				}
 				
-				var html = "<table class='detailTb' width='100%' border='1' style='width=90%; margin=10px;'>"
+				var html = "<table class='detailTb' width='100%' border='1' style='margin=10px;'>"
 				         + "<thead><tr><th>id</th><th>create Time</th><th>start Time</th><th>Thread Stack</th></tr></thead>";
 				var list = data.data;
 				var count = 0;
@@ -397,7 +397,7 @@ table = $("#fom").DataTable({
 				html += "</table>";
 				
 				layer.open({
-					title : 'Thread stack of active tasks[' + count + ']',
+					title : 'Thread stack of active tasks[ ' + count + ' ]',
 					type : 1,
 					skin : 'layui-layer-demo',
 					area : [ '1200px', '600px' ],
@@ -409,6 +409,49 @@ table = $("#fom").DataTable({
 			},
 			error : function(XMLHttpRequest, textStatus, errorThrown) {
 				layer.msg(XMLHttpRequest.responseText);
+			}
+		});
+	}
+	
+	function failedTasks(e){
+		var scheduleName = $(e).attr("schedule");
+		$.ajax({
+		    url : root + "/fom/schedule/faileds",
+			type : "post",
+			dataType : "json",
+			data : {
+				"scheduleName" : scheduleName,
+			},
+			success : function(data) {
+				if (data.code != 200) {
+					return;
+				}
+				
+				var html = "<table width='100%' border='1' style='margin=10px;'>";
+				html += "<thead><tr><th>id</th><th>create Time</th><th>start Time</th><th>cost Time</th><th>cause</th></tr></thead>";
+				var list = data.data;
+				var count = 0;
+				$.each(list, function(i, item){  
+					count++;
+					html += "<tr style='line-height:22px;height:22px;'>" 
+					      + "<td>" + item.id + "</td>" 
+					      + "<td>" + item.createTime + "</td>" 
+					      + "<td>" + item.startTime + "</td>" 
+					      + "<td>" + item.costTime + "</td>" 
+					      + "<td>" + item.cause + "</td></tr>"
+	            });  
+				html += "</table>";
+				
+				layer.open({
+					title : 'Throwable of failed tasks[ ' + count + ' ]',
+					type : 1,
+					skin : 'layui-layer-demo',
+					area : [ '1500px', '600px' ],
+					maxmin : true,
+					closeBtn : 2,
+					anim : 2,
+					content : html
+				});
 			}
 		});
 	}
@@ -429,14 +472,13 @@ table = $("#fom").DataTable({
 					
 					var data = data.data;
 					var html = '<div>'
-						     + '<div style="width:100%; float:left; margin-left:20px;">'
-						     + '<div class="layui-input-inline"> 起止日期：'
-					      	 + '<input scheduleName="' + scheduleName + '" id="costDate" type="text" style="width:270px;" readonly="readonly" '
-					      	 + 'placeholder="yyyyMMdd" onchange="changeDate(this)"> '
-						     + '区间设置ms：<input id="levelInput" style="width:300px;"/> '
+						     + '<div style="width:100%; float:left; margin-left:50px;">'
+						     + '<div class="layui-input-inline"> '
+						     + '起止日期：<input schedule="' + scheduleName + '" id="statDay" type="text" style="width:200px;"readonly="readonly"> '
+						     + '区间设置ms：<input id="statLevel" style="width:300px;"/> '
 						     + '数据保存天数：<input id="saveDay" style="width:40px;"/> '
-						     + '<button scheduleName="' + scheduleName + '" onclick="saveCostLevel(this);" style="margin-left:5px;">保存</button>'
-						     + '<button scheduleName="' + scheduleName + '" onclick="dataDownload(this);" style="margin-left:5px;">下载数据</button>'
+						     + '<button schedule="' + scheduleName + '" onclick="saveStatConf(this);" style="margin-left:5px;">保存</button>'
+						     + '<button schedule="' + scheduleName + '" onclick="dataDownload(this);" style="margin-left:5px;">下载数据</button>'
 						     + '</div></div>'
 						     + '<div id="HighchartsAll" style="width:25%; height:500px; float:left;"/>'
 						     + '<div id="HighchartsDay" style="width:75%; height:500px; float:left;"/>'
@@ -454,77 +496,40 @@ table = $("#fom").DataTable({
 					});
 
 					$("#saveDay").val(data.saveday);
-					$("#levelInput").val(data.lv1 + "," + data.lv2 + "," + data.lv3 + "," + data.lv4 + "," + data.lv5);
+					$("#statLevel").val(data.lv1 + "," + data.lv2 + "," + data.lv3 + "," + data.lv4 + "," + data.lv5);
 					
 					layui.laydate.render({
-						elem : '#costDate',
+						elem : '#statDay',
 						format : 'yyyy/MM/dd',
 						value : data.day,
 						isInitValue : true,
-						showBottom : false
+						showBottom : false,
+						done : function(value, date) {
+							var name = $("#statDay").attr("schedule");
+							$.ajax({
+								url : root + "/fom/schedule/success",
+								type : "post",
+								dataType : "json",
+								data : {
+									"scheduleName" : name,
+									"statDay" : value
+								},
+								success : function(data) {
+									if(data.code != 200){
+										return;
+									}
+									refreshHighchartsAll(data.data);
+									refreshHighchartsDay(data.data);
+								},
+								error : function(XMLHttpRequest, textStatus, errorThrown) {
+									layer.msg(XMLHttpRequest.responseText);
+								}
+							});
+						}
 					});
-
-					var all = data.all;
-					Highcharts.chart('HighchartsAll', {
-						chart : {
-							type : 'column'
-						},
-						title : {
-							text : ''
-						},
-						subtitle : {
-							text : 'statistics of all'
-						},
-						xAxis : {
-							categories : [ 'count = ' + all.successCount + ', '
-								                    + ', min = ' + all.minCost + 'ms '
-								                    + ', max = ' + all.maxCost + 'ms '
-								                    + ', avg = ' + all.avgCost + 'ms'
-							],
-							crosshair : true
-						},
-						yAxis : {
-							min : 0,
-							title : {
-								text : '任务耗时区间统计'
-							}
-						},
-						tooltip : {
-							// head + 每个 point + footer 拼接成完整的 table
-							headerFormat : '<span style="font-size:10px">{point.key}</span><table>',
-							pointFormat : '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' 
-							            + '<td style="padding:0"><b>{point.y}</b></td></tr>',
-							footerFormat : '</table>',
-							shared : true,
-							useHTML : true
-						},
-						plotOptions : {
-							column : {
-								borderWidth : 0
-							}
-						},
-						series : [ {
-							name : '0 ~ ' + data.lv1 + 'ms',
-							data : [ all.level1 ]
-						}, {
-							name : data.lv1 + ' ~ ' + data.lv2 + 'ms',
-							data : [ all.level2 ]
-						}, {
-							name : data.lv2 + ' ~ ' + data.lv3 + 'ms',
-							data : [ all.level3 ]
-						}, {
-							name : data.lv3 + ' ~ ' + data.lv4 + 'ms',
-							data : [ all.level4 ]
-						}, {
-							name : data.lv4 + ' ~ ' + data.lv5 + 'ms',
-							data : [ all.level5 ]
-						}, {
-							name : '> ' + data.lv5 + 'ms',
-							data : [ all.level6 ]
-						} ]
-					});
-
-					HighchartsDay(data);
+					
+					refreshHighchartsAll(data);
+					refreshHighchartsDay(data);
 				},
 				error : function(XMLHttpRequest, textStatus, errorThrown) {
 					layer.msg(XMLHttpRequest.responseText);
@@ -532,7 +537,104 @@ table = $("#fom").DataTable({
 			});
 	}
 	
-	function HighchartsDay(data) {
+	function saveStatConf(e){
+		var scheduleName = $(e).attr("schedule");
+		var statLevel = $("#statLevel").val();
+		var saveDay = $("#saveDay").val();
+		var statDay = $("#statDay").val();
+		
+		$.ajax({
+			url : root + "/fom/schedule/saveStatConf",
+			type : "post",
+			dataType : "json",
+			data : {
+				"scheduleName" : scheduleName,
+				"saveDay" : saveDay,
+				"statLevel" : statLevel,
+				"statDay" : statDay
+			},
+			success : function(data) {
+				if(data.code != 200){
+					return;
+				}
+				
+				var data = data.data;
+				if(data == null){
+					return;
+				}
+				
+				refreshHighchartsAll(data);
+				refreshHighchartsDay(data);
+			},
+			error : function(XMLHttpRequest, textStatus, errorThrown) {
+				layer.msg(XMLHttpRequest.responseText);
+			}
+		});
+	}
+	
+	function refreshHighchartsAll(data){
+		var all = data.all;
+		Highcharts.chart('HighchartsAll', {
+			chart : {
+				type : 'column'
+			},
+			title : {
+				text : ''
+			},
+			subtitle : {
+				text : 'statistics of all'
+			},
+			xAxis : {
+				categories : [ 'count = ' + all.successCount + ', '
+					                    + ', min = ' + all.minCost + 'ms '
+					                    + ', max = ' + all.maxCost + 'ms '
+					                    + ', avg = ' + all.avgCost + 'ms'
+				],
+				crosshair : true
+			},
+			yAxis : {
+				min : 0,
+				title : {
+					text : '任务耗时区间统计'
+				}
+			},
+			tooltip : {
+				// head + 每个 point + footer 拼接成完整的 table
+				headerFormat : '<span style="font-size:10px">{point.key}</span><table>',
+				pointFormat : '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' 
+				            + '<td style="padding:0"><b>{point.y}</b></td></tr>',
+				footerFormat : '</table>',
+				shared : true,
+				useHTML : true
+			},
+			plotOptions : {
+				column : {
+					borderWidth : 0
+				}
+			},
+			series : [ {
+				name : '0 ~ ' + data.lv1 + 'ms',
+				data : [ all.level1 ]
+			}, {
+				name : data.lv1 + ' ~ ' + data.lv2 + 'ms',
+				data : [ all.level2 ]
+			}, {
+				name : data.lv2 + ' ~ ' + data.lv3 + 'ms',
+				data : [ all.level3 ]
+			}, {
+				name : data.lv3 + ' ~ ' + data.lv4 + 'ms',
+				data : [ all.level4 ]
+			}, {
+				name : data.lv4 + ' ~ ' + data.lv5 + 'ms',
+				data : [ all.level5 ]
+			}, {
+				name : '> ' + data.lv5 + 'ms',
+				data : [ all.level6 ]
+			} ]
+		});
+	}
+	
+	function refreshHighchartsDay(data) {
 		var day1 = data.day1;
 		var day2 = data.day2;
 		var day3 = data.day3;
@@ -552,7 +654,7 @@ table = $("#fom").DataTable({
 				text : ''
 			},
 			subtitle : {
-				text : 'statistics of 10 days'
+				text : day1.day + ' ~ ' + day10.day
 			},
 			xAxis : {
 				categories : [

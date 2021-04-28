@@ -61,8 +61,8 @@ public class ScheduleInfo {
 		this.stateImage = state.src();
 		
 		ScheduleStatistics scheduleStatistics = scheduleContext.getScheduleStatistics();
-		this.success = scheduleStatistics.getSuccess().get();
-		this.failed = scheduleStatistics.getFailed().get();
+		this.success = scheduleStatistics.getSuccess();
+		this.failed = scheduleStatistics.getFailed();
 		
 		ScheduleConfig scheduleConfig = scheduleContext.getScheduleConfig();
 		this.waiting = scheduleConfig.getWaitings();
