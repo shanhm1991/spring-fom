@@ -7,4 +7,5 @@ package org.springframework.fom.interceptor;
  */
 public interface TaskTimeoutHandler {
 
+	void handleTimeout(long costTime);
 }

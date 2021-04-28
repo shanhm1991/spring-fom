@@ -19,10 +19,10 @@ public class TestTask extends Task<Long> {
 
 	@Override
 	public Long exec() { 
-		long sleep = random.nextInt(5000);
+		long sleep = random.nextInt(8000);
 		try {
 			logger.info("task executing ...");
-			Thread.sleep(sleep);
+			Thread.sleep(4000);
 		} catch (InterruptedException e) {
 			logger.info("task cancled due to interrupt.");
 			return sleep;

@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.springframework.fom.annotation.FomSchedule;
+
 import java.util.Set;
 
 /**
@@ -55,8 +58,19 @@ public class ScheduleInfo {
 		this.scheduleBeanName = scheduleContext.getScheduleBeanName();
 		this.scheduleTimes = scheduleContext.getSchedulTimes();
 		this.loadTime = dateFormat.format(scheduleContext.getLoadTime());
-		this.lastTime = dateFormat.format(scheduleContext.getLastTime());
-		this.nextTime = dateFormat.format(scheduleContext.getNextTime());
+		
+		if(0 == scheduleContext.getLastTime()){
+			this.lastTime = "";
+		}else{
+			this.lastTime = dateFormat.format(scheduleContext.getLastTime());
+		}
+		
+		if(0 == scheduleContext.getNextTime()){
+			this.nextTime = "";
+		}else{
+			this.nextTime = dateFormat.format(scheduleContext.getNextTime());
+		}
+		
 		this.loggerName = scheduleContext.getLogger().getName();
 		
 		State state = scheduleContext.getState();
@@ -89,7 +103,7 @@ public class ScheduleInfo {
 					config.add(new Conf(key, defaultVal, true, false, true, false));
 				}
 			}else{
-				if(ScheduleConfig.CONF_CRON.equals(key)){
+				if(FomSchedule.CRON.equals(key)){
 					config.add(new Conf(key, scheduleConfig.getCronExpression(), true, false, false, false));
 				}else{
 					if(readOnlyKey.contains(key)){

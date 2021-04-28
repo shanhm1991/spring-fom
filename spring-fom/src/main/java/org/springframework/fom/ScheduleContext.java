@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +22,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
@@ -28,9 +30,11 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.fom.annotation.FomSchedule;
 import org.springframework.fom.interceptor.ScheduleCompleter;
 import org.springframework.fom.interceptor.ScheduleFactory;
 import org.springframework.fom.interceptor.ScheduleTerminator;
+import org.springframework.fom.interceptor.TaskTimeoutHandler;
 import org.springframework.fom.support.Response;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -40,7 +44,7 @@ import org.springframework.util.ReflectionUtils;
  * @author shanhm1991@163.com
  *
  */
-public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter<E>, ScheduleTerminator, ApplicationContextAware {
+public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter<E>, ScheduleTerminator, TaskTimeoutHandler, ApplicationContextAware {
 
 	private static final int SECOND_UNIT = 1000;
 
@@ -78,6 +82,9 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 	private State state = INITED; 
 
 	private ApplicationContext applicationContext;
+	
+	// running 状态纪录exec请求
+	private final AtomicBoolean nextTimeHasSated = new AtomicBoolean(false);
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -154,6 +161,16 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 		if(applicationContext != null && scheduleBeanName != null 
 				&& (scheduleContext = (ScheduleContext<E>)applicationContext.getBean(scheduleName)) != null){
 			scheduleContext.onScheduleComplete(execTimes, lastExecTime, results);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void handleTimeout(long costTime) {
+		ScheduleContext<E> scheduleContext;
+		if(applicationContext != null && scheduleBeanName != null 
+				&& (scheduleContext = (ScheduleContext<E>)applicationContext.getBean(scheduleName)) != null){
+			scheduleContext.handleTimeout(costTime);
 		}
 	}
 
@@ -253,8 +270,18 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 				logger.warn("schedule[{}] is stopping, cann't execut now.", scheduleName); 
 				return new Response<>(Response.FAILED, "schedule[" + scheduleName + "] is stopping, cann't execut now.");
 			case RUNNING:
-				logger.warn("schedule[{}] is already running.", scheduleName); 
-				return new Response<>(Response.FAILED, "schedule[" + scheduleName + "] is already running.");
+				if(scheduleConfig.getIgnoreExecRequestWhenRunning()){
+					logger.warn("schedule[{}] is already running.", scheduleName); 
+					return new Response<>(Response.FAILED, "schedule[" + scheduleName + "] is already running.");
+				}else{
+					if(!nextTimeHasSated.compareAndSet(false, true)){
+						logger.info("schedule[{}] is running, and exec was already requested.", scheduleName); 
+						return new Response<>(Response.FAILED, "schedule[" + scheduleName + "] is running, and exec was already requested.");
+					}
+					nextTime = System.currentTimeMillis();
+					logger.info("schedule[{}] is running, and will re-exec immediately after completion.", scheduleName); 
+					return new Response<>(Response.SUCCESS, "schedule[" + scheduleName + "]  is running, and will re-exec immediately after completion .");
+				}
 			case SLEEPING:
 				scheduleThread.interrupt();
 				logger.info("schedule[{}] execute now.", scheduleName); 
@@ -310,7 +337,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 							try {
 								wait(waitTime);
 							} catch (InterruptedException e) {
-								//借助interrupted标记来中断睡眠，立即重新执行
+								// 中断即重新执行
 							}
 						}
 					}
@@ -333,14 +360,20 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 			}
 
 			if(scheduleConfig.getCron() != null){
-				nextTime = scheduleConfig.getCron().getTimeAfter(last).getTime();
+				if(!nextTimeHasSated.compareAndSet(true, false)){ 
+					nextTime = scheduleConfig.getCron().getTimeAfter(last).getTime();
+				}
 				waitTaskCompleted(scheduleBatch);
 			}else if(scheduleConfig.getFixedRate() > 0){
-				nextTime = last.getTime() + scheduleConfig.getFixedRate() * SECOND_UNIT;
+				if(!nextTimeHasSated.compareAndSet(true, false)){ 
+					nextTime = last.getTime() + scheduleConfig.getFixedRate() * SECOND_UNIT;
+				}
 				waitTaskCompleted(scheduleBatch);
 			}else if(scheduleConfig.getFixedDelay() > 0){
 				waitTaskCompleted(scheduleBatch);
-				nextTime = System.currentTimeMillis() + scheduleConfig.getFixedDelay() * SECOND_UNIT;
+				if(!nextTimeHasSated.compareAndSet(true, false)){ 
+					nextTime = System.currentTimeMillis() + scheduleConfig.getFixedDelay() * SECOND_UNIT;
+				}
 			}else{
 				waitTaskCompleted(scheduleBatch);
 				nextTime = 0;
@@ -351,31 +384,85 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 			if(scheduleBatch == null){
 				return;
 			}
+			
+			long overTime = scheduleConfig.getTaskOverTime();
+			boolean detectTimeoutOnEachTask = scheduleConfig.getDetectTimeoutOnEachTask();
+			boolean cancelTaskOnTimeout = scheduleConfig.getCancelTaskOnTimeout();
 			try {
-				long overTime = scheduleConfig.getTaskOverTime();
-				while(true){
-					if(scheduleBatch.waitTaskCompleted(overTime)){ 
+				if(FomSchedule.TASK_OVERTIME_DEFAULT == overTime){
+					scheduleBatch.waitTaskCompleted();
+					cleanCompletedFutures();
+				}else{
+					if(!detectTimeoutOnEachTask){ // 对整体任务算超时
+						if(!scheduleBatch.waitTaskCompleted(overTime)){ 
+							for(TimedFuture<Result<E>> future : submitFutures){
+								if(!future.isDone()){
+									long cost = System.currentTimeMillis() - future.getStartTime(); 
+									if(cost >= overTime * SECOND_UNIT){
+										try{
+											handleTimeout(cost);
+										}catch(Exception e){
+											logger.error("", e); 
+										}
+									}
+									
+									if(cancelTaskOnTimeout){ 
+										logger.warn("cancle task[{}] due to time out, cost={}ms", future.getTaskId(), cost);
+										future.cancel(true);
+									}
+								}
+							}
+						}
+						scheduleBatch.waitTaskCompleted();
 						cleanCompletedFutures();
 						return;
-					}else if(overTime > 0){
-						for(TimedFuture<Result<E>> future : submitFutures){
-							if(!future.isDone() && !future.isCancelled()){
-								long cost = System.currentTimeMillis() - future.getStartTime(); 
-								if(cost >= overTime * SECOND_UNIT){
-									logger.warn("cancle task[{}] which has time out, cost={}ms", future.getTaskId(), cost);
-									future.cancel(true);
-								}else{
-									long leftTime = overTime - cost / SECOND_UNIT;
-									if(leftTime < overTime){
-										overTime = leftTime;
+					}else{ // 对每个任务单独算超时
+						while(true){
+							if(scheduleBatch.waitTaskCompleted(overTime)){ 
+								cleanCompletedFutures();
+								return;
+							}else{
+								Set<String> needNotWait = new HashSet<>(); // 已经完成的或者已经执行过handleTimeout的任务不需要再等
+								for(TimedFuture<Result<E>> future : submitFutures){
+									if(!future.isDone()){
+										long cost = System.currentTimeMillis() - future.getStartTime(); 
+										if(cost >= overTime * SECOND_UNIT){
+											if(!needNotWait.add(future.getTaskId())){
+												continue;
+											}
+											
+											try{
+												handleTimeout(cost);
+											}catch(Exception e){
+												logger.error("", e); 
+											}
+											
+											if(cancelTaskOnTimeout){ 
+												logger.warn("cancle task[{}] due to time out, cost={}ms", future.getTaskId(), cost);
+												future.cancel(true);
+											}
+										}else{
+											long leftTime = overTime - cost / SECOND_UNIT;
+											if(leftTime < overTime){
+												overTime = leftTime;
+											}
+										}
+									}else{
+										needNotWait.add(future.getTaskId());
 									}
+								}
+								
+								if(needNotWait.size() == submitFutures.size()){
+									scheduleBatch.waitTaskCompleted();
+									cleanCompletedFutures();
+									return;
 								}
 							}
 						}
 					}
 				}
 			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt(); // 保留中断请求，后面还要检测处理
+				Thread.currentThread().interrupt(); // 保留中断请求，后面检测处理
 			}
 		}
 
@@ -542,6 +629,10 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 		public boolean waitTaskCompleted(long taskOverTime) throws InterruptedException{
 			return completeLatch.await(taskOverTime, TimeUnit.SECONDS);
 		}
+ 
+		public void waitTaskCompleted() throws InterruptedException{
+			completeLatch.await();
+		}
 
 		public ScheduleBatch(boolean isSchedul, long schedulTimes, long schedulTime){
 			this.isSchedul = isSchedul;
@@ -663,4 +754,5 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 			}
 		}
 	}
+
 }

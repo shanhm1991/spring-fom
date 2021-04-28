@@ -56,8 +56,6 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		this.valueResolver = stringValueResolver;
 	}
 
-	// handleTimeOut TODO
-
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		Class<?> clazz = bean.getClass();
@@ -122,7 +120,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 				ObjectInputStream ois = new ObjectInputStream(input);){
 			HashMap<String, Object> map = (HashMap<String, Object>)ois.readObject();
 			
-			String cron = (String)map.remove(ScheduleConfig.CONF_CRON);
+			String cron = (String)map.remove(FomSchedule.CRON);
 			ScheduleConfig scheduleConfig = scheduleContext.getScheduleConfig();
 			scheduleConfig.setCron(cron);
 			
@@ -215,10 +213,10 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		if(!StringUtils.isEmpty(threadCoreString)){
 			threadCoreString = valueResolver.resolveStringValue(threadCoreString);
 			int threadCore = Integer.parseInt(threadCoreString);
-			if(ScheduleConfig.THREAD_MIN != threadCore){
+			if(FomSchedule.THREAD_CORE_DEFAULT != threadCore){
 				scheduleConfig.setThreadCore(threadCore);
 			}
-		}else if(ScheduleConfig.THREAD_MIN != fomSchedule.threadCore()){
+		}else if(FomSchedule.THREAD_CORE_DEFAULT != fomSchedule.threadCore()){
 			scheduleConfig.setThreadCore(fomSchedule.threadCore());
 		}
 
@@ -226,37 +224,55 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		if(!StringUtils.isEmpty(threadMaxString)){
 			threadMaxString = valueResolver.resolveStringValue(threadMaxString);
 			int threadMax = Integer.parseInt(threadMaxString);
-			if(ScheduleConfig.THREAD_MIN != threadMax){
+			if(FomSchedule.THREAD_CORE_DEFAULT != threadMax){
 				scheduleConfig.setThreadMax(threadMax);
 			}
-		}else if(ScheduleConfig.THREAD_MIN != fomSchedule.threadMax()){
+		}else if(FomSchedule.THREAD_CORE_DEFAULT != fomSchedule.threadMax()){
 			scheduleConfig.setThreadMax(fomSchedule.threadMax());
 		}
 
-		String queueSizeString = fomSchedule.queueSizeString();
-		if(StringUtils.isEmpty(queueSizeString) 
-				|| !scheduleConfig.setQueueSize(Integer.parseInt(valueResolver.resolveStringValue(queueSizeString)))){
+		String queueSize = fomSchedule.queueSizeString();
+		if(StringUtils.isEmpty(queueSize) 
+				|| !scheduleConfig.setQueueSize(Integer.parseInt(valueResolver.resolveStringValue(queueSize)))){
 			scheduleConfig.setQueueSize(fomSchedule.queueSize());
 		}
 
-		String threadAliveTimeString = fomSchedule.threadAliveTimeString(); 
-		if(StringUtils.isEmpty(threadAliveTimeString) 
-				|| !scheduleConfig.setThreadAliveTime(Integer.parseInt(valueResolver.resolveStringValue(threadAliveTimeString)))){
+		String threadAliveTime = fomSchedule.threadAliveTimeString(); 
+		if(StringUtils.isEmpty(threadAliveTime) 
+				|| !scheduleConfig.setThreadAliveTime(Integer.parseInt(valueResolver.resolveStringValue(threadAliveTime)))){
 			scheduleConfig.setThreadAliveTime(fomSchedule.threadAliveTime());
 		}
 
 		scheduleConfig.setRemark(valueResolver.resolveStringValue(fomSchedule.remark()));
 
-		String execOnLoadString = fomSchedule.execOnLoadString();
-		if(StringUtils.isEmpty(execOnLoadString) 
-				|| !scheduleConfig.setExecOnLoad(Boolean.parseBoolean(valueResolver.resolveStringValue(execOnLoadString)))){
+		String execOnLoad = fomSchedule.execOnLoadString();
+		if(StringUtils.isEmpty(execOnLoad) 
+				|| !scheduleConfig.setExecOnLoad(Boolean.parseBoolean(valueResolver.resolveStringValue(execOnLoad)))){
 			scheduleConfig.setExecOnLoad(fomSchedule.execOnLoad()); 
 		}
 
-		String taskOverTimeString = fomSchedule.taskOverTimeString();
-		if(StringUtils.isEmpty(taskOverTimeString) 
-				|| !scheduleConfig.setTaskOverTime(Integer.parseInt(valueResolver.resolveStringValue(taskOverTimeString)))){
+		String taskOverTime = fomSchedule.taskOverTimeString();
+		if(StringUtils.isEmpty(taskOverTime) 
+				|| !scheduleConfig.setTaskOverTime(Integer.parseInt(valueResolver.resolveStringValue(taskOverTime)))){
 			scheduleConfig.setTaskOverTime(fomSchedule.taskOverTime());
+		}
+		
+		String cancelTaskOnTimeout = fomSchedule.cancelTaskOnTimeoutString();
+		if(StringUtils.isEmpty(cancelTaskOnTimeout) 
+				|| !scheduleConfig.setCancelTaskOnTimeout(Boolean.parseBoolean(valueResolver.resolveStringValue(cancelTaskOnTimeout)))){
+			scheduleConfig.setCancelTaskOnTimeout(fomSchedule.cancelTaskOnTimeout());
+		}
+			
+		String detectTimeoutOnEachTask = fomSchedule.detectTimeoutOnEachTaskString();
+		if(StringUtils.isEmpty(detectTimeoutOnEachTask) 
+				|| !scheduleConfig.setDetectTimeoutOnEachTask(Boolean.parseBoolean(valueResolver.resolveStringValue(detectTimeoutOnEachTask)))){
+			scheduleConfig.setDetectTimeoutOnEachTask(fomSchedule.detectTimeoutOnEachTask());
+		}
+		
+		String ignoreExecRequestWhenRunning = fomSchedule.ignoreExecRequestWhenRunningString();
+		if(StringUtils.isEmpty(ignoreExecRequestWhenRunning) 
+				|| !scheduleConfig.setIgnoreExecRequestWhenRunning(Boolean.parseBoolean(valueResolver.resolveStringValue(ignoreExecRequestWhenRunning)))){
+			scheduleConfig.setIgnoreExecRequestWhenRunning(fomSchedule.ignoreExecRequestWhenRunning());
 		}
 	}
 

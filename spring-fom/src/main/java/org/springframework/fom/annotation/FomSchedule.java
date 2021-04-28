@@ -7,7 +7,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.core.annotation.AliasFor;
-import org.springframework.fom.ScheduleConfig;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,6 +19,131 @@ import org.springframework.stereotype.Component;
 @Documented
 @Component
 public @interface FomSchedule {
+	
+	/**
+	 * 定时计划：cron
+	 */
+	public static final String CRON = "cron";
+
+	/**
+	 * 定时计划：fixedRate
+	 */
+	public static final String FIXED_RATE = "fixedRate";
+
+	/**
+	 * 定时计划：fixedDelay
+	 */
+	public static final String FIXED_DELAY = "fixedDelay";
+
+	/**
+	 * 备注
+	 */
+	public static final String REMARK = "remark";
+
+	/**
+	 * 线程池任务队列长度
+	 */
+	public static final String QUEUE_SIZE = "queueSize";
+
+	/**
+	 * 线程池核心线程数
+	 */
+	public static final String THREAD_CORE = "threadCore";
+
+	/**
+	 * 线程池最大线程数
+	 */
+	public static final String THREAD_MAX = "threadMax";
+
+	/**
+	 * 线程池任务线程最长空闲时间
+	 */
+	public static final String THREAD_ALIVETIME = "threadAliveTime";
+
+	/**
+	 * 任务超时时间
+	 */
+	public static final String TASK_OVERTIME = "taskOverTime";
+
+	/**
+	 * 启动时是否执行
+	 */
+	public static final String EXEC_ONLOAN = "execOnLoad";
+	
+	/**
+	 * 是否中断超时的任务
+	 */
+	public static final String CANCEL_TASK_ONTIMEOUT = "cancelTaskOnTimeout";
+	
+	/**
+	 * 是否对每个任务单独检测超时
+	 */
+	public static final String DETECT_TIMEOUT_ONEACHTASK = "detectTimeoutOnEachTask";
+	
+	/**
+	 * Running状态时是否忽略执行请求
+	 */
+	public static final String IGNORE_EXECREQUEST_WHEN_RUNNING = "ignoreExecRequestWhenRunning";
+	
+	/**
+	 * 线程数：默认1
+	 */
+	public static final int THREAD_CORE_DEFAULT = 1;
+
+	/**
+	 * 线程空闲存活时间：default
+	 */
+	public static final int THREAD_ALIVETIME_DEFAULT = 20;
+
+	/**
+	 * 线程空闲存活时间：min
+	 */
+	public static final int THREAD_ALIVETIME_MIN = 1;
+
+	/**
+	 * 任务队列长度：default
+	 */
+	public static final int QUEUE_SIZE_DEFAULT = 1000;
+
+	/**
+	 * 任务队列长度：min
+	 */
+	public static final int QUEUE_SIZE_MIN = 1;
+
+	/**
+	 * 任务超时时间：default
+	 */
+	public static final int TASK_OVERTIME_DEFAULT = 0;
+
+	/**
+	 * 定时计划：fixedRate 默认值：0
+	 */
+	public static final int FIXED_RATE_DEFAULT = 0;
+
+	/**
+	 * 定时计划：fixedDelay 默认值：0
+	 */
+	public static final int FIXED_DELAY_DEFAULT = 0;
+
+	/**
+	 * 启动时默认不执行
+	 */
+	public static final boolean EXEC_ONLOAN_DEFAULT = false;
+	
+	/**
+	 * 默认不中断超时的任务
+	 */
+	public static final boolean CANCEL_TASK_ONTIMEOUT_DEFAULT = false;
+	
+	/**
+	 * 默认对每个任务单独检测超时
+	 */
+	public static final boolean DETECT_TIMEOUT_ONEACHTASK_DEFAULT = true;
+	
+	/**
+	 * 默认Running状态时忽略执行请求
+	 */
+	public static final boolean IGNORE_EXECREQUEST_WHEN_RUNNING_DEFAULT = true;
 
 	@AliasFor(annotation = Component.class)
 	String value() default "";
@@ -36,7 +160,7 @@ public @interface FomSchedule {
 	 * 任务执行计划：距上一次任务开始时的时间（单位：秒）
 	 * @return
 	 */
-	long fixedRate() default ScheduleConfig.FIXED_RATE_DEFAULT;
+	long fixedRate() default FIXED_RATE_DEFAULT;
 	
 	String fixedRateString() default "";
 
@@ -44,7 +168,7 @@ public @interface FomSchedule {
 	 * 任务执行计划：距上一次任务结束时的时间（单位：秒）
 	 * @return
 	 */
-	long fixedDelay() default ScheduleConfig.FIXED_DELAY_DEFAULT;
+	long fixedDelay() default FIXED_DELAY_DEFAULT;
 	
 	String fixedDelayString() default "";
 
@@ -52,7 +176,7 @@ public @interface FomSchedule {
 	 * 加载时是否启动任务，默认false
 	 * @return
 	 */
-	boolean execOnLoad() default ScheduleConfig.EXECONLOAN_DEFAULT;
+	boolean execOnLoad() default EXEC_ONLOAN_DEFAULT;
 	
 	String execOnLoadString() default "";
 
@@ -60,7 +184,7 @@ public @interface FomSchedule {
 	 * 线程池核心线程数：default=1，min=1，max=2147483647
 	 * @return
 	 */
-	int threadCore() default ScheduleConfig.THREAD_MIN;
+	int threadCore() default THREAD_CORE_DEFAULT;
 	
 	String threadCoreString() default "";
 
@@ -68,7 +192,7 @@ public @interface FomSchedule {
 	 * 线程池最大线程数，default=1，min=1，max=2147483647
 	 * @return
 	 */
-	int threadMax() default ScheduleConfig.THREAD_MIN;
+	int threadMax() default THREAD_CORE_DEFAULT;
 	
 	String threadMaxString() default "";
 
@@ -76,7 +200,7 @@ public @interface FomSchedule {
 	 * 任务线程空闲存活时间（单位：秒）：default=20，min=1，max=2147483647
 	 * @return
 	 */
-	int threadAliveTime() default ScheduleConfig.THREAD_ALIVETIME_DEFAULT;
+	int threadAliveTime() default THREAD_ALIVETIME_DEFAULT;
 	
 	String threadAliveTimeString() default "";
 
@@ -84,7 +208,7 @@ public @interface FomSchedule {
 	 * 任务队列长度，default=100，min=1，max=2147483647
 	 * @return
 	 */
-	int queueSize() default ScheduleConfig.QUEUE_SIZE_DEFAULT;
+	int queueSize() default QUEUE_SIZE_DEFAULT;
 	
 	String queueSizeString() default "";
 
@@ -92,8 +216,32 @@ public @interface FomSchedule {
 	 * 任务超时时间（单位：秒）：default=0（不限时），min=1，max=2147483647，
 	 * @return
 	 */
-	int taskOverTime() default ScheduleConfig.TASK_OVERTIME_DEFAULT;
+	int taskOverTime() default TASK_OVERTIME_DEFAULT;
 	
 	String taskOverTimeString() default "";
+	
+	/**
+	 * 是否中断超时的任务
+	 * @return
+	 */
+	boolean cancelTaskOnTimeout() default CANCEL_TASK_ONTIMEOUT_DEFAULT;
+	
+	String cancelTaskOnTimeoutString() default "";
+	
+	/**
+	 * 是否单独对每个任务检测超时
+	 * @return
+	 */
+	boolean detectTimeoutOnEachTask() default DETECT_TIMEOUT_ONEACHTASK_DEFAULT;
+	
+	String detectTimeoutOnEachTaskString() default "";
+	
+	/**
+	 * Running状态时是否忽略执行请求
+	 * @return
+	 */
+	boolean ignoreExecRequestWhenRunning() default IGNORE_EXECREQUEST_WHEN_RUNNING_DEFAULT;
+	
+	String ignoreExecRequestWhenRunningString() default "";
 
 }

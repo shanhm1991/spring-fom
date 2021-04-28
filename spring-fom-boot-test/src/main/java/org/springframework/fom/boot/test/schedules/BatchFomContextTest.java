@@ -15,7 +15,7 @@ import org.springframework.fom.boot.test.TestTask;
  * @author shanhm1991@163.com
  *
  */
-@FomSchedule(fixedRate = 15, threadCore = 4)
+@FomSchedule(cron = "0 0/1 * * * ?", threadCore = 2)
 public class BatchFomContextTest extends ScheduleContext<Long> {
 	
 	@Value("${conf.user:shanhm1991}@${conf.address:163.com}")
@@ -24,7 +24,7 @@ public class BatchFomContextTest extends ScheduleContext<Long> {
 	@Override
 	public List<TestTask> newSchedulTasks() throws Exception {
 		List<TestTask> tasks = new ArrayList<>();
-		for(int i = 0;i < 5; i++){
+		for(int i = 0;i < 8; i++){
 			tasks.add(new TestTask(i));
 		} 
 		return tasks;
