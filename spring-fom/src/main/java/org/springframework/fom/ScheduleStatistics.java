@@ -3,16 +3,21 @@ package org.springframework.fom;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
+
+import org.springframework.util.Assert;
 
 /**
  * 
@@ -54,8 +59,10 @@ public class ScheduleStatistics {
 	// map<day, queue>
 	private final Map<String, Queue<Result<?>>> successMap = new ConcurrentHashMap<>();
 
-	private final Map<String, Result<?>> failedMap = new ConcurrentHashMap<>();
+	// map<day, queue>
+	private final Map<String, Queue<Result<?>>> failedMap = new ConcurrentHashMap<>();
 
+	// 配置的线程安全委托给ConcurrentHashMap
 	private final Map<String, Integer> statConfigMap = new ConcurrentHashMap<>();
 
 	public ScheduleStatistics(){
@@ -69,26 +76,27 @@ public class ScheduleStatistics {
 
 	void record(Result<?> result){
 		if(result.isSuccess()){
-			recordSuccess(result);
+			record(result, success, successMap);
 		}else{
-			recordFailed(result); 
+			record(result, failed, failedMap); 
 		}
 	}
 
-	private void recordSuccess(Result<?> result){
-		success.incrementAndGet();
+	private void record(Result<?> result, AtomicLong count, Map<String, Queue<Result<?>>> statMap){
+		count.incrementAndGet();
+		
 		String day = new SimpleDateFormat("yyyy/MM/dd").format(System.currentTimeMillis());
-		Queue<Result<?>> queue = successMap.get(day); 
+		Queue<Result<?>> queue = statMap.get(day); 
 		// 尽量避免使用同步，虽然api中免不了也有同步的使用
 		if(queue == null){ 
 			queue = new ConcurrentLinkedQueue<>();	
-			Queue<Result<?>> exist = successMap.putIfAbsent(day, queue);
+			Queue<Result<?>> exist = statMap.putIfAbsent(day, queue);
 			if(exist == null){
 				// dayHasSaved由每天第一个放入queue的线程负责检测，不存在多线程访问场景  
 				// 虽然每次不是同一个线程访问，但一天只检测一次，线程安全问题暂且忽略
 				dayHasSaved.add(day);
 				while(dayHasSaved.size() > statConfigMap.get(STAT_DAY)){ 
-					successMap.remove(dayHasSaved.removeLast());
+					statMap.remove(dayHasSaved.removeLast());
 				}
 			}else{
 				queue = exist;
@@ -96,10 +104,20 @@ public class ScheduleStatistics {
 		}
 		queue.add(result);
 	}
-
-	private void recordFailed(Result<?> result){
-		failedMap.put(result.getTaskId(), result);
-		failed.incrementAndGet();
+	
+	public void setSaveDay(int saveDay){
+		Assert.isTrue(saveDay >= 1, "saveDay cannot be less than 1");
+		statConfigMap.put(STAT_DAY, saveDay);
+	}
+	
+	public boolean setLevel(String[] levelArray){
+		Assert.isTrue(levelArray != null && levelArray.length == 5, "invalid statLevel");
+		int level_1 = Integer.parseInt(levelArray[0]);
+		int level_2 = Integer.parseInt(levelArray[1]);
+		int level_3 = Integer.parseInt(levelArray[2]);
+		int level_4 = Integer.parseInt(levelArray[3]);
+		int level_5 = Integer.parseInt(levelArray[4]);
+		return setLevel(level_1, level_2, level_3, level_4, level_5);
 	}
 
 	public boolean setLevel(int lv1, int lv2, int lv3, int lv4, int lv5){
@@ -126,16 +144,16 @@ public class ScheduleStatistics {
 		}
 	}
 
-	AtomicLong getSuccess() {
-		return success;
+	long getSuccess() {
+		return success.get();
 	}
 
-	AtomicLong getFailed() {
-		return failed;
+	long getFailed() {
+		return failed.get();
 	}
 
 	// endDay yyyy/MM/dd
-	Map<String, Object> getSuccessStat(String endDay) throws ParseException {  
+	Map<String, Object> getSuccessStat(String statDay) throws ParseException {  
 		int level_1;
 		int level_2;
 		int level_3;
@@ -261,17 +279,17 @@ public class ScheduleStatistics {
 		
 		DateFormat dateFormata = new SimpleDateFormat("yyyy/MM/dd");
 		Calendar calendar = Calendar.getInstance();
-		if(endDay != null){
-			calendar.setTime(dateFormata.parse(endDay));
+		if(statDay != null){
+			calendar.setTime(dateFormata.parse(statDay));
 		}else{
-			endDay = dateFormata.format(System.currentTimeMillis());
+			statDay = dateFormata.format(System.currentTimeMillis());
 			calendar.setTime(new Date());
 		}
 		
 		// endDay 往前固定取十天
-		successMap.put("day", endDay);
+		successMap.put("day", statDay);
 		for(int i = 1; i <= 10; i++){
-			Map<String, Object> dayMap = statMap.get(endDay);
+			Map<String, Object> dayMap = statMap.get(statDay);
 			if(dayMap == null){
 				dayMap = new HashMap<>();
 				dayMap.put("successCount", 0);
@@ -284,13 +302,53 @@ public class ScheduleStatistics {
 				dayMap.put("level4", 0);
 				dayMap.put("level5", 0);
 				dayMap.put("level6", 0);
-				dayMap.put("day", endDay);
+				dayMap.put("day", statDay);
 			}
 			successMap.put("day" + i, dayMap);
 			
 			calendar.add(Calendar.DAY_OF_MONTH, -1);
-			endDay = dateFormata.format(calendar.getTime()); 
+			statDay = dateFormata.format(calendar.getTime()); 
 		}
 		return successMap;
+	}
+	
+	List<Map<String, String>> getFailedStat() {  
+		List<Map<String, String>> failes = new ArrayList<>();
+		
+		DateFormat dateFormata = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		Iterator<String> it = dayHasSaved.iterator();
+		while(it.hasNext()){
+			String day = it.next();
+			Queue<Result<?>> queue = failedMap.get(day);
+			if(queue == null){
+				continue;
+			}
+			
+			for(Result<?> result : queue){
+				Map<String, String> map = new HashMap<>();
+				map.put("id", result.getTaskId());
+				map.put("createTime", dateFormata.format(result.getCreateTime())); 
+				map.put("startTime", dateFormata.format(result.getStartTime()));
+				map.put("costTime", dateFormata.format(result.getCostTime()));
+				
+				if(result.getThrowable() == null){
+					map.put("cause", "null");
+				}else{
+					Throwable throwable = result.getThrowable();
+					Throwable cause = throwable;
+					while((cause = cause.getCause()) != null){
+						throwable = cause;
+					}
+					
+					StringBuilder builder = new StringBuilder(throwable.toString()).append(":<br>");
+					for(StackTraceElement stack : throwable.getStackTrace()){ 
+						builder.append(stack).append("<br>");
+					}
+					map.put("cause", builder.toString());
+				}
+				failes.add(map);
+			}
+		}
+		return failes;
 	}
 }

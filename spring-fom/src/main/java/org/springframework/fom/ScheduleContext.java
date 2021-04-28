@@ -586,7 +586,11 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 		return scheduleConfig.getActiveTasks();
 	}
 	
-	public Map<String, Object> getSuccessStat(String endDay) throws ParseException {  
-		return scheduleStatistics.getSuccessStat(endDay);
+	public Map<String, Object> getSuccessStat(String statDay) throws ParseException {  
+		return scheduleStatistics.getSuccessStat(statDay);
+	}
+	
+	public List<Map<String, String>> getFailedStat() {
+		return scheduleStatistics.getFailedStat();
 	}
 }

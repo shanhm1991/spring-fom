@@ -92,10 +92,23 @@ public class FomController {
 		return new Response<>(Response.SUCCESS, "", fomService.getActiveTasks(scheduleName));  
 	}
 	
+	@RequestMapping("/schedule/faileds")
+	@ResponseBody
+	public Response<List<Map<String, String>>> failedStat(String scheduleName) throws ParseException { 
+		return new Response<>(Response.SUCCESS, "", fomService.getFailedStat(scheduleName));  
+	}
+	
 	@RequestMapping("/schedule/success")
 	@ResponseBody
-	public Response<Map<String, Object>> successStat(String scheduleName, String endDay) throws ParseException { 
-		return new Response<>(Response.SUCCESS, "", fomService.getSuccessStat(scheduleName, endDay)); 
+	public Response<Map<String, Object>> successStat(String scheduleName, String statDay) throws ParseException { 
+		return new Response<>(Response.SUCCESS, "", fomService.getSuccessStat(scheduleName, statDay)); 
+	}
+	
+	@RequestMapping("/schedule/saveStatConf")
+	@ResponseBody
+	public Response<Map<String, Object>> saveStatConf(String scheduleName, 
+			String statDay, String statLevel, int saveDay) throws ParseException { 
+		return new Response<>(Response.SUCCESS, "", fomService.saveStatConf(scheduleName, statDay, statLevel, saveDay)); 
 	}
 	
 	/*************************Handlers************************************/

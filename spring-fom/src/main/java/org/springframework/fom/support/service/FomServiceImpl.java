@@ -14,6 +14,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.fom.ScheduleContext;
 import org.springframework.fom.ScheduleInfo;
+import org.springframework.fom.ScheduleStatistics;
 import org.springframework.fom.logging.LogLevel;
 import org.springframework.fom.logging.LoggerConfiguration;
 import org.springframework.fom.logging.LoggingSystem;
@@ -95,9 +96,7 @@ public class FomServiceImpl implements FomService, ApplicationContextAware{
 
 	@Override
 	public String getLoggerLevel(String scheduleName) {
-		if(loggingSystem == null){
-			throw new UnsupportedOperationException("No suitable logging system located");
-		}
+		Assert.notNull(loggingSystem, "No suitable logging system located");
 
 		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
 		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
@@ -135,9 +134,7 @@ public class FomServiceImpl implements FomService, ApplicationContextAware{
 	public void updateloggerLevel(
 			@NotBlank(message = "scheduleName cannot be empty.") String scheduleName,
 			@NotBlank(message = "levelName cannot be empty.") String levelName) {
-		if(loggingSystem == null){
-			throw new UnsupportedOperationException("No suitable logging system located");
-		}
+		Assert.notNull(loggingSystem, "No suitable logging system located");
 
 		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
 		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
@@ -193,9 +190,31 @@ public class FomServiceImpl implements FomService, ApplicationContextAware{
 	}
 
 	@Override
-	public Map<String, Object> getSuccessStat(String scheduleName, String endDay) throws ParseException { 
+	public Map<String, Object> getSuccessStat(String scheduleName, String statDay) throws ParseException { 
 		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
 		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
-		return schedule.getSuccessStat(endDay);
+		return schedule.getSuccessStat(statDay);
+	}
+
+	@Override
+	public Map<String, Object> saveStatConf(String scheduleName, String statDay, String statLevel, int saveDay) throws ParseException {
+		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
+		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
+		
+		Map<String, Object> successStat = null;
+		ScheduleStatistics scheduleStatistics = schedule.getScheduleStatistics();
+		if(scheduleStatistics.setLevel(statLevel.split(","))){
+			successStat = schedule.getSuccessStat(statDay);
+		}
+		
+		scheduleStatistics.setSaveDay(saveDay); 
+		return successStat;
+	}
+	
+	@Override
+	public List<Map<String, String>> getFailedStat(String scheduleName){
+		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
+		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
+		return schedule.getFailedStat();
 	}
 }

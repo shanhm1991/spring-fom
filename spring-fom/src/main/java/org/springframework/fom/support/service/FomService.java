@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -91,9 +92,31 @@ public interface FomService {
 	/**
 	 *  获取成功的任务统计
 	 * @param scheduleName
-	 * @param endDay
+	 * @param statDay
 	 * @return
 	 * @throws ParseException
 	 */
-	Map<String, Object> getSuccessStat(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName, String endDay) throws ParseException;
+	Map<String, Object> getSuccessStat(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName, String statDay) throws ParseException;
+	
+	/**
+	 * 保存统计配置
+	 * @param scheduleName
+	 * @param statDay
+	 * @param statLevel
+	 * @param saveDay
+	 * @return
+	 * @throws ParseException
+	 */
+	Map<String, Object> saveStatConf(
+			@NotBlank(message = "scheduleName cannot be empty.") String scheduleName, 
+			@NotBlank(message = "statDay cannot be empty.") String statDay, 
+			@NotBlank(message = "statLevel cannot be empty.") String statLevel, 
+			@Min(value=1, message="saveDay cannot be less than 1") int saveDay) throws ParseException;
+	
+	/**
+	 * 获取失败的任务统计
+	 * @param scheduleName
+	 * @return
+	 */
+	List<Map<String, String>> getFailedStat(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName);
 }
