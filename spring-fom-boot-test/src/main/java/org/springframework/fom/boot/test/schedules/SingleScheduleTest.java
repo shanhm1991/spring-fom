@@ -4,6 +4,7 @@ import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.fom.annotation.FomSchedule;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -19,11 +20,14 @@ public class SingleScheduleTest {
 	
 	private final Random random = new Random();
 	
-	@Scheduled(fixedDelay = 70)
+	@Value("${conf.user:shanhm1991}@${conf.address:163.com}")
+	private String email;
+	
+	@Scheduled(fixedDelay = 40)
 	public long test(){
 		long sleep = random.nextInt(5000);
 		try {
-			LOG.info("task executing ...");
+			LOG.info("task executing ..., email={}", email);
 			Thread.sleep(sleep);
 		} catch (InterruptedException e) {
 			LOG.info("task cancled due to interrupt.");

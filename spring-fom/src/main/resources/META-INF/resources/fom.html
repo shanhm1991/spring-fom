@@ -85,6 +85,10 @@ img {
 .detailTb tr td{
     padding-left: 5px;
 }
+
+table tr .onlyRead {
+    background-color: #F8F8F8
+}
 </style>
 </head>
 <body>
@@ -140,7 +144,12 @@ table = $("#fom").DataTable({
 					"defaultContent" : "<i class='layui-icon layui-icon-triangle-r boxbtn' title='expand'/></i>"
 				},
 				{
-					"data" : "scheduleName" 
+					"data" : "scheduleName"
+					/* , 
+					"render": function (data, type, row, meta){
+						$(this).attr('style', 'text-align: left;'); */
+						//$('td:eq(1)', row).attr('style', 'text-align: left;').html(data.scheduleName);  
+					//} 
 				},
 				{
 					"data" : "loadTime" 
@@ -219,10 +228,27 @@ table = $("#fom").DataTable({
 					},
 					"orderable" : false
 				}
-			]
+			],
+			"createdRow" : function(row, data, index) {
+				$('td', row).eq(1).css("text-align", "left");
+			}
 		
 		});
+		
+    $('#fom tbody').on('click', 'td.details-control', function() {
+    	var tr = $(this).closest('tr');
+		var row = table.row(tr);
+		if (row.child.isShown()) {
+			$(this).html("<i class='layui-icon layui-icon-triangle-r boxbtn' title='expand'/></i>");
+			row.child.hide();
+			tr.removeClass('shown');
+		} else {
+			$(this).html("<i class='layui-icon layui-icon-triangle-d boxbtn' title='collapse'/></i>");
+			row.child(format(row.data())).show();
+			tr.addClass('shown');
+		}
 	});
+});
 	
 	function initLogLevel(scheduleName, level){
 		var select = "<select schedule='" + scheduleName + "' onchange='changeLogLevel(this)' >";
@@ -250,6 +276,87 @@ table = $("#fom").DataTable({
 				"scheduleName" : scheduleName
 			}
 		}); 
+	}
+	
+	function format(data) {
+		var Tb = $('<table schedule="' + data.scheduleName + '" cellpadding="5" cellspacing="0" border="0" style="padding-left:50px; width:100%; text-align:left;" />');
+		var row1 = $('<tr><td style="width:10%;"><i class="layui-icon layui-icon-ok detailbtn" title="save" onclick="save(this)"/></i></td>'
+			       + '<td style="width:90%;"><i class="layui-icon layui-icon-edit detailbtn" title="edit" onclick="edit(this)"/></i></td></tr>');
+		Tb.append(row1);
+		
+		var config = data.config;
+		$.each(config, function(i, item){  
+			var Tr = $('<tr><td>' + item.key + '</td></tr>');
+			
+			var input = $('<input disabled="disabled" style="width:100%; padding:2px;"/>');
+			if(item.onlyRead){
+				$(Tr).attr("title", item.key + " is readOnly").addClass("readOnly");
+			}
+			
+			$(input).attr("oldValue", item.value);
+			input.val(item.value);
+			
+			var Td = $('<td/>');
+			Td.append(input);
+			Tr.append(Td);
+			Tb.append(Tr);
+        
+		}); 
+		return Tb;
+	}
+	
+	function edit(e) {
+		var Tb = $(e).parent().parent().parent();
+		Tb.find("tr").not(".readOnly").find("input").attr("disabled", false);
+	}
+	
+	function save(e) {
+		var Tb = $(e).parent().parent().parent();
+		var disabled = Tb.find("input").attr("disabled");
+		if (disabled == true || disabled == "disabled") {
+			return;
+		}
+
+		Tb.find("input").attr("disabled", true);
+		
+		var json = '{';
+		Tb.find("tr").each(function(i) {
+			if (i == 0) {
+				return;
+			}
+			
+			var key = $(this).find("td").eq(0).html();
+			
+			var input = $(this).find("input");
+			var value = $(input).val();
+			var oldValue = $(input).attr("oldValue");
+			if(value != oldValue){
+				json = json + '"' + key + '":"' + value + '",';
+			}
+		});
+		json = json.substr(0, json.length - 1) + '}';
+		if(json == '}'){
+			return;
+		}
+		
+		var scheduleName = Tb.attr("schedule");
+		$.ajax({
+			url : root + "/fom/schedule/config/save",
+			type : "post",
+			dataType : "json",
+			data : {
+				"scheduleName" : scheduleName,
+				"data" : json
+			},
+			success : function(data) {
+				if(data.code != 200){
+					TINY.box.show("failed, " + data.msg, 0, 0, 0, 0, 4);
+				}
+			},
+			error : function(XMLHttpRequest, textStatus, errorThrown) {
+				TINY.box.show(XMLHttpRequest.responseText, 0, 0, 0, 0, 4);
+			}
+		});
 	}
 	
 	function scheduleStart(e) {

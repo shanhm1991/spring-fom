@@ -2,8 +2,12 @@ package org.springframework.fom;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * 
@@ -40,7 +44,7 @@ public class ScheduleInfo {
 	
 	private final long active;
 	
-	private final Map<String, Object> config;
+	private final List<Conf> config = new ArrayList<>();
 	
 	private final String loggerName;
 	
@@ -68,8 +72,87 @@ public class ScheduleInfo {
 		this.waiting = scheduleConfig.getWaitings();
 		this.active = scheduleConfig.getActives();
 		
-		this.config = new HashMap<>();
-		config.putAll(scheduleConfig.getConfMap());
+		Map<String, Object> configMap = new HashMap<>();
+		configMap.putAll(scheduleConfig.getConfMap());
+		
+		Map<String, Object> internalConf = ScheduleConfig.getInternalConf();
+		Set<String> readOnlyKey = ScheduleConfig.getReadOnlyConf();
+		
+		// 内部配置
+		for(String key : internalConf.keySet()){
+			Object defaultVal = internalConf.get(key);
+			Object val = configMap.remove(key);
+			if(val == null){
+				if(readOnlyKey.contains(key)){
+					config.add(new Conf(key, defaultVal, true, true, true, false));
+				}else{
+					config.add(new Conf(key, defaultVal, true, false, true, false));
+				}
+			}else{
+				if(ScheduleConfig.CONF_CRON.equals(key)){
+					config.add(new Conf(key, scheduleConfig.getCronExpression(), true, false, false, false));
+				}else{
+					if(readOnlyKey.contains(key)){
+						config.add(new Conf(key, val, true, true, false, false));
+					}else{
+						config.add(new Conf(key, val, true, false, false, false));
+					}
+				}
+			}
+		}
+		
+		// 自定义配置 已经环境变量
+		for(Entry<String, Object> entry : configMap.entrySet()){
+			config.add(new Conf(entry.getKey(), entry.getValue(), false, false, false, false));
+		}
+	}
+	
+	public static class Conf{
+		
+		private boolean internal = false;
+		
+		private boolean onlyRead = false;
+		
+		private boolean envirment = false;
+		
+		private boolean defaultValue = false;
+		
+		private final String key;
+		
+		private final Object value;
+		
+		public Conf(String key, Object value, boolean internal, boolean onlyRead, boolean defaultValue, boolean envirment){
+			this.key = key;
+			this.value = value;
+			this.internal = internal;
+			this.onlyRead = onlyRead;
+			this.envirment = envirment;
+			this.defaultValue = defaultValue;
+		}
+		
+		public boolean isInternal() {
+			return internal;
+		}
+
+		public boolean isOnlyRead() {
+			return onlyRead;
+		}
+
+		public boolean isEnvirment() {
+			return envirment;
+		}
+
+		public boolean isDefaultValue() {
+			return defaultValue;
+		}
+
+		public String getKey() {
+			return key;
+		}
+
+		public Object getValue() {
+			return value;
+		}
 	}
 
 	public String getScheduleName() {
@@ -136,7 +219,7 @@ public class ScheduleInfo {
 		return stateImage;
 	}
 	
-	public Map<String, Object> getConfig() {
+	public List<Conf> getConfig() {
 		return config;
 	}
 

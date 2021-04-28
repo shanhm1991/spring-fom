@@ -1,5 +1,6 @@
 package org.springframework.fom;
 
+import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -124,19 +126,26 @@ public class ScheduleConfig {
 	/**
 	 * 内定配置，不允许直接put
 	 */
-	private static Set<String> internalConf = new HashSet<>();
+	private static Map<String, Object> internalConf = new TreeMap<>();
+
+	private static Set<String> readOnlyConf = new HashSet<>();
+
+	private final Map<String, List<Field>> envirmentConf = new HashMap<>();
 
 	static{
-		internalConf.add(CONF_CRON);
-		internalConf.add(CONF_FIXEDRATE);
-		internalConf.add(CONF_FIXEDDELAY);
-		internalConf.add(CONF_REMARK);
-		internalConf.add(CONF_QUEUESIZE);
-		internalConf.add(CONF_THREAD_CORE);
-		internalConf.add(CONF_THREAD_MAX);
-		internalConf.add(CONF_THREAD_ALIVETIME);
-		internalConf.add(CONF_TASK_OVERTIME);
-		internalConf.add(CONF_EXECONLOAN);
+		internalConf.put(CONF_CRON, "");
+		internalConf.put(CONF_FIXEDRATE, FIXED_RATE_DEFAULT);
+		internalConf.put(CONF_FIXEDDELAY, FIXED_DELAY_DEFAULT);
+		internalConf.put(CONF_REMARK, "");
+		internalConf.put(CONF_QUEUESIZE, QUEUE_SIZE_DEFAULT);
+		internalConf.put(CONF_THREAD_CORE, THREAD_MIN);
+		internalConf.put(CONF_THREAD_MAX, THREAD_MIN);
+		internalConf.put(CONF_THREAD_ALIVETIME, THREAD_ALIVETIME_DEFAULT);
+		internalConf.put(CONF_TASK_OVERTIME, TASK_OVERTIME_DEFAULT);
+		internalConf.put(CONF_EXECONLOAN, EXECONLOAN_DEFAULT);
+
+		readOnlyConf.add(CONF_QUEUESIZE);
+		readOnlyConf.add(CONF_EXECONLOAN);
 	}
 
 	private final ConcurrentHashMap<String, Object> confMap = new ConcurrentHashMap<>();
@@ -152,13 +161,32 @@ public class ScheduleConfig {
 		pool.allowCoreThreadTimeOut(true);
 	}
 
+	static Map<String, Object> getInternalConf() {
+		return internalConf;
+	}
+
+	static Set<String> getReadOnlyConf() {
+		return readOnlyConf;
+	}
+
+	Map<String, List<Field>> getEnvirment() {
+		return envirmentConf;
+	}
+
 	TimedExecutorPool getPool() {
 		return pool;
 	}
 
-	ConcurrentHashMap<String, Object> getConfMap() {
-		return confMap;
+	public Map<String, Object> getConfMap() {
+		Map<String, Object> map = new HashMap<>();
+		map.putAll(confMap);
+		map.put(CONF_CRON, getCronExpression());
+		return map;
 	} 
+	
+	Map<String, Object> getOriginalMap() {
+		return confMap;
+	}
 
 	public boolean containsKey(String key){
 		return confMap.containsKey(key);
@@ -210,7 +238,7 @@ public class ScheduleConfig {
 
 	// get/set of config  下面的set方法其实都有先获取后判断的线程安全问题，不过对于配置更新来说，这个影响可以忽略
 	public boolean set(String key, Object value) {
-		if(internalConf.contains(key)){
+		if(internalConf.containsKey(key)){
 			throw new UnsupportedOperationException("cannot override internal config:" + key);
 		}
 
@@ -424,7 +452,7 @@ public class ScheduleConfig {
 	public String toString() {
 		return confMap.toString();
 	}
-	
+
 	Map<String, String> getWaitingTasks(){
 		Map<String, String> map = new HashMap<>();
 		if(pool == null){
@@ -434,7 +462,7 @@ public class ScheduleConfig {
 		if(array == null || array.length == 0){
 			return map;
 		}
-		
+
 		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss SSS");
 		for(Object obj : array){
 			if(obj instanceof TimedFuture){
@@ -444,23 +472,23 @@ public class ScheduleConfig {
 		}
 		return map;
 	}
-	
+
 	List<Map<String, String>> getActiveTasks(){
 		List<Map<String, String>> list = new ArrayList<>();
 		if(pool == null){
 			return list;
 		}
-		
+
 		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		for(Entry<Task<?>, Thread> entry : pool.getActiveThreads().entrySet()){
 			Task<?> task = entry.getKey();
 			Thread thread = entry.getValue();
-			
+
 			Map<String, String> map = new HashMap<>();
 			map.put("id", task.getTaskId());
 			map.put("createTime", format.format(task.getCreateTime()));
 			map.put("startTime", format.format(task.getStartTime()));
-			
+
 			StringBuilder builder = new StringBuilder();
 			for(StackTraceElement stack : thread.getStackTrace()){
 				builder.append(stack).append("<br>");
@@ -470,4 +498,48 @@ public class ScheduleConfig {
 		}
 		return list;
 	}
+
+	// 没有做自我保护
+	Set<Field> saveConfig(HashMap<String, Object> map){
+		Set<Field> envirmentFieldChange = new HashSet<>();
+		for(Entry<String, Object> entry : map.entrySet()){
+			String key = entry.getKey();
+			Object value = entry.getValue();
+			if(internalConf.containsKey(key)){
+				saveInternalConfig(key, value);
+			}else{
+				List<Field> list = envirmentConf.get(key);
+				if(list != null){
+					envirmentFieldChange.addAll(list);
+				}
+				confMap.put(key, value);
+			}
+		}
+		return envirmentFieldChange;
+	}
+
+	// 简单处理下
+	private void saveInternalConfig(String key, Object value){
+		switch(key){
+		case CONF_CRON:
+			setCron(value.toString()); return;
+		case CONF_FIXEDRATE:
+			setFixedRate(Long.valueOf(value.toString())); return;
+		case CONF_FIXEDDELAY:
+			setFixedDelay(Long.valueOf(value.toString())); return;
+		case CONF_REMARK:
+			setRemark(value.toString()); return;
+		case CONF_THREAD_CORE:
+			setThreadCore(Integer.valueOf(value.toString())); return;
+		case CONF_THREAD_MAX:
+			setThreadMax(Integer.valueOf(value.toString())); return;
+		case CONF_THREAD_ALIVETIME:
+			setThreadAliveTime(Integer.valueOf(value.toString())); return;
+		case CONF_TASK_OVERTIME:
+			setTaskOverTime(Integer.valueOf(value.toString())); return;
+		default:
+			throw new UnsupportedOperationException("config[" + key + "] cannot be change");
+		}
+	}
+	
 }

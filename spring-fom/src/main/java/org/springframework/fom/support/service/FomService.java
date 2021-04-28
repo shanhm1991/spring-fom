@@ -1,6 +1,7 @@
 package org.springframework.fom.support.service;
 
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -119,4 +120,12 @@ public interface FomService {
 	 * @return
 	 */
 	List<Map<String, String>> getFailedStat(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName);
+	
+	/**
+	 * 更新配置 
+	 * @param scheduleName
+	 * @param map
+	 * @throws Exception 
+	 */
+	void saveConfig(String scheduleName, HashMap<String, Object> map) throws Exception;
 }

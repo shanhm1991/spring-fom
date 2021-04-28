@@ -1,5 +1,8 @@
 package org.springframework.fom.support.service;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +13,7 @@ import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotBlank;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.fom.ScheduleContext;
@@ -30,6 +34,12 @@ import org.springframework.validation.annotation.Validated;
  */
 @Validated
 public class FomServiceImpl implements FomService, ApplicationContextAware{
+	
+	@Value("${spring.fom.config.cache.enable:true}")
+	private boolean configCacheEnable;
+	
+	@Value("${spring.fom.config.cache.path:cache/schedule}")
+	private String configCachePath;
 
 	private ApplicationContext applicationContext;
 
@@ -216,5 +226,31 @@ public class FomServiceImpl implements FomService, ApplicationContextAware{
 		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
 		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
 		return schedule.getFailedStat();
+	}
+
+	@Override
+	public void saveConfig(String scheduleName, HashMap<String, Object> map) throws Exception {
+		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
+		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
+		
+		schedule.saveConfig(map, true);
+		
+		if(configCacheEnable){
+			File dir = new File(configCachePath);
+			if(!dir.exists() && !dir.mkdirs()){
+				return;
+			}
+			
+			File cacheFile = new File(dir.getPath() + File.separator + scheduleName + ".cache");
+			if(cacheFile.exists()){
+				cacheFile.delete();
+			}
+			
+			Map<String, Object> configMap = schedule.getScheduleConfig().getConfMap();
+			try(FileOutputStream out = new FileOutputStream(cacheFile);
+					ObjectOutputStream oos = new ObjectOutputStream(out)){
+				 oos.writeObject(configMap);
+			}
+		}
 	}
 }

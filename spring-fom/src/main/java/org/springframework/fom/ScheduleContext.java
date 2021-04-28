@@ -6,6 +6,7 @@ import static org.springframework.fom.State.SLEEPING;
 import static org.springframework.fom.State.STOPPED;
 import static org.springframework.fom.State.STOPPING;
 
+import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
@@ -23,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.fom.interceptor.ScheduleCompleter;
@@ -30,6 +33,7 @@ import org.springframework.fom.interceptor.ScheduleFactory;
 import org.springframework.fom.interceptor.ScheduleTerminator;
 import org.springframework.fom.support.Response;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * 
@@ -103,11 +107,11 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 	public long getLoadTime() {
 		return loadTime;
 	}
-	
+
 	public long getLastTime() {
 		return lastTime;
 	}
-	
+
 	public long getNextTime() {
 		return nextTime;
 	}
@@ -577,20 +581,86 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 			return taskNotCompleted.get();
 		}
 	}
-	
+
 	public Map<String, String> getWaitingTasks(){
 		return scheduleConfig.getWaitingTasks();
 	}
-	
+
 	public List<Map<String, String>> getActiveTasks(){
 		return scheduleConfig.getActiveTasks();
 	}
-	
+
 	public Map<String, Object> getSuccessStat(String statDay) throws ParseException {  
 		return scheduleStatistics.getSuccessStat(statDay);
 	}
-	
+
 	public List<Map<String, String>> getFailedStat() {
 		return scheduleStatistics.getFailedStat();
+	}
+
+	public void saveConfig(HashMap<String, Object> map, boolean valueEnvirment) throws NumberFormatException, IllegalArgumentException, IllegalAccessException{
+		Set<Field> envirmentChange = scheduleConfig.saveConfig(map);
+		if(!valueEnvirment || envirmentChange.isEmpty()){
+			return;
+		}
+		valueEnvirmentField(envirmentChange);
+	} 
+
+	void valueEnvirmentField(Set<Field> envirmentChange) throws NumberFormatException, IllegalArgumentException, IllegalAccessException{
+		// 修改当前schedul引用对应变量属性值，不保证线程安全 
+		for(Field field: envirmentChange){
+			Value value = field.getAnnotation(Value.class);
+			String expression = value.value();
+
+			List<String> list = FomBeanPostProcessor.getProperties(expression);
+			for(String ex : list){
+				int index = ex.indexOf(":");
+				if(index == -1){
+					index = ex.indexOf("}");
+				}
+				String key = ex.substring(2, index);
+
+				String confValue = scheduleConfig.get(key);
+				expression = expression.replace(ex, confValue);
+			}
+
+			ReflectionUtils.makeAccessible(field);
+			Object instance = this;
+			if(scheduleBeanName != null && applicationContext != null){
+				instance = applicationContext.getBean(scheduleBeanName);
+			}
+
+			switch(field.getGenericType().toString()){
+			case "short":
+			case "class java.lang.Short":
+				field.set(instance, Short.valueOf(expression));
+				break;
+			case "int":
+			case "class java.lang.Integer":
+				field.set(instance, Integer.valueOf(expression));
+				break;
+			case "long":
+			case "class java.lang.Long":
+				field.set(instance, Long.valueOf(expression));
+				break;
+			case "float":
+			case "class java.lang.Float":
+				field.set(instance, Float.valueOf(expression));
+				break;
+			case "double":
+			case "class java.lang.Double":
+				field.set(instance, Double.valueOf(expression));
+				break;
+			case "boolean":
+			case "class java.lang.Boolean":
+				field.set(instance, Boolean.valueOf(expression));
+				break;
+			case "class java.lang.String":
+				field.set(instance, expression);
+				break;
+			default:
+				throw new UnsupportedOperationException("value set failed：" + instance.getClass().getName() + "." + field.getName());
+			}
+		}
 	}
 }

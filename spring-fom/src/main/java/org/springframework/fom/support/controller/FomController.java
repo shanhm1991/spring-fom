@@ -1,6 +1,7 @@
 package org.springframework.fom.support.controller;
 
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +23,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * 
@@ -109,6 +112,15 @@ public class FomController {
 	public Response<Map<String, Object>> saveStatConf(String scheduleName, 
 			String statDay, String statLevel, int saveDay) throws ParseException { 
 		return new Response<>(Response.SUCCESS, "", fomService.saveStatConf(scheduleName, statDay, statLevel, saveDay)); 
+	}
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping("/schedule/config/save")
+	@ResponseBody
+	public Response<Void> saveConfig(String scheduleName, String data) throws Exception {  
+		HashMap<String, Object> configMap = (HashMap<String, Object>) new ObjectMapper().readValue(data, HashMap.class);
+		fomService.saveConfig(scheduleName, configMap);
+		return new Response<>(Response.SUCCESS, ""); 
 	}
 	
 	/*************************Handlers************************************/

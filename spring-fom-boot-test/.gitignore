@@ -3,6 +3,7 @@
 /target/
 /bin/
 /log/
+/cache/
 .project
 .classpath
 .checkstyle

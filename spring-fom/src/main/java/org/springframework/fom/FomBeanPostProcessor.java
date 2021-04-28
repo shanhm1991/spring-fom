@@ -1,11 +1,18 @@
 package org.springframework.fom;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-//import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -14,6 +21,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.context.ApplicationContextException;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.fom.annotation.FomSchedule;
 import org.springframework.fom.interceptor.ScheduleProxy;
@@ -27,6 +35,12 @@ import org.springframework.util.StringValueResolver;
  *
  */
 public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware, EmbeddedValueResolverAware {
+	
+	@Value("${spring.fom.config.cache.enable:true}")
+	private boolean configCacheEnable;
+	
+	@Value("${spring.fom.config.cache.path:cache/schedule}")
+	private String configCachePath;
 
 	private BeanFactory beanFactory;
 
@@ -44,7 +58,6 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 
 	// handleTimeOut TODO
 
-	@SuppressWarnings("rawtypes")
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		Class<?> clazz = bean.getClass();
@@ -52,7 +65,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 			return bean;
 		}
 
-		ScheduleContext scheduleContext = (ScheduleContext)bean;
+		ScheduleContext<?> scheduleContext = (ScheduleContext<?>)bean;
 
 		String scheduleBeanName = scheduleContext.getScheduleBeanName();
 		Object scheduleBean = null;
@@ -79,6 +92,12 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		}else{ // xml配置
 
 		}
+		
+		try {
+			loadCache(beanName, scheduleContext);
+		} catch (Exception e) {
+			throw new ApplicationContextException("", e);
+		}
 		scheduleConfig.reset();
 
 		Enhancer enhancer = new Enhancer();
@@ -86,6 +105,37 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		enhancer.setCallback(new ScheduleProxy(beanName, scheduleContext, fomSchedule, scheduleBean));
 		Object obj = enhancer.create();
 		return obj;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void loadCache(String beanName, ScheduleContext<?> scheduleContext) throws Exception{ 
+		if(!configCacheEnable){
+			return;
+		}
+		
+		File file = new File(configCachePath + File.separator + beanName + ".cache");
+		if(!file.exists()){
+			return;
+		}
+		
+		try(FileInputStream input = new FileInputStream(file);
+				ObjectInputStream ois = new ObjectInputStream(input);){
+			HashMap<String, Object> map = (HashMap<String, Object>)ois.readObject();
+			
+			String cron = (String)map.remove(ScheduleConfig.CONF_CRON);
+			ScheduleConfig scheduleConfig = scheduleContext.getScheduleConfig();
+			scheduleConfig.setCron(cron);
+			
+			Map<String, Object> originalMap = scheduleConfig.getOriginalMap();
+			originalMap.putAll(map);
+			
+			Collection<List<Field>> fileds = scheduleConfig.getEnvirment().values();
+			Set<Field> envirmentField = new HashSet<>();
+			for(List<Field> list : fileds){
+				envirmentField.addAll(list);
+			}
+			scheduleContext.valueEnvirmentField(envirmentField);
+		}
 	}
 
 	// 只要获取到一个就结束
@@ -218,6 +268,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 			fields = scheduleContext.getClass().getDeclaredFields();
 		}
 
+		Map<String, List<Field>> envirment = scheduleConfig.getEnvirment();
 		for(Field field : fields){
 			Value value = field.getAnnotation(Value.class);
 			if(value != null){
@@ -229,13 +280,22 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 						index = ex.indexOf("}");
 					}
 					String key = ex.substring(2, index);
+					
+					// 一个环境变量可能赋值给多个Field，一个Field也可能被多个环境变量赋值
+					List<Field> fieldList = envirment.get(key);
+					if(fieldList == null){
+						fieldList = new ArrayList<>();
+						envirment.put(key, fieldList);
+					}
+					fieldList.add(field);
+					
 					scheduleConfig.set(key, confValue);
 				}
 			}
 		}
 	}
 
-	private List<String> getProperties(String expression){
+	static List<String> getProperties(String expression){
 		List<String> list = new ArrayList<>();
 		int begin;
 		int end = 0;
