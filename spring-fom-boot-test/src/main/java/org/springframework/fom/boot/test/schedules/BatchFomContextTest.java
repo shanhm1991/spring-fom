@@ -15,7 +15,7 @@ import org.springframework.fom.boot.test.TestTask;
  * @author shanhm1991@163.com
  *
  */
-@FomSchedule(cron = "0 0/1 * * * ?", threadCore = 2)
+@FomSchedule(cron = "0/30 * * * * ?", threadCore = 2)
 public class BatchFomContextTest extends ScheduleContext<Long> {
 	
 	@Value("${conf.user:shanhm1991}@${conf.address:163.com}")

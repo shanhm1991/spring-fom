@@ -1,7 +1,6 @@
 package org.springframework.fom.boot.test;
 
-import java.util.Random;
-
+import org.apache.commons.lang3.RandomUtils;
 import org.springframework.fom.Task;
 
 /**
@@ -11,18 +10,16 @@ import org.springframework.fom.Task;
  */
 public class TestTask extends Task<Long> {
 	
-	private final Random random = new Random();
-	
 	public TestTask(int i) {
 		super("TestTask-" + i);
 	}
 
 	@Override
 	public Long exec() { 
-		long sleep = random.nextInt(8000);
+		long sleep = RandomUtils.nextLong(3000, 6000);
 		try {
 			logger.info("task executing ...");
-			Thread.sleep(4000);
+			Thread.sleep(sleep);
 		} catch (InterruptedException e) {
 			logger.info("task cancled due to interrupt.");
 			return sleep;

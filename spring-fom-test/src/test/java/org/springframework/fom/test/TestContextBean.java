@@ -1,4 +1,4 @@
-package org.springframework.fom.boot.test;
+package org.springframework.fom.test;
 
 import java.util.ArrayList;
 import java.util.Collection;

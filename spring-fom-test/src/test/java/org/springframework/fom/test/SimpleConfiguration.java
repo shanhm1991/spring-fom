@@ -1,4 +1,4 @@
-package org.springframework.fom.boot.test;
+package org.springframework.fom.test;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +11,7 @@ import org.springframework.fom.annotation.EnableFom;
  *
  */
 @EnableFom
-@ComponentScan("org.springframework.fom.boot.test")
+@ComponentScan("org.springframework.fom.test")
 @PropertySource("conf/conf.properties")
 @Configuration
 public class SimpleConfiguration {

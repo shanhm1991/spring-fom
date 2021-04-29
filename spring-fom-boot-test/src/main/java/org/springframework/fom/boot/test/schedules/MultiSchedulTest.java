@@ -16,7 +16,7 @@ import org.springframework.scheduling.annotation.Scheduled;
  * @author shanhm1991@163.com
  *
  */
-@FomSchedule(remark = "定时多任务测试", cron = "0/30 * * * * ?", execOnLoad = true, threadCore = 2, taskOverTime = 4)
+@FomSchedule(remark = "定时多任务测试", cron = "0 0/10 * * * ?", execOnLoad = true, threadCore = 2, taskOverTime = 4)
 public class MultiSchedulTest implements ScheduleCompleter<Object> {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(MultiSchedulTest.class);

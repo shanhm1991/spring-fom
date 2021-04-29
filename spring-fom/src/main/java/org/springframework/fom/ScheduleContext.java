@@ -389,7 +389,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 			boolean detectTimeoutOnEachTask = scheduleConfig.getDetectTimeoutOnEachTask();
 			boolean cancelTaskOnTimeout = scheduleConfig.getCancelTaskOnTimeout();
 			try {
-				if(FomSchedule.TASK_OVERTIME_DEFAULT == overTime){
+				if(FomSchedule.TASK_OVERTIME_DEFAULT == overTime){ // 默认不检测超时
 					scheduleBatch.waitTaskCompleted();
 					cleanCompletedFutures();
 				}else{
@@ -397,54 +397,69 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 						if(!scheduleBatch.waitTaskCompleted(overTime)){ 
 							for(TimedFuture<Result<E>> future : submitFutures){
 								if(!future.isDone()){
-									long cost = System.currentTimeMillis() - future.getStartTime(); 
-									if(cost >= overTime * SECOND_UNIT){
-										try{
-											handleTimeout(cost);
-										}catch(Exception e){
-											logger.error("", e); 
-										}
-									}
-									
-									if(cancelTaskOnTimeout){ 
-										logger.warn("cancle task[{}] due to time out, cost={}ms", future.getTaskId(), cost);
-										future.cancel(true);
-									}
-								}
-							}
-						}
-						scheduleBatch.waitTaskCompleted();
-						cleanCompletedFutures();
-						return;
-					}else{ // 对每个任务单独算超时
-						while(true){
-							if(scheduleBatch.waitTaskCompleted(overTime)){ 
-								cleanCompletedFutures();
-								return;
-							}else{
-								Set<String> needNotWait = new HashSet<>(); // 已经完成的或者已经执行过handleTimeout的任务不需要再等
-								for(TimedFuture<Result<E>> future : submitFutures){
-									if(!future.isDone()){
+									long startTime = future.getStartTime();  
+									if(startTime > 0){
 										long cost = System.currentTimeMillis() - future.getStartTime(); 
 										if(cost >= overTime * SECOND_UNIT){
-											if(!needNotWait.add(future.getTaskId())){
-												continue;
-											}
-											
 											try{
 												handleTimeout(cost);
 											}catch(Exception e){
 												logger.error("", e); 
 											}
-											
-											if(cancelTaskOnTimeout){ 
-												logger.warn("cancle task[{}] due to time out, cost={}ms", future.getTaskId(), cost);
-												future.cancel(true);
-											}
-										}else{
-											long leftTime = overTime - cost / SECOND_UNIT;
-											if(leftTime < overTime){
-												overTime = leftTime;
+										}
+										
+										if(cancelTaskOnTimeout){ 
+											logger.warn("cancle task[{}] due to time out, cost={}ms", future.getTaskId(), cost);
+											future.cancel(true);
+										}
+									}else{
+										logger.warn("cancle task[{}] which has not started, cost={}ms", future.getTaskId(), 0);
+										future.cancel(true);
+									}
+								}
+							}
+						}
+						
+						scheduleBatch.waitTaskCompleted();
+						cleanCompletedFutures();
+						return;
+					}else{ // 对每个任务单独检测超时
+						long checkTime = overTime;
+						logger.error("checkTime" + checkTime); 
+						while(true){
+							if(scheduleBatch.waitTaskCompleted(checkTime)){ 
+								cleanCompletedFutures();
+								return;
+							}else{
+								Set<String> needNotWait = new HashSet<>(); 
+								boolean checkTimeReset = false;
+								for(TimedFuture<Result<E>> future : submitFutures){
+									if(!future.isDone()){
+										long startTime = future.getStartTime();  
+										if(startTime > 0){ // startTime = 0 表示任务还没启动
+											long cost = System.currentTimeMillis() - startTime; 
+											if(cost >= checkTime * SECOND_UNIT){ 
+												if(!needNotWait.add(future.getTaskId())){
+													continue;
+												}
+												
+												try{
+													handleTimeout(cost);
+												}catch(Exception e){
+													logger.error("", e); 
+												}
+												
+												if(cancelTaskOnTimeout){ 
+													logger.warn("cancle task[{}] due to time out, cost={}ms", future.getTaskId(), cost);
+													future.cancel(true);
+												}
+											}else{
+												// 获取一个最近要超时的任务时间
+												long leftTime = checkTime - cost / SECOND_UNIT;
+												if(leftTime < checkTime){
+													checkTime = leftTime;
+													checkTimeReset = true;
+												}
 											}
 										}
 									}else{
@@ -452,6 +467,12 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 									}
 								}
 								
+								// 如果检查一轮之后，checkTime没有被重置，则恢复成overTime
+								if(!checkTimeReset && checkTime != overTime){ 
+									checkTime = overTime;
+								}
+								
+								// 已经完成的，或者已经执行过handleTimeout的任务不需要再等
 								if(needNotWait.size() == submitFutures.size()){
 									scheduleBatch.waitTaskCompleted();
 									cleanCompletedFutures();

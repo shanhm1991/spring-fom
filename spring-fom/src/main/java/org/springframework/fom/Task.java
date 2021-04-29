@@ -21,12 +21,13 @@ public abstract class Task<E> implements Callable<Result<E>> {
 
 	private final long createTime;
 
-	private long startTime;
+	// 任务线程自己设置，其它线程读取
+	private volatile long startTime;
 
-	// set by ScheduleContext
+	// 轮询线程设置，任务线程读取
 	private volatile ScheduleContext<E> scheduleContext;
 
-	// set by ScheduleContext
+	// 轮询线程设置，任务线程读取
 	private volatile ScheduleBatch<E> scheduleBatch;
 
 	public Task(String id) { 

@@ -13,14 +13,15 @@ import org.springframework.fom.boot.test.TestTask;
 import org.springframework.fom.interceptor.ScheduleCompleter;
 import org.springframework.fom.interceptor.ScheduleFactory;
 import org.springframework.fom.interceptor.ScheduleTerminator;
+import org.springframework.fom.interceptor.TaskTimeoutHandler;
 
 /**
  * 
  * @author shanhm1991@163.com
  *
  */
-@FomSchedule(fixedDelay = 20, execOnLoad = true, threadCore = 4, remark = "定时批任务测试")
-public class BatchSchedulTest implements ScheduleFactory<Long>, ScheduleCompleter<Long>, ScheduleTerminator {
+@FomSchedule(fixedDelay = 20, execOnLoad = true, threadCore = 4, taskOverTime = 4, cancelTaskOnTimeout = true, detectTimeoutOnEachTask = false, remark = "定时批任务测试")
+public class BatchSchedulTest implements ScheduleFactory<Long>, ScheduleCompleter<Long>, ScheduleTerminator, TaskTimeoutHandler {
 
 	private static final Logger LOG = LoggerFactory.getLogger(BatchSchedulTest.class);
 	
@@ -43,5 +44,10 @@ public class BatchSchedulTest implements ScheduleFactory<Long>, ScheduleComplete
 	public void onScheduleTerminate(long schedulTimes, long lastTime) {
 		String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(lastTime);
 		LOG.info("任务关闭，共执行{}次任务，最后一次执行时间为{}", schedulTimes, date);
+	}
+
+	@Override
+	public void handleTimeout(long costTime) {
+		LOG.info("处理超时任务，已经耗时{}ms", costTime); 
 	}
 }

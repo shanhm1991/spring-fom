@@ -36,12 +36,6 @@ import org.springframework.util.StringValueResolver;
  */
 public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware, EmbeddedValueResolverAware {
 	
-	@Value("${spring.fom.config.cache.enable:true}")
-	private boolean configCacheEnable;
-	
-	@Value("${spring.fom.config.cache.path:cache/schedule}")
-	private String configCachePath;
-
 	private BeanFactory beanFactory;
 
 	private StringValueResolver valueResolver;
@@ -107,10 +101,11 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 	
 	@SuppressWarnings("unchecked")
 	private void loadCache(String beanName, ScheduleContext<?> scheduleContext) throws Exception{ 
-		if(!configCacheEnable){
+		if(!Boolean.valueOf(valueResolver.resolveStringValue("${spring.fom.config.cache.enable:true}"))){
 			return;
 		}
-		
+
+		String configCachePath = valueResolver.resolveStringValue("${spring.fom.config.cache.path:cache/schedule}");
 		File file = new File(configCachePath + File.separator + beanName + ".cache");
 		if(!file.exists()){
 			return;

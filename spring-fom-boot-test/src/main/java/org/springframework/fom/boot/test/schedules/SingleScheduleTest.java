@@ -23,7 +23,7 @@ public class SingleScheduleTest {
 	@Value("${conf.user:shanhm1991}@${conf.address:163.com}")
 	private String email;
 	
-	@Scheduled(fixedRate = 40)
+	@Scheduled(fixedRate = 30)
 	public long test(){
 		long sleep = random.nextInt(5000);
 		try {
