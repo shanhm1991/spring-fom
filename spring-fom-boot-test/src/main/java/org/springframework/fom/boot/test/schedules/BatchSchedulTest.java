@@ -20,7 +20,7 @@ import org.springframework.fom.interceptor.TaskTimeoutHandler;
  * @author shanhm1991@163.com
  *
  */
-@FomSchedule(fixedDelay = 20, execOnLoad = true, threadCore = 4, taskOverTime = 4, cancelTaskOnTimeout = true, detectTimeoutOnEachTask = false, remark = "定时批任务测试")
+@FomSchedule(cron = "0/30 * * * * ?", threadCore = 4, taskOverTime = 4, cancelTaskOnTimeout = true, remark = "定时批任务测试")
 public class BatchSchedulTest implements ScheduleFactory<Long>, ScheduleCompleter<Long>, ScheduleTerminator, TaskTimeoutHandler {
 
 	private static final Logger LOG = LoggerFactory.getLogger(BatchSchedulTest.class);
@@ -28,7 +28,7 @@ public class BatchSchedulTest implements ScheduleFactory<Long>, ScheduleComplete
 	@Override
 	public Collection<TestTask> newSchedulTasks() throws Exception {
 		List<TestTask> list = new ArrayList<>();
-		for(int i = 8; i < 18; i++){
+		for(int i = 1; i <= 10; i++){
 			list.add(new TestTask(i));
 		}
 		return list;

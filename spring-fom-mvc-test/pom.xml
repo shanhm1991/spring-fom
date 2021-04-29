@@ -37,7 +37,7 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.github.shanhm1991</groupId>
+			<groupId>io.github.shanhm1991</groupId>
 			<artifactId>spring-fom</artifactId>
 			<version>2.1.1</version>
 		</dependency>

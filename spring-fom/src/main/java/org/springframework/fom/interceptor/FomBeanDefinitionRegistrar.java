@@ -43,6 +43,10 @@ public class FomBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar
 			// 注册FomAdvice
 			RootBeanDefinition fomAdvice = new RootBeanDefinition(FomAdvice.class);
 			registry.registerBeanDefinition("fomAdvice", fomAdvice); 
+			
+			// 注册FomServiceImpl
+			RootBeanDefinition fomServiceImpl = new RootBeanDefinition(FomServiceImpl.class);
+			registry.registerBeanDefinition("fomService", fomServiceImpl); 
 		}
 
 		// 注册SchedulePostProcessor
@@ -52,10 +56,6 @@ public class FomBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar
 		// 注册FomScheduleStarter
 		RootBeanDefinition fomScheduleStarter = new RootBeanDefinition(FomScheduleStarter.class);
 		registry.registerBeanDefinition("fomScheduleStarter", fomScheduleStarter); 
-
-		// 注册FomServiceImpl
-		RootBeanDefinition fomServiceImpl = new RootBeanDefinition(FomServiceImpl.class);
-		registry.registerBeanDefinition("fomService", fomServiceImpl); 
 
 		// 注册FomBeanDefinition
 		String[] beanNames = registry.getBeanDefinitionNames();

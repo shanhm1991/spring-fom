@@ -269,6 +269,12 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 				|| !scheduleConfig.setIgnoreExecRequestWhenRunning(Boolean.parseBoolean(valueResolver.resolveStringValue(ignoreExecRequestWhenRunning)))){
 			scheduleConfig.setIgnoreExecRequestWhenRunning(fomSchedule.ignoreExecRequestWhenRunning());
 		}
+		
+		String enableTaskConflict = fomSchedule.enableTaskConflictString();
+		if(StringUtils.isEmpty(enableTaskConflict) 
+				|| !scheduleConfig.setEnableTaskConflict(Boolean.parseBoolean(valueResolver.resolveStringValue(enableTaskConflict)))){
+			scheduleConfig.setEnableTaskConflict(fomSchedule.enableTaskConflict());
+		}
 	}
 
 	private void setValue(ScheduleConfig scheduleConfig, ScheduleContext<?> scheduleContext, Object scheduleBean){

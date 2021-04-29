@@ -71,6 +71,11 @@ public @interface FomSchedule {
 	public static final String EXEC_ONLOAN = "execOnLoad";
 	
 	/**
+	 * 是否检测任务冲突
+	 */
+	public static final String ENABLE_TASK_CONFLICT = "enableTaskConflict";
+	
+	/**
 	 * 是否中断超时的任务
 	 */
 	public static final String CANCEL_TASK_ONTIMEOUT = "cancelTaskOnTimeout";
@@ -91,19 +96,14 @@ public @interface FomSchedule {
 	public static final int THREAD_CORE_DEFAULT = 1;
 
 	/**
-	 * 线程空闲存活时间：default
+	 * 线程空闲存活时间：默认1
 	 */
-	public static final int THREAD_ALIVETIME_DEFAULT = 20;
+	public static final int THREAD_ALIVETIME_DEFAULT = 1;
 
 	/**
-	 * 线程空闲存活时间：min
+	 * 任务队列长度：默认256
 	 */
-	public static final int THREAD_ALIVETIME_MIN = 1;
-
-	/**
-	 * 任务队列长度：default
-	 */
-	public static final int QUEUE_SIZE_DEFAULT = 1000;
+	public static final int QUEUE_SIZE_DEFAULT = 256;
 
 	/**
 	 * 任务队列长度：min
@@ -129,6 +129,11 @@ public @interface FomSchedule {
 	 * 启动时默认不执行
 	 */
 	public static final boolean EXEC_ONLOAN_DEFAULT = false;
+	
+	/**
+	 * 默认不检测任务冲突
+	 */
+	public static final boolean ENABLE_TASK_CONFLICT_DEFAULT = false;
 	
 	/**
 	 * 默认不中断超时的任务
@@ -197,7 +202,7 @@ public @interface FomSchedule {
 	String threadMaxString() default "";
 
 	/**
-	 * 任务线程空闲存活时间（单位：秒）：default=20，min=1，max=2147483647
+	 * 任务线程空闲存活时间（单位：秒）：default=1，min=1，max=2147483647
 	 * @return
 	 */
 	int threadAliveTime() default THREAD_ALIVETIME_DEFAULT;
@@ -205,7 +210,7 @@ public @interface FomSchedule {
 	String threadAliveTimeString() default "";
 
 	/**
-	 * 任务队列长度，default=100，min=1，max=2147483647
+	 * 任务队列长度，default=256，min=1，max=2147483647
 	 * @return
 	 */
 	int queueSize() default QUEUE_SIZE_DEFAULT;
@@ -219,6 +224,14 @@ public @interface FomSchedule {
 	int taskOverTime() default TASK_OVERTIME_DEFAULT;
 	
 	String taskOverTimeString() default "";
+	
+	/**
+	 * 是否检测任务冲突
+	 * @return
+	 */
+	boolean enableTaskConflict() default ENABLE_TASK_CONFLICT_DEFAULT; 
+	
+	String enableTaskConflictString() default "";
 	
 	/**
 	 * 是否中断超时的任务
