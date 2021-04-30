@@ -29,6 +29,11 @@ public abstract class Task<E> implements Callable<Result<E>> {
 
 	// 轮询线程设置，任务线程读取
 	private volatile ScheduleBatch<E> scheduleBatch;
+	
+	public Task(){
+		this.id = Thread.currentThread().getName() + "-Task";
+		this.createTime = System.currentTimeMillis();
+	}
 
 	public Task(String id) { 
 		this.id = id;
@@ -50,7 +55,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 				scheduleBatch.addResult(result); 
 				scheduleContext.checkScheduleComplete(scheduleBatch);
 			}
-			scheduleContext.getScheduleStatistics().record(result); 
+			scheduleContext.record(result); 
 		}
 
 		if(result.isSuccess()){

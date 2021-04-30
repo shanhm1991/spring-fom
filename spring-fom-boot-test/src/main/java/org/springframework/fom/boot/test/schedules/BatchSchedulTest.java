@@ -47,7 +47,7 @@ public class BatchSchedulTest implements ScheduleFactory<Long>, ScheduleComplete
 	}
 
 	@Override
-	public void handleTimeout(long costTime) {
-		LOG.info("处理超时任务，已经耗时{}ms", costTime); 
+	public void handleTimeout(String taskId, long costTime) {
+		LOG.info("处理超时任务{}，已经耗时{}ms", taskId, costTime); 
 	}
 }

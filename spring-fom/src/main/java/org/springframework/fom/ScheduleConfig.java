@@ -28,10 +28,11 @@ import org.springframework.util.StringUtils;
  *
  */
 public class ScheduleConfig {
-	
+
 	// 内定配置，不允许直接put
 	private static Map<String, Object> internalConf = new TreeMap<>();
 
+	// 暂时不用，所有配置都可以修改，只是生效时机不同
 	private static Set<String> readOnlyConf = new HashSet<>();
 
 	private final Map<String, List<Field>> envirmentConf = new HashMap<>();
@@ -47,13 +48,14 @@ public class ScheduleConfig {
 		internalConf.put(FomSchedule.THREAD_ALIVETIME, FomSchedule.THREAD_ALIVETIME_DEFAULT);
 		internalConf.put(FomSchedule.TASK_OVERTIME, FomSchedule.TASK_OVERTIME_DEFAULT);
 		internalConf.put(FomSchedule.EXEC_ONLOAN, FomSchedule.EXEC_ONLOAN_DEFAULT);
+		internalConf.put(FomSchedule.ENABLE_TASKRESULT_STAT, FomSchedule.ENABLE_TASKRESULT_STAT_DEFAULT); 
 		internalConf.put(FomSchedule.ENABLE_TASK_CONFLICT, FomSchedule.ENABLE_TASK_CONFLICT_DEFAULT);
 		internalConf.put(FomSchedule.CANCEL_TASK_ONTIMEOUT, FomSchedule.CANCEL_TASK_ONTIMEOUT_DEFAULT);
 		internalConf.put(FomSchedule.DETECT_TIMEOUT_ONEACHTASK, FomSchedule.DETECT_TIMEOUT_ONEACHTASK_DEFAULT);
 		internalConf.put(FomSchedule.IGNORE_EXECREQUEST_WHEN_RUNNING, FomSchedule.IGNORE_EXECREQUEST_WHEN_RUNNING_DEFAULT);
 
-		readOnlyConf.add(FomSchedule.QUEUE_SIZE);
-		readOnlyConf.add(FomSchedule.EXEC_ONLOAN);
+		//readOnlyConf.add(FomSchedule.QUEUE_SIZE);
+		//readOnlyConf.add(FomSchedule.EXEC_ONLOAN);
 	}
 
 	private final ConcurrentHashMap<String, Object> confMap = new ConcurrentHashMap<>();
@@ -91,7 +93,7 @@ public class ScheduleConfig {
 		map.put(FomSchedule.CRON, getCronExpression());
 		return map;
 	} 
-	
+
 	Map<String, Object> getOriginalMap() {
 		return confMap;
 	}
@@ -346,11 +348,11 @@ public class ScheduleConfig {
 		confMap.put(FomSchedule.EXEC_ONLOAN, execOnLoad);
 		return true;
 	}
-	
+
 	public boolean getCancelTaskOnTimeout(){
 		return MapUtils.getBoolean(confMap, FomSchedule.CANCEL_TASK_ONTIMEOUT, FomSchedule.CANCEL_TASK_ONTIMEOUT_DEFAULT);
 	}
-	
+
 	public boolean setCancelTaskOnTimeout(boolean cancelTaskOnTimeout){
 		if(cancelTaskOnTimeout == getCancelTaskOnTimeout()){
 			return false;
@@ -358,11 +360,11 @@ public class ScheduleConfig {
 		confMap.put(FomSchedule.CANCEL_TASK_ONTIMEOUT, cancelTaskOnTimeout);
 		return true;
 	}
-	
+
 	public boolean getDetectTimeoutOnEachTask(){
 		return MapUtils.getBoolean(confMap, FomSchedule.DETECT_TIMEOUT_ONEACHTASK, FomSchedule.DETECT_TIMEOUT_ONEACHTASK_DEFAULT);
 	}
-	
+
 	public boolean setDetectTimeoutOnEachTask(boolean detectTimeoutOnEachTask){
 		if(detectTimeoutOnEachTask == getDetectTimeoutOnEachTask()){
 			return false;
@@ -370,11 +372,23 @@ public class ScheduleConfig {
 		confMap.put(FomSchedule.DETECT_TIMEOUT_ONEACHTASK, detectTimeoutOnEachTask);
 		return true;
 	}
-	
+
+	public boolean getEnableTaskResultStat(){ 
+		return MapUtils.getBoolean(confMap, FomSchedule.ENABLE_TASKRESULT_STAT, FomSchedule.ENABLE_TASKRESULT_STAT_DEFAULT);
+	}
+
+	public boolean setEnableTaskResultStat(boolean enableTaskResultStat){
+		if(enableTaskResultStat == getEnableTaskResultStat()){
+			return false;
+		}
+		confMap.put(FomSchedule.ENABLE_TASKRESULT_STAT, enableTaskResultStat);
+		return true;
+	}
+
 	public boolean getEnableTaskConflict(){
 		return MapUtils.getBoolean(confMap, FomSchedule.ENABLE_TASK_CONFLICT, FomSchedule.ENABLE_TASK_CONFLICT_DEFAULT);
 	}
-	
+
 	public boolean setEnableTaskConflict(boolean enableTaskConflict){
 		if(enableTaskConflict == getEnableTaskConflict()){
 			return false;
@@ -382,11 +396,11 @@ public class ScheduleConfig {
 		confMap.put(FomSchedule.ENABLE_TASK_CONFLICT, enableTaskConflict);
 		return true;
 	}
-	
+
 	public boolean getIgnoreExecRequestWhenRunning(){
 		return MapUtils.getBoolean(confMap, FomSchedule.IGNORE_EXECREQUEST_WHEN_RUNNING, FomSchedule.IGNORE_EXECREQUEST_WHEN_RUNNING_DEFAULT);
 	}
-	
+
 	public boolean setIgnoreExecRequestWhenRunning(boolean ignoreExecRequestWhenRunning){
 		if(ignoreExecRequestWhenRunning == getIgnoreExecRequestWhenRunning()){
 			return false;
@@ -479,7 +493,7 @@ public class ScheduleConfig {
 		return envirmentFieldChange;
 	}
 
-	// 简单处理下
+	// 配置有限，这里简单处理下，这样做主要是为了自我保护，防止配置被恶意修改
 	private void saveInternalConfig(String key, Object value){
 		switch(key){
 		case FomSchedule.CRON:
@@ -506,9 +520,14 @@ public class ScheduleConfig {
 			setIgnoreExecRequestWhenRunning(Boolean.valueOf(value.toString())); return; 
 		case FomSchedule.ENABLE_TASK_CONFLICT:
 			setEnableTaskConflict(Boolean.valueOf(value.toString())); return; 
+		case FomSchedule.ENABLE_TASKRESULT_STAT: 
+			setEnableTaskResultStat(Boolean.valueOf(value.toString())); return;  
+		case FomSchedule.QUEUE_SIZE:
+			setQueueSize(Integer.valueOf(value.toString())); return;  
+		case FomSchedule.EXEC_ONLOAN:
+			setExecOnLoad(Boolean.valueOf(value.toString())); return;  
 		default:
 			throw new UnsupportedOperationException("config[" + key + "] cannot be change");
 		}
 	}
-	
 }

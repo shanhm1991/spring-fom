@@ -81,7 +81,7 @@ public class ScheduleProxy implements MethodInterceptor {
 				|| !(long.class.isAssignableFrom(parameterTypes[1]))){
 			return method.invoke(scheduleContext, args);
 		}
-		
+
 		if(!(ScheduleTerminator.class.isAssignableFrom(scheduleBeanClass))){
 			return null;
 		}
@@ -89,19 +89,20 @@ public class ScheduleProxy implements MethodInterceptor {
 		((ScheduleTerminator)scheduleBean).onScheduleTerminate((long)args[0], (long)args[1]);
 		return null;
 	}
-	
+
 	private Object handleTimeout(Object object, Method method, Object[] args, MethodProxy methodProxy) throws Throwable{
 		Class<?>[] parameterTypes = method.getParameterTypes();
-		if(scheduleBean == null || parameterTypes.length != 1
-				|| !(long.class.isAssignableFrom(parameterTypes[0]))){
+		if(scheduleBean == null || parameterTypes.length != 2
+				|| !(String.class.isAssignableFrom(parameterTypes[0]))
+				|| !(long.class.isAssignableFrom(parameterTypes[1]))){
 			return method.invoke(scheduleContext, args);
 		}
-		
+
 		if(!(TaskTimeoutHandler.class.isAssignableFrom(scheduleBeanClass))){
 			return null;
 		}
-		
-		((TaskTimeoutHandler)scheduleBean).handleTimeout((long)args[0]); 
+
+		((TaskTimeoutHandler)scheduleBean).handleTimeout((String)args[0], (long)args[1]); 
 		return null;
 	}
 

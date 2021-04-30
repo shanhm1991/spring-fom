@@ -62,16 +62,22 @@ public class FomBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar
 		Class<?> clazz;
 		for(String beanName : beanNames){
 			BeanDefinition beanDefinition = registry.getBeanDefinition(beanName);
-			String className = beanDefinition.getBeanClassName();
-			try {
-				clazz = Class.forName(className);
-			} catch (ClassNotFoundException e) {
-				throw new ApplicationContextException("", e);
+			if(beanDefinition == null){
+				System.out.println(beanName);
 			}
+			
+			String className = beanDefinition.getBeanClassName();
+			if(className != null){
+				try {
+					clazz = Class.forName(className);
+				} catch (ClassNotFoundException e) {
+					throw new ApplicationContextException("", e);
+				}
 
-			FomSchedule fomSchedule = clazz.getAnnotation(FomSchedule.class);
-			if(fomSchedule != null){
-				parseFomSchedule(beanName, clazz, beanDefinition, fomSchedule, registry);
+				FomSchedule fomSchedule = clazz.getAnnotation(FomSchedule.class);
+				if(fomSchedule != null){
+					parseFomSchedule(beanName, clazz, beanDefinition, fomSchedule, registry);
+				}
 			}
 		}
 	}

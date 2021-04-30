@@ -86,6 +86,16 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 	private final AtomicBoolean nextTimeHasSated = new AtomicBoolean(false);
 	
 	private volatile boolean enableTaskConflict = false;
+	
+	public ScheduleContext(){
+		
+	}
+	
+	public ScheduleContext(boolean needInit){
+		if(needInit){
+			scheduleConfig.reset();
+		}
+	}
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -167,11 +177,11 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void handleTimeout(long costTime) {
+	public void handleTimeout(String taskId, long costTime) {
 		ScheduleContext<E> scheduleContext;
 		if(applicationContext != null && scheduleBeanName != null 
 				&& (scheduleContext = (ScheduleContext<E>)applicationContext.getBean(scheduleName)) != null){
-			scheduleContext.handleTimeout(costTime);
+			scheduleContext.handleTimeout(taskId, costTime);
 		}
 	}
 
@@ -405,7 +415,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 										long cost = System.currentTimeMillis() - future.getStartTime(); 
 										if(cost >= overTime * SECOND_UNIT){
 											try{
-												handleTimeout(cost);
+												handleTimeout(future.getTaskId(), cost);
 											}catch(Exception e){
 												logger.error("", e); 
 											}
@@ -446,7 +456,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 												}
 												
 												try{
-													handleTimeout(cost);
+													handleTimeout(future.getTaskId(),cost);
 												}catch(Exception e){
 													logger.error("", e); 
 												}
@@ -735,6 +745,12 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 		}
 		valueEnvirmentField(envirmentChange);
 	} 
+	
+	protected void record(Result<E> result){
+		if(scheduleConfig.getEnableTaskResultStat()){
+			scheduleStatistics.record1(result);
+		}
+	}
 
 	void valueEnvirmentField(Set<Field> envirmentChange) throws NumberFormatException, IllegalArgumentException, IllegalAccessException{
 		// 修改当前schedul引用对应变量属性值，不保证线程安全 

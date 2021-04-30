@@ -74,7 +74,7 @@ public class ScheduleStatistics {
 		statConfigMap.put(STAT_LEVEL_5, DEFAULT_STAT_LEVEL_5);
 	}
 
-	void record(Result<?> result){
+	void record1(Result<?> result){
 		if(result.isSuccess()){
 			record(result, success, successMap);
 		}else{

@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -35,7 +34,7 @@ import org.springframework.util.StringValueResolver;
  *
  */
 public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware, EmbeddedValueResolverAware {
-	
+
 	private BeanFactory beanFactory;
 
 	private StringValueResolver valueResolver;
@@ -59,32 +58,38 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 
 		ScheduleContext<?> scheduleContext = (ScheduleContext<?>)bean;
 
-		String scheduleBeanName = scheduleContext.getScheduleBeanName();
+		String scheduleBeanName = scheduleContext.getScheduleBeanName(); 
+		FomSchedule fomSchedule = scheduleContext.getClass().getAnnotation(FomSchedule.class);
+		if(StringUtils.isEmpty(scheduleBeanName) && fomSchedule == null){ // 通过@Bean注入的不需要处理
+			scheduleContext.setScheduleName(beanName);  
+			scheduleContext.setLogger(LoggerFactory.getLogger(scheduleContext.getClass()));
+			return bean;
+		}
+
 		Object scheduleBean = null;
 		if(!StringUtils.isEmpty(scheduleBeanName)){ 
 			scheduleBean = beanFactory.getBean(scheduleBeanName);
 		}
-
-		Logger logger;
-		FomSchedule fomSchedule = clazz.getAnnotation(FomSchedule.class);
-		if(fomSchedule == null){ // 如果scheduleBean本身就是一个代理类，那么就获取不到FomSchedule.class
+		
+		// 获取FomSchedule，顺便设置下Logger
+		fomSchedule = clazz.getAnnotation(FomSchedule.class);
+		if(fomSchedule == null){ 
 			fomSchedule = scheduleBean.getClass().getAnnotation(FomSchedule.class);
-			logger = LoggerFactory.getLogger(scheduleBean.getClass());
-		}else{
-			logger = LoggerFactory.getLogger(clazz);
+			scheduleContext.setLogger(LoggerFactory.getLogger(scheduleBean.getClass())); 
+		}else{ 
+			scheduleContext.setLogger(LoggerFactory.getLogger(clazz));
 		}
-
-		scheduleContext.setLogger(logger); 
+		
 		ScheduleConfig scheduleConfig = scheduleContext.getScheduleConfig();
 		if(fomSchedule != null){ // 注解引入
 			setCronConf(scheduleConfig, fomSchedule, scheduleContext, scheduleBean);
 			setOtherConf(scheduleConfig, fomSchedule);
 			setValue(scheduleConfig, scheduleContext, scheduleBean);
-			
+
 		}else{ // xml配置
 
 		}
-		
+
 		try {
 			loadCache(beanName, scheduleContext);
 		} catch (Exception e) {
@@ -98,7 +103,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		Object obj = enhancer.create();
 		return obj;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void loadCache(String beanName, ScheduleContext<?> scheduleContext) throws Exception{ 
 		if(!Boolean.valueOf(valueResolver.resolveStringValue("${spring.fom.config.cache.enable:true}"))){
@@ -110,18 +115,18 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		if(!file.exists()){
 			return;
 		}
-		
+
 		try(FileInputStream input = new FileInputStream(file);
 				ObjectInputStream ois = new ObjectInputStream(input);){
 			HashMap<String, Object> map = (HashMap<String, Object>)ois.readObject();
-			
+
 			String cron = (String)map.remove(FomSchedule.CRON);
 			ScheduleConfig scheduleConfig = scheduleContext.getScheduleConfig();
 			scheduleConfig.setCron(cron);
-			
+
 			Map<String, Object> originalMap = scheduleConfig.getOriginalMap();
 			originalMap.putAll(map);
-			
+
 			Collection<List<Field>> fileds = scheduleConfig.getEnvirment().values();
 			Set<Field> envirmentField = new HashSet<>();
 			for(List<Field> list : fileds){
@@ -251,25 +256,25 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 				|| !scheduleConfig.setTaskOverTime(Integer.parseInt(valueResolver.resolveStringValue(taskOverTime)))){
 			scheduleConfig.setTaskOverTime(fomSchedule.taskOverTime());
 		}
-		
+
 		String cancelTaskOnTimeout = fomSchedule.cancelTaskOnTimeoutString();
 		if(StringUtils.isEmpty(cancelTaskOnTimeout) 
 				|| !scheduleConfig.setCancelTaskOnTimeout(Boolean.parseBoolean(valueResolver.resolveStringValue(cancelTaskOnTimeout)))){
 			scheduleConfig.setCancelTaskOnTimeout(fomSchedule.cancelTaskOnTimeout());
 		}
-			
+
 		String detectTimeoutOnEachTask = fomSchedule.detectTimeoutOnEachTaskString();
 		if(StringUtils.isEmpty(detectTimeoutOnEachTask) 
 				|| !scheduleConfig.setDetectTimeoutOnEachTask(Boolean.parseBoolean(valueResolver.resolveStringValue(detectTimeoutOnEachTask)))){
 			scheduleConfig.setDetectTimeoutOnEachTask(fomSchedule.detectTimeoutOnEachTask());
 		}
-		
+
 		String ignoreExecRequestWhenRunning = fomSchedule.ignoreExecRequestWhenRunningString();
 		if(StringUtils.isEmpty(ignoreExecRequestWhenRunning) 
 				|| !scheduleConfig.setIgnoreExecRequestWhenRunning(Boolean.parseBoolean(valueResolver.resolveStringValue(ignoreExecRequestWhenRunning)))){
 			scheduleConfig.setIgnoreExecRequestWhenRunning(fomSchedule.ignoreExecRequestWhenRunning());
 		}
-		
+
 		String enableTaskConflict = fomSchedule.enableTaskConflictString();
 		if(StringUtils.isEmpty(enableTaskConflict) 
 				|| !scheduleConfig.setEnableTaskConflict(Boolean.parseBoolean(valueResolver.resolveStringValue(enableTaskConflict)))){
@@ -297,7 +302,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 						index = ex.indexOf("}");
 					}
 					String key = ex.substring(2, index);
-					
+
 					// 一个环境变量可能赋值给多个Field，一个Field也可能被多个环境变量赋值
 					List<Field> fieldList = envirment.get(key);
 					if(fieldList == null){
@@ -305,7 +310,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 						envirment.put(key, fieldList);
 					}
 					fieldList.add(field);
-					
+
 					scheduleConfig.set(key, confValue);
 				}
 			}
