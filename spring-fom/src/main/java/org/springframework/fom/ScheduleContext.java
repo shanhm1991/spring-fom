@@ -548,7 +548,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 						}
 						
 						task.setScheduleBatch(scheduleBatch);
-						TimedFuture future = submit(task);
+						TimedFuture future = (TimedFuture)submit(task);
 						
 						it.remove();
 						submitMap.put(taskId, future);    
@@ -569,7 +569,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 					Task<E> task = it.next();
 					taskId = task.getTaskId();
 					task.setScheduleBatch(scheduleBatch);
-					TimedFuture future = submit(task);
+					TimedFuture future = (TimedFuture)submit(task);
 					
 					it.remove();
 					submitFutures.add(future);
@@ -620,7 +620,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 		}
 	}
 
-	public TimedFuture<Result<E>> submit(Task<E> task) {
+	public Future<Result<E>> submit(Task<E> task) {
 		task.setScheduleContext(ScheduleContext.this); 
 
 		TimedFuture<Result<E>> future = scheduleConfig.getPool().submit(task);
@@ -640,7 +640,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 				Task<E> task = it.next();
 				taskId = task.getTaskId();
 				task.setScheduleBatch(batch);
-				TimedFuture<Result<E>> future = submit(task);
+				Future<Result<E>> future = submit(task);
 				
 				it.remove();
 				futureList.add(future);
