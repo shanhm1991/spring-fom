@@ -15,17 +15,21 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -64,8 +68,6 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 
 	private String scheduleBeanName;
 
-	protected Logger logger;
-
 	// 最近一次执行时间
 	private volatile long lastTime;
 
@@ -81,16 +83,21 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 	private State state = INITED; 
 
 	private ApplicationContext applicationContext;
-	
+
 	// running 状态纪录exec请求
 	private final AtomicBoolean nextTimeHasSated = new AtomicBoolean(false);
-	
+
 	private volatile boolean enableTaskConflict = false;
 	
+	protected Logger logger = LoggerFactory.getLogger(ScheduleContext.class); 
+
+	// 记录外部线程submitBatch提交次数，与定时任务无关
+	private final AtomicLong batchSubmits = new AtomicLong();
+
 	public ScheduleContext(){
-		
+
 	}
-	
+
 	public ScheduleContext(boolean needInit){
 		if(needInit){
 			scheduleConfig.reset();
@@ -223,9 +230,9 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 			case INITED:
 			case STOPPED:
 				if(scheduleConfig.getPool().isTerminated()){
-					scheduleConfig.reset();
+					scheduleConfig.reset(); 
 				}
-				
+
 				enableTaskConflict = scheduleConfig.getEnableTaskConflict(); // 只在启动时读取一次
 				scheduleThread = new ScheduleThread();
 				scheduleThread.start();
@@ -332,9 +339,9 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 					}else{
 						runSchedul();
 					}
-				}catch(InterruptedException e){
-					// ignore 进入下次循环，获取判断当前状态
-				}catch (RuntimeException e){
+				}catch(InterruptedException e){ // 直接进行下次执行
+
+				}catch (Exception e){ // 所有的Exception，都认为不影响定时器
 					logger.error("", e);
 				}catch(Throwable e){
 					logger.error("schedule terminated unexpectedly", e); 
@@ -397,7 +404,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 			if(scheduleBatch == null){
 				return;
 			}
-			
+
 			long overTime = scheduleConfig.getTaskOverTime();
 			boolean detectTimeoutOnEachTask = scheduleConfig.getDetectTimeoutOnEachTask();
 			boolean cancelTaskOnTimeout = scheduleConfig.getCancelTaskOnTimeout();
@@ -420,7 +427,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 												logger.error("", e); 
 											}
 										}
-										
+
 										if(cancelTaskOnTimeout){ 
 											logger.warn("cancle task[{}] due to time out, cost={}ms", future.getTaskId(), cost);
 											future.cancel(true);
@@ -432,7 +439,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 								}
 							}
 						}
-						
+
 						scheduleBatch.waitTaskCompleted();
 						cleanCompletedFutures();
 						return;
@@ -454,13 +461,13 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 												if(!needNotWait.add(future.getTaskId())){
 													continue;
 												}
-												
+
 												try{
 													handleTimeout(future.getTaskId(),cost);
 												}catch(Exception e){
 													logger.error("", e); 
 												}
-												
+
 												if(cancelTaskOnTimeout){ 
 													logger.warn("cancle task[{}] due to time out, cost={}ms", future.getTaskId(), cost);
 													future.cancel(true);
@@ -478,12 +485,12 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 										needNotWait.add(future.getTaskId());
 									}
 								}
-								
+
 								// 如果检查一轮之后，checkTime没有被重置，则恢复成overTime，避免等待时间太短消耗cpu
 								if(!checkTimeReset && checkTime != overTime){ 
 									checkTime = overTime;
 								}
-								
+
 								// 已经完成的，或者已经执行过handleTimeout的任务不需要再等
 								if(needNotWait.size() == submitFutures.size()){
 									scheduleBatch.waitTaskCompleted();
@@ -507,49 +514,68 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 
 			lastTime = System.currentTimeMillis();
 
+			Collection<? extends Task<E>> tasks = newSchedulTasks();
+			if(tasks == null || tasks.isEmpty()){
+				return;
+			}
+
 			ScheduleBatch<E> scheduleBatch = new ScheduleBatch<>(true, schedulTimes, lastTime);
 			try{
-				Collection<? extends Task<E>> tasks = newSchedulTasks();
-				if(tasks != null && !tasks.isEmpty()){ // 尽量避免第三方依赖
-					if(enableTaskConflict){
-						submitWithConflict(tasks, scheduleBatch);
-					}else{
-						submitWithNotConflict(tasks, scheduleBatch);
-					}
+				if(enableTaskConflict){
+					submitWithConflict(tasks, scheduleBatch);
+				}else{
+					submitWithNotConflict(tasks, scheduleBatch);
 				}
-			} catch (RejectedExecutionException e) {
-				logger.warn("task submit rejected.", e); 
 			}finally{ 
 				scheduleBatch.submitCompleted();
 				checkScheduleComplete(scheduleBatch);
 				caculateNextTime(scheduleBatch); 
 			}
 		}
-		
+
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		private void submitWithConflict(Collection<? extends Task<E>> tasks, ScheduleBatch<E> scheduleBatch){
 			synchronized(submitMap){
-				for (Task<E> task : tasks) {
-					String taskId = task.getTaskId();
-					task.setScheduleBatch(scheduleBatch);
-					if (isTaskAlive(taskId)) {
-						logger.warn("task[{}] is still alive, create canceled.", taskId);
-						continue;
+				Iterator<? extends Task<E>> it = tasks.iterator();
+				String taskId = null; 
+				try{
+					while(it.hasNext()){
+						Task<E> task = it.next();
+						taskId = task.getTaskId();
+						if (isTaskAlive(taskId)) {
+							logger.warn("task[{}] is still alive, create canceled.", taskId);
+							continue;
+						}
+						
+						task.setScheduleBatch(scheduleBatch);
+						TimedFuture future = submit(task);
+						
+						it.remove();
+						submitMap.put(taskId, future);    
+						submitFutures.add(future);
 					}
-
-					TimedFuture future = submit(task);
-					submitMap.put(taskId, future);    
-					submitFutures.add(future);
+				} catch (RejectedExecutionException e) {
+					logger.warn("task[{}] submit rejected, and ignored task={}", taskId, tasks, e); 
 				}
 			}
 		}
-		
+
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		private void submitWithNotConflict(Collection<? extends Task<E>> tasks, ScheduleBatch<E> scheduleBatch){
-			for (Task<E> task : tasks) {
-				task.setScheduleBatch(scheduleBatch);
-				TimedFuture future = submit(task);
-				submitFutures.add(future);
+			Iterator<? extends Task<E>> it = tasks.iterator();
+			String taskId = null; 
+			try{
+				while(it.hasNext()){
+					Task<E> task = it.next();
+					taskId = task.getTaskId();
+					task.setScheduleBatch(scheduleBatch);
+					TimedFuture future = submit(task);
+					
+					it.remove();
+					submitFutures.add(future);
+				}
+			} catch (RejectedExecutionException e) {
+				logger.warn("task[{}] submit rejected, and ignored task={}", taskId, tasks, e); 
 			}
 		}
 
@@ -603,6 +629,73 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 		}
 		logger.info("task[{}] submitted.", task.getTaskId()); 
 		return future; 
+	}
+	
+	private List<Future<Result<E>>> submitBatch(Collection<? extends Task<E>> tasks, ScheduleBatch<E> batch){
+		List<Future<Result<E>>> futureList = new ArrayList<>(tasks.size());
+		Iterator<? extends Task<E>> it = tasks.iterator();
+		String taskId = null; 
+		try{
+			while(it.hasNext()){
+				Task<E> task = it.next();
+				taskId = task.getTaskId();
+				task.setScheduleBatch(batch);
+				TimedFuture<Result<E>> future = submit(task);
+				
+				it.remove();
+				futureList.add(future);
+			}
+		} catch (RejectedExecutionException e) {
+			logger.warn("task[{}] submit rejected, and ignored task={}", taskId, tasks, e); 
+		} finally{ 
+			batch.submitCompleted();
+			checkScheduleComplete(batch);
+		}
+		return futureList;
+	}
+
+	/**
+	 * 批量提交任务
+	 * @param tasks
+	 * @return
+	 */
+	public List<Future<Result<E>>> submitBatch(Collection<? extends Task<E>> tasks) {
+		if(tasks == null || tasks.isEmpty()){
+			return new ArrayList<>();
+		}
+		
+		ScheduleBatch<E> batch = new ScheduleBatch<>(false, batchSubmits.incrementAndGet(), System.currentTimeMillis());
+		return submitBatch(tasks, batch);
+	}
+	
+	/**
+	 * 批量提交任务，并在等待秒数之后获取结果
+	 * @param tasks
+	 * @param timeout
+	 * @param cancelOnTimeout
+	 * @return
+	 * @throws InterruptedException
+	 * @throws ExecutionException
+	 */
+	public List<Result<E>> submitBatchAndWait(Collection<? extends Task<E>> tasks, long timeout, boolean cancelOnTimeout) throws InterruptedException, ExecutionException { 
+		if(tasks == null || tasks.isEmpty()){
+			return new ArrayList<>();
+		}
+		
+		ScheduleBatch<E> batch = new ScheduleBatch<>(false, batchSubmits.incrementAndGet(), System.currentTimeMillis());
+		List<Future<Result<E>>> futureList = submitBatch(tasks, batch);
+		
+		batch.waitTaskCompleted(timeout);
+		
+		List<Result<E>> resultList = new ArrayList<>(futureList.size());
+		for(Future<Result<E>> future : futureList){
+			if(future.isDone()){
+				resultList.add(future.get());
+			}else if(cancelOnTimeout){
+				future.cancel(true);
+			}
+		}
+		return resultList;
 	}
 
 	private boolean isTaskAlive(String taskId){
@@ -678,7 +771,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 		public boolean waitTaskCompleted(long taskOverTime) throws InterruptedException{
 			return completeLatch.await(taskOverTime, TimeUnit.SECONDS);
 		}
- 
+
 		public void waitTaskCompleted() throws InterruptedException{
 			completeLatch.await();
 		}
@@ -745,10 +838,10 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 		}
 		valueEnvirmentField(envirmentChange);
 	} 
-	
+
 	protected void record(Result<E> result){
 		if(scheduleConfig.getEnableTaskResultStat()){
-			scheduleStatistics.record1(result);
+			scheduleStatistics.record(result);
 		}
 	}
 

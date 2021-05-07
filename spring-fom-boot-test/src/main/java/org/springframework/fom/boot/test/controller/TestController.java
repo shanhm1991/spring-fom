@@ -1,9 +1,12 @@
 package org.springframework.fom.boot.test.controller;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.fom.Result;
 import org.springframework.fom.ScheduleContext;
 import org.springframework.fom.ScheduleInfo;
 import org.springframework.fom.Task;
@@ -48,17 +51,26 @@ public class TestController {
 
 	@RequestMapping("/task/submit")
 	@ResponseBody
-	public Response<Void> submit(){
-		Task<Long> task = new Task<Long>(){
-			@Override
-			public Long exec() throws Exception {
-				long sleep = RandomUtils.nextLong(3000, 6000);
-				Thread.sleep(sleep);
-				return sleep;
-			}
-		};
+	public Response<List<Result<Long>>> submit() throws InterruptedException, ExecutionException{
+		List<Task<Long>> tasks = new ArrayList<>();
+		for(int i=0;i<10;i++){ 
+			tasks.add(new Task<Long>(){
+				@Override
+				public Long exec() throws Exception {
+					long sleep = RandomUtils.nextLong(3000, 6000);
+					try {
+						logger.info("task executing ...");
+						Thread.sleep(sleep);
+					} catch (InterruptedException e) {
+						logger.info("task cancled due to interrupt.");
+						return sleep;
+					} 
+					return sleep;
+				}
+			});
+		}
 
-		testExecutor.submit(task);
-		return new Response<>(Response.SUCCESS, "");
+		List<Result<Long>> results = testExecutor.submitBatchAndWait(tasks, 5, true); // 执行超过5秒的结果直接丢弃
+		return new Response<>(Response.SUCCESS, "", results);
 	}
 }

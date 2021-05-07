@@ -1,0 +1,10 @@
+/.settings/
+/.idea/
+/target/
+/bin/
+/log/
+/cache/
+.project
+.classpath
+.checkstyle
+spring-fom-boot-test.iml

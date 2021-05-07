@@ -21,13 +21,13 @@ public abstract class Task<E> implements Callable<Result<E>> {
 
 	private final long createTime;
 
-	// 任务线程自己设置，其它线程读取
+	// 任务线程启动时自己设置
 	private volatile long startTime;
 
-	// 轮询线程设置，任务线程读取
+	// 定时线程设置，任务线程读取
 	private volatile ScheduleContext<E> scheduleContext;
 
-	// 轮询线程设置，任务线程读取
+	// 定时线程设置，任务线程读取
 	private volatile ScheduleBatch<E> scheduleBatch;
 	
 	public Task(){
@@ -155,5 +155,10 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	@Override
 	public final int hashCode() {
 		return this.id.hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return id;
 	}
 }
