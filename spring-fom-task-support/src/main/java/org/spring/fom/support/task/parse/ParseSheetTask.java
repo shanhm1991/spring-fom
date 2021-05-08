@@ -3,7 +3,6 @@ package org.spring.fom.support.task.parse;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -27,6 +26,8 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.spring.fom.support.task.reader.ExcelRow;
 import org.spring.fom.support.task.reader.IExcelReader;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 /**
  * 根据配置规则按sheet解析excel
@@ -128,7 +129,7 @@ public abstract class ParseSheetTask<E> extends ParseExcelTask<Map<String, Objec
 		
 	}
 
-	protected void initExcelRule() throws DocumentException, FileNotFoundException {  
+	protected void initExcelRule() throws DocumentException, IOException {  
 		//可以手动赋值excelRule或者将excelRule放在context的config中
 		if(StringUtils.isBlank(excelRule)){ 
 			excelRule = getConfig("parse.excel.rule");
@@ -139,11 +140,9 @@ public abstract class ParseSheetTask<E> extends ParseExcelTask<Map<String, Objec
 		}
 		
 		File ruleXml = new File(excelRule);
-		if(!ruleXml.exists()){
-			ruleXml = new File(System.getProperty("webapp.root") + excelRule);
-			if(!ruleXml.exists()){
-				throw new IllegalArgumentException("configuration of Excel not found, target=" + excelRule);
-			}
+		if(!ruleXml.exists()){ 
+			Resource resources = new ClassPathResource(excelRule);		
+			ruleXml = resources.getFile();
 		}
 
 		logger.info("load configuration of Excel, target=" + excelRule);

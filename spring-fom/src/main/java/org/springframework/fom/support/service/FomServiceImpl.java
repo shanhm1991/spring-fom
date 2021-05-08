@@ -120,17 +120,23 @@ public class FomServiceImpl implements FomService, ApplicationContextAware{
 		LoggerConfiguration loggerConfiguration = loggingSystem.getLoggerConfiguration(loggerName);
 		if(loggerConfiguration != null){
 			LogLevel logLevel = loggerConfiguration.getConfiguredLevel();
+			if(logLevel == null){
+				logLevel = loggerConfiguration.getEffectiveLevel();
+			}
 			if(logLevel != null){
 				return logLevel.name();
 			}
 			return "NULL";
 		}else{
-			// 随便找一个配置了的父Logger的级别
+			// 向上找一个最近的父Logger
 			List<LoggerConfiguration> list =loggingSystem.getLoggerConfigurations();
 			for(LoggerConfiguration logger : list){
 				String name = logger.getName();
 				if(name.startsWith(loggerName)){
 					LogLevel logLevel = logger.getConfiguredLevel();
+					if(logLevel == null){
+						logLevel = logger.getEffectiveLevel();
+					}
 					if(logLevel != null){
 						return logLevel.name();
 					}

@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.fom.Result;
 import org.springframework.fom.ScheduleConfig;
 import org.springframework.fom.ScheduleContext;
+import org.springframework.fom.Task;
 
 /**
  * 
@@ -29,6 +30,16 @@ public class ExecConfiguration {
 			protected void record(Result<Long> result) {
 				super.record(result);
 				// 自定义任务结果统计
+			}
+			
+			@Override
+			public Task<Long> schedul() throws Exception {
+				return new Task<Long>(){
+					@Override
+					public Long exec() throws Exception {
+						return 0L;
+					}
+				};
 			}
 		};
 		

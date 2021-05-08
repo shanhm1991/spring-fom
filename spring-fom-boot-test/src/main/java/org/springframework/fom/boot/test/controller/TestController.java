@@ -48,6 +48,12 @@ public class TestController {
 	public Response<List<ScheduleInfo>> list(){
 		return new Response<>(Response.SUCCESS, "", fomService.list());
 	}
+	
+	@RequestMapping("/task/start")
+	@ResponseBody
+	public Response<Void> exec(){
+		return testExecutor.scheduleStart();
+	}
 
 	@RequestMapping("/task/submit")
 	@ResponseBody

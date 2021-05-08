@@ -10,7 +10,6 @@ import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -197,13 +196,16 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 	public Collection<? extends Task<E>> newSchedulTasks() throws Exception {
 		ScheduleContext<E> scheduleContext;
 		if(applicationContext != null 
-				&& (scheduleContext = (ScheduleContext<E>)applicationContext.getBean(scheduleName)) != null){
+				&& (scheduleContext = (ScheduleContext<E>)applicationContext.getBean(scheduleName)) != null
+				&& scheduleContext.getClass() != this.getClass()){
 			return scheduleContext.newSchedulTasks();
 		}
 
 		Task<E> task = schedul();
 		if(task != null){
-			return Arrays.asList(task);
+			List<Task<E>> list = new ArrayList<>();
+			list.add(task);
+			return list;
 		}
 		return new ArrayList<>();
 	}
@@ -339,9 +341,9 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 					}else{
 						runSchedul();
 					}
-				}catch(InterruptedException e){ // 直接进行下次执行
-
-				}catch (Exception e){ // 所有的Exception，都认为不影响定时器
+				}catch(InterruptedException e){ 
+					Thread.currentThread().interrupt(); // 保留中断请求，下面处理
+				}catch (Exception e){ // 对于Exception，认为不影响定时线程
 					logger.error("", e);
 				}catch(Throwable e){
 					logger.error("schedule terminated unexpectedly", e); 
@@ -356,18 +358,13 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 						synchronized(this) {
 							try {
 								wait(waitTime);
-							} catch (InterruptedException e) {
-								// 中断即重新执行
+							} catch (InterruptedException e) { // 等待时响应中断：立即跳出等待
+								
 							}
 						}
 					}
 				}else{
-					synchronized(ScheduleContext.this){
-						if(state == INITED){
-							return;
-						}
-					}
-					terminate(); 
+					switchState(INITED); // 定时线程退出，保留线程池
 					return;
 				}
 			}
@@ -613,8 +610,8 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 					}else if(isStopping){
 						logger.warn("schedule[{}] is still stopping, though has waiting for a day.", scheduleName);
 					}
-				} catch (InterruptedException e) {
-					logger.warn("interrupt ignore when waiting task completetion."); 
+				} catch (InterruptedException e) { // 忽略所有中断请求
+					logger.warn("interrupt ignored when waiting task completetion."); 
 				}
 			}
 		}
