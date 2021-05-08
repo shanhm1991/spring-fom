@@ -7,40 +7,70 @@
 			<pattern>${pattern}</pattern>
 		</encoder>
 	</appender>
-
-	<appender name="batchFomContextTest" class="ch.qos.logback.core.FileAppender">
-		<file>log/batchFomContextTest.log</file>
-		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>${pattern}</pattern>
-		</encoder>
-	</appender>
-
-	<appender name="batchSchedulTest" class="ch.qos.logback.core.FileAppender">
-		<file>log/batchSchedulTest.log</file>
-		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>${pattern}</pattern>
-		</encoder>
-	</appender>
-
-	<appender name="multiSchedulTest" class="ch.qos.logback.core.FileAppender">
-		<file>log/multiSchedulTest.log</file>
-		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>${pattern}</pattern>
-		</encoder>
-	</appender>
-
-	<appender name="singleScheduleTest" class="ch.qos.logback.core.FileAppender">
-		<file>log/singleScheduleTest.log</file>
-		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>${pattern}</pattern>
-		</encoder>
+	
+	<appender name="batchFomContextTest" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>log/batchFomContextTest.log</file>  
+    	<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>log/batchFomContextTest.log.%d{yyyyMMdd}.%i</fileNamePattern>  
+        	<maxFileSize>20MB</maxFileSize>      
+        	<maxHistory>60</maxHistory>  
+        	<totalSizeCap>2GB</totalSizeCap> 
+       </rollingPolicy>
+    	<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">  
+      		<pattern>${pattern}</pattern>  
+    	</encoder>  
 	</appender>
 	
-	<appender name="root" class="ch.qos.logback.core.FileAppender">
-		<file>log/root.log</file>
-		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>${pattern}</pattern>
-		</encoder>
+	<appender name="batchSchedulTest" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>log/batchSchedulTest.log</file>  
+    	<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>log/batchSchedulTest.log.%d{yyyyMMdd}.%i</fileNamePattern>  
+        	<maxFileSize>20MB</maxFileSize>      
+        	<maxHistory>60</maxHistory>  
+        	<totalSizeCap>2GB</totalSizeCap> 
+       </rollingPolicy>
+    	<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">  
+      		<pattern>${pattern}</pattern>  
+    	</encoder>  
+	</appender>
+	
+	<appender name="multiSchedulTest" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>log/multiSchedulTest.log</file>  
+    	<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>log/multiSchedulTest.log.%d{yyyyMMdd}.%i</fileNamePattern>  
+        	<maxFileSize>20MB</maxFileSize>      
+        	<maxHistory>60</maxHistory>  
+        	<totalSizeCap>2GB</totalSizeCap> 
+       </rollingPolicy>
+    	<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">  
+      		<pattern>${pattern}</pattern>  
+    	</encoder>  
+	</appender>
+	
+	<appender name="singleScheduleTest" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>log/singleScheduleTest.log</file>  
+    	<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>log/singleScheduleTest.log.%d{yyyyMMdd}.%i</fileNamePattern>  
+        	<maxFileSize>20MB</maxFileSize>      
+        	<maxHistory>60</maxHistory>  
+        	<totalSizeCap>2GB</totalSizeCap> 
+       </rollingPolicy>
+    	<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">  
+      		<pattern>${pattern}</pattern>  
+    	</encoder>  
+	</appender>
+	
+	<appender name="root" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>log/root.log</file>  
+    	<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>log/root.log.%d{yyyyMMdd}.%i</fileNamePattern>  
+        	<maxFileSize>20MB</maxFileSize>      
+        	<maxHistory>60</maxHistory>  
+        	<totalSizeCap>2GB</totalSizeCap> 
+       </rollingPolicy>
+    	<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">  
+      		<pattern>${pattern}</pattern>  
+    	</encoder>  
 	</appender>
 
 	<root level="info">
