@@ -24,6 +24,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 /**
  * 
@@ -65,22 +67,26 @@ public class ExcelReader implements IExcelReader {
 	private boolean inited = false;
 
 	public ExcelReader(String sourceUri) throws IOException {
-		int index = sourceUri.lastIndexOf('.');
-		if(index == -1){
-			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx.");
-		}
-		this.type = sourceUri.substring(index + 1);
-		this.inputStream = new FileInputStream(sourceUri);
-		init();
+		this(new File(sourceUri));
 	}
 
 	public ExcelReader(File file) throws IOException {
+		if(!file.exists()){
+			Resource resource = new ClassPathResource(file.getPath());
+			file = resource.getFile();
+		}
+		
 		String name = file.getName();
 		int index = name.lastIndexOf('.');
 		if(index == -1){
 			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx");
 		}
+		
 		this.type = name.substring(index + 1);
+		if(!IExcelReader.EXCEL_XLS.equalsIgnoreCase(type) && !IExcelReader.EXCEL_XLSX.equalsIgnoreCase(type)){
+			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx.");
+		}
+		
 		this.inputStream = new FileInputStream(file);
 		init();
 	}
@@ -288,5 +294,4 @@ public class ExcelReader implements IExcelReader {
 		IOUtils.closeQuietly(workbook); 
 		IOUtils.closeQuietly(inputStream);
 	}
-
 }

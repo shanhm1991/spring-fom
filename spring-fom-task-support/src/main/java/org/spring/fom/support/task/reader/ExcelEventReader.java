@@ -45,6 +45,8 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -74,28 +76,21 @@ public class ExcelEventReader implements IExcelReader {
 	private ExcelSheetFilter sheetFilter;
 
 	public ExcelEventReader(String sourceUri) throws IOException, OpenXML4JException, SAXException, DocumentException {  
-		int index = sourceUri.lastIndexOf('.');
-		if(index == -1){
-			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx.");
-		}
-		this.type = sourceUri.substring(index + 1); 
-		if(EXCEL_XLS.equalsIgnoreCase(type)){
-			pfs = new POIFSFileSystem(new FileInputStream(sourceUri));  
-			initHssf();
-		}else if(EXCEL_XLSX.equalsIgnoreCase(type)){
-			pkg = OPCPackage.open(sourceUri); 
-			initXssf();
-		}else{
-			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx");
-		}
+		this(new File(sourceUri));
 	}
 
 	public ExcelEventReader(File file) throws IOException, OpenXML4JException, SAXException, DocumentException { 
+		if(!file.exists()){
+			Resource resource = new ClassPathResource(file.getPath());
+			file = resource.getFile();
+		}
+		
 		String name = file.getName();
 		int index = name.lastIndexOf('.');
 		if(index == -1){
 			throw new UnsupportedOperationException("Excel file name must end with .xls or .xlsx");
 		}
+		
 		this.type = name.substring(index + 1);
 		if(EXCEL_XLS.equalsIgnoreCase(type)){
 			pfs = new POIFSFileSystem(new FileInputStream(file));  
