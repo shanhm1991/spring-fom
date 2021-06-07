@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
@@ -39,11 +40,16 @@ public class FomAdvice {
 	private ThreadLocal<String> localid = new ThreadLocal<>();
 
 	@Pointcut("execution(* org.springframework.fom.*..*Controller.*(..)) && !execution(* org.springframework.fom.*..*Controller.handle*(..))")
-	public void point() {
+	public void requestPoint() {
+
+	}
+	
+	@Pointcut("execution(* org.springframework.fom.*..*Controller.*(..))")
+	public void responsePoint() {
 
 	}
 
-	@Before("point()")
+	@Before("requestPoint()")
 	public void logRequest(JoinPoint point) throws JsonProcessingException {
 		localTime.set(System.currentTimeMillis());
 
@@ -54,7 +60,7 @@ public class FomAdvice {
 
 		String requestId = request.getHeader("requestId");
 		if(StringUtils.isEmpty(requestId)){ 
-			requestId = idGenerator.generateIdWithDate(null, "-", "yyyyMMddHHmmss", 1000);
+			requestId = idGenerator.generateIdWithDate(null, "|", "yyyyMMddHHmmss", 1000);
 		} 
 
 		localid.set(requestId); 
@@ -81,12 +87,15 @@ public class FomAdvice {
 		logger.info(">> request  {} {} {}", remote, url, map);
 	}
 
-
-
-	@AfterReturning(returning = "resp", pointcut = "point()")
+	@AfterReturning(pointcut = "responsePoint()", returning = "resp")
 	public Response<?> logResponse(Response<?> resp) { 
 		resp.setRequestId(localid.get()); 
 		logger.info("<< response {}ms {}", System.currentTimeMillis() - localTime.get(), resp);
 		return resp;
+	}
+	
+	@AfterThrowing(pointcut = "requestPoint()", throwing = "e")
+	public void logException(Throwable e){
+		logger.error("", e); 
 	}
 }

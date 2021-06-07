@@ -140,7 +140,7 @@ public class ScheduleConfig {
 		for(Object obj : array){
 			if(obj instanceof TimedFuture){
 				TimedFuture future = (TimedFuture)obj;
-				map.put(future.getTaskId(), format.format(future.getCreateTime()));
+				map.put(future.getTaskId(), format.format(future.getSubmitTime()));
 			}
 		}
 		return map;
@@ -438,11 +438,11 @@ public class ScheduleConfig {
 			return map;
 		}
 
-		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss SSS");
+		DateFormat format = new SimpleDateFormat("yyyyMMdd HH:mm:ss SSS");
 		for(Object obj : array){
 			if(obj instanceof TimedFuture){
 				TimedFuture<?> future = (TimedFuture<?>)obj;
-				map.put(future.getTaskId(), format.format(future.getCreateTime()));
+				map.put(future.getTaskId(), format.format(future.getSubmitTime()));
 			}
 		}
 		return map;
@@ -454,14 +454,14 @@ public class ScheduleConfig {
 			return list;
 		}
 
-		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		DateFormat format = new SimpleDateFormat("yyyyMMdd HH:mm:ss SSS");
 		for(Entry<Task<?>, Thread> entry : pool.getActiveThreads().entrySet()){
 			Task<?> task = entry.getKey();
 			Thread thread = entry.getValue();
 
 			Map<String, String> map = new HashMap<>();
 			map.put("id", task.getTaskId());
-			map.put("createTime", format.format(task.getCreateTime()));
+			map.put("submitTime", format.format(task.getSubmitTime()));
 			map.put("startTime", format.format(task.getStartTime()));
 
 			StringBuilder builder = new StringBuilder();

@@ -57,7 +57,6 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		}
 
 		ScheduleContext<?> scheduleContext = (ScheduleContext<?>)bean;
-
 		String scheduleBeanName = scheduleContext.getScheduleBeanName(); 
 		FomSchedule fomSchedule = scheduleContext.getClass().getAnnotation(FomSchedule.class);
 		if(StringUtils.isEmpty(scheduleBeanName) && fomSchedule == null){ // 通过@Bean注入的不需要处理
@@ -86,7 +85,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 			setOtherConf(scheduleConfig, fomSchedule);
 			setValue(scheduleConfig, scheduleContext, scheduleBean);
 
-		}else{ // xml配置
+		}else{ // xml配置方式 TODO
 
 		}
 

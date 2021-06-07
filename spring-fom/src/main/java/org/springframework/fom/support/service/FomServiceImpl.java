@@ -3,11 +3,14 @@ package org.springframework.fom.support.service;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotBlank;
@@ -16,6 +19,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.fom.Result;
 import org.springframework.fom.ScheduleContext;
 import org.springframework.fom.ScheduleInfo;
 import org.springframework.fom.ScheduleStatistics;
@@ -258,5 +262,63 @@ public class FomServiceImpl implements FomService, ApplicationContextAware{
 				 oos.writeObject(configMap);
 			}
 		}
+	}
+
+	@Override
+	public String buildExport(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName) {
+		ScheduleContext<?> schedule = scheduleMap.get(scheduleName);
+		Assert.notNull(schedule, "schedule names " + scheduleName + " not exist.");
+		
+		ScheduleStatistics scheduleStatistics = schedule.getScheduleStatistics();
+		Map<String, List<Result<?>>> success = scheduleStatistics.copySuccessMap();
+		Map<String, List<Result<?>>> faield = scheduleStatistics.copyFaieldMap();
+		
+		TreeSet<String> daySet = new TreeSet<>();
+		daySet.addAll(success.keySet());
+		daySet.addAll(faield.keySet());
+		
+		DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd HH:mm:ss SSS");
+		StringBuilder builder = new StringBuilder();
+		for(String day : daySet){
+			List<Result<?>> slist = success.get(day);
+			if(slist != null){
+				builder.append(day).append(" success:").append("\n");
+				for(Result<?> result : slist){
+					builder.append(result.getTaskId()).append(", ");
+					builder.append("submitTime=").append(dateFormat.format(result.getSubmitTime())).append(", ");
+					builder.append("startTime=").append(dateFormat.format(result.getStartTime())).append(", ");
+					builder.append("cost=").append(result.getCostTime()).append("ms, ");
+					builder.append("result=").append(result.getContent()).append("\n");
+				}
+				builder.append("\n");
+			}
+			
+			List<Result<?>> flist = faield.get(day);
+			if(flist != null){
+				builder.append(day).append(" failed:").append("\n");
+				for(Result<?> result : flist){
+					builder.append(result.getTaskId()).append(", ");
+					builder.append("submitTime=").append(dateFormat.format(result.getSubmitTime())).append(", ");
+					builder.append("startTime=").append(dateFormat.format(result.getStartTime())).append(", ");
+					builder.append("cost=").append(result.getCostTime()).append("ms, ");
+					Throwable throwable = result.getThrowable();
+					if(throwable == null){
+						builder.append("cause=null").append("\n");
+					}else{
+						Throwable cause = throwable;
+						while((cause = throwable.getCause()) != null){
+							throwable = cause;
+						} 
+						
+						builder.append("cause=").append(throwable.toString()).append("\n");
+						for(StackTraceElement stack : throwable.getStackTrace()){ 
+							builder.append(stack).append("\n");
+						}
+					}
+				}
+				builder.append("\n");
+			}
+		}
+		return builder.toString();
 	}
 }

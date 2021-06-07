@@ -127,5 +127,11 @@ public interface FomService {
 	 * @param map
 	 * @throws Exception 
 	 */
-	void saveConfig(String scheduleName, HashMap<String, Object> map) throws Exception;
+	void saveConfig(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName, HashMap<String, Object> map) throws Exception;
+	
+	/**
+	 * 导出任务统计
+	 * @param scheduleName
+	 */
+	String buildExport(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName);
 }

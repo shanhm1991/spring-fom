@@ -454,7 +454,7 @@ table = $("#fom").DataTable({
 					}
 					
 					var html = "<table class='detailTb' width='100%' border='1' style='margin=10px;'>"
-					         + "<thead><tr><th>id</th><th>create time</th></tr></thead>";
+					         + "<thead><tr><th>id</th><th>submit time</th></tr></thead>";
 					var count = 0;         
 					for (var key in data) {
 						html += "<tr style='line-height:22px;height:22px;'><td><div>" + key + "</div></td><td><div>" + data[key] + "</div></td></tr>"
@@ -463,7 +463,7 @@ table = $("#fom").DataTable({
 					html += "</table>";
 					
 					layer.open({
-						title : 'create time of waiting tasks[ ' + count + ' ]',
+						title : 'submit time of waiting tasks[ ' + count + ' ]',
 						type : 1,
 						skin : 'layui-layer-demo',
 						area : [ '1200px', '600px' ],
@@ -494,12 +494,12 @@ table = $("#fom").DataTable({
 				}
 				
 				var html = "<table class='detailTb' width='100%' border='1' style='margin=10px;'>"
-				         + "<thead><tr><th>id</th><th>create Time</th><th>start Time</th><th>Thread Stack</th></tr></thead>";
+				         + "<thead><tr><th>id</th><th>submit Time</th><th>start Time</th><th>Thread Stack</th></tr></thead>";
 				var list = data.data;
 				var count = 0;
 				$.each(list, function(i, item){  
 					count++;
-					html += "<tr style='line-height:22px;height:22px;'><td>" + item.id + "</td><td>" + item.createTime + "</td><td>" + item.startTime + "</td><td>" + item.stack + "</td></tr>"
+					html += "<tr style='line-height:22px;height:22px;'><td>" + item.id + "</td><td>" + item.submitTime + "</td><td>" + item.startTime + "</td><td>" + item.stack + "</td></tr>"
 	            });  
 				html += "</table>";
 				
@@ -535,14 +535,14 @@ table = $("#fom").DataTable({
 				}
 				
 				var html = "<table class='detailTb' width='100%' border='1' style='margin=10px;'>";
-				html += "<thead><tr><th>id</th><th>create Time</th><th>start Time</th><th>cost Time</th><th>cause</th></tr></thead>";
+				html += "<thead><tr><th>id</th><th>submit Time</th><th>start Time</th><th>cost Time</th><th>cause</th></tr></thead>";
 				var list = data.data;
 				var count = 0;
 				$.each(list, function(i, item){  
 					count++;
 					html += "<tr style='line-height:22px;height:22px;'>" 
 					      + "<td>" + item.id + "</td>" 
-					      + "<td>" + item.createTime + "</td>" 
+					      + "<td>" + item.submitTime + "</td>" 
 					      + "<td>" + item.startTime + "</td>" 
 					      + "<td>" + item.costTime + "</td>" 
 					      + "<td>" + item.cause + "</td></tr>"
@@ -552,6 +552,10 @@ table = $("#fom").DataTable({
 				layer.open({
 					title : 'Throwable of failed tasks[ ' + count + ' ]',
 					type : 1,
+					btn:['数据导出'],
+					yes:function(index, layero){
+					 window.open(root + "/fom/schedule/export?scheduleName=" + scheduleName);
+					},
 					skin : 'layui-layer-demo',
 					area : [ '1500px', '600px' ],
 					maxmin : true,
@@ -579,13 +583,12 @@ table = $("#fom").DataTable({
 					
 					var data = data.data;
 					var html = '<div>'
-						     + '<div style="width:100%; float:left; margin-left:50px;">'
+						     + '<div style="width:90%; float:left; margin-left:50px;">'
 						     + '<div class="layui-input-inline"> '
 						     + '起止日期：<input schedule="' + scheduleName + '" id="statDay" type="text" style="width:200px;"readonly="readonly"> '
 						     + '区间设置ms：<input id="statLevel" style="width:300px;"/> '
 						     + '数据保存天数：<input id="saveDay" style="width:40px;"/> '
-						     + '<button schedule="' + scheduleName + '" onclick="saveStatConf(this);" style="margin-left:5px;">保存</button>'
-						     + '<button schedule="' + scheduleName + '" onclick="dataDownload(this);" style="margin-left:5px;">下载数据</button>'
+						     + '<button schedule="' + scheduleName + '" onclick="saveStatConf(this);" style="margin-left:5px; padding-left:4px;padding-right:4px;"> 确认 </button>'
 						     + '</div></div>'
 						     + '<div id="HighchartsAll" style="width:25%; height:500px; float:left;"/>'
 						     + '<div id="HighchartsDay" style="width:75%; height:500px; float:left;"/>'
@@ -595,7 +598,11 @@ table = $("#fom").DataTable({
 						title : 'Time cost of success task',
 						type : 1,
 						skin : 'layui-layer-demo',
-						area : [ '1500px', '650px' ],
+						btn:['数据导出'],
+						yes:function(index, layero){
+						 window.open(root + "/fom/schedule/export?scheduleName=" + scheduleName);
+						},
+						area : [ '1600px', '650px' ],
 						maxmin : true,
 						closeBtn : 2,
 						anim : 2,

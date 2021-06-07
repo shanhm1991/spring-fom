@@ -24,8 +24,8 @@ class TimedFuture<T> extends FutureTask<T> {
 		}
 	}
 
-	public long getCreateTime() {
-		return task.getCreateTime();
+	public long getSubmitTime() {
+		return task.getSubmitTime();
 	}
 	
 	public long getStartTime() {

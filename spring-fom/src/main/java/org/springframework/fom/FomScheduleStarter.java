@@ -29,7 +29,7 @@ public class FomScheduleStarter implements SmartLifecycle, ApplicationContextAwa
 		String[] scheduleNames = applicationContext.getBeanNamesForType(ScheduleContext.class);
 		for(String scheduleName : scheduleNames){
 			ScheduleContext<?> schedule = (ScheduleContext)applicationContext.getBean(scheduleName);
-			logger.info("start schedule[{}]: {}", scheduleName, schedule.getScheduleConfig().getConfMap()); 
+			logger.info("load schedule[{}]: {}", scheduleName, schedule.getScheduleConfig().getConfMap()); 
 			schedule.scheduleStart();
 		}
 	}
@@ -40,7 +40,6 @@ public class FomScheduleStarter implements SmartLifecycle, ApplicationContextAwa
 		String[] scheduleNames = applicationContext.getBeanNamesForType(ScheduleContext.class);
 		for(String scheduleName : scheduleNames){
 			ScheduleContext<?> schedule = (ScheduleContext)applicationContext.getBean(scheduleName);
-			logger.info("stop schedule[{}]", scheduleName);
 			schedule.scheduleShutdown();
 		}
 	}

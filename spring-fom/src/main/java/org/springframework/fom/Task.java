@@ -19,7 +19,8 @@ public abstract class Task<E> implements Callable<Result<E>> {
 
 	protected final String id;
 
-	private final long createTime;
+	// 定时线程提交时设置
+	private long submitTime;
 
 	// 任务线程启动时自己设置
 	private volatile long startTime;
@@ -32,12 +33,10 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	
 	public Task(){
 		this.id = Thread.currentThread().getName() + "-Task";
-		this.createTime = System.currentTimeMillis();
 	}
 
 	public Task(String id) { 
 		this.id = id;
-		this.createTime = System.currentTimeMillis();
 	}
 
 	@Override
@@ -46,7 +45,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		logger.debug("task started."); 
 
 		this.startTime = System.currentTimeMillis();
-		final Result<E> result = new Result<>(id, createTime, startTime); 
+		final Result<E> result = new Result<>(id, submitTime, startTime); 
 		doCall(result);
 		result.setCostTime(System.currentTimeMillis() - startTime); 
 
@@ -59,9 +58,9 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		}
 
 		if(result.isSuccess()){
-			logger.info("task success, cost={}ms {}", result.getCostTime(), result.getContent());
+			logger.info("task success, cost={}ms, restult={}", result.getCostTime(), result.getContent());
 		}else{
-			logger.warn("task failed, cost={}ms {}", result.getCostTime(), result.getContent());
+			logger.warn("task failed, cost={}ms, restult={}", result.getCostTime(), result.getContent());
 		}
 		return result;
 	}
@@ -101,9 +100,13 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	public final String getTaskId() {
 		return id;
 	}
+	
+	void setSubmitTime(long submitTime) {
+		this.submitTime = submitTime;
+	}
 
-	public final long getCreateTime() {
-		return createTime;
+	public long getSubmitTime() {
+		return submitTime;
 	}
 
 	public final long getStartTime() {

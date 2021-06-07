@@ -33,8 +33,7 @@ public class FomBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar
 			return;
 		}
 		
-		AnnotationAttributes attrs = 
-				AnnotationAttributes.fromMap(meta.getAnnotationAttributes(EnableFom.class.getName()));
+		AnnotationAttributes attrs = AnnotationAttributes.fromMap(meta.getAnnotationAttributes(EnableFom.class.getName()));
 		if((boolean)attrs.get("enableFomView")){
 			// 注册FomController
 			RootBeanDefinition fomController = new RootBeanDefinition(FomController.class);
@@ -62,10 +61,6 @@ public class FomBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar
 		Class<?> clazz;
 		for(String beanName : beanNames){
 			BeanDefinition beanDefinition = registry.getBeanDefinition(beanName);
-			if(beanDefinition == null){
-				System.out.println(beanName);
-			}
-			
 			String className = beanDefinition.getBeanClassName();
 			if(className != null){
 				try {

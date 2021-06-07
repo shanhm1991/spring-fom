@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -74,6 +75,24 @@ public class ScheduleStatistics {
 		statConfigMap.put(STAT_LEVEL_5, DEFAULT_STAT_LEVEL_5);
 	}
 
+	public Map<String, List<Result<?>>> copySuccessMap(){
+		return copy(successMap);
+	}
+
+	public Map<String, List<Result<?>>> copyFaieldMap(){
+		return copy(failedMap);
+	}
+
+	private Map<String, List<Result<?>>> copy(Map<String, Queue<Result<?>>> stat){
+		Map<String, List<Result<?>>> map = new HashMap<>();
+		for(Entry<String, Queue<Result<?>>>  entry : stat.entrySet()){
+			String day = entry.getKey();
+			Queue<Result<?>> queue = entry.getValue();
+			map.put(day, Arrays.asList(queue.toArray(new Result[queue.size()])));
+		}
+		return map;
+	}
+
 	void record(Result<?> result){
 		if(result.isSuccess()){
 			record(result, success, successMap);
@@ -84,7 +103,7 @@ public class ScheduleStatistics {
 
 	private void record(Result<?> result, AtomicLong count, Map<String, Queue<Result<?>>> statMap){
 		count.incrementAndGet();
-		
+
 		String day = new SimpleDateFormat("yyyy/MM/dd").format(System.currentTimeMillis());
 		Queue<Result<?>> queue = statMap.get(day); 
 		// 尽量避免使用同步，虽然api中免不了也有同步的使用
@@ -104,12 +123,12 @@ public class ScheduleStatistics {
 		}
 		queue.add(result);
 	}
-	
+
 	public void setSaveDay(int saveDay){
 		Assert.isTrue(saveDay >= 1, "saveDay cannot be less than 1");
 		statConfigMap.put(STAT_DAY, saveDay);
 	}
-	
+
 	public boolean setLevel(String[] levelArray){
 		Assert.isTrue(levelArray != null && levelArray.length == 5, "invalid statLevel");
 		int level_1 = Integer.parseInt(levelArray[0]);
@@ -169,7 +188,7 @@ public class ScheduleStatistics {
 			level_5 = statConfigMap.get(STAT_LEVEL_5);
 			saveDay = statConfigMap.get(STAT_DAY);
 		}
-		
+
 		Map<String, Map<String, Object>> statMap = new HashMap<>();
 		int countLv1 = 0; 
 		int countLv2 = 0; 
@@ -185,7 +204,7 @@ public class ScheduleStatistics {
 		for(Entry<String, Queue<Result<?>>> entry : successMap.entrySet()){
 			String day = entry.getKey();
 			Queue<Result<?>> queue = entry.getValue();
-			
+
 			int dayCountLv1 = 0; 
 			int dayCountLv2 = 0; 
 			int dayCountLv3 = 0; 
@@ -211,7 +230,7 @@ public class ScheduleStatistics {
 				}else{
 					dayCountLv6++;
 				}
-				
+
 				dayCount++;
 				dayTotal += cost;
 				if(dayMin == 0){
@@ -223,7 +242,7 @@ public class ScheduleStatistics {
 					datMax = cost;
 				}
 			}
-			
+
 			Map<String, Object> dayMap = new HashMap<>();
 			dayMap.put("day", day);
 			dayMap.put("level1", dayCountLv1);
@@ -236,7 +255,7 @@ public class ScheduleStatistics {
 			dayMap.put("minCost", dayMin);
 			dayMap.put("maxCost", datMax);
 			dayMap.put("avgCost", dayCount > 0 ? dayTotal / dayCount : 0);
-			
+
 			statMap.put(day, dayMap);
 			countLv1 += dayCountLv1;
 			countLv2 += dayCountLv2;
@@ -267,7 +286,7 @@ public class ScheduleStatistics {
 		allMap.put("avgCost", count > 0 ? total / count : 0);
 		allMap.put("minCost", min);
 		allMap.put("maxCost", max);
-		
+
 		Map<String, Object> successMap = new HashMap<>();
 		successMap.put(STAT_LEVEL_1, level_1);
 		successMap.put(STAT_LEVEL_2, level_2);
@@ -276,7 +295,7 @@ public class ScheduleStatistics {
 		successMap.put(STAT_LEVEL_5, level_5);
 		successMap.put(STAT_DAY, saveDay);
 		successMap.put("all", allMap);
-		
+
 		DateFormat dateFormata = new SimpleDateFormat("yyyy/MM/dd");
 		Calendar calendar = Calendar.getInstance();
 		if(statDay != null){
@@ -285,7 +304,7 @@ public class ScheduleStatistics {
 			statDay = dateFormata.format(System.currentTimeMillis());
 			calendar.setTime(new Date());
 		}
-		
+
 		// endDay 往前固定取十天
 		successMap.put("day", statDay);
 		for(int i = 1; i <= 10; i++){
@@ -305,17 +324,17 @@ public class ScheduleStatistics {
 				dayMap.put("day", statDay);
 			}
 			successMap.put("day" + i, dayMap);
-			
+
 			calendar.add(Calendar.DAY_OF_MONTH, -1);
 			statDay = dateFormata.format(calendar.getTime()); 
 		}
 		return successMap;
 	}
-	
+
 	List<Map<String, String>> getFailedStat() {  
 		List<Map<String, String>> failes = new ArrayList<>();
-		
-		DateFormat dateFormata = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+
+		DateFormat dateFormata = new SimpleDateFormat("yyyyMMdd HH:mm:ss SSS");
 		Iterator<String> it = dayHasSaved.iterator();
 		while(it.hasNext()){
 			String day = it.next();
@@ -323,23 +342,23 @@ public class ScheduleStatistics {
 			if(queue == null){
 				continue;
 			}
-			
+
 			for(Result<?> result : queue){
 				Map<String, String> map = new HashMap<>();
 				map.put("id", result.getTaskId());
-				map.put("createTime", dateFormata.format(result.getCreateTime())); 
+				map.put("submitTime", dateFormata.format(result.getSubmitTime())); 
 				map.put("startTime", dateFormata.format(result.getStartTime()));
-				map.put("costTime", dateFormata.format(result.getCostTime()));
-				
+				map.put("costTime", result.getCostTime() + "ms");
+
 				if(result.getThrowable() == null){
 					map.put("cause", "null");
 				}else{
 					Throwable throwable = result.getThrowable();
 					Throwable cause = throwable;
-					while((cause = cause.getCause()) != null){
+					while((cause = throwable.getCause()) != null){
 						throwable = cause;
 					}
-					
+
 					StringBuilder builder = new StringBuilder(throwable.toString()).append(":<br>");
 					for(StackTraceElement stack : throwable.getStackTrace()){ 
 						builder.append(stack).append("<br>");

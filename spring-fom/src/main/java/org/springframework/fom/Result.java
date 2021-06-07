@@ -13,7 +13,7 @@ public class Result<E> implements Cloneable{
 
 	private final String taskId;
 
-	private final long createTime;
+	private final long submitTime;
 
 	private final long startTime;
 
@@ -25,9 +25,9 @@ public class Result<E> implements Cloneable{
 
 	private Throwable throwable;
 
-	Result(String sourceUri, long createTime, long startTime) {
+	Result(String sourceUri, long submitTime, long startTime) {
 		this.taskId = sourceUri;
-		this.createTime = createTime;
+		this.submitTime = submitTime;
 		this.startTime = startTime;
 	}
 
@@ -35,8 +35,8 @@ public class Result<E> implements Cloneable{
 		return taskId;
 	}
 
-	public long getCreateTime() {
-		return createTime;
+	public long getSubmitTime() {
+		return submitTime;
 	}
 
 	public long getStartTime() {
@@ -83,7 +83,7 @@ public class Result<E> implements Cloneable{
 
 	@Override
 	public String toString() {
-		return "{taskId=" + taskId + ", success=" + success + ", createTime=" + createTime + ", startTime="
+		return "{taskId=" + taskId + ", success=" + success + ", submitTime=" + submitTime + ", startTime="
 				+ startTime + ", costTime=" + costTime + ", content=" + content + ", throwable=" + throwable + "}";
 	}
 }

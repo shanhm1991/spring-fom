@@ -13,7 +13,7 @@ import org.springframework.util.StringUtils;
  */
 public class IdGenerator {
 	
-	private AtomicInteger index = new AtomicInteger(0);
+	private final AtomicInteger index = new AtomicInteger(0);
 
 	/**
 	 * 获取固定长度的id

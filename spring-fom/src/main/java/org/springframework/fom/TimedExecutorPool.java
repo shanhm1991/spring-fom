@@ -25,8 +25,13 @@ class TimedExecutorPool extends ThreadPoolExecutor {
 		return new TimedFuture<>(runnable, value);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected <T> TimedFuture<T> newTaskFor(Callable<T> callable) {
+		if(callable instanceof Task){
+			Task<T> task = (Task<T>)callable;
+			task.setSubmitTime(System.currentTimeMillis()); 
+		}
 		return new TimedFuture<>(callable);
 	}
 
@@ -59,6 +64,8 @@ class TimedExecutorPool extends ThreadPoolExecutor {
 
 	@Override
 	public <T> TimedFuture<T> submit(Callable<T> callable) { 
+		if (callable == null)
+			throw new NullPointerException();
 		TimedFuture<T> future = newTaskFor(callable);
 		execute(future);
 		return future;

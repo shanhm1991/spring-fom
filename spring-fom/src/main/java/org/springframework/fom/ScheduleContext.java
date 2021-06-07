@@ -624,7 +624,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 		if(task.getScheduleBatch() != null){
 			task.getScheduleBatch().increaseTaskNotCompleted();
 		}
-		logger.info("task[{}] submitted.", task.getTaskId()); 
+		logger.debug("task[{}] submitted.", task.getTaskId()); 
 		return future; 
 	}
 	

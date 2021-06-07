@@ -1,26 +1,19 @@
 package org.springframework.fom.support.controller;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.ValidationException;
+import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.fom.ScheduleInfo;
-import org.springframework.fom.support.FomAdvice;
 import org.springframework.fom.support.Response;
 import org.springframework.fom.support.Response.Page;
 import org.springframework.fom.support.service.FomService;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -32,10 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  */
 @RequestMapping("/fom")
-public class FomController {
+public class FomController extends FomExceptionController {
 	
-	private static Logger logger = LoggerFactory.getLogger(FomController.class);
-
 	@Autowired
 	private FomService fomService;
 
@@ -95,6 +86,18 @@ public class FomController {
 		return new Response<>(Response.SUCCESS, "", fomService.getActiveTasks(scheduleName));  
 	}
 	
+	@RequestMapping("/schedule/export")
+	public void statExport(String scheduleName, HttpServletResponse resp) throws IOException { 
+		String stat = fomService.buildExport(scheduleName);
+		resp.reset();
+		resp.setContentType("application/octet-stream;charset=UTF-8");
+		resp.addHeader("Content-Disposition", "attachment;filename=\"" + scheduleName + "." + System.currentTimeMillis() +".txt\"");
+		try(PrintWriter write = resp.getWriter()){
+			write.write(stat);
+			write.flush();
+		}
+	}
+	
 	@RequestMapping("/schedule/faileds")
 	@ResponseBody
 	public Response<List<Map<String, String>>> failedStat(String scheduleName) throws ParseException { 
@@ -121,65 +124,5 @@ public class FomController {
 		HashMap<String, Object> configMap = (HashMap<String, Object>) new ObjectMapper().readValue(data, HashMap.class);
 		fomService.saveConfig(scheduleName, configMap);
 		return new Response<>(Response.SUCCESS, ""); 
-	}
-	
-	/*************************Handlers************************************/
-	@Autowired
-	private FomAdvice fomAdvice;
-	
-	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-	@ResponseBody
-	public Response<Void> handle(HttpRequestMethodNotSupportedException e){
-		logger.error("", e); 
-		Response<Void> resp = new Response<>(Response.ILLEGAL, "request not support");
-		fomAdvice.logResponse(resp);
-		return resp;
-	}
-	
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	@ResponseBody
-	public Response<Void> handle(MethodArgumentNotValidException e){
-		logger.error("", e); 
-		BindingResult binding = e.getBindingResult();
-        if (binding.hasErrors()) {
-            List<ObjectError> errors = binding.getAllErrors();
-            if (!errors.isEmpty()) {
-                FieldError fieldError = (FieldError)errors.get(0);
-                Response<Void> resp = new Response<>(Response.ILLEGAL, fieldError.getDefaultMessage());
-        		fomAdvice.logResponse(resp);
-        		return resp;
-            }
-        }
-        
-        Response<Void> resp = new Response<>(Response.ILLEGAL, "illegal request");
-		fomAdvice.logResponse(resp);
-		return resp;
-	}
-	
-	@ExceptionHandler(IllegalArgumentException.class)
-	@ResponseBody
-	public Response<Void> handle(IllegalArgumentException e){
-		logger.error("", e); 
-		Response<Void> resp = new Response<>(Response.ILLEGAL, e.getMessage());
-		fomAdvice.logResponse(resp);
-		return resp;
-	}
-	
-	@ExceptionHandler(ValidationException.class)
-	@ResponseBody
-	public Response<Void> handle(ValidationException e){
-		logger.error("", e);
-		Response<Void> resp = new Response<>(Response.ILLEGAL, e.getMessage());
-		fomAdvice.logResponse(resp);
-		return resp;
-	}
-	
-	@ExceptionHandler(Exception.class)
-	@ResponseBody
-	public Response<Void> handle(Exception e){
-		logger.error("", e); 
-		Response<Void> resp = new Response<>(Response.ERROR, e.getMessage());
-		fomAdvice.logResponse(resp);
-		return resp;
 	}
 }
