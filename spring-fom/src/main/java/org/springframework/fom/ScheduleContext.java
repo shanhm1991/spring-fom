@@ -87,7 +87,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 	private final AtomicBoolean nextTimeHasSated = new AtomicBoolean(false);
 
 	private volatile boolean enableTaskConflict = false;
-	
+
 	protected Logger logger = LoggerFactory.getLogger(ScheduleContext.class); 
 
 	// 记录外部线程submitBatch提交次数，与定时任务无关
@@ -359,7 +359,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 							try {
 								wait(waitTime);
 							} catch (InterruptedException e) { // 等待时响应中断：立即跳出等待
-								
+
 							}
 						}
 					}
@@ -511,13 +511,13 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 
 			lastTime = System.currentTimeMillis();
 
-			Collection<? extends Task<E>> tasks = newSchedulTasks();
-			if(tasks == null || tasks.isEmpty()){
-				return;
-			}
-
 			ScheduleBatch<E> scheduleBatch = new ScheduleBatch<>(true, schedulTimes, lastTime);
 			try{
+				Collection<? extends Task<E>> tasks = newSchedulTasks();
+				if(tasks == null || tasks.isEmpty()){
+					return;
+				}
+
 				if(enableTaskConflict){
 					submitWithConflict(tasks, scheduleBatch);
 				}else{
@@ -543,10 +543,10 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 							logger.warn("task[{}] is still alive, create canceled.", taskId);
 							continue;
 						}
-						
+
 						task.setScheduleBatch(scheduleBatch);
 						TimedFuture future = (TimedFuture)submit(task);
-						
+
 						it.remove();
 						submitMap.put(taskId, future);    
 						submitFutures.add(future);
@@ -567,7 +567,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 					taskId = task.getTaskId();
 					task.setScheduleBatch(scheduleBatch);
 					TimedFuture future = (TimedFuture)submit(task);
-					
+
 					it.remove();
 					submitFutures.add(future);
 				}
@@ -627,7 +627,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 		logger.debug("task[{}] submitted.", task.getTaskId()); 
 		return future; 
 	}
-	
+
 	private List<Future<Result<E>>> submitBatch(Collection<? extends Task<E>> tasks, ScheduleBatch<E> batch){
 		List<Future<Result<E>>> futureList = new ArrayList<>(tasks.size());
 		Iterator<? extends Task<E>> it = tasks.iterator();
@@ -638,7 +638,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 				taskId = task.getTaskId();
 				task.setScheduleBatch(batch);
 				Future<Result<E>> future = submit(task);
-				
+
 				it.remove();
 				futureList.add(future);
 			}
@@ -660,11 +660,11 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 		if(tasks == null || tasks.isEmpty()){
 			return new ArrayList<>();
 		}
-		
+
 		ScheduleBatch<E> batch = new ScheduleBatch<>(false, batchSubmits.incrementAndGet(), System.currentTimeMillis());
 		return submitBatch(tasks, batch);
 	}
-	
+
 	/**
 	 * 批量提交任务，并在等待秒数之后获取结果
 	 * @param tasks
@@ -678,12 +678,12 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 		if(tasks == null || tasks.isEmpty()){
 			return new ArrayList<>();
 		}
-		
+
 		ScheduleBatch<E> batch = new ScheduleBatch<>(false, batchSubmits.incrementAndGet(), System.currentTimeMillis());
 		List<Future<Result<E>>> futureList = submitBatch(tasks, batch);
-		
+
 		batch.waitTaskCompleted(timeout);
-		
+
 		List<Result<E>> resultList = new ArrayList<>(futureList.size());
 		for(Future<Result<E>> future : futureList){
 			if(future.isDone()){
@@ -844,9 +844,11 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 
 	void valueEnvirmentField(Set<Field> envirmentChange) throws NumberFormatException, IllegalArgumentException, IllegalAccessException{
 		// 修改当前schedul引用对应变量属性值，不保证线程安全 
+		String key = "";
+		String expression;
 		for(Field field: envirmentChange){
 			Value value = field.getAnnotation(Value.class);
-			String expression = value.value();
+			expression = value.value();
 
 			List<String> list = FomBeanPostProcessor.getProperties(expression);
 			for(String ex : list){
@@ -854,9 +856,10 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 				if(index == -1){
 					index = ex.indexOf("}");
 				}
-				String key = ex.substring(2, index);
+				key = ex.substring(2, index);
 
-				String confValue = scheduleConfig.get(key);
+				Object obj = scheduleConfig.get(key);
+				String confValue = String.valueOf(obj);
 				expression = expression.replace(ex, confValue);
 			}
 
@@ -869,31 +872,24 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 			switch(field.getGenericType().toString()){
 			case "short":
 			case "class java.lang.Short":
-				field.set(instance, Short.valueOf(expression));
-				break;
+				field.set(instance, Short.valueOf(expression)); break;
 			case "int":
 			case "class java.lang.Integer":
-				field.set(instance, Integer.valueOf(expression));
-				break;
+				field.set(instance, Integer.valueOf(expression)); break;
 			case "long":
 			case "class java.lang.Long":
-				field.set(instance, Long.valueOf(expression));
-				break;
+				field.set(instance, Long.valueOf(expression)); break;
 			case "float":
 			case "class java.lang.Float":
-				field.set(instance, Float.valueOf(expression));
-				break;
+				field.set(instance, Float.valueOf(expression)); break;
 			case "double":
 			case "class java.lang.Double":
-				field.set(instance, Double.valueOf(expression));
-				break;
+				field.set(instance, Double.valueOf(expression)); break;
 			case "boolean":
 			case "class java.lang.Boolean":
-				field.set(instance, Boolean.valueOf(expression));
-				break;
+				field.set(instance, Boolean.valueOf(expression)); break;
 			case "class java.lang.String":
-				field.set(instance, expression);
-				break;
+				field.set(instance, expression); break;
 			default:
 				throw new UnsupportedOperationException("value set failed：" + instance.getClass().getName() + "." + field.getName());
 			}

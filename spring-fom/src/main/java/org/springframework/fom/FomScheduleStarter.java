@@ -6,6 +6,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.fom.annotation.FomSchedule;
 
 /**
  * 
@@ -29,8 +30,13 @@ public class FomScheduleStarter implements SmartLifecycle, ApplicationContextAwa
 		String[] scheduleNames = applicationContext.getBeanNamesForType(ScheduleContext.class);
 		for(String scheduleName : scheduleNames){
 			ScheduleContext<?> schedule = (ScheduleContext)applicationContext.getBean(scheduleName);
-			logger.info("load schedule[{}]: {}", scheduleName, schedule.getScheduleConfig().getConfMap()); 
-			schedule.scheduleStart();
+			ScheduleConfig config = schedule.getScheduleConfig();
+			if(config.getBoolean(FomSchedule.ENABLE, true)){
+				schedule.scheduleStart();
+				logger.info("load and start schedule[{}]: {}", scheduleName, schedule.getScheduleConfig().getConfMap()); 
+			}else{
+				logger.info("load schedule[{}]: {}", scheduleName, schedule.getScheduleConfig().getConfMap()); 
+			}
 		}
 	}
 

@@ -31,7 +31,7 @@ public class MultiSchedulTest implements ScheduleCompleter<Object> {
 		} catch (InterruptedException e) {
 			LOG.info("task cancled due to interrupt.");
 		} 
-		throw new IllegalArgumentException("reason 1");
+		return 1;
 	}
 	
 	@Scheduled
@@ -42,7 +42,7 @@ public class MultiSchedulTest implements ScheduleCompleter<Object> {
 		} catch (InterruptedException e) {
 			LOG.info("task cancled due to interrupt.");
 		} 
-		throw new IllegalArgumentException("reason 2");
+		return "test";
 	}
 
 	@Override

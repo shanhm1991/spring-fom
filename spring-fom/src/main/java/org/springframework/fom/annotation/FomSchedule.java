@@ -96,6 +96,11 @@ public @interface FomSchedule {
 	public static final String IGNORE_EXECREQUEST_WHEN_RUNNING = "ignoreExecRequestWhenRunning";
 	
 	/**
+	 * 加载时是否启动
+	 */
+	public static final String ENABLE = "enable";
+	
+	/**
 	 * 线程数：默认1
 	 */
 	public static final int THREAD_CORE_DEFAULT = 1;
@@ -159,10 +164,27 @@ public @interface FomSchedule {
 	 * 默认Running状态时忽略执行请求
 	 */
 	public static final boolean IGNORE_EXECREQUEST_WHEN_RUNNING_DEFAULT = true;
+	
+	/**
+	 * 默认加载启动
+	 */
+	public static final boolean ENABLE_DEFAULT = true;
 
 	@AliasFor(annotation = Component.class)
 	String value() default "";
 
+	/**
+	 * 是否启用
+	 * @return
+	 */
+	boolean enable() default ENABLE_DEFAULT;
+	
+	String enableString() default "";
+	
+	/**
+	 * 备注
+	 * @return
+	 */
 	String remark() default "";
 
 	/**

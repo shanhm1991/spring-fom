@@ -17,7 +17,7 @@ import org.springframework.fom.support.Response;
  * @author shanhm1991@163.com
  *
  */
-public interface FomService {
+public interface FomService extends ScheduleService {
 
 	/**
 	 * 获取所有schedule信息

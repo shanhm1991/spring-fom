@@ -16,9 +16,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.quartz.CronExpression;
 import org.springframework.fom.annotation.FomSchedule;
 import org.springframework.fom.collections.MapUtils;
+import org.springframework.fom.quartz.CronExpression;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -53,7 +53,7 @@ public class ScheduleConfig {
 		internalConf.put(FomSchedule.CANCEL_TASK_ONTIMEOUT, FomSchedule.CANCEL_TASK_ONTIMEOUT_DEFAULT);
 		internalConf.put(FomSchedule.DETECT_TIMEOUT_ONEACHTASK, FomSchedule.DETECT_TIMEOUT_ONEACHTASK_DEFAULT);
 		internalConf.put(FomSchedule.IGNORE_EXECREQUEST_WHEN_RUNNING, FomSchedule.IGNORE_EXECREQUEST_WHEN_RUNNING_DEFAULT);
-
+		internalConf.put(FomSchedule.ENABLE, FomSchedule.ENABLE_DEFAULT);
 		//readOnlyConf.add(FomSchedule.QUEUE_SIZE);
 		//readOnlyConf.add(FomSchedule.EXEC_ONLOAN);
 	}
@@ -396,6 +396,18 @@ public class ScheduleConfig {
 		confMap.put(FomSchedule.ENABLE_TASK_CONFLICT, enableTaskConflict);
 		return true;
 	}
+	
+	public boolean getEnable(){
+		return MapUtils.getBoolean(confMap, FomSchedule.ENABLE, FomSchedule.ENABLE_DEFAULT);
+	}
+	
+	public boolean setEnable(boolean enable){
+		if(enable == getEnable()){
+			return false;
+		}
+		confMap.put(FomSchedule.ENABLE, enable);
+		return true;
+	}
 
 	public boolean getIgnoreExecRequestWhenRunning(){
 		return MapUtils.getBoolean(confMap, FomSchedule.IGNORE_EXECREQUEST_WHEN_RUNNING, FomSchedule.IGNORE_EXECREQUEST_WHEN_RUNNING_DEFAULT);
@@ -474,7 +486,6 @@ public class ScheduleConfig {
 		return list;
 	}
 
-	// 没有做自我保护
 	Set<Field> saveConfig(HashMap<String, Object> map){
 		Set<Field> envirmentFieldChange = new HashSet<>();
 		for(Entry<String, Object> entry : map.entrySet()){
@@ -487,7 +498,29 @@ public class ScheduleConfig {
 				if(list != null){
 					envirmentFieldChange.addAll(list);
 				}
-				confMap.put(key, value);
+				
+				// 保存配置的时候，尽量按照不改变原配置值的类型
+				Object oldValue = confMap.get(key);
+				if(oldValue != null){
+					Class<?> clazz = oldValue.getClass();
+					if(Integer.class == clazz){
+						confMap.put(key, Integer.valueOf(value.toString()));
+					}else if(Long.class == clazz){
+						confMap.put(key, Long.valueOf(value.toString()));
+					}else if(Float.class == clazz){
+						confMap.put(key, Float.valueOf(value.toString()));
+					}else if(Double.class == clazz){
+						confMap.put(key, Double.valueOf(value.toString()));
+					}else if(Boolean.class == clazz){
+						confMap.put(key, Boolean.valueOf(value.toString()));
+					}else if(Short.class == clazz){
+						confMap.put(key, Short.valueOf(value.toString()));
+					}else{
+						confMap.put(key, value);
+					}
+				}else{
+					confMap.put(key, value);
+				}
 			}
 		}
 		return envirmentFieldChange;
@@ -526,6 +559,8 @@ public class ScheduleConfig {
 			setQueueSize(Integer.valueOf(value.toString())); return;  
 		case FomSchedule.EXEC_ONLOAN:
 			setExecOnLoad(Boolean.valueOf(value.toString())); return;  
+		case FomSchedule.ENABLE:
+			setEnable(Boolean.valueOf(value.toString())); return;  
 		default:
 			throw new UnsupportedOperationException("config[" + key + "] cannot be change");
 		}

@@ -69,7 +69,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		if(!StringUtils.isEmpty(scheduleBeanName)){ 
 			scheduleBean = beanFactory.getBean(scheduleBeanName);
 		}
-		
+
 		// 获取FomSchedule，顺便设置下Logger
 		fomSchedule = clazz.getAnnotation(FomSchedule.class);
 		if(fomSchedule == null){ 
@@ -78,7 +78,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		}else{ 
 			scheduleContext.setLogger(LoggerFactory.getLogger(clazz));
 		}
-		
+
 		ScheduleConfig scheduleConfig = scheduleContext.getScheduleConfig();
 		if(fomSchedule != null){ // 注解引入
 			setCronConf(scheduleConfig, fomSchedule, scheduleContext, scheduleBean);
@@ -279,6 +279,12 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 				|| !scheduleConfig.setEnableTaskConflict(Boolean.parseBoolean(valueResolver.resolveStringValue(enableTaskConflict)))){
 			scheduleConfig.setEnableTaskConflict(fomSchedule.enableTaskConflict());
 		}
+
+		String enableString = fomSchedule.enableString();
+		if(StringUtils.isEmpty(enableString) 
+				|| !scheduleConfig.setEnable(Boolean.parseBoolean(valueResolver.resolveStringValue(enableString)))){
+			scheduleConfig.setEnable(fomSchedule.enable());
+		}
 	}
 
 	private void setValue(ScheduleConfig scheduleConfig, ScheduleContext<?> scheduleContext, Object scheduleBean){
@@ -294,13 +300,15 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 			Value value = field.getAnnotation(Value.class);
 			if(value != null){
 				List<String> list = getProperties(value.value());
+				String key = null;
+				String confValue = null;
 				for(String ex : list){
-					String confValue = valueResolver.resolveStringValue(ex);
+					confValue = valueResolver.resolveStringValue(ex);
 					int index = ex.indexOf(":");
 					if(index == -1){
 						index = ex.indexOf("}");
 					}
-					String key = ex.substring(2, index);
+					key = ex.substring(2, index);
 
 					// 一个环境变量可能赋值给多个Field，一个Field也可能被多个环境变量赋值
 					List<Field> fieldList = envirment.get(key);
@@ -309,8 +317,30 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 						envirment.put(key, fieldList);
 					}
 					fieldList.add(field);
-
 					scheduleConfig.set(key, confValue);
+				}
+				// 配置集合中的值尽量按照对应属性的类型来（如果可以的话）
+				if(list.size() == 1) {
+					switch(field.getGenericType().toString()){
+					case "short":
+					case "class java.lang.Short":
+						scheduleConfig.set(key, Short.valueOf(confValue)); break;
+					case "int":
+					case "class java.lang.Integer":
+						scheduleConfig.set(key, Integer.valueOf(confValue)); break;
+					case "long":
+					case "class java.lang.Long":
+						scheduleConfig.set(key, Long.valueOf(confValue)); break;
+					case "float":
+					case "class java.lang.Float":
+						scheduleConfig.set(key, Float.valueOf(confValue)); break;
+					case "double":
+					case "class java.lang.Double":
+						scheduleConfig.set(key, Double.valueOf(confValue)); break;
+					case "boolean":
+					case "class java.lang.Boolean":
+						scheduleConfig.set(key, Boolean.valueOf(confValue)); break;
+					}
 				}
 			}
 		}
