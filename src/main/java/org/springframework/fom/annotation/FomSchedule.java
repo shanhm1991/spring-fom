@@ -81,11 +81,6 @@ public @interface FomSchedule {
 	public static final String ENABLE_TASKRESULT_STAT = "enableTaskResultStat";
 	
 	/**
-	 * 是否中断超时的任务
-	 */
-	public static final String CANCEL_TASK_ONTIMEOUT = "cancelTaskOnTimeout";
-	
-	/**
 	 * 是否对每个任务单独检测超时
 	 */
 	public static final String DETECT_TIMEOUT_ONEACHTASK = "detectTimeoutOnEachTask";
@@ -194,7 +189,7 @@ public @interface FomSchedule {
 	String cron() default "";
 
 	/**
-	 * 任务执行计划：距上一次任务开始时的时间（单位：秒）
+	 * 任务执行计划：距上一次任务开始时的时间（单位：毫秒）
 	 * @return
 	 */
 	long fixedRate() default FIXED_RATE_DEFAULT;
@@ -202,7 +197,7 @@ public @interface FomSchedule {
 	String fixedRateString() default "";
 
 	/**
-	 * 任务执行计划：距上一次任务结束时的时间（单位：秒）
+	 * 任务执行计划：距上一次任务结束时的时间（单位：毫秒）
 	 * @return
 	 */
 	long fixedDelay() default FIXED_DELAY_DEFAULT;
@@ -234,7 +229,7 @@ public @interface FomSchedule {
 	String threadMaxString() default "";
 
 	/**
-	 * 任务线程空闲存活时间（单位：秒）：default=1，min=1，max=2147483647
+	 * 任务线程空闲存活时间（单位：毫秒）：default=1，min=1，max=2147483647
 	 * @return
 	 */
 	int threadAliveTime() default THREAD_ALIVETIME_DEFAULT;
@@ -250,7 +245,7 @@ public @interface FomSchedule {
 	String queueSizeString() default "";
 
 	/**
-	 * 任务超时时间（单位：秒）：default=0（不限时），min=1，max=2147483647，
+	 * 任务超时时间（单位：毫秒）：default=0（不限时），min=1，max=2147483647，
 	 * @return
 	 */
 	int taskOverTime() default TASK_OVERTIME_DEFAULT;
@@ -272,14 +267,6 @@ public @interface FomSchedule {
 	boolean enableTaskConflict() default ENABLE_TASK_CONFLICT_DEFAULT; 
 	
 	String enableTaskConflictString() default "";
-	
-	/**
-	 * 是否中断超时的任务
-	 * @return
-	 */
-	boolean cancelTaskOnTimeout() default CANCEL_TASK_ONTIMEOUT_DEFAULT;
-	
-	String cancelTaskOnTimeoutString() default "";
 	
 	/**
 	 * 是否单独对每个任务检测超时

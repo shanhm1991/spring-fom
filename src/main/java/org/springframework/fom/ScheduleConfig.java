@@ -50,7 +50,6 @@ public class ScheduleConfig {
 		internalConf.put(FomSchedule.EXEC_ONLOAN, FomSchedule.EXEC_ONLOAN_DEFAULT);
 		internalConf.put(FomSchedule.ENABLE_TASKRESULT_STAT, FomSchedule.ENABLE_TASKRESULT_STAT_DEFAULT); 
 		internalConf.put(FomSchedule.ENABLE_TASK_CONFLICT, FomSchedule.ENABLE_TASK_CONFLICT_DEFAULT);
-		internalConf.put(FomSchedule.CANCEL_TASK_ONTIMEOUT, FomSchedule.CANCEL_TASK_ONTIMEOUT_DEFAULT);
 		internalConf.put(FomSchedule.DETECT_TIMEOUT_ONEACHTASK, FomSchedule.DETECT_TIMEOUT_ONEACHTASK_DEFAULT);
 		internalConf.put(FomSchedule.IGNORE_EXECREQUEST_WHEN_RUNNING, FomSchedule.IGNORE_EXECREQUEST_WHEN_RUNNING_DEFAULT);
 		internalConf.put(FomSchedule.ENABLE, FomSchedule.ENABLE_DEFAULT);
@@ -317,8 +316,8 @@ public class ScheduleConfig {
 			return false;
 		}
 		confMap.put(FomSchedule.THREAD_ALIVETIME, aliveTime);
-		if(pool != null && pool.getKeepAliveTime(TimeUnit.SECONDS) != aliveTime){ 
-			pool.setKeepAliveTime(aliveTime, TimeUnit.SECONDS);
+		if(pool != null && pool.getKeepAliveTime(TimeUnit.MILLISECONDS) != aliveTime){ 
+			pool.setKeepAliveTime(aliveTime, TimeUnit.MILLISECONDS);
 		}
 		return true;
 	}
@@ -346,18 +345,6 @@ public class ScheduleConfig {
 			return false;
 		}
 		confMap.put(FomSchedule.EXEC_ONLOAN, execOnLoad);
-		return true;
-	}
-
-	public boolean getCancelTaskOnTimeout(){
-		return MapUtils.getBoolean(confMap, FomSchedule.CANCEL_TASK_ONTIMEOUT, FomSchedule.CANCEL_TASK_ONTIMEOUT_DEFAULT);
-	}
-
-	public boolean setCancelTaskOnTimeout(boolean cancelTaskOnTimeout){
-		if(cancelTaskOnTimeout == getCancelTaskOnTimeout()){
-			return false;
-		}
-		confMap.put(FomSchedule.CANCEL_TASK_ONTIMEOUT, cancelTaskOnTimeout);
 		return true;
 	}
 
@@ -545,8 +532,6 @@ public class ScheduleConfig {
 			setThreadAliveTime(Integer.valueOf(value.toString())); return;
 		case FomSchedule.TASK_OVERTIME:
 			setTaskOverTime(Integer.valueOf(value.toString())); return;
-		case FomSchedule.CANCEL_TASK_ONTIMEOUT: 
-			setCancelTaskOnTimeout(Boolean.valueOf(value.toString())); return; 
 		case FomSchedule.DETECT_TIMEOUT_ONEACHTASK:
 			setDetectTimeoutOnEachTask(Boolean.valueOf(value.toString())); return; 
 		case FomSchedule.IGNORE_EXECREQUEST_WHEN_RUNNING:

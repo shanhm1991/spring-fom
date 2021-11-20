@@ -40,6 +40,9 @@ public class FomServiceImpl implements FomService {
 
 	@Value("${spring.fom.config.cache.enable:true}")
 	private boolean configCacheEnable;
+	
+	@Value("${spring.fom.config.cache.history.save:false}")
+	private boolean configCacheHistorySave;
 
 	@Value("${spring.fom.config.cache.path:cache/schedule}")
 	private String configCachePath;
@@ -234,7 +237,11 @@ public class FomServiceImpl implements FomService {
 
 		File cacheFile = new File(dir.getPath() + File.separator + schedule.getScheduleName() + ".cache"); 
 		if(cacheFile.exists()){
-			cacheFile.renameTo(new File(dir.getPath() + File.separator + schedule.getScheduleName() + ".cache." + System.currentTimeMillis()));
+			if(configCacheHistorySave){
+				cacheFile.renameTo(new File(dir.getPath() + File.separator + schedule.getScheduleName() + ".cache." + System.currentTimeMillis()));
+			}else{
+				cacheFile.delete();
+			}
 		}
 
 		Map<String, Object> configMap = schedule.getScheduleConfig().getConfMap();
@@ -242,7 +249,7 @@ public class FomServiceImpl implements FomService {
 				ObjectOutputStream oos = new ObjectOutputStream(out)){
 			oos.writeObject(configMap);
 		}catch(Exception e){
-			// ignore
+			e.printStackTrace();
 		}
 	}
 

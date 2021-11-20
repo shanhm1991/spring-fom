@@ -17,7 +17,7 @@ class TimedExecutorPool extends ThreadPoolExecutor {
 	private final Map<Task<?>, Thread> threadMap = new ConcurrentHashMap<>();
 
 	public TimedExecutorPool(int core, int max, long aliveTime, BlockingQueue<Runnable> workQueue) {
-		super(core, max, aliveTime, TimeUnit.SECONDS, workQueue);
+		super(core, max, aliveTime, TimeUnit.MILLISECONDS, workQueue);
 	}
 
 	@SuppressWarnings("unchecked")

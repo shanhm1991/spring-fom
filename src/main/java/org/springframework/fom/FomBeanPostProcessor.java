@@ -256,12 +256,6 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 			scheduleConfig.setTaskOverTime(fomSchedule.taskOverTime());
 		}
 
-		String cancelTaskOnTimeout = fomSchedule.cancelTaskOnTimeoutString();
-		if(StringUtils.isEmpty(cancelTaskOnTimeout) 
-				|| !scheduleConfig.setCancelTaskOnTimeout(Boolean.parseBoolean(valueResolver.resolveStringValue(cancelTaskOnTimeout)))){
-			scheduleConfig.setCancelTaskOnTimeout(fomSchedule.cancelTaskOnTimeout());
-		}
-
 		String detectTimeoutOnEachTask = fomSchedule.detectTimeoutOnEachTaskString();
 		if(StringUtils.isEmpty(detectTimeoutOnEachTask) 
 				|| !scheduleConfig.setDetectTimeoutOnEachTask(Boolean.parseBoolean(valueResolver.resolveStringValue(detectTimeoutOnEachTask)))){
