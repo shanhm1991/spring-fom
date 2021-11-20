@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.fom.ScheduleContext.ScheduleBatch;
+import org.springframework.util.StringUtils;
 
 /**
  * 
@@ -35,7 +36,11 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	private volatile ScheduleBatch<E> scheduleBatch;
 	
 	public Task(){
-		this.id = this.getClass().getSimpleName() + "-" + INDEX.incrementAndGet();
+		String name = this.getClass().getSimpleName();
+		if(StringUtils.isEmpty(name)){
+			name = "Task";
+		}
+		this.id = name + "-" + INDEX.incrementAndGet();
 	}
 
 	public Task(String id) { 
