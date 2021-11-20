@@ -1,9 +1,0 @@
-/.settings/
-/.idea/
-/target/
-/bin/
-/log/
-.project
-.classpath
-.checkstyle
-spring-fom-test.iml
