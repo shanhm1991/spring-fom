@@ -41,7 +41,7 @@ public class FomServiceImpl implements FomService {
 	@Value("${spring.fom.config.cache.enable:true}")
 	private boolean configCacheEnable;
 	
-	@Value("${spring.fom.config.cache.history.save:false}")
+	@Value("${spring.fom.config.cache.history:false}")
 	private boolean configCacheHistorySave;
 
 	@Value("${spring.fom.config.cache.path:cache/schedule}")
