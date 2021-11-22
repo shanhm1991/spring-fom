@@ -445,6 +445,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 								TaskDelayed taskDelayed = delayQueue.take();
 								waitTaskFuture(taskDelayed.getFuture(), delayQueue, overTime);
 							}
+							scheduleBatch.waitTaskCompleted();
 							cleanCompletedFutures();
 						}
 					}
