@@ -44,8 +44,8 @@ public class ScheduleProxy implements MethodInterceptor {
 			return onScheduleComplete(object, method, args, methodProxy);
 		}else if("onScheduleTerminate".equals(methodName)){
 			return onScheduleTerminate(object, method, args, methodProxy);
-		}else if("handleTimeout".equals(methodName)){
-			return handleTimeout(object, method, args, methodProxy);
+		}else if("handleCancel".equals(methodName)){
+			return handleCancel(object, method, args, methodProxy);
 		}else if("newSchedulTasks".equals(methodName)){
 			return newSchedulTasks(object, method, args, methodProxy);
 		}else{
@@ -90,7 +90,7 @@ public class ScheduleProxy implements MethodInterceptor {
 		return null;
 	}
 
-	private Object handleTimeout(Object object, Method method, Object[] args, MethodProxy methodProxy) throws Throwable{
+	private Object handleCancel(Object object, Method method, Object[] args, MethodProxy methodProxy) throws Throwable{
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		if(scheduleBean == null || parameterTypes.length != 2
 				|| !(String.class.isAssignableFrom(parameterTypes[0]))
@@ -98,11 +98,11 @@ public class ScheduleProxy implements MethodInterceptor {
 			return method.invoke(scheduleContext, args);
 		}
 
-		if(!(TaskTimeoutHandler.class.isAssignableFrom(scheduleBeanClass))){
+		if(!(TaskCancelHandler.class.isAssignableFrom(scheduleBeanClass))){
 			return null;
 		}
 
-		((TaskTimeoutHandler)scheduleBean).handleTimeout((String)args[0], (long)args[1]); 
+		((TaskCancelHandler)scheduleBean).handleCancel((String)args[0], (long)args[1]); 
 		return null;
 	}
 

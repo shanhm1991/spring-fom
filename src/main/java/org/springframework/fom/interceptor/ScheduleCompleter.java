@@ -12,7 +12,7 @@ import org.springframework.fom.Result;
 public interface ScheduleCompleter<E> {
 
 	/**
-	 * schedule任务完成时触发
+	 *任务全部完成时事件处理
 	 * @param execTimes 执行次数
 	 * @param lastExecTime 本次执行时间
 	 * @param results 结果集

@@ -37,7 +37,7 @@ import org.springframework.fom.annotation.FomSchedule;
 import org.springframework.fom.interceptor.ScheduleCompleter;
 import org.springframework.fom.interceptor.ScheduleFactory;
 import org.springframework.fom.interceptor.ScheduleTerminator;
-import org.springframework.fom.interceptor.TaskTimeoutHandler;
+import org.springframework.fom.interceptor.TaskCancelHandler;
 import org.springframework.fom.support.Response;
 import org.springframework.util.ReflectionUtils;
 
@@ -46,7 +46,7 @@ import org.springframework.util.ReflectionUtils;
  * @author shanhm1991@163.com
  *
  */
-public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter<E>, ScheduleTerminator, TaskTimeoutHandler, ApplicationContextAware {
+public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter<E>, ScheduleTerminator, TaskCancelHandler, ApplicationContextAware {
 
 	// 所有schedule共用，以便根据id检测任务冲突
 	private static Map<String,TimedFuture<Result<?>>> submitMap = new HashMap<>(512);
@@ -181,11 +181,11 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void handleTimeout(String taskId, long costTime) {
+	public void handleCancel(String taskId, long costTime) {
 		ScheduleContext<E> scheduleContext;
 		if(applicationContext != null && scheduleBeanName != null 
 				&& (scheduleContext = (ScheduleContext<E>)applicationContext.getBean(scheduleName)) != null){
-			scheduleContext.handleTimeout(taskId, costTime);
+			scheduleContext.handleCancel(taskId, costTime);
 		}
 	}
 
@@ -416,21 +416,25 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 									if(startTime > 0){
 										long cost = System.currentTimeMillis() - future.getStartTime(); 
 										try{
-											handleTimeout(future.getTaskId(), cost);
+											handleCancel(future.getTaskId(), cost);
 										}catch(Exception e){
 											logger.error("", e); 
 										}
 
-										logger.warn("cancle task[{}] due to time out, cost={}ms", future.getTaskId(), cost);
+										logger.info("cancle task[{}] due to time out, cost={}ms", future.getTaskId(), cost);
 										future.cancel(true);
 									}else{
-										logger.warn("cancle task[{}] which has not started, cost={}ms", future.getTaskId(), 0);
+										logger.info("cancle task[{}] which has not started, cost={}ms", future.getTaskId(), 0);
 										future.cancel(true);
 									}
 								}
 							}
 						}
-						scheduleBatch.waitTaskCompleted();
+						long taskNotCompleted = scheduleBatch.getTaskNotCompleted();
+						if(taskNotCompleted > 0){
+							logger.warn("some[{}] tasks may not respond to interrupts and cancel fails.", taskNotCompleted); 
+							scheduleBatch.waitTaskCompleted();
+						}
 						cleanCompletedFutures();
 					}else{ // 对每个任务单独检测超时
 						if(scheduleBatch.waitTaskCompleted(overTime)){ 
@@ -445,7 +449,12 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 								TaskDelayed taskDelayed = delayQueue.take();
 								waitTaskFuture(taskDelayed.getFuture(), delayQueue, overTime);
 							}
-							scheduleBatch.waitTaskCompleted();
+
+							long taskNotCompleted = scheduleBatch.getTaskNotCompleted();
+							if(taskNotCompleted > 0){
+								logger.warn("some[{}] tasks may not respond to interrupts and cancel fails.", taskNotCompleted); 
+								scheduleBatch.waitTaskCompleted();
+							}
 							cleanCompletedFutures();
 						}
 					}
@@ -464,12 +473,12 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 					long cost = System.currentTimeMillis() - future.getStartTime(); 
 					if(cost >= overTime){
 						try{
-							handleTimeout(future.getTaskId(), cost);
+							handleCancel(future.getTaskId(), cost);
 						}catch(Exception e){
 							logger.error("", e); 
 						}
 
-						logger.warn("cancle task[{}] due to time out, cost={}ms", future.getTaskId(), cost);
+						logger.info("cancle task[{}] due to time out, cost={}ms", future.getTaskId(), cost);
 						future.cancel(true);
 					}else{
 						delayQueue.add(new TaskDelayed(future, overTime - cost)); 
@@ -527,7 +536,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 						submitFutures.add(future);
 					}
 				} catch (RejectedExecutionException e) {
-					logger.warn("task[{}] submit rejected, and ignored task={}", taskId, tasks, e); 
+					logger.error("task[{}] submit rejected, and ignored task={}", taskId, tasks, e); 
 				}
 			}
 		}
@@ -547,7 +556,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 					submitFutures.add(future);
 				}
 			} catch (RejectedExecutionException e) {
-				logger.warn("task[{}] submit rejected, and ignored task={}", taskId, tasks, e); 
+				logger.error("task[{}] submit rejected, and ignored task={}", taskId, tasks, e); 
 			}
 		}
 
@@ -573,17 +582,20 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 					synchronized (ScheduleContext.this) {
 						if(state == STOPPING){
 							isStopping = true;
-							
+
 							// 不支持中断的任务，可能自定义了手动取消操作
 							for(TimedFuture<Result<E>> future : submitFutures) {
 								long startTime = future.getStartTime();
 								if(!future.isDone() && startTime > 0){
 									long cost = System.currentTimeMillis() - future.getStartTime(); 
 									try{
-										handleTimeout(future.getTaskId(), cost);
+										handleCancel(future.getTaskId(), cost);
 									}catch(Exception e){
 										logger.error("", e); 
 									}
+									
+									logger.info("cancle task[{}] due to terminate, cost={}ms", future.getTaskId(), cost);
+									future.cancel(true);
 								}
 							}
 							scheduleConfig.getPool().shutdownNow();
@@ -631,7 +643,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 				futureList.add(future);
 			}
 		} catch (RejectedExecutionException e) {
-			logger.warn("task[{}] submit rejected, and ignored task={}", taskId, tasks, e); 
+			logger.error("task[{}] submit rejected, and ignored task={}", taskId, tasks, e); 
 		} finally{ 
 			batch.submitCompleted();
 			checkScheduleComplete(batch);

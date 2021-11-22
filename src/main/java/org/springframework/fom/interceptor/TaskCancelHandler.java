@@ -5,12 +5,12 @@ package org.springframework.fom.interceptor;
  * @author shanhm1991@163.com
  *
  */
-public interface TaskTimeoutHandler {
+public interface TaskCancelHandler {
 
 	/**
-	 * 处理超时任务
+	 * 任务取消处理
 	 * @param taskId 任务id
 	 * @param costTime 任务耗时
 	 */
-	void handleTimeout(String taskId, long costTime);
+	void handleCancel(String taskId, long costTime);
 }

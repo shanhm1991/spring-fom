@@ -8,7 +8,7 @@ package org.springframework.fom.interceptor;
 public interface ScheduleTerminator {
 
 	/**
-	 * schedule终结时触发
+	 * 定时器关闭处理
 	 * @param execTimes 执行次数
 	 * @param lastExecTime 最后一次执行时间
 	 */
