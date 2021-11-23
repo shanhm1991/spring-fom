@@ -97,7 +97,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 
 	public ScheduleContext(boolean needInit){
 		if(needInit){
-			scheduleConfig.reset();
+			scheduleConfig.refresh();
 		}
 	}
 
@@ -230,7 +230,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 			case INITED:
 			case STOPPED:
 				if(scheduleConfig.getPool().isTerminated()){
-					scheduleConfig.reset(); 
+					scheduleConfig.refresh(); 
 				}
 
 				enableTaskConflict = scheduleConfig.getEnableTaskConflict(); // 只在启动时读取一次
@@ -341,8 +341,8 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 					}
 				}catch(InterruptedException e){ 
 					Thread.currentThread().interrupt(); // 保留中断请求，下面处理
-				}catch (Exception e){ // 对于Exception，认为不影响定时线程
-					logger.error("", e);
+				}catch (Exception e){ 
+					logger.error("", e); // 对于Exception，认为不影响定时线程
 				}catch(Throwable e){
 					logger.error("schedule terminated unexpectedly", e); 
 					terminate();
@@ -356,8 +356,8 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 						synchronized(this) {
 							try {
 								wait(waitTime);
-							} catch (InterruptedException e) { // 等待时响应中断：立即跳出等待
-
+							} catch (InterruptedException e) { 
+								// 响应中断：结束等待，并立即重新检测state
 							}
 						}
 					}
@@ -432,7 +432,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 						}
 						long taskNotCompleted = scheduleBatch.getTaskNotCompleted();
 						if(taskNotCompleted > 0){
-							logger.warn("some[{}] tasks may not respond to interrupts and cancel fails.", taskNotCompleted); 
+							logger.warn("some[{}] tasks cancel fails, which may not respond to interrupts.", taskNotCompleted); 
 							scheduleBatch.waitTaskCompleted();
 						}
 						cleanCompletedFutures();
@@ -747,10 +747,13 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, ScheduleCompleter
 
 		private final List<Result<E>> list = new ArrayList<>();
 
+		// 任务是否全部提交结束
 		private volatile boolean hasSubmitCompleted = false;
 
+		// 还没有结束的任务数
 		private final AtomicInteger taskNotCompleted = new AtomicInteger(1);
 
+		// 闭锁，等待任务全部提交并执行结束
 		private final CountDownLatch completeLatch = new CountDownLatch(1);
 
 		public void submitCompleted(){

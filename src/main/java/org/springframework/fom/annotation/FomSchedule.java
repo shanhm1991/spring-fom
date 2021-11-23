@@ -169,7 +169,7 @@ public @interface FomSchedule {
 	String value() default "";
 
 	/**
-	 * 是否启用
+	 * 加载时是否启动
 	 * @return
 	 */
 	boolean enable() default ENABLE_DEFAULT;
@@ -205,7 +205,7 @@ public @interface FomSchedule {
 	String fixedDelayString() default "";
 
 	/**
-	 * 加载时是否启动任务，默认false
+	 * 启动时是否立即执行，默认false
 	 * @return
 	 */
 	boolean execOnLoad() default EXEC_ONLOAN_DEFAULT;

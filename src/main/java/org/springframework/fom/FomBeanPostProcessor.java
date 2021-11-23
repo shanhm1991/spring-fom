@@ -59,7 +59,9 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		ScheduleContext<?> scheduleContext = (ScheduleContext<?>)bean;
 		String scheduleBeanName = scheduleContext.getScheduleBeanName(); 
 		FomSchedule fomSchedule = scheduleContext.getClass().getAnnotation(FomSchedule.class);
-		if(StringUtils.isEmpty(scheduleBeanName) && fomSchedule == null){ // 通过@Bean注入的不需要处理
+		
+		// 通过@Bean注入的不需要处理
+		if(StringUtils.isEmpty(scheduleBeanName) && fomSchedule == null){ 
 			scheduleContext.setScheduleName(beanName);  
 			scheduleContext.setLogger(LoggerFactory.getLogger(scheduleContext.getClass()));
 			return bean;
@@ -70,7 +72,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 			scheduleBean = beanFactory.getBean(scheduleBeanName);
 		}
 
-		// 获取FomSchedule，顺便设置下Logger
+		// 设置Logger
 		fomSchedule = clazz.getAnnotation(FomSchedule.class);
 		if(fomSchedule == null){ 
 			fomSchedule = scheduleBean.getClass().getAnnotation(FomSchedule.class);
@@ -79,22 +81,25 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 			scheduleContext.setLogger(LoggerFactory.getLogger(clazz));
 		}
 
+		// 加载配置
 		ScheduleConfig scheduleConfig = scheduleContext.getScheduleConfig();
-		if(fomSchedule != null){ // 注解引入
+		if(fomSchedule != null){ // 注解
 			setCronConf(scheduleConfig, fomSchedule, scheduleContext, scheduleBean);
 			setOtherConf(scheduleConfig, fomSchedule);
 			setValue(scheduleConfig, scheduleContext, scheduleBean);
-
-		}else{ // xml配置方式 TODO
+		}else{ // xml配置 TODO
 
 		}
 
+		// 加载缓存配置（之前修改配置后持久化的文件）
 		try {
 			loadCache(beanName, scheduleContext);
 		} catch (Exception e) {
 			throw new ApplicationContextException("", e);
 		}
-		scheduleConfig.reset();
+		
+		// 刷新配置
+		scheduleConfig.refresh();
 
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(clazz);

@@ -61,7 +61,7 @@ public class ScheduleConfig {
 
 	private TimedExecutorPool pool;
 
-	public void reset(){
+	public void refresh(){
 		int core = getThreadCore(); 
 		int max = getThreadMax();
 		int aliveTime = getThreadAliveTime();   
