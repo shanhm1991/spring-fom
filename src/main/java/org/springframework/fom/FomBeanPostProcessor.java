@@ -101,6 +101,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		// 刷新配置
 		scheduleConfig.refresh();
 
+		// 创建代理 注册容器
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(clazz);
 		enhancer.setCallback(new ScheduleProxy(beanName, scheduleContext, fomSchedule, scheduleBean));
