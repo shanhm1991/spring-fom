@@ -8,17 +8,12 @@ import java.util.concurrent.TimeUnit;
  * @author shanhm1991@163.com
  *
  */
-public class TaskDelayed implements Delayed {
-	
-	@SuppressWarnings("rawtypes")
-	private final TimedFuture future;
+class DelayedTask implements Delayed {
 	
     private final long delayTime;
     
-    @SuppressWarnings("rawtypes")
-	public TaskDelayed(TimedFuture future, long delaySeconds) {
-    	this.future = future;
-        this.delayTime = System.currentTimeMillis() + delaySeconds;
+	public DelayedTask(long delayTime) {
+        this.delayTime = System.currentTimeMillis() + delayTime;
     }
     
     @Override
@@ -28,12 +23,7 @@ public class TaskDelayed implements Delayed {
 
 	@Override
 	public int compareTo(Delayed delayTask) {
-		TaskDelayed d = (TaskDelayed) delayTask;
+		DelayedTask d = (DelayedTask) delayTask;
         return (int) (this.getDelay(TimeUnit.MILLISECONDS) - d.getDelay(TimeUnit.MILLISECONDS));
-	}
-
-	@SuppressWarnings("rawtypes")
-	public TimedFuture getFuture() {
-		return future;
 	}
 }

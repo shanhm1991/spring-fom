@@ -1,4 +1,4 @@
-package org.springframework.fom.interceptor;
+package org.springframework.fom.proxy;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
+import org.springframework.fom.Result;
 import org.springframework.fom.ScheduleContext;
 import org.springframework.fom.Task;
 import org.springframework.fom.annotation.FomSchedule;
@@ -40,21 +41,23 @@ public class ScheduleProxy implements MethodInterceptor {
 	@Override
 	public Object intercept(Object object, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 		String methodName = method.getName();
-		if("onScheduleComplete".equals(methodName)){ 
-			return onScheduleComplete(object, method, args, methodProxy);
-		}else if("onScheduleTerminate".equals(methodName)){
-			return onScheduleTerminate(object, method, args, methodProxy);
+		if("onComplete".equals(methodName)){ 
+			return onComplete(object, method, args, methodProxy);
+		}else if("onTerminate".equals(methodName)){
+			return onTerminate(object, method, args, methodProxy);
 		}else if("handleCancel".equals(methodName)){
 			return handleCancel(object, method, args, methodProxy);
 		}else if("newSchedulTasks".equals(methodName)){
 			return newSchedulTasks(object, method, args, methodProxy);
+		}else if("handleResult".equals(methodName)){
+			return handleResult(object, method, args, methodProxy);
 		}else{
 			return method.invoke(scheduleContext, args);
 		}
 	}
-
+	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private Object onScheduleComplete(Object object, Method method, Object[] args, MethodProxy methodProxy) throws Throwable{
+	private Object onComplete(Object object, Method method, Object[] args, MethodProxy methodProxy) throws Throwable{
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		// scheduleBean为空代表是继承的ScheduleContext
 		if(scheduleBean == null || parameterTypes.length != 3
@@ -65,16 +68,16 @@ public class ScheduleProxy implements MethodInterceptor {
 		}
 
 		// 直接断开调用
-		if(!(ScheduleCompleter.class.isAssignableFrom(scheduleBeanClass))){
+		if(!(CompleterHandler.class.isAssignableFrom(scheduleBeanClass))){
 			return null;
 		}
 
 		// 调用scheduleBean的行为
-		((ScheduleCompleter)scheduleBean).onScheduleComplete((long)args[0], (long)args[1], (List)args[2]); 
+		((CompleterHandler)scheduleBean).onComplete((long)args[0], (long)args[1], (List)args[2]); 
 		return null;
 	}
 
-	private Object onScheduleTerminate(Object object, Method method, Object[] args, MethodProxy methodProxy) throws Throwable{
+	private Object onTerminate(Object object, Method method, Object[] args, MethodProxy methodProxy) throws Throwable{
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		if(scheduleBean == null || parameterTypes.length != 2
 				|| !(long.class.isAssignableFrom(parameterTypes[0]))
@@ -82,11 +85,11 @@ public class ScheduleProxy implements MethodInterceptor {
 			return method.invoke(scheduleContext, args);
 		}
 
-		if(!(ScheduleTerminator.class.isAssignableFrom(scheduleBeanClass))){
+		if(!(TerminateHandler.class.isAssignableFrom(scheduleBeanClass))){
 			return null;
 		}
 
-		((ScheduleTerminator)scheduleBean).onScheduleTerminate((long)args[0], (long)args[1]);
+		((TerminateHandler)scheduleBean).onTerminate((long)args[0], (long)args[1]);
 		return null;
 	}
 
@@ -166,5 +169,20 @@ public class ScheduleProxy implements MethodInterceptor {
 		return tasks;
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Object handleResult(Object object, Method method, Object[] args, MethodProxy methodProxy) throws Throwable{
+		Class<?>[] parameterTypes = method.getParameterTypes();
+		if(scheduleBean == null || parameterTypes.length != 1 
+				|| !Result.class.isAssignableFrom(parameterTypes[0])){
+			return method.invoke(scheduleContext, args);
+		}
+		
+		if(!(ResultHandler.class.isAssignableFrom(scheduleBeanClass))){
+			return null;
+		}
+		
+		((ResultHandler)scheduleBean).handleResult((Result)args[0]);
+		return null;
+	}
 
 }

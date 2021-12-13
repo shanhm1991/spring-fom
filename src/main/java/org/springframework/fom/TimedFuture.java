@@ -10,13 +10,19 @@ import java.util.concurrent.FutureTask;
  * @param <T> 结果类型
  */
 class TimedFuture<T> extends FutureTask<T> {
-	
+
 	private final Task<?> task;
 
-	public TimedFuture(Callable<T> callable){
+	private final int timeOut;
+
+	private final boolean enableTaskConflict;
+
+	public TimedFuture(Callable<T> callable, int timeOut, boolean enableTaskConflict){
 		super(callable);
+		this.timeOut = timeOut;
+		this.enableTaskConflict = enableTaskConflict;
 		if(callable instanceof Task){
-			 task = ((Task<?>)callable);
+			task = ((Task<?>)callable);
 		}else{
 			task = null;
 		}
@@ -25,7 +31,7 @@ class TimedFuture<T> extends FutureTask<T> {
 	public long getSubmitTime() {
 		return task.getSubmitTime();
 	}
-	
+
 	public long getStartTime() {
 		return task.getStartTime();
 	}
@@ -40,5 +46,13 @@ class TimedFuture<T> extends FutureTask<T> {
 
 	public Task<?> getTask(){
 		return task;
+	}
+
+	public int getTimeOut() {
+		return timeOut;
+	}
+
+	public boolean isEnableTaskConflict() {
+		return enableTaskConflict;
 	}
 }

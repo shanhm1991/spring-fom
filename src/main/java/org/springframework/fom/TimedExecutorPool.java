@@ -20,16 +20,6 @@ class TimedExecutorPool extends ThreadPoolExecutor {
 		super(core, max, aliveTime, TimeUnit.MILLISECONDS, workQueue);
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	protected <T> TimedFuture<T> newTaskFor(Callable<T> callable) {
-		if(callable instanceof Task){
-			Task<T> task = (Task<T>)callable;
-			task.setSubmitTime(System.currentTimeMillis()); 
-		}
-		return new TimedFuture<>(callable);
-	}
-
 	@SuppressWarnings({"rawtypes"})
 	@Override
 	protected void beforeExecute(Thread t, Runnable r) { 
@@ -48,13 +38,21 @@ class TimedExecutorPool extends ThreadPoolExecutor {
 		}
 	}
 
-	@Override
-	public <T> TimedFuture<T> submit(Callable<T> callable) { 
+	public <T> TimedFuture<T> submit(Callable<T> callable, int timeOut, boolean enableTaskConflict) { 
 		if (callable == null)
 			throw new NullPointerException();
-		TimedFuture<T> future = newTaskFor(callable);
+		TimedFuture<T> future = newTaskFor(callable, timeOut, enableTaskConflict);
 		execute(future);
 		return future;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private <T> TimedFuture<T> newTaskFor(Callable<T> callable, int timeOut, boolean enableTaskConflict) {
+		if(callable instanceof Task){
+			Task<T> task = (Task<T>)callable;
+			task.setSubmitTime(System.currentTimeMillis());
+		}
+		return new TimedFuture<>(callable, timeOut, enableTaskConflict);
 	}
 
 	public Map<Task<?>, Thread> getActiveThreads() {

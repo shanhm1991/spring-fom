@@ -1,4 +1,4 @@
-package org.springframework.fom.interceptor;
+package org.springframework.fom;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -9,9 +9,6 @@ import org.springframework.context.ApplicationContextException;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.fom.FomBeanPostProcessor;
-import org.springframework.fom.FomScheduleStarter;
-import org.springframework.fom.ScheduleContext;
 import org.springframework.fom.annotation.EnableFom;
 import org.springframework.fom.annotation.FomSchedule;
 import org.springframework.fom.support.FomAdvice;

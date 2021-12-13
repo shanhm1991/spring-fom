@@ -23,7 +23,7 @@ import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.fom.annotation.FomSchedule;
-import org.springframework.fom.interceptor.ScheduleProxy;
+import org.springframework.fom.proxy.ScheduleProxy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
@@ -100,6 +100,9 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		
 		// 刷新配置
 		scheduleConfig.refresh();
+		
+		// 初始化时提前设置一下，因为运行过程中不允许修改
+		scheduleContext.setEnableTaskConflict(scheduleConfig.getEnableTaskConflict()); 
 
 		// 创建代理 注册容器
 		Enhancer enhancer = new Enhancer();

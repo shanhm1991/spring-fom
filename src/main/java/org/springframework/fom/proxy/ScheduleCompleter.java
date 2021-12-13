@@ -1,4 +1,4 @@
-package org.springframework.fom.interceptor;
+package org.springframework.fom.proxy;
 
 import java.util.List;
 
@@ -12,10 +12,10 @@ import org.springframework.fom.Result;
 public interface ScheduleCompleter<E> {
 
 	/**
-	 *任务全部完成时事件处理
-	 * @param execTimes 执行次数
+	 * 任务全部完成时事件处理
+	 * @param execTimes 已经执行次数
 	 * @param lastExecTime 本次执行时间
-	 * @param results 结果集
+	 * @param results 本次任务结果集
 	 * @throws Exception
 	 */
 	public void onScheduleComplete(long execTimes, long lastExecTime, List<Result<E>> results) throws Exception;

@@ -48,7 +48,6 @@ public class ScheduleConfig {
 		internalConf.put(FomSchedule.THREAD_ALIVETIME, FomSchedule.THREAD_ALIVETIME_DEFAULT);
 		internalConf.put(FomSchedule.TASK_OVERTIME, FomSchedule.TASK_OVERTIME_DEFAULT);
 		internalConf.put(FomSchedule.EXEC_ONLOAN, FomSchedule.EXEC_ONLOAN_DEFAULT);
-		internalConf.put(FomSchedule.ENABLE_TASKRESULT_STAT, FomSchedule.ENABLE_TASKRESULT_STAT_DEFAULT); 
 		internalConf.put(FomSchedule.ENABLE_TASK_CONFLICT, FomSchedule.ENABLE_TASK_CONFLICT_DEFAULT);
 		internalConf.put(FomSchedule.DETECT_TIMEOUT_ONEACHTASK, FomSchedule.DETECT_TIMEOUT_ONEACHTASK_DEFAULT);
 		internalConf.put(FomSchedule.IGNORE_EXECREQUEST_WHEN_RUNNING, FomSchedule.IGNORE_EXECREQUEST_WHEN_RUNNING_DEFAULT);
@@ -360,18 +359,6 @@ public class ScheduleConfig {
 		return true;
 	}
 
-	public boolean getEnableTaskResultStat(){ 
-		return MapUtils.getBoolean(confMap, FomSchedule.ENABLE_TASKRESULT_STAT, FomSchedule.ENABLE_TASKRESULT_STAT_DEFAULT);
-	}
-
-	public boolean setEnableTaskResultStat(boolean enableTaskResultStat){
-		if(enableTaskResultStat == getEnableTaskResultStat()){
-			return false;
-		}
-		confMap.put(FomSchedule.ENABLE_TASKRESULT_STAT, enableTaskResultStat);
-		return true;
-	}
-
 	public boolean getEnableTaskConflict(){
 		return MapUtils.getBoolean(confMap, FomSchedule.ENABLE_TASK_CONFLICT, FomSchedule.ENABLE_TASK_CONFLICT_DEFAULT);
 	}
@@ -538,8 +525,6 @@ public class ScheduleConfig {
 			setIgnoreExecRequestWhenRunning(Boolean.valueOf(value.toString())); return; 
 		case FomSchedule.ENABLE_TASK_CONFLICT:
 			setEnableTaskConflict(Boolean.valueOf(value.toString())); return; 
-		case FomSchedule.ENABLE_TASKRESULT_STAT: 
-			setEnableTaskResultStat(Boolean.valueOf(value.toString())); return;  
 		case FomSchedule.QUEUE_SIZE:
 			setQueueSize(Integer.valueOf(value.toString())); return;  
 		case FomSchedule.EXEC_ONLOAN:

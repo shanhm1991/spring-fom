@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Import;
-import org.springframework.fom.interceptor.FomBeanDefinitionRegistrar;
+import org.springframework.fom.FomBeanDefinitionRegistrar;
 
 /**
  * 
@@ -20,5 +20,5 @@ import org.springframework.fom.interceptor.FomBeanDefinitionRegistrar;
 @Import(FomBeanDefinitionRegistrar.class)
 public @interface EnableFom {
 
-	boolean enableFomView() default false;
+	boolean enableFomView() default true;
 }

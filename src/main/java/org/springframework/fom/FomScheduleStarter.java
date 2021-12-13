@@ -38,6 +38,8 @@ public class FomScheduleStarter implements SmartLifecycle, ApplicationContextAwa
 				logger.info("load schedule[{}]: {}", scheduleName, schedule.getScheduleConfig().getConfMap()); 
 			}
 		}
+		
+		new DelayedThread().start(); // 启动一个守护线程，检测所有手动提交的任务超时情况
 	}
 
 	@SuppressWarnings("rawtypes")

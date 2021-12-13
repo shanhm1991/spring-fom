@@ -76,11 +76,6 @@ public @interface FomSchedule {
 	public static final String ENABLE_TASK_CONFLICT = "enableTaskConflict";
 	
 	/**
-	 * 是否对任务结果进行统计
-	 */
-	public static final String ENABLE_TASKRESULT_STAT = "enableTaskResultStat";
-	
-	/**
 	 * 是否对每个任务单独检测超时
 	 */
 	public static final String DETECT_TIMEOUT_ONEACHTASK = "detectTimeoutOnEachTask";
@@ -139,11 +134,6 @@ public @interface FomSchedule {
 	 * 默认不检测任务冲突
 	 */
 	public static final boolean ENABLE_TASK_CONFLICT_DEFAULT = false;
-	
-	/**
-	 * 默认对任务结果进行统计
-	 */
-	public static final boolean ENABLE_TASKRESULT_STAT_DEFAULT = true;
 	
 	/**
 	 * 默认不中断超时的任务
@@ -251,14 +241,6 @@ public @interface FomSchedule {
 	int taskOverTime() default TASK_OVERTIME_DEFAULT;
 	
 	String taskOverTimeString() default "";
-	
-	/**
-	 * 是否统计任务结果
-	 * @return
-	 */
-	boolean enableTaskResultStat() default ENABLE_TASKRESULT_STAT_DEFAULT;
-	
-	String enableTaskResultStatString() default "";
 	
 	/**
 	 * 是否检测任务冲突

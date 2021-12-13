@@ -1,4 +1,4 @@
-package org.springframework.fom.interceptor;
+package org.springframework.fom.proxy;
 
 import java.util.Collection;
 

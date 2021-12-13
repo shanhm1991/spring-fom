@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.fom.ScheduleContext.ScheduleBatch;
+import org.springframework.fom.ScheduleContext.CompleteLatch;
 import org.springframework.util.StringUtils;
 
 /**
@@ -33,7 +33,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	private volatile ScheduleContext<E> scheduleContext;
 
 	// 定时线程设置，任务线程读取
-	private volatile ScheduleBatch<E> scheduleBatch;
+	private volatile CompleteLatch<E> completeLatch;
 	
 	public Task(){
 		String name = this.getClass().getSimpleName();
@@ -58,9 +58,9 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		result.setCostTime(System.currentTimeMillis() - startTime); 
 
 		if(scheduleContext != null){
-			if(scheduleBatch != null){
-				scheduleBatch.addResult(result); 
-				scheduleContext.checkScheduleComplete(scheduleBatch);
+			if(completeLatch != null){
+				completeLatch.addResult(result); 
+				scheduleContext.checkComplete(completeLatch);
 			}
 			scheduleContext.record(result); 
 		}
@@ -121,12 +121,12 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		return startTime;
 	}
 
-	ScheduleBatch<E> getScheduleBatch() {
-		return scheduleBatch;
+	CompleteLatch<E> getCompleteLatch() {
+		return completeLatch;
 	}
 
-	void setScheduleBatch(ScheduleBatch<E> scheduleBatch) {
-		this.scheduleBatch = scheduleBatch;
+	void setCompleteLatch(CompleteLatch<E> completeLatch) {
+		this.completeLatch = completeLatch;
 	}
 
 	ScheduleContext<E> getScheduleContext() {
