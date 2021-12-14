@@ -34,7 +34,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.fom.annotation.FomSchedule;
 import org.springframework.fom.proxy.ResultHandler;
-import org.springframework.fom.proxy.CompleterHandler;
+import org.springframework.fom.proxy.CompleteHandler;
 import org.springframework.fom.proxy.ScheduleFactory;
 import org.springframework.fom.proxy.TerminateHandler;
 import org.springframework.fom.proxy.TaskCancelHandler;
@@ -47,7 +47,7 @@ import org.springframework.util.ReflectionUtils;
  * @author shanhm1991@163.com
  * 
  */
-public class ScheduleContext<E> implements ScheduleFactory<E>, CompleterHandler<E>, ResultHandler<E>, TerminateHandler, TaskCancelHandler, ApplicationContextAware {
+public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E>, ResultHandler<E>, TerminateHandler, TaskCancelHandler, ApplicationContextAware {
 
 	// 所有schedule共用，以便根据id检测任务冲突
 	private static Map<String,TimedFuture<Result<?>>> submitMap = new HashMap<>(512);

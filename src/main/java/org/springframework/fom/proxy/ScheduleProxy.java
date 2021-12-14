@@ -68,12 +68,12 @@ public class ScheduleProxy implements MethodInterceptor {
 		}
 
 		// 直接断开调用
-		if(!(CompleterHandler.class.isAssignableFrom(scheduleBeanClass))){
+		if(!(CompleteHandler.class.isAssignableFrom(scheduleBeanClass))){
 			return null;
 		}
 
 		// 调用scheduleBean的行为
-		((CompleterHandler)scheduleBean).onComplete((long)args[0], (long)args[1], (List)args[2]); 
+		((CompleteHandler)scheduleBean).onComplete((long)args[0], (long)args[1], (List)args[2]); 
 		return null;
 	}
 

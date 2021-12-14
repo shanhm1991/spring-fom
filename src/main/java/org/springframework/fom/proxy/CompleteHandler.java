@@ -9,7 +9,7 @@ import org.springframework.fom.Result;
  * @author shanhm1991@163.com
  *
  */
-public interface CompleterHandler<E> {
+public interface CompleteHandler<E> {
 
 	/**
 	 * 任务全部完成时事件处理
