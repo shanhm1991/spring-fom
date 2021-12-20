@@ -419,8 +419,9 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 						for(TimedFuture<Result<E>> future : submitFutures){
 							if(!future.isDone()){
 								long startTime = future.getStartTime();  
+								long cost = 0;
 								if(startTime > 0){
-									long cost = System.currentTimeMillis() - future.getStartTime(); 
+									cost = System.currentTimeMillis() - future.getStartTime(); 
 									logger.info("cancle task[{}] due to time out, cost={}ms", future.getTaskId(), cost);
 									try{
 										handleCancel(future.getTaskId(), cost);
@@ -428,9 +429,9 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 										logger.error("", e); 
 									}
 								}else{
-									logger.info("cancle task[{}] which has not started, cost={}ms", future.getTaskId(), 0);
+									logger.info("cancle task[{}] which has not started, cost={}ms", future.getTaskId(), cost);
 								}
-								future.cancel(true);
+								cancleTask(future, cost);
 							}
 						}
 					}
@@ -482,7 +483,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 						}
 
 						logger.info("cancle task[{}] due to time out, cost={}ms", future.getTaskId(), cost);
-						future.cancel(true);
+						cancleTask(future, cost);
 					}else{
 						delayQueue.add(new DelayedSingleTask(future, overTime - cost)); 
 					}
@@ -598,7 +599,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 									}
 
 									logger.info("cancle task[{}] due to terminate, cost={}ms", future.getTaskId(), cost);
-									future.cancel(true);
+									cancleTask(future, cost);
 								}
 							}
 							scheduleConfig.getPool().shutdownNow();
@@ -618,6 +619,20 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 				}
 			}
 		}
+
+		private void cancleTask(TimedFuture<Result<E>> future, long costTime) {
+			Task<?> task = future.getTask();
+			if(costTime > 0  && TaskCancelHandler.class.isAssignableFrom(task.getClass())){ 
+				TaskCancelHandler handler = (TaskCancelHandler)task;
+				try {
+					handler.handleCancel(task.getTaskId(), costTime);
+				} catch (Exception e) {
+					logger.error("", e); 
+				}
+			}
+			future.cancel(true);
+		}
+
 	}
 
 	public Future<Result<E>> submit(Task<E> task) {
@@ -651,7 +666,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 			}else{
 				futureList = submitWithNoConflict(tasks, completeLatch);
 			}
-			
+
 			long overTime = scheduleConfig.getTaskOverTime();
 			if(FomSchedule.TASK_OVERTIME_DEFAULT != overTime){ 
 				DelayedThread.detectTimeout(futureList, scheduleConfig.getDetectTimeoutOnEachTask()); 
@@ -661,7 +676,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 			checkComplete(completeLatch);
 		}
 	}
-	
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private List<TimedFuture> submitWithConflict(Collection<? extends Task<E>> tasks, CompleteLatch<E> completeLatch){
 		List<TimedFuture> futureList = new ArrayList<>(tasks.size());
@@ -753,7 +768,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 		}
 		submitFutures.clear();
 	}
-	
+
 	static void cleanCompletedFutures(String taskId) {
 		synchronized(submitMap) {
 			TimedFuture<Result<?>> future = submitMap.get(taskId);

@@ -6,6 +6,7 @@ import java.util.concurrent.DelayQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.fom.proxy.TaskCancelHandler;
 
 /**
  * 
@@ -18,9 +19,9 @@ import org.slf4j.LoggerFactory;
  *
  */
 class DelayedThread extends Thread { 
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(DelayedThread.class);
-	
+
 	private static final DelayQueue<DelayedTask> DELAYQUEUE  = new DelayQueue<>();
 
 	@SuppressWarnings("rawtypes")
@@ -28,7 +29,7 @@ class DelayedThread extends Thread {
 		if(futureList.isEmpty()){
 			return;
 		}
-		
+
 		if(detectTimeoutOnEachTask){
 			for(TimedFuture future : futureList){
 				DELAYQUEUE.add(new DelayedSingleTask(future, future.getTimeOut())); 
@@ -37,12 +38,12 @@ class DelayedThread extends Thread {
 			DELAYQUEUE.add(new DelayedBatchTask(futureList, futureList.get(0).getTimeOut()));
 		}
 	}
-	
+
 	public DelayedThread(){
 		this.setName("SubmitDemonThread");  
 		this.setDaemon(true);
 	}
-	
+
 	@Override
 	public void run() {
 		while(true){
@@ -53,7 +54,7 @@ class DelayedThread extends Thread {
 				LOGGER.info("Thread DaemonSubmitThread interrupted and stoped"); 
 				return;
 			}
-			
+
 			if(delayedTask instanceof DelayedSingleTask){
 				waitSingleTask((DelayedSingleTask)delayedTask);
 			}else{
@@ -61,7 +62,7 @@ class DelayedThread extends Thread {
 			}
 		}
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	private void waitSingleTask(DelayedSingleTask delayedTask){
 		TimedFuture future = delayedTask.getFuture();
@@ -76,13 +77,13 @@ class DelayedThread extends Thread {
 					Task task = future.getTask();
 					ScheduleContext scheduleContext = task.getScheduleContext();
 					Logger logger = scheduleContext.getLogger();
+					logger.info("cancle task[{}] due to time out, cost={}ms", future.getTaskId(), cost);
 					try{
 						scheduleContext.handleCancel(future.getTaskId(), cost);
 					}catch(Exception e){
 						logger.error("", e); 
 					}
-					logger.info("cancle task[{}] due to time out, cost={}ms", future.getTaskId(), cost);
-					future.cancel(true);
+					cancleTask(future, cost, logger);
 				}else{
 					DELAYQUEUE.add(new DelayedSingleTask(future, overTime - cost)); 
 				}
@@ -91,25 +92,26 @@ class DelayedThread extends Thread {
 			ScheduleContext.cleanCompletedFutures(future.getTaskId()); 
 		}
 	}
-	
+
 	@SuppressWarnings({ "rawtypes" })
 	private void waitBatchTask(DelayedBatchTask delayedTask){
 		List<TimedFuture> futures = delayedTask.getFutureList();
-		
+
 		TimedFuture f1 = futures.get(0);
 		Task task = f1.getTask();
 		int timeOut = f1.getTimeOut();
 		ScheduleContext scheduleContext = task.getScheduleContext();
 		Logger logger = scheduleContext.getLogger();
-		
+
 		Iterator<TimedFuture> it = futures.iterator();
 		while(it.hasNext()){
 			TimedFuture future = it.next();
 			if(!future.isDone()) {
+				long cost = 0;
 				if(future.getStartTime() == 0){
-					logger.info("cancle task[{}] which has not started, cost={}ms", future.getTaskId(), 0);
+					logger.info("cancle task[{}] which has not started, cost={}ms", future.getTaskId(), cost);
 				}else{
-					long cost = System.currentTimeMillis() - future.getStartTime();  
+					cost = System.currentTimeMillis() - future.getStartTime();  
 					logger.info("cancle task[{}] due to time out, cost={}ms", future.getTaskId(), cost);
 					try{
 						scheduleContext.handleCancel(future.getTaskId(), cost);
@@ -117,7 +119,7 @@ class DelayedThread extends Thread {
 						logger.error("", e); 
 					}
 				}
-				future.cancel(true);
+				cancleTask(future, cost, logger);
 			}else{
 				it.remove();
 				if(future.isEnableTaskConflict()){
@@ -125,9 +127,23 @@ class DelayedThread extends Thread {
 				}
 			}
 		}
-		
+
 		if(!futures.isEmpty()){
 			DELAYQUEUE.add(new DelayedBatchTask(futures, timeOut));
 		}
+	}
+
+	@SuppressWarnings("rawtypes")
+	private void cancleTask(TimedFuture future, long costTime, Logger logger) {
+		Task<?> task = future.getTask();
+		if(costTime > 0  && TaskCancelHandler.class.isAssignableFrom(task.getClass())){ 
+			TaskCancelHandler handler = (TaskCancelHandler)task;
+			try {
+				handler.handleCancel(task.getTaskId(), costTime);
+			} catch (Exception e) {
+				logger.error("", e); 
+			}
+		}
+		future.cancel(true);
 	}
 }
