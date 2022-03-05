@@ -1,9 +1,7 @@
-/.settings/
-/.idea/
-/target/
-/bin/
-/log/
-.project
-.classpath
-.checkstyle
-spring-fom.iml
+# 忽略所有文件
+*
+
+# 除了以下文件
+!src
+!pom.xml
+!README.md
