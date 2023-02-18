@@ -67,6 +67,10 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 			scheduleContext.setLogger(LoggerFactory.getLogger(scheduleContext.getClass()));
 			return bean;
 		}
+		
+		if(fom.external()) {
+			return bean;
+		}
 
 		Object scheduleBean = null;
 		if(StringUtils.hasText(scheduleBeanName)){

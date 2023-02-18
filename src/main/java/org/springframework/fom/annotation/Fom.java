@@ -161,6 +161,11 @@ public @interface Fom {
 	String enableString() default "";
 	
 	/**
+	 * 外部加载
+	 */
+	boolean external() default false;
+	
+	/**
 	 * 备注
 	 */
 	String remark() default "";
