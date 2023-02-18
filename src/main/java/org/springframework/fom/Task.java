@@ -34,7 +34,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	
 	public Task(){
 		String name = this.getClass().getSimpleName();
-		if(StringUtils.isEmpty(name)){
+		if(!StringUtils.hasText(name)){
 			name = "Task";
 		}
 		this.id = name;

@@ -200,7 +200,7 @@ public class ScheduleConfig {
 	}
 
 	public boolean setCron(String cron){
-		if(StringUtils.isEmpty(cron)){
+		if(!StringUtils.hasText(cron)){
 			return false;
 		}
 

@@ -18,7 +18,6 @@ package org.springframework.fom.logging;
 
 import java.util.Comparator;
 
-import org.springframework.fom.logging.LoggerConfiguration;
 import org.springframework.util.Assert;
 
 /**

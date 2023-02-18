@@ -16,8 +16,6 @@
 
 package org.springframework.fom.logging;
 
-import org.springframework.fom.logging.LoggingSystem;
-
 /**
  * Logging levels supported by a {@link LoggingSystem}.
  *

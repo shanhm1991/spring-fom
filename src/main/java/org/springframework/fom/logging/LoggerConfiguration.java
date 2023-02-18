@@ -16,8 +16,6 @@
 
 package org.springframework.fom.logging;
 
-import org.springframework.fom.logging.LogLevel;
-import org.springframework.fom.logging.LoggingSystem;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 

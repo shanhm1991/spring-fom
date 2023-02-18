@@ -20,9 +20,6 @@ import java.lang.reflect.Method;
 
 import org.springframework.fom.logging.LogFile;
 import org.springframework.fom.logging.LoggingInitializationContext;
-import org.springframework.fom.logging.logback.ColorConverter;
-import org.springframework.fom.logging.logback.ExtendedWhitespaceThrowableProxyConverter;
-import org.springframework.fom.logging.logback.WhitespaceThrowableProxyConverter;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertyResolver;

@@ -196,7 +196,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 	}
 
 	private boolean setCron(ScheduleConfig scheduleConfig, String cron){
-		if(!StringUtils.isEmpty(cron)){
+		if(StringUtils.hasText(cron)){
 			cron = valueResolver.resolveStringValue(cron);
 			scheduleConfig.setCron(cron); 
 			return true;
@@ -205,7 +205,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 	}
 
 	private boolean setFixedRate(ScheduleConfig scheduleConfig, long fixedRate, String fixedRateString){
-		if(!StringUtils.isEmpty(fixedRateString)){
+		if(StringUtils.hasText(fixedRateString)){
 			fixedRateString = valueResolver.resolveStringValue(fixedRateString);
 			if(scheduleConfig.setFixedRate(Long.parseLong(fixedRateString))){
 				return true;
@@ -218,7 +218,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 	}
 
 	private boolean setFixedDelay(ScheduleConfig scheduleConfig, long fixedDelay, String fixedDelayString){
-		if(!StringUtils.isEmpty(fixedDelayString)){
+		if(StringUtils.hasText(fixedDelayString)){
 			fixedDelayString = valueResolver.resolveStringValue(fixedDelayString);
 			if(scheduleConfig.setFixedDelay(Long.parseLong(fixedDelayString))){
 				return true;
@@ -232,7 +232,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 
 	private void setOtherConf(ScheduleConfig scheduleConfig, Fom fom){
 		String threadCoreString = fom.threadCoreString();
-		if(!StringUtils.isEmpty(threadCoreString)){
+		if(StringUtils.hasText(threadCoreString)){
 			threadCoreString = valueResolver.resolveStringValue(threadCoreString);
 			int threadCore = Integer.parseInt(threadCoreString);
 			if(Fom.THREAD_CORE_DEFAULT != threadCore){
@@ -243,7 +243,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		}
 
 		String threadMaxString = fom.threadMaxString();
-		if(!StringUtils.isEmpty(threadMaxString)){
+		if(StringUtils.hasText(threadMaxString)){
 			threadMaxString = valueResolver.resolveStringValue(threadMaxString);
 			int threadMax = Integer.parseInt(threadMaxString);
 			if(Fom.THREAD_CORE_DEFAULT != threadMax){
@@ -254,13 +254,13 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		}
 
 		String queueSize = fom.queueSizeString();
-		if(StringUtils.isEmpty(queueSize) 
+		if(!StringUtils.hasText(queueSize) 
 				|| !scheduleConfig.setQueueSize(Integer.parseInt(valueResolver.resolveStringValue(queueSize)))){
 			scheduleConfig.setQueueSize(fom.queueSize());
 		}
 
 		String threadAliveTime = fom.threadAliveTimeString();
-		if(StringUtils.isEmpty(threadAliveTime) 
+		if(!StringUtils.hasText(threadAliveTime) 
 				|| !scheduleConfig.setThreadAliveTime(Integer.parseInt(valueResolver.resolveStringValue(threadAliveTime)))){
 			scheduleConfig.setThreadAliveTime(fom.threadAliveTime());
 		}
@@ -268,37 +268,37 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		scheduleConfig.setRemark(valueResolver.resolveStringValue(fom.remark()));
 
 		String execOnLoad = fom.execOnLoadString();
-		if(StringUtils.isEmpty(execOnLoad) 
+		if(!StringUtils.hasText(execOnLoad) 
 				|| !scheduleConfig.setExecOnLoad(Boolean.parseBoolean(valueResolver.resolveStringValue(execOnLoad)))){
 			scheduleConfig.setExecOnLoad(fom.execOnLoad());
 		}
 
 		String taskOverTime = fom.taskOverTimeString();
-		if(StringUtils.isEmpty(taskOverTime) 
+		if(!StringUtils.hasText(taskOverTime) 
 				|| !scheduleConfig.setTaskOverTime(Integer.parseInt(valueResolver.resolveStringValue(taskOverTime)))){
 			scheduleConfig.setTaskOverTime(fom.taskOverTime());
 		}
 
 		String detectTimeoutOnEachTask = fom.detectTimeoutOnEachTaskString();
-		if(StringUtils.isEmpty(detectTimeoutOnEachTask) 
+		if(!StringUtils.hasText(detectTimeoutOnEachTask) 
 				|| !scheduleConfig.setDetectTimeoutOnEachTask(Boolean.parseBoolean(valueResolver.resolveStringValue(detectTimeoutOnEachTask)))){
 			scheduleConfig.setDetectTimeoutOnEachTask(fom.detectTimeoutOnEachTask());
 		}
 
 		String ignoreExecRequestWhenRunning = fom.ignoreExecRequestWhenRunningString();
-		if(StringUtils.isEmpty(ignoreExecRequestWhenRunning) 
+		if(!StringUtils.hasText(ignoreExecRequestWhenRunning) 
 				|| !scheduleConfig.setIgnoreExecRequestWhenRunning(Boolean.parseBoolean(valueResolver.resolveStringValue(ignoreExecRequestWhenRunning)))){
 			scheduleConfig.setIgnoreExecRequestWhenRunning(fom.ignoreExecRequestWhenRunning());
 		}
 
 		String enableTaskConflict = fom.enableTaskConflictString();
-		if(StringUtils.isEmpty(enableTaskConflict) 
+		if(!StringUtils.hasText(enableTaskConflict) 
 				|| !scheduleConfig.setEnableTaskConflict(Boolean.parseBoolean(valueResolver.resolveStringValue(enableTaskConflict)))){
 			scheduleConfig.setEnableTaskConflict(fom.enableTaskConflict());
 		}
 
 		String enableString = fom.enableString();
-		if(StringUtils.isEmpty(enableString) 
+		if(!StringUtils.hasText(enableString) 
 				|| !scheduleConfig.setEnable(Boolean.parseBoolean(valueResolver.resolveStringValue(enableString)))){
 			scheduleConfig.setEnable(fom.enable());
 		}

@@ -21,10 +21,6 @@ import java.util.logging.Handler;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-import org.springframework.fom.logging.AbstractLoggingSystem;
-import org.springframework.fom.logging.LogFile;
-import org.springframework.fom.logging.LoggingInitializationContext;
-import org.springframework.fom.logging.LoggingSystem;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 

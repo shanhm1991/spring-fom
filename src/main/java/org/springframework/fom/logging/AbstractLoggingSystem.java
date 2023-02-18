@@ -23,12 +23,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.fom.logging.LogFile;
-import org.springframework.fom.logging.LogLevel;
-import org.springframework.fom.logging.LoggerConfiguration;
-import org.springframework.fom.logging.LoggingInitializationContext;
-import org.springframework.fom.logging.LoggingSystem;
-import org.springframework.fom.logging.LoggingSystemProperties;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ClassUtils;

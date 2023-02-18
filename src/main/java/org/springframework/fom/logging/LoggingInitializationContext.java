@@ -16,7 +16,6 @@
 
 package org.springframework.fom.logging;
 
-import org.springframework.fom.logging.LoggingSystem;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 

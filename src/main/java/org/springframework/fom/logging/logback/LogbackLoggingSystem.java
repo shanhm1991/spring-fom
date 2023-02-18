@@ -274,7 +274,7 @@ public class LogbackLoggingSystem extends Slf4JLoggingSystem {
 
 	private ch.qos.logback.classic.Logger getLogger(String name) {
 		LoggerContext factory = getLoggerContext();
-		if (StringUtils.isEmpty(name) || ROOT_LOGGER_NAME.equals(name)) {
+		if (!StringUtils.hasText(name) || ROOT_LOGGER_NAME.equals(name)) {
 			name = Logger.ROOT_LOGGER_NAME;
 		}
 		return factory.getLogger(name);

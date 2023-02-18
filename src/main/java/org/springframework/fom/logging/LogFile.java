@@ -18,7 +18,6 @@ package org.springframework.fom.logging;
 
 import java.util.Properties;
 
-import org.springframework.fom.logging.LoggingSystemProperties;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.util.Assert;
