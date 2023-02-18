@@ -12,39 +12,30 @@ public interface ScheduleService {
 	/**
 	 * 序列化当前schedule的配置
 	 */
-	public void serializeCurrent();
+	void serializeCurrent();
 	
 	/**
 	 * 序列化schedule配置
-	 * @param scheduleName
 	 */
-	public void serialize(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName);
+	void serialize(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName);
 	
 	/**
 	 * 设置当前schedule的配置
-	 * @param key
-	 * @param value
 	 */
-	public void putCurrentConfig(String key, Object value);
+	void putCurrentConfig(String key, Object value);
 	
 	/**
 	 * 设置schedule的配置
-	 * @param scheduleName
-	 * @param key
-	 * @param value
 	 */
-	public void putConfig(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName, String key, Object value);
+	void putConfig(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName, String key, Object value);
 	
 	/**
 	 * 获取当前schedule的配置
-	 * @param key
 	 */
-	public <V> V getCurrentConfig(String key);
+	<V> V getCurrentConfig(String key);
 	
 	/**
 	 * 获取schedule的配置
-	 * @param scheduleName
-	 * @param key
 	 */
-	public <V> V getConfig(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName, String key);
+	<V> V getConfig(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName, String key);
 }

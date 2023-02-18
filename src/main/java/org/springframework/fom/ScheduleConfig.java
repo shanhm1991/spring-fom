@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.fom.annotation.FomSchedule;
+import org.springframework.fom.annotation.Fom;
 import org.springframework.fom.collections.MapUtils;
 import org.springframework.fom.quartz.CronExpression;
 import org.springframework.util.Assert;
@@ -38,20 +38,20 @@ public class ScheduleConfig {
 	private final Map<String, List<Field>> envirmentConf = new HashMap<>();
 
 	static{
-		internalConf.put(FomSchedule.CRON, "");
-		internalConf.put(FomSchedule.FIXED_RATE, FomSchedule.FIXED_RATE_DEFAULT);
-		internalConf.put(FomSchedule.FIXED_DELAY, FomSchedule.FIXED_DELAY_DEFAULT);
-		internalConf.put(FomSchedule.REMARK, "");
-		internalConf.put(FomSchedule.QUEUE_SIZE, FomSchedule.QUEUE_SIZE_DEFAULT);
-		internalConf.put(FomSchedule.THREAD_CORE, FomSchedule.THREAD_CORE_DEFAULT);
-		internalConf.put(FomSchedule.THREAD_MAX, FomSchedule.THREAD_CORE_DEFAULT);
-		internalConf.put(FomSchedule.THREAD_ALIVETIME, FomSchedule.THREAD_ALIVETIME_DEFAULT);
-		internalConf.put(FomSchedule.TASK_OVERTIME, FomSchedule.TASK_OVERTIME_DEFAULT);
-		internalConf.put(FomSchedule.EXEC_ONLOAN, FomSchedule.EXEC_ONLOAN_DEFAULT);
-		internalConf.put(FomSchedule.ENABLE_TASK_CONFLICT, FomSchedule.ENABLE_TASK_CONFLICT_DEFAULT);
-		internalConf.put(FomSchedule.DETECT_TIMEOUT_ONEACHTASK, FomSchedule.DETECT_TIMEOUT_ONEACHTASK_DEFAULT);
-		internalConf.put(FomSchedule.IGNORE_EXECREQUEST_WHEN_RUNNING, FomSchedule.IGNORE_EXECREQUEST_WHEN_RUNNING_DEFAULT);
-		internalConf.put(FomSchedule.ENABLE, FomSchedule.ENABLE_DEFAULT);
+		internalConf.put(Fom.CRON, "");
+		internalConf.put(Fom.FIXED_RATE, Fom.FIXED_RATE_DEFAULT);
+		internalConf.put(Fom.FIXED_DELAY, Fom.FIXED_DELAY_DEFAULT);
+		internalConf.put(Fom.REMARK, "");
+		internalConf.put(Fom.QUEUE_SIZE, Fom.QUEUE_SIZE_DEFAULT);
+		internalConf.put(Fom.THREAD_CORE, Fom.THREAD_CORE_DEFAULT);
+		internalConf.put(Fom.THREAD_MAX, Fom.THREAD_CORE_DEFAULT);
+		internalConf.put(Fom.THREAD_ALIVETIME, Fom.THREAD_ALIVETIME_DEFAULT);
+		internalConf.put(Fom.TASK_OVERTIME, Fom.TASK_OVERTIME_DEFAULT);
+		internalConf.put(Fom.EXEC_ONLOAN, Fom.EXEC_ONLOAN_DEFAULT);
+		internalConf.put(Fom.ENABLE_TASK_CONFLICT, Fom.ENABLE_TASK_CONFLICT_DEFAULT);
+		internalConf.put(Fom.DETECT_TIMEOUT_ONEACHTASK, Fom.DETECT_TIMEOUT_ONEACHTASK_DEFAULT);
+		internalConf.put(Fom.IGNORE_EXECREQUEST_WHEN_RUNNING, Fom.IGNORE_EXECREQUEST_WHEN_RUNNING_DEFAULT);
+		internalConf.put(Fom.ENABLE, Fom.ENABLE_DEFAULT);
 		//readOnlyConf.add(FomSchedule.QUEUE_SIZE);
 		//readOnlyConf.add(FomSchedule.EXEC_ONLOAN);
 	}
@@ -88,7 +88,7 @@ public class ScheduleConfig {
 	public Map<String, Object> getConfMap() {
 		Map<String, Object> map = new HashMap<>();
 		map.putAll(confMap);
-		map.put(FomSchedule.CRON, getCronExpression());
+		map.put(Fom.CRON, getCronExpression());
 		return map;
 	} 
 
@@ -188,7 +188,7 @@ public class ScheduleConfig {
 
 	// get/set of internal config 
 	public CronExpression getCron(){
-		return (CronExpression)confMap.get(FomSchedule.CRON);
+		return (CronExpression)confMap.get(Fom.CRON);
 	}
 
 	public String getCronExpression(){
@@ -212,64 +212,64 @@ public class ScheduleConfig {
 		}
 
 		if(!cron.equals(getCron())){
-			confMap.put(FomSchedule.CRON, cronExpression);
+			confMap.put(Fom.CRON, cronExpression);
 			return true;
 		}
 		return false;
 	}
 
 	public long getFixedRate(){
-		return MapUtils.getLongValue(confMap, FomSchedule.FIXED_RATE, FomSchedule.FIXED_RATE_DEFAULT);
+		return MapUtils.getLongValue(confMap, Fom.FIXED_RATE, Fom.FIXED_RATE_DEFAULT);
 	}
 
 	public boolean setFixedRate(long fixedRate){
-		if(fixedRate > FomSchedule.FIXED_RATE_DEFAULT && fixedRate != getFixedRate()){
-			confMap.put(FomSchedule.FIXED_RATE, fixedRate);
+		if(fixedRate > Fom.FIXED_RATE_DEFAULT && fixedRate != getFixedRate()){
+			confMap.put(Fom.FIXED_RATE, fixedRate);
 			return true;
 		}
 		return false;
 	}
 
 	public long getFixedDelay(){
-		return MapUtils.getLongValue(confMap, FomSchedule.FIXED_DELAY, FomSchedule.FIXED_DELAY_DEFAULT);
+		return MapUtils.getLongValue(confMap, Fom.FIXED_DELAY, Fom.FIXED_DELAY_DEFAULT);
 	}
 
 	public boolean setFixedDelay(long fixedDelay){
-		if(fixedDelay > FomSchedule.FIXED_DELAY_DEFAULT && fixedDelay != getFixedDelay()){
-			confMap.put(FomSchedule.FIXED_DELAY, fixedDelay);
+		if(fixedDelay > Fom.FIXED_DELAY_DEFAULT && fixedDelay != getFixedDelay()){
+			confMap.put(Fom.FIXED_DELAY, fixedDelay);
 			return true;
 		}
 		return false;
 	}
 
 	public String getRemark(){
-		return MapUtils.getString(confMap, FomSchedule.REMARK, "");
+		return MapUtils.getString(confMap, Fom.REMARK, "");
 	}
 
 	public boolean setRemark(String remark){
 		if(remark.equals(getRemark())){
 			return false;
 		}
-		confMap.put(FomSchedule.REMARK, remark);
+		confMap.put(Fom.REMARK, remark);
 		return true;
 	}
 
 	public int getThreadCore(){
-		return MapUtils.getIntValue(confMap, FomSchedule.THREAD_CORE, FomSchedule.THREAD_CORE_DEFAULT);
+		return MapUtils.getIntValue(confMap, Fom.THREAD_CORE, Fom.THREAD_CORE_DEFAULT);
 	}
 
 	public boolean setThreadCore(int threadCore){
-		Assert.isTrue(threadCore >= FomSchedule.THREAD_CORE_DEFAULT, 
-				buildMsg(FomSchedule.THREAD_CORE, " cannot be less than ", FomSchedule.THREAD_CORE_DEFAULT)); 
+		Assert.isTrue(threadCore >= Fom.THREAD_CORE_DEFAULT,
+				buildMsg(Fom.THREAD_CORE, " cannot be less than ", Fom.THREAD_CORE_DEFAULT));
 		if(threadCore == getThreadCore()){
 			return false;
 		}
 
-		confMap.put(FomSchedule.THREAD_CORE, threadCore);
+		confMap.put(Fom.THREAD_CORE, threadCore);
 		int threadMax = getThreadMax();
 		if(threadMax < threadCore){ 
 			threadMax = threadCore;
-			confMap.put(FomSchedule.THREAD_MAX, threadMax);
+			confMap.put(Fom.THREAD_MAX, threadMax);
 		}
 
 		if(pool != null && pool.getCorePoolSize() != threadCore){
@@ -280,21 +280,21 @@ public class ScheduleConfig {
 	}
 
 	public int getThreadMax(){
-		return MapUtils.getIntValue(confMap, FomSchedule.THREAD_MAX, FomSchedule.THREAD_CORE_DEFAULT);
+		return MapUtils.getIntValue(confMap, Fom.THREAD_MAX, Fom.THREAD_CORE_DEFAULT);
 	}
 
 	public boolean setThreadMax(int threadMax){
-		Assert.isTrue(threadMax >= FomSchedule.THREAD_CORE_DEFAULT, 
-				buildMsg(FomSchedule.THREAD_MAX, " cannot be less than ",FomSchedule. THREAD_CORE_DEFAULT)); 
+		Assert.isTrue(threadMax >= Fom.THREAD_CORE_DEFAULT,
+				buildMsg(Fom.THREAD_MAX, " cannot be less than ", Fom. THREAD_CORE_DEFAULT));
 		if(threadMax == getThreadMax()){
 			return false;
 		}
 
-		confMap.put(FomSchedule.THREAD_MAX, threadMax);
+		confMap.put(Fom.THREAD_MAX, threadMax);
 		int threadCore = getThreadCore();
 		if(threadCore > threadMax){
 			threadCore = threadMax;
-			confMap.put(FomSchedule.THREAD_CORE, threadCore);
+			confMap.put(Fom.THREAD_CORE, threadCore);
 		}
 
 		if(pool != null && pool.getMaximumPoolSize() != threadMax){
@@ -305,16 +305,16 @@ public class ScheduleConfig {
 	}
 
 	public int getThreadAliveTime(){
-		return MapUtils.getIntValue(confMap, FomSchedule.THREAD_ALIVETIME, FomSchedule.THREAD_ALIVETIME_DEFAULT);
+		return MapUtils.getIntValue(confMap, Fom.THREAD_ALIVETIME, Fom.THREAD_ALIVETIME_DEFAULT);
 	}
 
 	public boolean setThreadAliveTime(int aliveTime){
-		Assert.isTrue(aliveTime >= FomSchedule.THREAD_ALIVETIME_DEFAULT, 
-				buildMsg(FomSchedule.THREAD_ALIVETIME, " cannot be less than ", FomSchedule.THREAD_ALIVETIME_DEFAULT)); 
+		Assert.isTrue(aliveTime >= Fom.THREAD_ALIVETIME_DEFAULT,
+				buildMsg(Fom.THREAD_ALIVETIME, " cannot be less than ", Fom.THREAD_ALIVETIME_DEFAULT));
 		if(aliveTime == getThreadAliveTime()){
 			return false;
 		}
-		confMap.put(FomSchedule.THREAD_ALIVETIME, aliveTime);
+		confMap.put(Fom.THREAD_ALIVETIME, aliveTime);
 		if(pool != null && pool.getKeepAliveTime(TimeUnit.MILLISECONDS) != aliveTime){ 
 			pool.setKeepAliveTime(aliveTime, TimeUnit.MILLISECONDS);
 		}
@@ -322,90 +322,90 @@ public class ScheduleConfig {
 	}
 
 	public int getTaskOverTime(){
-		return MapUtils.getIntValue(confMap, FomSchedule.TASK_OVERTIME, FomSchedule.TASK_OVERTIME_DEFAULT);
+		return MapUtils.getIntValue(confMap, Fom.TASK_OVERTIME, Fom.TASK_OVERTIME_DEFAULT);
 	}
 
 	public boolean setTaskOverTime(int overTime){
-		Assert.isTrue(overTime >= FomSchedule.TASK_OVERTIME_DEFAULT, 
-				buildMsg(FomSchedule.TASK_OVERTIME, " cannot be less than ", FomSchedule.TASK_OVERTIME_DEFAULT)); 
+		Assert.isTrue(overTime >= Fom.TASK_OVERTIME_DEFAULT,
+				buildMsg(Fom.TASK_OVERTIME, " cannot be less than ", Fom.TASK_OVERTIME_DEFAULT));
 		if(overTime == getTaskOverTime()){
 			return false;
 		}
-		confMap.put(FomSchedule.TASK_OVERTIME, overTime);
+		confMap.put(Fom.TASK_OVERTIME, overTime);
 		return true;
 	}
 
 	public boolean getExecOnLoad(){
-		return MapUtils.getBoolean(confMap, FomSchedule.EXEC_ONLOAN, FomSchedule.EXEC_ONLOAN_DEFAULT);
+		return MapUtils.getBoolean(confMap, Fom.EXEC_ONLOAN, Fom.EXEC_ONLOAN_DEFAULT);
 	}
 
 	public boolean setExecOnLoad(boolean execOnLoad) {
 		if(execOnLoad == getExecOnLoad()){
 			return false;
 		}
-		confMap.put(FomSchedule.EXEC_ONLOAN, execOnLoad);
+		confMap.put(Fom.EXEC_ONLOAN, execOnLoad);
 		return true;
 	}
 
 	public boolean getDetectTimeoutOnEachTask(){
-		return MapUtils.getBoolean(confMap, FomSchedule.DETECT_TIMEOUT_ONEACHTASK, FomSchedule.DETECT_TIMEOUT_ONEACHTASK_DEFAULT);
+		return MapUtils.getBoolean(confMap, Fom.DETECT_TIMEOUT_ONEACHTASK, Fom.DETECT_TIMEOUT_ONEACHTASK_DEFAULT);
 	}
 
 	public boolean setDetectTimeoutOnEachTask(boolean detectTimeoutOnEachTask){
 		if(detectTimeoutOnEachTask == getDetectTimeoutOnEachTask()){
 			return false;
 		}
-		confMap.put(FomSchedule.DETECT_TIMEOUT_ONEACHTASK, detectTimeoutOnEachTask);
+		confMap.put(Fom.DETECT_TIMEOUT_ONEACHTASK, detectTimeoutOnEachTask);
 		return true;
 	}
 
 	public boolean getEnableTaskConflict(){
-		return MapUtils.getBoolean(confMap, FomSchedule.ENABLE_TASK_CONFLICT, FomSchedule.ENABLE_TASK_CONFLICT_DEFAULT);
+		return MapUtils.getBoolean(confMap, Fom.ENABLE_TASK_CONFLICT, Fom.ENABLE_TASK_CONFLICT_DEFAULT);
 	}
 
 	public boolean setEnableTaskConflict(boolean enableTaskConflict){
 		if(enableTaskConflict == getEnableTaskConflict()){
 			return false;
 		}
-		confMap.put(FomSchedule.ENABLE_TASK_CONFLICT, enableTaskConflict);
+		confMap.put(Fom.ENABLE_TASK_CONFLICT, enableTaskConflict);
 		return true;
 	}
 	
 	public boolean getEnable(){
-		return MapUtils.getBoolean(confMap, FomSchedule.ENABLE, FomSchedule.ENABLE_DEFAULT);
+		return MapUtils.getBoolean(confMap, Fom.ENABLE, Fom.ENABLE_DEFAULT);
 	}
 	
 	public boolean setEnable(boolean enable){
 		if(enable == getEnable()){
 			return false;
 		}
-		confMap.put(FomSchedule.ENABLE, enable);
+		confMap.put(Fom.ENABLE, enable);
 		return true;
 	}
 
 	public boolean getIgnoreExecRequestWhenRunning(){
-		return MapUtils.getBoolean(confMap, FomSchedule.IGNORE_EXECREQUEST_WHEN_RUNNING, FomSchedule.IGNORE_EXECREQUEST_WHEN_RUNNING_DEFAULT);
+		return MapUtils.getBoolean(confMap, Fom.IGNORE_EXECREQUEST_WHEN_RUNNING, Fom.IGNORE_EXECREQUEST_WHEN_RUNNING_DEFAULT);
 	}
 
 	public boolean setIgnoreExecRequestWhenRunning(boolean ignoreExecRequestWhenRunning){
 		if(ignoreExecRequestWhenRunning == getIgnoreExecRequestWhenRunning()){
 			return false;
 		}
-		confMap.put(FomSchedule.IGNORE_EXECREQUEST_WHEN_RUNNING, ignoreExecRequestWhenRunning);
+		confMap.put(Fom.IGNORE_EXECREQUEST_WHEN_RUNNING, ignoreExecRequestWhenRunning);
 		return true;
 	}
 
 	public int getQueueSize(){
-		return MapUtils.getIntValue(confMap, FomSchedule.QUEUE_SIZE, FomSchedule.QUEUE_SIZE_DEFAULT);
+		return MapUtils.getIntValue(confMap, Fom.QUEUE_SIZE, Fom.QUEUE_SIZE_DEFAULT);
 	}
 
 	boolean setQueueSize(int queueSize){
-		Assert.isTrue(queueSize >= FomSchedule.QUEUE_SIZE_MIN, 
-				buildMsg(FomSchedule.QUEUE_SIZE, " cannot be less than ", FomSchedule.QUEUE_SIZE_MIN)); 
+		Assert.isTrue(queueSize >= Fom.QUEUE_SIZE_MIN,
+				buildMsg(Fom.QUEUE_SIZE, " cannot be less than ", Fom.QUEUE_SIZE_MIN));
 		if(queueSize == getQueueSize()){
 			return false;
 		}
-		confMap.put(FomSchedule.QUEUE_SIZE, queueSize);
+		confMap.put(Fom.QUEUE_SIZE, queueSize);
 		return true;
 	}
 
@@ -503,33 +503,33 @@ public class ScheduleConfig {
 	// 配置有限，这里简单处理下，这样做主要是为了自我保护，防止配置被恶意修改
 	private void saveInternalConfig(String key, Object value){
 		switch(key){
-		case FomSchedule.CRON:
+		case Fom.CRON:
 			setCron(value.toString()); return;
-		case FomSchedule.FIXED_RATE:
+		case Fom.FIXED_RATE:
 			setFixedRate(Long.valueOf(value.toString())); return;
-		case FomSchedule.FIXED_DELAY:
+		case Fom.FIXED_DELAY:
 			setFixedDelay(Long.valueOf(value.toString())); return;
-		case FomSchedule.REMARK:
+		case Fom.REMARK:
 			setRemark(value.toString()); return;
-		case FomSchedule.THREAD_CORE:
+		case Fom.THREAD_CORE:
 			setThreadCore(Integer.valueOf(value.toString())); return;
-		case FomSchedule.THREAD_MAX:
+		case Fom.THREAD_MAX:
 			setThreadMax(Integer.valueOf(value.toString())); return;
-		case FomSchedule.THREAD_ALIVETIME:
+		case Fom.THREAD_ALIVETIME:
 			setThreadAliveTime(Integer.valueOf(value.toString())); return;
-		case FomSchedule.TASK_OVERTIME:
+		case Fom.TASK_OVERTIME:
 			setTaskOverTime(Integer.valueOf(value.toString())); return;
-		case FomSchedule.DETECT_TIMEOUT_ONEACHTASK:
+		case Fom.DETECT_TIMEOUT_ONEACHTASK:
 			setDetectTimeoutOnEachTask(Boolean.valueOf(value.toString())); return; 
-		case FomSchedule.IGNORE_EXECREQUEST_WHEN_RUNNING:
+		case Fom.IGNORE_EXECREQUEST_WHEN_RUNNING:
 			setIgnoreExecRequestWhenRunning(Boolean.valueOf(value.toString())); return; 
-		case FomSchedule.ENABLE_TASK_CONFLICT:
+		case Fom.ENABLE_TASK_CONFLICT:
 			setEnableTaskConflict(Boolean.valueOf(value.toString())); return; 
-		case FomSchedule.QUEUE_SIZE:
+		case Fom.QUEUE_SIZE:
 			setQueueSize(Integer.valueOf(value.toString())); return;  
-		case FomSchedule.EXEC_ONLOAN:
+		case Fom.EXEC_ONLOAN:
 			setExecOnLoad(Boolean.valueOf(value.toString())); return;  
-		case FomSchedule.ENABLE:
+		case Fom.ENABLE:
 			setEnable(Boolean.valueOf(value.toString())); return;  
 		default:
 			throw new UnsupportedOperationException("config[" + key + "] cannot be change");

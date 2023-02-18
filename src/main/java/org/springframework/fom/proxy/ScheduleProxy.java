@@ -10,8 +10,8 @@ import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.fom.Result;
 import org.springframework.fom.ScheduleContext;
 import org.springframework.fom.Task;
-import org.springframework.fom.annotation.FomSchedule;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.fom.annotation.Fom;
+import org.springframework.fom.annotation.Schedule;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -29,7 +29,7 @@ public class ScheduleProxy implements MethodInterceptor {
 
 	private Class<?> scheduleBeanClass;
 
-	public ScheduleProxy(String beanName, ScheduleContext<?> scheduleContext, FomSchedule fomSchedule, Object scheduleBean){
+	public ScheduleProxy(String beanName, ScheduleContext<?> scheduleContext, Fom fom, Object scheduleBean){
 		this.scheduleContext = scheduleContext;
 		this.beanName = beanName;
 		this.scheduleBean = scheduleBean;
@@ -122,15 +122,14 @@ public class ScheduleProxy implements MethodInterceptor {
 			tasks.addAll((Collection<Task<?>>)methodProxy.invokeSuper(object, args)); 
 			List<Method> methods = new ArrayList<>();
 			for(Method m : scheduleContext.getClass().getMethods()){
-				Scheduled scheduled = m.getAnnotation(Scheduled.class);
+				Schedule scheduled = m.getAnnotation(Schedule.class);
 				if(scheduled != null){
 					methods.add(m);
 				}
 			}
 
-			int index = 0;
 			for(final Method m : methods){
-				Task<Object> task = new Task<Object>(beanName + "-" + ++index){
+				Task<Object> task = new Task<Object>(beanName + "-" + m.getName()){
 					@Override
 					public Object exec() throws Exception {
 						return m.invoke(scheduleContext);
@@ -149,15 +148,14 @@ public class ScheduleProxy implements MethodInterceptor {
 
 			List<Method> methods = new ArrayList<>();
 			for(Method m : scheduleBeanClass.getMethods()){
-				Scheduled scheduled = m.getAnnotation(Scheduled.class);
+				Schedule scheduled = m.getAnnotation(Schedule.class);
 				if(scheduled != null){
 					methods.add(m);
 				}
 			}
 
-			int index = 0;
 			for(final Method m : methods){
-				Task<Object> task = new Task<Object>(beanName + "-" + ++index){
+				Task<Object> task = new Task<Object>(beanName + "-" + m.getName()){
 					@Override
 					public Object exec() throws Exception {
 						return m.invoke(scheduleBean);

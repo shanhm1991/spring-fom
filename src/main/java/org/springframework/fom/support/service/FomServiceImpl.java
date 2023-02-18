@@ -21,14 +21,16 @@ import org.springframework.fom.Result;
 import org.springframework.fom.ScheduleContext;
 import org.springframework.fom.ScheduleInfo;
 import org.springframework.fom.ScheduleStatistics;
-import org.springframework.fom.annotation.FomSchedule;
+import org.springframework.fom.annotation.Fom;
 import org.springframework.fom.logging.LogLevel;
 import org.springframework.fom.logging.LoggerConfiguration;
 import org.springframework.fom.logging.LoggingSystem;
 import org.springframework.fom.logging.log4j.Log4jLoggingSystem;
-import org.springframework.fom.support.Response;
+import org.springframework.fom.support.FomResponse;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * 
@@ -38,14 +40,15 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class FomServiceImpl implements FomService {
 
-	@Value("${spring.fom.config.cache.enable:true}")
-	private boolean configCacheEnable;
+	// file redis
+	@Value("${spring.fom.cache.type:file}")
+	private String cacheType;
 	
-	@Value("${spring.fom.config.cache.history:false}")
-	private boolean configCacheHistorySave;
+	@Value("${spring.fom.cache.history:false}")
+	private boolean cacheHistory;
 
-	@Value("${spring.fom.config.cache.path:cache/schedule}")
-	private String configCachePath;
+	@Value("${spring.fom.cache.file.path:cache/schedule}")
+	private String cacheFilePath;
 
 	@Autowired
 	private ApplicationContext applicationContext;
@@ -64,7 +67,7 @@ public class FomServiceImpl implements FomService {
 	public List<ScheduleInfo> list() {
 		List<ScheduleInfo> list = new ArrayList<>();
 		String[] names = applicationContext.getBeanNamesForType(ScheduleContext.class);
-		if(names == null || names.length == 0){
+		if(names.length == 0){
 			return list;
 		}
 
@@ -98,7 +101,7 @@ public class FomServiceImpl implements FomService {
 		}
 
 		String[] beanNames = applicationContext.getBeanNamesForType(clazz);
-		Assert.isTrue(beanNames != null && beanNames.length == 1, "cannot determine schedule by class:" + clazz); 
+		Assert.isTrue(beanNames.length == 1, "cannot determine schedule by class:" + clazz);
 
 		String beanName = beanNames[0];
 		ScheduleContext<?> scheduleContext = (ScheduleContext<?>)applicationContext.getBean("$" + beanName);
@@ -170,17 +173,17 @@ public class FomServiceImpl implements FomService {
 	}
 
 	@Override
-	public Response<Void> start(String scheduleName) {
+	public FomResponse<Void> start(String scheduleName) {
 		return getScheduleByValidName(scheduleName).scheduleStart();
 	}
 
 	@Override
-	public Response<Void> shutdown(String scheduleName){
+	public FomResponse<Void> shutdown(String scheduleName){
 		return getScheduleByValidName(scheduleName).scheduleShutdown();
 	}
 
 	@Override
-	public Response<Void> exec(String scheduleName) {
+	public FomResponse<Void> exec(String scheduleName) {
 		return getScheduleByValidName(scheduleName).scheduleExecNow();
 	}
 
@@ -225,26 +228,38 @@ public class FomServiceImpl implements FomService {
 		serializeConfig(schedule);
 	}
 
-	private void serializeConfig(ScheduleContext<?> schedule){
-		if(!configCacheEnable){
-			return;	
+	private void serializeConfig(ScheduleContext<?> schedule){  
+		if("file".equalsIgnoreCase(cacheType)){
+			serializeFile(schedule);
+		}else if("redis".equalsIgnoreCase(cacheType)){
+			// TODO
+		}
+	}
+	
+	private void serializeFile(ScheduleContext<?> schedule){
+		File dir = new File(cacheFilePath);
+		if(!dir.exists() && !dir.mkdirs()){
+			throw new IllegalArgumentException("cann't touch cache dir " + cacheFilePath); 
 		}
 		
-		File dir = new File(configCachePath);
-		if(!dir.exists() && !dir.mkdirs()){
-			return;
-		}
-
 		File cacheFile = new File(dir.getPath() + File.separator + schedule.getScheduleName() + ".cache"); 
 		if(cacheFile.exists()){
-			if(configCacheHistorySave){
+			if(cacheHistory){
 				cacheFile.renameTo(new File(dir.getPath() + File.separator + schedule.getScheduleName() + ".cache." + System.currentTimeMillis()));
 			}else{
 				cacheFile.delete();
 			}
 		}
-
+		
 		Map<String, Object> configMap = schedule.getScheduleConfig().getConfMap();
+		
+		try{
+			String str = new ObjectMapper().writeValueAsString(configMap);
+			System.out.println(str);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
 		try(FileOutputStream out = new FileOutputStream(cacheFile);
 				ObjectOutputStream oos = new ObjectOutputStream(out)){
 			oos.writeObject(configMap);
@@ -316,8 +331,8 @@ public class FomServiceImpl implements FomService {
 			for(StackTraceElement stack : stacks){
 				String clazzName = stack.getClassName();
 				Class<?> clazz = Class.forName(clazzName); 
-				FomSchedule fom = clazz.getAnnotation(FomSchedule.class);
-				if(clazz.getAnnotation(FomSchedule.class) != null){
+				Fom fom = clazz.getAnnotation(Fom.class);
+				if(clazz.getAnnotation(Fom.class) != null){
 					String beanName =  fom.value();
 					if(beanName == null || "".equals(beanName.trim())){ 
 						beanName = clazz.getSimpleName();

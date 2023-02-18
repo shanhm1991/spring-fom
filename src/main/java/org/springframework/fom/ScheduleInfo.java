@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.springframework.fom.annotation.FomSchedule;
+import org.springframework.fom.annotation.Fom;
 
 import java.util.Set;
 
@@ -103,7 +103,7 @@ public class ScheduleInfo {
 					config.add(new Conf(key, defaultVal, true, false, true, false));
 				}
 			}else{
-				if(FomSchedule.CRON.equals(key)){
+				if(Fom.CRON.equals(key)){
 					config.add(new Conf(key, scheduleConfig.getCronExpression(), true, false, false, false));
 				}else{
 					if(readOnlyKey.contains(key)){

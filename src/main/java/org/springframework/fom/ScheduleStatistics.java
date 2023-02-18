@@ -58,10 +58,10 @@ public class ScheduleStatistics {
 	private final LinkedList<String> dayHasSaved = new LinkedList<>();
 
 	// map<day, queue>
-	private final Map<String, Queue<Result<?>>> successMap = new ConcurrentHashMap<>();
+	private final Map<String, ConcurrentLinkedQueue<Result<?>>> successMap = new ConcurrentHashMap<>();
 
 	// map<day, queue>
-	private final Map<String, Queue<Result<?>>> failedMap = new ConcurrentHashMap<>();
+	private final Map<String, ConcurrentLinkedQueue<Result<?>>> failedMap = new ConcurrentHashMap<>();
 
 	// 配置的线程安全委托给ConcurrentHashMap
 	private final Map<String, Integer> statConfigMap = new ConcurrentHashMap<>();
@@ -83,9 +83,9 @@ public class ScheduleStatistics {
 		return copy(failedMap);
 	}
 
-	private Map<String, List<Result<?>>> copy(Map<String, Queue<Result<?>>> stat){
+	private Map<String, List<Result<?>>> copy(Map<String, ConcurrentLinkedQueue<Result<?>>> stat){
 		Map<String, List<Result<?>>> map = new HashMap<>();
-		for(Entry<String, Queue<Result<?>>>  entry : stat.entrySet()){
+		for(Entry<String, ConcurrentLinkedQueue<Result<?>>>  entry : stat.entrySet()){
 			String day = entry.getKey();
 			Queue<Result<?>> queue = entry.getValue();
 			map.put(day, Arrays.asList(queue.toArray(new Result[queue.size()])));
@@ -101,15 +101,15 @@ public class ScheduleStatistics {
 		}
 	}
 
-	private void record(Result<?> result, AtomicLong count, Map<String, Queue<Result<?>>> statMap){
+	private void record(Result<?> result, AtomicLong count, Map<String, ConcurrentLinkedQueue<Result<?>>> statMap){
 		count.incrementAndGet();
 
 		String day = new SimpleDateFormat("yyyy/MM/dd").format(System.currentTimeMillis());
-		Queue<Result<?>> queue = statMap.get(day); 
+		ConcurrentLinkedQueue<Result<?>> queue = statMap.get(day);
 		// 尽量避免使用同步，虽然api中免不了也有同步的使用
 		if(queue == null){ 
-			queue = new ConcurrentLinkedQueue<>();	
-			Queue<Result<?>> exist = statMap.putIfAbsent(day, queue);
+			queue = new ConcurrentLinkedQueue<>();
+			ConcurrentLinkedQueue<Result<?>> exist = statMap.putIfAbsent(day, queue);
 			if(exist == null){
 				// dayHasSaved由每天第一个放入queue的线程负责检测，不存在多线程访问场景  
 				// 虽然每次不是同一个线程访问，但一天只检测一次，线程安全问题暂且忽略
@@ -121,7 +121,12 @@ public class ScheduleStatistics {
 				queue = exist;
 			}
 		}
+
 		queue.add(result);
+		int num = queue.size() - 10;
+		for(int i=0; i<num; i++){
+			queue.poll();
+		}
 	}
 
 	public void setSaveDay(int saveDay){
@@ -201,7 +206,7 @@ public class ScheduleStatistics {
 		long total = 0;
 		int count = 0;
 		// 遍历过程中数据依然在改变，但是统计结果不是必须要体现出来
-		for(Entry<String, Queue<Result<?>>> entry : successMap.entrySet()){
+		for(Entry<String, ConcurrentLinkedQueue<Result<?>>> entry : successMap.entrySet()){
 			String day = entry.getKey();
 			Queue<Result<?>> queue = entry.getValue();
 
@@ -354,7 +359,7 @@ public class ScheduleStatistics {
 					map.put("cause", "null");
 				}else{
 					Throwable throwable = result.getThrowable();
-					Throwable cause = throwable;
+					Throwable cause;
 					while((cause = throwable.getCause()) != null){
 						throwable = cause;
 					}

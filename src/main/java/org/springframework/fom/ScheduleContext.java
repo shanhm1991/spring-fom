@@ -32,13 +32,13 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.fom.annotation.FomSchedule;
+import org.springframework.fom.annotation.Fom;
 import org.springframework.fom.proxy.ResultHandler;
 import org.springframework.fom.proxy.CompleteHandler;
 import org.springframework.fom.proxy.ScheduleFactory;
 import org.springframework.fom.proxy.TerminateHandler;
 import org.springframework.fom.proxy.TaskCancelHandler;
-import org.springframework.fom.support.Response;
+import org.springframework.fom.support.FomResponse;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -231,7 +231,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 		return state;
 	}
 
-	public Response<Void> scheduleStart(){
+	public FomResponse<Void> scheduleStart(){
 		synchronized (this) {
 			switch(state){
 			case INITED:
@@ -244,32 +244,32 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 				scheduleThread = new ScheduleThread();
 				scheduleThread.start();
 				logger.info("schedule[{}] startup", scheduleName); 
-				return new Response<>(Response.SUCCESS, "schedule[" + scheduleName + "] startup.");
+				return new FomResponse<>(FomResponse.SUCCESS, "schedule[" + scheduleName + "] startup.");
 			case STOPPING:
 				logger.warn("schedule[{}] is stopping, cann't startup.", scheduleName); 
-				return new Response<>(Response.FAILED, "schedule[" + scheduleName + "] is stopping, cann't startup.");
+				return new FomResponse<>(FomResponse.FAILED, "schedule[" + scheduleName + "] is stopping, cann't startup.");
 			case RUNNING:
 			case SLEEPING:
 				logger.warn("schedule[{}] was already startup.", scheduleName); 
-				return new Response<>(Response.FAILED, "schedule[" + scheduleName + "] was already startup.");
+				return new FomResponse<>(FomResponse.FAILED, "schedule[" + scheduleName + "] was already startup.");
 			default:
-				return new Response<>(Response.FAILED, "schedule state invalid.");
+				return new FomResponse<>(FomResponse.FAILED, "schedule state invalid.");
 			}
 		}
 	}
 
-	public Response<Void> scheduleShutdown(){
+	public FomResponse<Void> scheduleShutdown(){
 		synchronized (this) {
 			switch(state){
 			case INITED:
 				logger.warn("schedule[{}] was not startup.", scheduleName); 
-				return new Response<>(Response.FAILED, "schedule[" + scheduleName + "] was not startup."); 
+				return new FomResponse<>(FomResponse.FAILED, "schedule[" + scheduleName + "] was not startup.");
 			case STOPPED:
 				logger.warn("schedule[{}] was already stopped.", scheduleName); 
-				return new Response<>(Response.FAILED, "schedule[" + scheduleName + "] was already stopped.");
+				return new FomResponse<>(FomResponse.FAILED, "schedule[" + scheduleName + "] was already stopped.");
 			case STOPPING:
 				logger.warn("schedule[{}] is stopping, cann't stop.", scheduleName); 
-				return new Response<>(Response.FAILED, "schedule[" + scheduleName + "] is already stopping.");
+				return new FomResponse<>(FomResponse.FAILED, "schedule[" + scheduleName + "] is already stopping.");
 			case RUNNING:
 			case SLEEPING:
 				state = STOPPING;
@@ -279,42 +279,42 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 					isFirstRun = true;
 				}
 				logger.info("schedule[{}] will stop soon.", scheduleName);
-				return new Response<>(Response.SUCCESS, "schedule[" + scheduleName + "] will stop soon.");
+				return new FomResponse<>(FomResponse.SUCCESS, "schedule[" + scheduleName + "] will stop soon.");
 			default:
-				return new Response<>(Response.FAILED, "schedule state invalid.");
+				return new FomResponse<>(FomResponse.FAILED, "schedule state invalid.");
 			}
 		}
 	}
 
-	public Response<Void> scheduleExecNow(){
+	public FomResponse<Void> scheduleExecNow(){
 		synchronized (this) {
 			switch(state){
 			case INITED:
 			case STOPPED:
 				logger.warn("schedule[{}] was not startup, cann't execut now.", scheduleName); 
-				return new Response<>(Response.FAILED, "schedule[" + scheduleName + "] was not startup, cann't execut now.");
+				return new FomResponse<>(FomResponse.FAILED, "schedule[" + scheduleName + "] was not startup, cann't execut now.");
 			case STOPPING:
 				logger.warn("schedule[{}] is stopping, cann't execut now.", scheduleName); 
-				return new Response<>(Response.FAILED, "schedule[" + scheduleName + "] is stopping, cann't execut now.");
+				return new FomResponse<>(FomResponse.FAILED, "schedule[" + scheduleName + "] is stopping, cann't execut now.");
 			case RUNNING:
 				if(scheduleConfig.getIgnoreExecRequestWhenRunning()){
 					logger.warn("schedule[{}] is already running.", scheduleName); 
-					return new Response<>(Response.FAILED, "schedule[" + scheduleName + "] is already running.");
+					return new FomResponse<>(FomResponse.FAILED, "schedule[" + scheduleName + "] is already running.");
 				}else{
 					if(!nextTimeHasSated.compareAndSet(false, true)){
 						logger.info("schedule[{}] is running, and exec was already requested.", scheduleName); 
-						return new Response<>(Response.FAILED, "schedule[" + scheduleName + "] is running, and exec was already requested.");
+						return new FomResponse<>(FomResponse.FAILED, "schedule[" + scheduleName + "] is running, and exec was already requested.");
 					}
 					nextTime = System.currentTimeMillis();
 					logger.info("schedule[{}] is running, and will re-exec immediately after completion.", scheduleName); 
-					return new Response<>(Response.SUCCESS, "schedule[" + scheduleName + "]  is running, and will re-exec immediately after completion .");
+					return new FomResponse<>(FomResponse.SUCCESS, "schedule[" + scheduleName + "]  is running, and will re-exec immediately after completion .");
 				}
 			case SLEEPING:
 				scheduleThread.interrupt();
 				logger.info("schedule[{}] execute now.", scheduleName); 
-				return new Response<>(Response.SUCCESS, "schedule[" + scheduleName + "] execute now.");
+				return new FomResponse<>(FomResponse.SUCCESS, "schedule[" + scheduleName + "] execute now.");
 			default:
-				return new Response<>(Response.FAILED, "schedule state invalid.");
+				return new FomResponse<>(FomResponse.FAILED, "schedule state invalid.");
 			}
 		}
 	}
@@ -411,7 +411,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 			int overTime = scheduleConfig.getTaskOverTime();
 			boolean detectTimeoutOnEachTask = scheduleConfig.getDetectTimeoutOnEachTask();
 			try {
-				if(FomSchedule.TASK_OVERTIME_DEFAULT == overTime){ // 默认不检测超时
+				if(Fom.TASK_OVERTIME_DEFAULT == overTime){ // 默认不检测超时
 					completeLatch.waitTaskCompleted();
 					cleanCompletedFutures();
 				}else if(!detectTimeoutOnEachTask){ // 对整体任务算超时
@@ -668,7 +668,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 			}
 
 			long overTime = scheduleConfig.getTaskOverTime();
-			if(FomSchedule.TASK_OVERTIME_DEFAULT != overTime){ 
+			if(Fom.TASK_OVERTIME_DEFAULT != overTime){
 				DelayedThread.detectTimeout(futureList, scheduleConfig.getDetectTimeoutOnEachTask()); 
 			}
 		}finally{ 
@@ -891,7 +891,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void handleResult(Result<E> result) throws Exception {
+	public void handleResult(Result<E> result) {
 		ScheduleContext<E> scheduleContext;
 		if(applicationContext != null && scheduleBeanName != null
 				&& (scheduleContext = (ScheduleContext<E>)applicationContext.getBean(scheduleName)) != null){

@@ -10,8 +10,7 @@ import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.fom.annotation.EnableFom;
-import org.springframework.fom.annotation.FomSchedule;
-import org.springframework.fom.support.FomAdvice;
+import org.springframework.fom.annotation.Fom;
 import org.springframework.fom.support.controller.FomController;
 import org.springframework.fom.support.service.FomServiceImpl;
 
@@ -36,10 +35,6 @@ public class FomBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar
 			RootBeanDefinition fomController = new RootBeanDefinition(FomController.class);
 			registry.registerBeanDefinition("fomController", fomController); 
 			
-			// 注册FomAdvice
-			RootBeanDefinition fomAdvice = new RootBeanDefinition(FomAdvice.class);
-			registry.registerBeanDefinition("fomAdvice", fomAdvice); 
-			
 			// 注册FomServiceImpl
 			RootBeanDefinition fomServiceImpl = new RootBeanDefinition(FomServiceImpl.class);
 			registry.registerBeanDefinition("fomService", fomServiceImpl); 
@@ -50,7 +45,7 @@ public class FomBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar
 		registry.registerBeanDefinition("schedulePostProcessor", fomBeanPostProcessor); 
 
 		// 注册FomScheduleStarter
-		RootBeanDefinition fomScheduleStarter = new RootBeanDefinition(FomScheduleStarter.class);
+		RootBeanDefinition fomScheduleStarter = new RootBeanDefinition(FomStarter.class);
 		registry.registerBeanDefinition("fomScheduleStarter", fomScheduleStarter); 
 
 		// 注册FomBeanDefinition
@@ -66,15 +61,15 @@ public class FomBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar
 					throw new ApplicationContextException("", e);
 				}
 
-				FomSchedule fomSchedule = clazz.getAnnotation(FomSchedule.class);
-				if(fomSchedule != null){
-					parseFomSchedule(beanName, clazz, beanDefinition, fomSchedule, registry);
+				Fom fom = clazz.getAnnotation(Fom.class);
+				if(fom != null){
+					parseFomSchedule(beanName, clazz, beanDefinition, fom, registry);
 				}
 			}
 		}
 	}
 
-	public void parseFomSchedule(String beanName, Class<?> clazz, BeanDefinition beanDefinition, FomSchedule fomSchedule, BeanDefinitionRegistry registry){
+	public void parseFomSchedule(String beanName, Class<?> clazz, BeanDefinition beanDefinition, Fom fom, BeanDefinitionRegistry registry){
 		if(ScheduleContext.class.isAssignableFrom(clazz)){
 			beanDefinition.getPropertyValues().add("scheduleName", beanName);
 			registry.registerAlias(beanName,  "$" + beanName); 

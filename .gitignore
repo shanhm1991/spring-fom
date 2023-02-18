@@ -1,7 +1,8 @@
-# 忽略所有文件
-*
+.settings/
+.project
+.classpath
 
-# 除了以下文件
-!src
-!pom.xml
-!README.md
+.idea/
+*.iml
+
+target/

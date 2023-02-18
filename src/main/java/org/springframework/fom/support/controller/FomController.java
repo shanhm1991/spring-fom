@@ -11,8 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.fom.ScheduleInfo;
-import org.springframework.fom.support.Response;
-import org.springframework.fom.support.Response.Page;
+import org.springframework.fom.support.FomResponse;
+import org.springframework.fom.support.FomResponse.Page;
 import org.springframework.fom.support.service.FomService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -25,65 +25,65 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  */
 @RequestMapping("/fom")
-public class FomController extends FomExceptionController {
+public class FomController {
 	
 	@Autowired
 	private FomService fomService;
 
 	@RequestMapping("/schedule/list")
 	@ResponseBody
-	public Response<Page<ScheduleInfo>> list() {
+	public FomResponse<Page<ScheduleInfo>> list() {
 		List<ScheduleInfo> list = fomService.list();
-		return new Response<>(Response.SUCCESS, "", new Page<>(list, list.size()));
+		return new FomResponse<>(FomResponse.SUCCESS, "", new Page<>(list, list.size()));
 	}
 	
 	@RequestMapping("/schedule/info")
 	@ResponseBody
-	public Response<ScheduleInfo> info(String scheduleName) {
-		return new Response<>(Response.SUCCESS, "", fomService.info(scheduleName)); 
+	public FomResponse<ScheduleInfo> info(String scheduleName) {
+		return new FomResponse<>(FomResponse.SUCCESS, "", fomService.info(scheduleName));
 	}
 	
 	@RequestMapping("/schedule/logger/level")
 	@ResponseBody
-	public Response<String> loggerLevel(String scheduleName) {
-		return new Response<>(Response.SUCCESS, "", fomService.getLoggerLevel(scheduleName)); 
+	public FomResponse<String> loggerLevel(String scheduleName) {
+		return new FomResponse<>(FomResponse.SUCCESS, "", fomService.getLoggerLevel(scheduleName));
 	}
 	
 	@RequestMapping("/schedule/logger/level/update")
 	@ResponseBody
-	public Response<Void> updateloggerLevel(String scheduleName, String levelName) {
+	public FomResponse<Void> updateloggerLevel(String scheduleName, String levelName) {
 		fomService.updateloggerLevel(scheduleName, levelName);
-		return new Response<>(Response.SUCCESS, ""); 
+		return new FomResponse<>(FomResponse.SUCCESS, "");
 	}
 	
 	@RequestMapping("/schedule/start")
 	@ResponseBody
-	public Response<Void> start(String scheduleName) {
+	public FomResponse<Void> start(String scheduleName) {
 		return fomService.start(scheduleName);
 	}
 	
 	@RequestMapping("/schedule/shutdown")
 	@ResponseBody
-	public Response<Void> shutdown(String scheduleName) {
+	public FomResponse<Void> shutdown(String scheduleName) {
 		return fomService.shutdown(scheduleName);
 	}
 	
 	@RequestMapping("/schedule/exec")
 	@ResponseBody
-	public Response<Void> exec(String scheduleName) {
+	public FomResponse<Void> exec(String scheduleName) {
 		return fomService.exec(scheduleName);
 	}
 	
 	@RequestMapping("/schedule/waitings")
 	@ResponseBody
-	public Response<Map<String, String>> waitingTasks(String scheduleName) {
-		return new Response<>(Response.SUCCESS, "", fomService.getWaitingTasks(scheduleName));  
+	public FomResponse<Map<String, String>> waitingTasks(String scheduleName) {
+		return new FomResponse<>(FomResponse.SUCCESS, "", fomService.getWaitingTasks(scheduleName));
 	}
 	
 	@RequestMapping("/schedule/actives")
 	@ResponseBody
-	public Response<List<Map<String, String>>> activeTasks(String scheduleName) {
-		return new Response<>(Response.SUCCESS, "", fomService.getActiveTasks(scheduleName));  
+	public FomResponse<List<Map<String, String>>> activeTasks(String scheduleName) {
+		return new FomResponse<>(FomResponse.SUCCESS, "", fomService.getActiveTasks(scheduleName));
 	}
 	
 	@RequestMapping("/schedule/export")
@@ -100,29 +100,29 @@ public class FomController extends FomExceptionController {
 	
 	@RequestMapping("/schedule/faileds")
 	@ResponseBody
-	public Response<List<Map<String, String>>> failedStat(String scheduleName) throws ParseException { 
-		return new Response<>(Response.SUCCESS, "", fomService.getFailedStat(scheduleName));  
+	public FomResponse<List<Map<String, String>>> failedStat(String scheduleName) {
+		return new FomResponse<>(FomResponse.SUCCESS, "", fomService.getFailedStat(scheduleName));
 	}
 	
 	@RequestMapping("/schedule/success")
 	@ResponseBody
-	public Response<Map<String, Object>> successStat(String scheduleName, String statDay) throws ParseException { 
-		return new Response<>(Response.SUCCESS, "", fomService.getSuccessStat(scheduleName, statDay)); 
+	public FomResponse<Map<String, Object>> successStat(String scheduleName, String statDay) throws ParseException {
+		return new FomResponse<>(FomResponse.SUCCESS, "", fomService.getSuccessStat(scheduleName, statDay));
 	}
 	
 	@RequestMapping("/schedule/saveStatConf")
 	@ResponseBody
-	public Response<Map<String, Object>> saveStatConf(String scheduleName, 
-			String statDay, String statLevel, int saveDay) throws ParseException { 
-		return new Response<>(Response.SUCCESS, "", fomService.saveStatConf(scheduleName, statDay, statLevel, saveDay)); 
+	public FomResponse<Map<String, Object>> saveStatConf(String scheduleName,
+														 String statDay, String statLevel, int saveDay) throws ParseException {
+		return new FomResponse<>(FomResponse.SUCCESS, "", fomService.saveStatConf(scheduleName, statDay, statLevel, saveDay));
 	}
 	
 	@SuppressWarnings("unchecked")
 	@RequestMapping("/schedule/config/save")
 	@ResponseBody
-	public Response<Void> saveConfig(String scheduleName, String data) throws Exception {  
+	public FomResponse<Void> saveConfig(String scheduleName, String data) throws Exception {
 		HashMap<String, Object> configMap = (HashMap<String, Object>) new ObjectMapper().readValue(data, HashMap.class);
 		fomService.saveConfig(scheduleName, configMap);
-		return new Response<>(Response.SUCCESS, ""); 
+		return new FomResponse<>(FomResponse.SUCCESS, "");
 	}
 }

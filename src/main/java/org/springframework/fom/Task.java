@@ -1,7 +1,6 @@
 package org.springframework.fom;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,8 +16,6 @@ import org.springframework.util.StringUtils;
  */
 public abstract class Task<E> implements Callable<Result<E>> {
 	
-	private static final AtomicLong INDEX = new AtomicLong(0);
-
 	protected volatile Logger logger = LoggerFactory.getLogger(Task.class);
 
 	protected final String id;
@@ -40,7 +37,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		if(StringUtils.isEmpty(name)){
 			name = "Task";
 		}
-		this.id = name + "-" + INDEX.incrementAndGet();
+		this.id = name;
 	}
 
 	public Task(String id) { 
@@ -66,9 +63,18 @@ public abstract class Task<E> implements Callable<Result<E>> {
 		}
 
 		if(result.isSuccess()){
-			logger.info("task success, cost={}ms, restult={}", result.getCostTime(), result.getContent());
+			logger.debug("task success, cost={}ms, restult={}", result.getCostTime(), result.getContent());
 		}else{
-			logger.warn("task failed, cost={}ms, restult={}", result.getCostTime(), result.getContent());
+			Throwable e = null;
+			if(result.getThrowable() != null){
+				Throwable throwable = result.getThrowable();
+				Throwable cause;
+				while((cause = throwable.getCause()) != null){
+					throwable = cause;
+				}
+				e = throwable;
+			}
+			logger.error("task failed, cost={}ms, restult={}", result.getCostTime(), result.getContent(), e);
 		}
 		return result;
 	}
@@ -81,16 +87,13 @@ public abstract class Task<E> implements Callable<Result<E>> {
 			}
 			result.setContent(exec());
 		} catch(Throwable e) {
-			logger.error("", e); 
-			result.setSuccess(false); 
+			result.setSuccess(false);
 			result.setThrowable(e);
 		} finally{
 			try {
 				afterExec(result.isSuccess(), result.getContent(), result.getThrowable());
 			}catch(Throwable e) {
 				logger.error("", e); 
-				result.setSuccess(false); 
-				result.setThrowable(e);; // exec的异常已经交给afterExec处理过，这里覆盖掉也能接受
 			}
 		}
 	}

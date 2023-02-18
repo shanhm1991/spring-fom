@@ -19,12 +19,13 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.EmbeddedValueResolverAware;
-import org.springframework.fom.annotation.FomSchedule;
+import org.springframework.fom.annotation.Fom;
+import org.springframework.fom.annotation.Schedule;
 import org.springframework.fom.proxy.ScheduleProxy;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
@@ -35,13 +36,13 @@ import org.springframework.util.StringValueResolver;
  */
 public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware, EmbeddedValueResolverAware {
 
-	private BeanFactory beanFactory;
+	private ConfigurableListableBeanFactory beanFactory;
 
 	private StringValueResolver valueResolver;
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.beanFactory = beanFactory;
+		this.beanFactory = (ConfigurableListableBeanFactory)beanFactory;
 	}
 
 	@Override
@@ -58,24 +59,24 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 
 		ScheduleContext<?> scheduleContext = (ScheduleContext<?>)bean;
 		String scheduleBeanName = scheduleContext.getScheduleBeanName(); 
-		FomSchedule fomSchedule = scheduleContext.getClass().getAnnotation(FomSchedule.class);
+		Fom fom = scheduleContext.getClass().getAnnotation(Fom.class);
 		
-		// 通过@Bean注入的不需要处理
-		if(StringUtils.isEmpty(scheduleBeanName) && fomSchedule == null){ 
+		// @Bean不处理
+		if(!StringUtils.hasText(scheduleBeanName) && fom == null){
 			scheduleContext.setScheduleName(beanName);  
 			scheduleContext.setLogger(LoggerFactory.getLogger(scheduleContext.getClass()));
 			return bean;
 		}
 
 		Object scheduleBean = null;
-		if(!StringUtils.isEmpty(scheduleBeanName)){ 
+		if(StringUtils.hasText(scheduleBeanName)){
 			scheduleBean = beanFactory.getBean(scheduleBeanName);
 		}
 
 		// 设置Logger
-		fomSchedule = clazz.getAnnotation(FomSchedule.class);
-		if(fomSchedule == null){ 
-			fomSchedule = scheduleBean.getClass().getAnnotation(FomSchedule.class);
+		fom = clazz.getAnnotation(Fom.class);
+		if(fom == null){
+			fom = scheduleBean.getClass().getAnnotation(Fom.class);
 			scheduleContext.setLogger(LoggerFactory.getLogger(scheduleBean.getClass())); 
 		}else{ 
 			scheduleContext.setLogger(LoggerFactory.getLogger(clazz));
@@ -83,11 +84,11 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 
 		// 加载配置
 		ScheduleConfig scheduleConfig = scheduleContext.getScheduleConfig();
-		if(fomSchedule != null){ // 注解
-			setCronConf(scheduleConfig, fomSchedule, scheduleContext, scheduleBean);
-			setOtherConf(scheduleConfig, fomSchedule);
+		if(fom != null){ // 注解
+			setCronConf(scheduleConfig, fom, scheduleContext, scheduleBean);
+			setOtherConf(scheduleConfig, fom);
 			setValue(scheduleConfig, scheduleContext, scheduleBean);
-		}else{ // xml配置 TODO
+		}else{ // xml配置
 
 		}
 
@@ -102,33 +103,42 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		scheduleConfig.refresh();
 		
 		// 初始化时提前设置一下，因为运行过程中不允许修改
-		scheduleContext.setEnableTaskConflict(scheduleConfig.getEnableTaskConflict()); 
+		scheduleContext.setEnableTaskConflict(scheduleConfig.getEnableTaskConflict());
+
+
+//		beanFactory.registerSingleton();  TODO
+
 
 		// 创建代理 注册容器
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(clazz);
-		enhancer.setCallback(new ScheduleProxy(beanName, scheduleContext, fomSchedule, scheduleBean));
+		enhancer.setCallback(new ScheduleProxy(beanName, scheduleContext, fom, scheduleBean));
 		Object obj = enhancer.create();
 		return obj;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void loadCache(String beanName, ScheduleContext<?> scheduleContext) throws Exception{ 
-		if(!Boolean.valueOf(valueResolver.resolveStringValue("${spring.fom.config.cache.enable:true}"))){
-			return;
+		String cacheType = valueResolver.resolveStringValue("${spring.fom.cache.type:file}");
+		if("file".equalsIgnoreCase(cacheType)){
+			loadFromFile(beanName, scheduleContext);
+		}else if("redis".equalsIgnoreCase(cacheType)){
+			loadFromRedis(beanName, scheduleContext);
 		}
-
-		String configCachePath = valueResolver.resolveStringValue("${spring.fom.config.cache.path:cache/schedule}");
-		File file = new File(configCachePath + File.separator + beanName + ".cache");
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void loadFromFile(String beanName, ScheduleContext<?> scheduleContext) throws Exception{
+		String cacheFilePath = valueResolver.resolveStringValue("${spring.fom.cache.file.path:cache/schedule}");
+		File file = new File(cacheFilePath + File.separator + beanName + ".cache");
 		if(!file.exists()){
 			return;
 		}
-
+		
 		try(FileInputStream input = new FileInputStream(file);
 				ObjectInputStream ois = new ObjectInputStream(input);){
 			HashMap<String, Object> map = (HashMap<String, Object>)ois.readObject();
 
-			String cron = (String)map.remove(FomSchedule.CRON);
+			String cron = (String)map.remove(Fom.CRON);
 			ScheduleConfig scheduleConfig = scheduleContext.getScheduleConfig();
 			scheduleConfig.setCron(cron);
 
@@ -143,13 +153,17 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 			scheduleContext.valueEnvirmentField(envirmentField);
 		}
 	}
+	
+	private void loadFromRedis(String beanName, ScheduleContext<?> scheduleContext) throws Exception{
+		// TODO
+	}
 
 	// 只要获取到一个就结束
-	private void setCronConf(ScheduleConfig scheduleConfig, FomSchedule fomSchedule, ScheduleContext<?> scheduleContext, Object scheduleBean){
-		if(fomSchedule != null){
-			if(setCron(scheduleConfig, fomSchedule.cron())
-					|| setFixedRate(scheduleConfig, fomSchedule.fixedRate(), fomSchedule.fixedRateString())
-					|| setFixedDelay(scheduleConfig, fomSchedule.fixedDelay(), fomSchedule.fixedDelayString())){ 
+	private void setCronConf(ScheduleConfig scheduleConfig, Fom fom, ScheduleContext<?> scheduleContext, Object scheduleBean){
+		if(fom != null){
+			if(setCron(scheduleConfig, fom.cron())
+					|| setFixedRate(scheduleConfig, fom.fixedRate(), fom.fixedRateString())
+					|| setFixedDelay(scheduleConfig, fom.fixedDelay(), fom.fixedDelayString())){
 				return;
 			}
 		}
@@ -157,7 +171,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		if(scheduleBean != null){ // 从scheduleBean中获取
 			Class<?> clazz = scheduleBean.getClass();
 			for(Method method : clazz.getMethods()){
-				Scheduled scheduled = method.getAnnotation(Scheduled.class);
+				Schedule scheduled = method.getAnnotation(Schedule.class);
 				if(scheduled != null){
 					if(setCron(scheduleConfig, scheduled.cron())
 							|| setFixedRate(scheduleConfig, scheduled.fixedRate(), scheduled.fixedRateString())
@@ -169,7 +183,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		}else{ // 从自身获取
 			Class<?> clazz = scheduleContext.getClass();
 			for(Method method : clazz.getMethods()){
-				Scheduled scheduled = method.getAnnotation(Scheduled.class);
+				Schedule scheduled = method.getAnnotation(Schedule.class);
 				if(scheduled != null){
 					if(setCron(scheduleConfig, scheduled.cron())
 							|| setFixedRate(scheduleConfig, scheduled.fixedRate(), scheduled.fixedRateString())
@@ -216,77 +230,77 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		return false;
 	}
 
-	private void setOtherConf(ScheduleConfig scheduleConfig, FomSchedule fomSchedule){
-		String threadCoreString = fomSchedule.threadCoreString();
+	private void setOtherConf(ScheduleConfig scheduleConfig, Fom fom){
+		String threadCoreString = fom.threadCoreString();
 		if(!StringUtils.isEmpty(threadCoreString)){
 			threadCoreString = valueResolver.resolveStringValue(threadCoreString);
 			int threadCore = Integer.parseInt(threadCoreString);
-			if(FomSchedule.THREAD_CORE_DEFAULT != threadCore){
+			if(Fom.THREAD_CORE_DEFAULT != threadCore){
 				scheduleConfig.setThreadCore(threadCore);
 			}
-		}else if(FomSchedule.THREAD_CORE_DEFAULT != fomSchedule.threadCore()){
-			scheduleConfig.setThreadCore(fomSchedule.threadCore());
+		}else if(Fom.THREAD_CORE_DEFAULT != fom.threadCore()){
+			scheduleConfig.setThreadCore(fom.threadCore());
 		}
 
-		String threadMaxString = fomSchedule.threadMaxString();
+		String threadMaxString = fom.threadMaxString();
 		if(!StringUtils.isEmpty(threadMaxString)){
 			threadMaxString = valueResolver.resolveStringValue(threadMaxString);
 			int threadMax = Integer.parseInt(threadMaxString);
-			if(FomSchedule.THREAD_CORE_DEFAULT != threadMax){
+			if(Fom.THREAD_CORE_DEFAULT != threadMax){
 				scheduleConfig.setThreadMax(threadMax);
 			}
-		}else if(FomSchedule.THREAD_CORE_DEFAULT != fomSchedule.threadMax()){
-			scheduleConfig.setThreadMax(fomSchedule.threadMax());
+		}else if(Fom.THREAD_CORE_DEFAULT != fom.threadMax()){
+			scheduleConfig.setThreadMax(fom.threadMax());
 		}
 
-		String queueSize = fomSchedule.queueSizeString();
+		String queueSize = fom.queueSizeString();
 		if(StringUtils.isEmpty(queueSize) 
 				|| !scheduleConfig.setQueueSize(Integer.parseInt(valueResolver.resolveStringValue(queueSize)))){
-			scheduleConfig.setQueueSize(fomSchedule.queueSize());
+			scheduleConfig.setQueueSize(fom.queueSize());
 		}
 
-		String threadAliveTime = fomSchedule.threadAliveTimeString(); 
+		String threadAliveTime = fom.threadAliveTimeString();
 		if(StringUtils.isEmpty(threadAliveTime) 
 				|| !scheduleConfig.setThreadAliveTime(Integer.parseInt(valueResolver.resolveStringValue(threadAliveTime)))){
-			scheduleConfig.setThreadAliveTime(fomSchedule.threadAliveTime());
+			scheduleConfig.setThreadAliveTime(fom.threadAliveTime());
 		}
 
-		scheduleConfig.setRemark(valueResolver.resolveStringValue(fomSchedule.remark()));
+		scheduleConfig.setRemark(valueResolver.resolveStringValue(fom.remark()));
 
-		String execOnLoad = fomSchedule.execOnLoadString();
+		String execOnLoad = fom.execOnLoadString();
 		if(StringUtils.isEmpty(execOnLoad) 
 				|| !scheduleConfig.setExecOnLoad(Boolean.parseBoolean(valueResolver.resolveStringValue(execOnLoad)))){
-			scheduleConfig.setExecOnLoad(fomSchedule.execOnLoad()); 
+			scheduleConfig.setExecOnLoad(fom.execOnLoad());
 		}
 
-		String taskOverTime = fomSchedule.taskOverTimeString();
+		String taskOverTime = fom.taskOverTimeString();
 		if(StringUtils.isEmpty(taskOverTime) 
 				|| !scheduleConfig.setTaskOverTime(Integer.parseInt(valueResolver.resolveStringValue(taskOverTime)))){
-			scheduleConfig.setTaskOverTime(fomSchedule.taskOverTime());
+			scheduleConfig.setTaskOverTime(fom.taskOverTime());
 		}
 
-		String detectTimeoutOnEachTask = fomSchedule.detectTimeoutOnEachTaskString();
+		String detectTimeoutOnEachTask = fom.detectTimeoutOnEachTaskString();
 		if(StringUtils.isEmpty(detectTimeoutOnEachTask) 
 				|| !scheduleConfig.setDetectTimeoutOnEachTask(Boolean.parseBoolean(valueResolver.resolveStringValue(detectTimeoutOnEachTask)))){
-			scheduleConfig.setDetectTimeoutOnEachTask(fomSchedule.detectTimeoutOnEachTask());
+			scheduleConfig.setDetectTimeoutOnEachTask(fom.detectTimeoutOnEachTask());
 		}
 
-		String ignoreExecRequestWhenRunning = fomSchedule.ignoreExecRequestWhenRunningString();
+		String ignoreExecRequestWhenRunning = fom.ignoreExecRequestWhenRunningString();
 		if(StringUtils.isEmpty(ignoreExecRequestWhenRunning) 
 				|| !scheduleConfig.setIgnoreExecRequestWhenRunning(Boolean.parseBoolean(valueResolver.resolveStringValue(ignoreExecRequestWhenRunning)))){
-			scheduleConfig.setIgnoreExecRequestWhenRunning(fomSchedule.ignoreExecRequestWhenRunning());
+			scheduleConfig.setIgnoreExecRequestWhenRunning(fom.ignoreExecRequestWhenRunning());
 		}
 
-		String enableTaskConflict = fomSchedule.enableTaskConflictString();
+		String enableTaskConflict = fom.enableTaskConflictString();
 		if(StringUtils.isEmpty(enableTaskConflict) 
 				|| !scheduleConfig.setEnableTaskConflict(Boolean.parseBoolean(valueResolver.resolveStringValue(enableTaskConflict)))){
-			scheduleConfig.setEnableTaskConflict(fomSchedule.enableTaskConflict());
+			scheduleConfig.setEnableTaskConflict(fom.enableTaskConflict());
 		}
 
-		String enableString = fomSchedule.enableString();
+		String enableString = fom.enableString();
 		if(StringUtils.isEmpty(enableString) 
 				|| !scheduleConfig.setEnable(Boolean.parseBoolean(valueResolver.resolveStringValue(enableString)))){
-			scheduleConfig.setEnable(fomSchedule.enable());
+			scheduleConfig.setEnable(fom.enable());
 		}
 	}
 
