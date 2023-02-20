@@ -65,6 +65,8 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 	private String scheduleName;
 
 	private String scheduleBeanName;
+	
+	private boolean external;
 
 	// 最近一次执行时间
 	private volatile long lastTime;
@@ -951,5 +953,13 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 				throw new UnsupportedOperationException("value set failed：" + instance.getClass().getName() + "." + field.getName());
 			}
 		}
+	}
+
+	public boolean isExternal() {
+		return external;
+	}
+
+	public void setExternal(boolean external) {
+		this.external = external;
 	}
 }

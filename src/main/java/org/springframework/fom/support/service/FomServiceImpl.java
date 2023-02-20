@@ -43,7 +43,7 @@ public class FomServiceImpl implements FomService {
 	// file redis
 	@Value("${spring.fom.cache.type:file}")
 	private String cacheType;
-	
+
 	@Value("${spring.fom.cache.history:false}")
 	private boolean cacheHistory;
 
@@ -67,15 +67,17 @@ public class FomServiceImpl implements FomService {
 	public List<ScheduleInfo> list() {
 		List<ScheduleInfo> list = new ArrayList<>();
 		String[] names = applicationContext.getBeanNamesForType(ScheduleContext.class);
-		if(names.length == 0){
-			return list;
-		}
-
-		for(String name : names){
-			ScheduleContext<?> schedule = applicationContext.getBean(name, ScheduleContext.class);
-			ScheduleInfo scheduleInfo = schedule.getScheduleInfo();
-			scheduleInfo.setLoggerLevel(getLoggerLevel(schedule.getScheduleName())); 
-			list.add(scheduleInfo);
+		if(names.length > 0){
+			for(String name : names){
+				if(name.startsWith("$EXTERNAL$")) {
+					continue;
+				}
+				
+				ScheduleContext<?> schedule = applicationContext.getBean(name, ScheduleContext.class);
+				ScheduleInfo scheduleInfo = schedule.getScheduleInfo();
+				scheduleInfo.setLoggerLevel(getLoggerLevel(schedule.getScheduleName())); 
+				list.add(scheduleInfo);
+			}
 		}
 		return list;
 	}
@@ -235,13 +237,13 @@ public class FomServiceImpl implements FomService {
 			// TODO
 		}
 	}
-	
+
 	private void serializeFile(ScheduleContext<?> schedule){
 		File dir = new File(cacheFilePath);
 		if(!dir.exists() && !dir.mkdirs()){
 			throw new IllegalArgumentException("cann't touch cache dir " + cacheFilePath); 
 		}
-		
+
 		File cacheFile = new File(dir.getPath() + File.separator + schedule.getScheduleName() + ".cache"); 
 		if(cacheFile.exists()){
 			if(cacheHistory){
@@ -250,16 +252,16 @@ public class FomServiceImpl implements FomService {
 				cacheFile.delete();
 			}
 		}
-		
+
 		Map<String, Object> configMap = schedule.getScheduleConfig().getConfMap();
-		
+
 		try{
 			String str = new ObjectMapper().writeValueAsString(configMap);
 			System.out.println(str);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		
+
 		try(FileOutputStream out = new FileOutputStream(cacheFile);
 				ObjectOutputStream oos = new ObjectOutputStream(out)){
 			oos.writeObject(configMap);

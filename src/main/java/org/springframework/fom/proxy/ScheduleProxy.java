@@ -10,7 +10,6 @@ import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.fom.Result;
 import org.springframework.fom.ScheduleContext;
 import org.springframework.fom.Task;
-import org.springframework.fom.annotation.Fom;
 import org.springframework.fom.annotation.Schedule;
 import org.springframework.util.CollectionUtils;
 
@@ -29,7 +28,7 @@ public class ScheduleProxy implements MethodInterceptor {
 
 	private Class<?> scheduleBeanClass;
 
-	public ScheduleProxy(String beanName, ScheduleContext<?> scheduleContext, Fom fom, Object scheduleBean){
+	public ScheduleProxy(String beanName, ScheduleContext<?> scheduleContext, Object scheduleBean){
 		this.scheduleContext = scheduleContext;
 		this.beanName = beanName;
 		this.scheduleBean = scheduleBean;
@@ -109,7 +108,7 @@ public class ScheduleProxy implements MethodInterceptor {
 		return null;
 	}
 
-	// TODO 这里应该过滤掉本身自带的方法，比如在newSchedulTasks上添加@Scheduled则忽略
+	// TODO 这里应该过滤掉本身自带的方法，比如在newSchedulTasks上添加@Schedule则忽略
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Object newSchedulTasks(Object object, Method method, Object[] args, MethodProxy methodProxy) throws Throwable{
 		Class<?>[] parameterTypes = method.getParameterTypes();

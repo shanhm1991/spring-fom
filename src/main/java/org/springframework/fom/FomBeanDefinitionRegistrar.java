@@ -28,27 +28,31 @@ public class FomBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar
 		if(!registed.compareAndSet(false, true)){
 			return;
 		}
-		
+
 		AnnotationAttributes attrs = AnnotationAttributes.fromMap(meta.getAnnotationAttributes(EnableFom.class.getName()));
 		if((boolean)attrs.get("enableFomView")){
-			// 注册FomController
+			// FomController
 			RootBeanDefinition fomController = new RootBeanDefinition(FomController.class);
 			registry.registerBeanDefinition("fomController", fomController); 
-			
-			// 注册FomServiceImpl
+
+			// FomServiceImpl
 			RootBeanDefinition fomServiceImpl = new RootBeanDefinition(FomServiceImpl.class);
 			registry.registerBeanDefinition("fomService", fomServiceImpl); 
 		}
 
-		// 注册SchedulePostProcessor
+		// SchedulePostProcessor
 		RootBeanDefinition fomBeanPostProcessor = new RootBeanDefinition(FomBeanPostProcessor.class);
 		registry.registerBeanDefinition("schedulePostProcessor", fomBeanPostProcessor); 
 
-		// 注册FomScheduleStarter
+		// FomScheduleStarter
 		RootBeanDefinition fomScheduleStarter = new RootBeanDefinition(FomStarter.class);
 		registry.registerBeanDefinition("fomScheduleStarter", fomScheduleStarter); 
 
-		// 注册FomBeanDefinition
+		// FomExternalRegister
+		RootBeanDefinition fomExternalRegister = new RootBeanDefinition(FomExternalRegister.class);
+		registry.registerBeanDefinition("fomExternalRegister", fomExternalRegister); 
+
+		// FomBeanDefinition
 		String[] beanNames = registry.getBeanDefinitionNames();
 		Class<?> clazz;
 		for(String beanName : beanNames){
@@ -62,7 +66,7 @@ public class FomBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar
 				}
 
 				Fom fom = clazz.getAnnotation(Fom.class);
-				if(fom != null){
+				if(fom != null && !fom.external()){ // 忽略external
 					parseFomSchedule(beanName, clazz, beanDefinition, fom, registry);
 				}
 			}

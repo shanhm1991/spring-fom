@@ -95,6 +95,10 @@ public class ScheduleConfig {
 	Map<String, Object> getOriginalMap() {
 		return confMap;
 	}
+	
+	void copy(ScheduleConfig scheduleConfig) {
+		confMap.putAll(scheduleConfig.confMap);
+	}
 
 	public boolean containsKey(String key){
 		return confMap.containsKey(key);

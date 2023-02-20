@@ -56,8 +56,12 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		if(!(ScheduleContext.class.isAssignableFrom(clazz))){
 			return bean;
 		}
-
+		
 		ScheduleContext<?> scheduleContext = (ScheduleContext<?>)bean;
+		if(scheduleContext.isExternal()) { // 插一段external专门处理
+			return processExternal(scheduleContext, beanName);
+		}
+		
 		String scheduleBeanName = scheduleContext.getScheduleBeanName(); 
 		Fom fom = scheduleContext.getClass().getAnnotation(Fom.class);
 		
@@ -68,10 +72,6 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 			return bean;
 		}
 		
-		if(fom.external()) {
-			return bean;
-		}
-
 		Object scheduleBean = null;
 		if(StringUtils.hasText(scheduleBeanName)){
 			scheduleBean = beanFactory.getBean(scheduleBeanName);
@@ -109,16 +109,20 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		// 初始化时提前设置一下，因为运行过程中不允许修改
 		scheduleContext.setEnableTaskConflict(scheduleConfig.getEnableTaskConflict());
 
-
-//		beanFactory.registerSingleton();  TODO
-
-
 		// 创建代理 注册容器
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(clazz);
-		enhancer.setCallback(new ScheduleProxy(beanName, scheduleContext, fom, scheduleBean));
-		Object obj = enhancer.create();
-		return obj;
+		enhancer.setCallback(new ScheduleProxy(beanName, scheduleContext, scheduleBean));
+		return enhancer.create();
+	}
+	
+	private Object processExternal(ScheduleContext<?> scheduleContext, String beanName) {
+		beanFactory.registerSingleton("$EXTERNAL$" + beanName, scheduleContext);
+		Object scheduleBean = beanFactory.getBean(scheduleContext.getScheduleBeanName());
+		Enhancer enhancer = new Enhancer();
+		enhancer.setSuperclass(ScheduleContext.class);
+		enhancer.setCallback(new ScheduleProxy(beanName, scheduleContext, scheduleBean));
+		return enhancer.create();
 	}
 
 	private void loadCache(String beanName, ScheduleContext<?> scheduleContext) throws Exception{ 

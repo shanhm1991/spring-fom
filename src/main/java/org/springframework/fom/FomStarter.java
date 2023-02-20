@@ -18,7 +18,7 @@ public class FomStarter implements SmartLifecycle, ApplicationContextAware {
 	private static final Logger logger = LoggerFactory.getLogger(FomStarter.class);
 
 	private ApplicationContext applicationContext;
-
+	
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
