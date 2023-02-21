@@ -17,6 +17,8 @@ import org.springframework.util.StringUtils;
 public abstract class Task<E> implements Callable<Result<E>> {
 	
 	protected volatile Logger logger = LoggerFactory.getLogger(Task.class);
+	
+	private static ThreadLocal<ScheduleContext<?>> localSchedule = new ThreadLocal<>();
 
 	protected final String id;
 
@@ -43,10 +45,15 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	public Task(String id) { 
 		this.id = id;
 	}
+	
+	public static ScheduleContext<?> getCurrentSchedule(){
+		return localSchedule.get();
+	}
 
 	@Override
 	public final Result<E> call() throws InterruptedException {   
 		Thread.currentThread().setName("task[" + id + "]");
+		localSchedule.set(scheduleContext); 
 		logger.debug("task started."); 
 
 		this.startTime = System.currentTimeMillis();

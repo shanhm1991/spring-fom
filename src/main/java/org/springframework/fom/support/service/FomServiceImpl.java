@@ -21,7 +21,7 @@ import org.springframework.fom.Result;
 import org.springframework.fom.ScheduleContext;
 import org.springframework.fom.ScheduleInfo;
 import org.springframework.fom.ScheduleStatistics;
-import org.springframework.fom.annotation.Fom;
+import org.springframework.fom.Task;
 import org.springframework.fom.logging.LogLevel;
 import org.springframework.fom.logging.LoggerConfiguration;
 import org.springframework.fom.logging.LoggingSystem;
@@ -327,36 +327,9 @@ public class FomServiceImpl implements FomService {
 		return builder.toString();
 	}
 
-	private ScheduleContext<?> getCurrentSchedule(){
-		StackTraceElement[] stacks = new Exception().getStackTrace();
-		try{
-			for(StackTraceElement stack : stacks){
-				String clazzName = stack.getClassName();
-				Class<?> clazz = Class.forName(clazzName); 
-				Fom fom = clazz.getAnnotation(Fom.class);
-				if(clazz.getAnnotation(Fom.class) != null){
-					String beanName =  fom.value();
-					if(beanName == null || "".equals(beanName.trim())){ 
-						beanName = clazz.getSimpleName();
-						beanName = beanName.substring(0, 1).toLowerCase() + beanName.substring(1, beanName.length());
-					}
-
-					if(ScheduleContext.class.isAssignableFrom(clazz)){
-						return applicationContext.getBean(beanName, ScheduleContext.class);
-					}else{
-						return applicationContext.getBean("$" + beanName, ScheduleContext.class);
-					}
-				}
-			}
-		}catch(Exception e){
-			throw new IllegalStateException("get current schedule failed", e);
-		}
-		throw new IllegalStateException("cannot get current schedule in the current callstack.");
-	}
-
 	@Override
 	public void serializeCurrent() {
-		serializeConfig(getCurrentSchedule());
+		serializeConfig(Task.getCurrentSchedule());
 	}
 
 	@Override
@@ -366,7 +339,7 @@ public class FomServiceImpl implements FomService {
 
 	@Override
 	public void putCurrentConfig(String key, Object value) {
-		getCurrentSchedule().getScheduleConfig().set(key, value);
+		Task.getCurrentSchedule().getScheduleConfig().set(key, value);
 	}
 
 	@Override
@@ -376,7 +349,7 @@ public class FomServiceImpl implements FomService {
 
 	@Override
 	public <V> V getCurrentConfig(String key) {
-		return getCurrentSchedule().getScheduleConfig().get(key);
+		return Task.getCurrentSchedule().getScheduleConfig().get(key);
 	}
 
 	@Override
