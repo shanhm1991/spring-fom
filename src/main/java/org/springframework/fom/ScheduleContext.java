@@ -342,9 +342,16 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 				}
 
 				try{
-					if(isFirstRun && !scheduleConfig.getExecOnLoad()){
+					if(isFirstRun){
 						isFirstRun = false;
-						caculateNextTime(null); 
+						if(scheduleConfig.getExecOnLoad()) {
+							runSchedul();
+						}else if(scheduleConfig.getInitialDelay() != Fom.initial_Delay_default) {
+							sleep(scheduleConfig.getInitialDelay());
+							runSchedul();
+						}else {
+							caculateNextTime(null); 
+						}
 					}else{
 						runSchedul();
 					}

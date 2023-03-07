@@ -1,7 +1,5 @@
 package org.springframework.fom;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -27,8 +25,6 @@ public class FomExternalRegister implements BeanFactoryAware, ApplicationContext
 	private static DefaultListableBeanFactory defaultListableBeanFactory;
 
 	private static AnnotationConfigServletWebServerApplicationContext applicationContext;
-
-	public static ConcurrentHashMap<String, String> externalMap = new ConcurrentHashMap<>();
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -74,7 +70,5 @@ public class FomExternalRegister implements BeanFactoryAware, ApplicationContext
 		}else{
 			logger.info("register schedule[{}]: {}", scheduleName, config.getConfMap()); 
 		}
-		
-		externalMap.put(scheduleName, "");
 	}
 }

@@ -52,6 +52,7 @@ public class ScheduleConfig {
 		internalConf.put(Fom.DETECT_TIMEOUT_ONEACHTASK, Fom.DETECT_TIMEOUT_ONEACHTASK_DEFAULT);
 		internalConf.put(Fom.IGNORE_EXECREQUEST_WHEN_RUNNING, Fom.IGNORE_EXECREQUEST_WHEN_RUNNING_DEFAULT);
 		internalConf.put(Fom.ENABLE, Fom.ENABLE_DEFAULT);
+		internalConf.put(Fom.initial_Delay, Fom.initial_Delay_default);
 		//readOnlyConf.add(FomSchedule.QUEUE_SIZE);
 		//readOnlyConf.add(FomSchedule.EXEC_ONLOAN);
 	}
@@ -385,6 +386,14 @@ public class ScheduleConfig {
 		}
 		confMap.put(Fom.ENABLE, enable);
 		return true;
+	}
+	
+	public long getInitialDelay() {
+		return MapUtils.getLong(confMap, Fom.initial_Delay, Fom.initial_Delay_default);
+	}
+	
+	public void setInitialDelay(long initialDelay) {
+		confMap.put(Fom.initial_Delay, initialDelay);
 	}
 
 	public boolean getIgnoreExecRequestWhenRunning(){

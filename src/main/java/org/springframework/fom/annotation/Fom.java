@@ -90,6 +90,10 @@ public @interface Fom {
 	 */
 	String ENABLE = "enable";
 	
+	String initial_Delay = "initialDelay";
+	
+	long initial_Delay_default = 0;
+	
 	/**
 	 * 线程数：默认1
 	 */
@@ -144,6 +148,8 @@ public @interface Fom {
 	 * 默认Running状态时忽略执行请求
 	 */
 	boolean IGNORE_EXECREQUEST_WHEN_RUNNING_DEFAULT = true;
+	
+	long initialDelay() default 0;
 	
 	/**
 	 * 默认加载启动

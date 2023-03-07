@@ -239,6 +239,9 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 	}
 
 	private void setOtherConf(ScheduleConfig scheduleConfig, Fom fom){
+		
+		scheduleConfig.setInitialDelay(fom.initialDelay()); 
+		
 		String threadCoreString = fom.threadCoreString();
 		if(StringUtils.hasText(threadCoreString)){
 			threadCoreString = valueResolver.resolveStringValue(threadCoreString);
