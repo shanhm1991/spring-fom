@@ -15,7 +15,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.springframework.fom.collections;
+package org.springframework.fom;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -135,7 +135,7 @@ public class MapUtils {
                     return (Boolean) answer;
                     
                 } else if (answer instanceof String) {
-                    return new Boolean((String) answer);
+                    return Boolean.parseBoolean((String) answer);
                     
                 } else if (answer instanceof Number) {
                     Number n = (Number) answer;
@@ -198,7 +198,7 @@ public class MapUtils {
         } else if (answer instanceof Byte) {
             return (Byte) answer;
         }
-        return new Byte(answer.byteValue());
+        return Byte.valueOf(answer.byteValue());
     }
 
     /**
@@ -218,7 +218,7 @@ public class MapUtils {
         } else if (answer instanceof Short) {
             return (Short) answer;
         }
-        return new Short(answer.shortValue());
+        return Short.valueOf(answer.shortValue());
     }
 
     /**
@@ -238,7 +238,7 @@ public class MapUtils {
         } else if (answer instanceof Integer) {
             return (Integer) answer;
         }
-        return new Integer(answer.intValue());
+        return Integer.valueOf(answer.intValue());
     }
 
     /**
@@ -258,7 +258,7 @@ public class MapUtils {
         } else if (answer instanceof Long) {
             return (Long) answer;
         }
-        return new Long(answer.longValue());
+        return Long.valueOf(answer.longValue());
     }
 
     /**
@@ -278,7 +278,7 @@ public class MapUtils {
         } else if (answer instanceof Float) {
             return (Float) answer;
         }
-        return new Float(answer.floatValue());
+        return Float.valueOf(answer.floatValue());
     }
 
     /**
@@ -298,7 +298,7 @@ public class MapUtils {
         } else if (answer instanceof Double) {
             return (Double) answer;
         }
-        return new Double(answer.doubleValue());
+        return Double.valueOf(answer.doubleValue());
     }
 
     /**
