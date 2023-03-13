@@ -28,6 +28,11 @@ import org.springframework.util.StringUtils;
  *
  */
 public class ScheduleConfig {
+	
+	/**
+	 * 加载时是否启动
+	 */
+	public static final String ENABLE = "enable";
 
 	// 内定配置，不允许直接put
 	private static Map<String, Object> internalConf = new TreeMap<>();
@@ -51,7 +56,7 @@ public class ScheduleConfig {
 		internalConf.put(Fom.ENABLE_TASK_CONFLICT, Fom.ENABLE_TASK_CONFLICT_DEFAULT);
 		internalConf.put(Fom.DETECT_TIMEOUT_ONEACHTASK, Fom.DETECT_TIMEOUT_ONEACHTASK_DEFAULT);
 		internalConf.put(Fom.IGNORE_EXECREQUEST_WHEN_RUNNING, Fom.IGNORE_EXECREQUEST_WHEN_RUNNING_DEFAULT);
-		internalConf.put(Fom.ENABLE, Fom.ENABLE_DEFAULT);
+		internalConf.put(ENABLE, Fom.ENABLE_DEFAULT);
 		internalConf.put(Fom.initial_Delay, Fom.initial_Delay_default);
 		//readOnlyConf.add(FomSchedule.QUEUE_SIZE);
 		//readOnlyConf.add(FomSchedule.EXEC_ONLOAN);
@@ -377,14 +382,14 @@ public class ScheduleConfig {
 	}
 	
 	public boolean getEnable(){
-		return MapUtils.getBoolean(confMap, Fom.ENABLE, Fom.ENABLE_DEFAULT);
+		return MapUtils.getBoolean(confMap, ENABLE, Fom.ENABLE_DEFAULT);
 	}
 	
 	public boolean setEnable(boolean enable){
 		if(enable == getEnable()){
 			return false;
 		}
-		confMap.put(Fom.ENABLE, enable);
+		confMap.put(ENABLE, enable);
 		return true;
 	}
 	
@@ -542,7 +547,7 @@ public class ScheduleConfig {
 			setQueueSize(Integer.valueOf(value.toString())); return;  
 		case Fom.EXEC_ONLOAN:
 			setExecOnLoad(Boolean.valueOf(value.toString())); return;  
-		case Fom.ENABLE:
+		case ENABLE:
 			setEnable(Boolean.valueOf(value.toString())); return;  
 		default:
 			throw new UnsupportedOperationException("config[" + key + "] cannot be change");

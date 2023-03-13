@@ -64,7 +64,7 @@ public class FomExternalRegister implements BeanFactoryAware, ApplicationContext
 		ScheduleContext<?> schedule = defaultListableBeanFactory.getBean(scheduleName, ScheduleContext.class); // 实例化一下
 		
 		ScheduleConfig config = schedule.getScheduleConfig();
-		if(config.getBoolean(Fom.ENABLE, true)){
+		if(config.getBoolean(ScheduleConfig.ENABLE, true)){
 			schedule.scheduleStart();
 			logger.info("register and start schedule[{}]: {}", scheduleName, config.getConfMap()); 
 		}else{

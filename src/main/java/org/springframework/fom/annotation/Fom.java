@@ -20,141 +20,11 @@ import org.springframework.stereotype.Component;
 @Component
 public @interface Fom {
 	
-	/**
-	 * 定时计划：cron
-	 */
-	String CRON = "cron";
 
-	/**
-	 * 定时计划：fixedRate
-	 */
-	String FIXED_RATE = "fixedRate";
-
-	/**
-	 * 定时计划：fixedDelay
-	 */
-	String FIXED_DELAY = "fixedDelay";
-
-	/**
-	 * 备注
-	 */
-	String REMARK = "remark";
-
-	/**
-	 * 线程池任务队列长度
-	 */
-	String QUEUE_SIZE = "queueSize";
-
-	/**
-	 * 线程池核心线程数
-	 */
-	String THREAD_CORE = "threadCore";
-
-	/**
-	 * 线程池最大线程数
-	 */
-	String THREAD_MAX = "threadMax";
-
-	/**
-	 * 线程池任务线程最长空闲时间
-	 */
-	String THREAD_ALIVETIME = "threadAliveTime";
-
-	/**
-	 * 任务超时时间
-	 */
-	String TASK_OVERTIME = "taskOverTime";
-
-	/**
-	 * 启动时是否执行
-	 */
-	String EXEC_ONLOAN = "execOnLoad";
-	
-	/**
-	 * 是否检测任务冲突
-	 */
-	String ENABLE_TASK_CONFLICT = "enableTaskConflict";
-	
-	/**
-	 * 是否对每个任务单独检测超时
-	 */
-	String DETECT_TIMEOUT_ONEACHTASK = "detectTimeoutOnEachTask";
-	
-	/**
-	 * Running状态时是否忽略执行请求
-	 */
-	String IGNORE_EXECREQUEST_WHEN_RUNNING = "ignoreExecRequestWhenRunning";
-	
-	/**
-	 * 加载时是否启动
-	 */
-	String ENABLE = "enable";
-	
-	String initial_Delay = "initialDelay";
-	
-	long initial_Delay_default = 0;
-	
-	/**
-	 * 线程数：默认1
-	 */
-	int THREAD_CORE_DEFAULT = 1;
-
-	/**
-	 * 线程空闲存活时间：默认1
-	 */
-	int THREAD_ALIVETIME_DEFAULT = 1;
-
-	/**
-	 * 任务队列长度：默认256
-	 */
-	int QUEUE_SIZE_DEFAULT = 256;
-
-	/**
-	 * 任务队列长度：min
-	 */
-	int QUEUE_SIZE_MIN = 1;
-
-	/**
-	 * 任务超时时间：default
-	 */
-	int TASK_OVERTIME_DEFAULT = 0;
-
-	/**
-	 * 定时计划：fixedRate 默认值：0
-	 */
-	int FIXED_RATE_DEFAULT = 0;
-
-	/**
-	 * 定时计划：fixedDelay 默认值：0
-	 */
-	int FIXED_DELAY_DEFAULT = 0;
-
-	/**
-	 * 启动时默认不执行
-	 */
-	boolean EXEC_ONLOAN_DEFAULT = false;
-	
-	/**
-	 * 默认不检测任务冲突
-	 */
-	boolean ENABLE_TASK_CONFLICT_DEFAULT = false;
-
-	/**
-	 * 默认对每个任务单独检测超时
-	 */
-	boolean DETECT_TIMEOUT_ONEACHTASK_DEFAULT = true;
-	
-	/**
-	 * 默认Running状态时忽略执行请求
-	 */
-	boolean IGNORE_EXECREQUEST_WHEN_RUNNING_DEFAULT = true;
 	
 	long initialDelay() default 0;
 	
-	/**
-	 * 默认加载启动
-	 */
-	boolean ENABLE_DEFAULT = true;
+	
 
 	@AliasFor(annotation = Component.class)
 	String value() default "";
@@ -257,5 +127,136 @@ public @interface Fom {
 	boolean ignoreExecRequestWhenRunning() default IGNORE_EXECREQUEST_WHEN_RUNNING_DEFAULT;
 	
 	String ignoreExecRequestWhenRunningString() default "";
+	
+	/**
+	 * 默认加载启动
+	 */
+	boolean ENABLE_DEFAULT = true;
+	
+	/**
+	 * 定时计划：cron
+	 */
+	String CRON = "cron";
+
+	/**
+	 * 定时计划：fixedRate
+	 */
+	String FIXED_RATE = "fixedRate";
+
+	/**
+	 * 定时计划：fixedDelay
+	 */
+	String FIXED_DELAY = "fixedDelay";
+
+	/**
+	 * 备注
+	 */
+	String REMARK = "remark";
+
+	/**
+	 * 线程池任务队列长度
+	 */
+	String QUEUE_SIZE = "queueSize";
+
+	/**
+	 * 线程池核心线程数
+	 */
+	String THREAD_CORE = "threadCore";
+
+	/**
+	 * 线程池最大线程数
+	 */
+	String THREAD_MAX = "threadMax";
+
+	/**
+	 * 线程池任务线程最长空闲时间
+	 */
+	String THREAD_ALIVETIME = "threadAliveTime";
+
+	/**
+	 * 任务超时时间
+	 */
+	String TASK_OVERTIME = "taskOverTime";
+
+	/**
+	 * 启动时是否执行
+	 */
+	String EXEC_ONLOAN = "execOnLoad";
+	
+	/**
+	 * 是否检测任务冲突
+	 */
+	String ENABLE_TASK_CONFLICT = "enableTaskConflict";
+	
+	/**
+	 * 是否对每个任务单独检测超时
+	 */
+	String DETECT_TIMEOUT_ONEACHTASK = "detectTimeoutOnEachTask";
+	
+	/**
+	 * Running状态时是否忽略执行请求
+	 */
+	String IGNORE_EXECREQUEST_WHEN_RUNNING = "ignoreExecRequestWhenRunning";
+	
+	
+	
+	String initial_Delay = "initialDelay";
+	
+	long initial_Delay_default = 0;
+	
+	/**
+	 * 线程数：默认1
+	 */
+	int THREAD_CORE_DEFAULT = 1;
+
+	/**
+	 * 线程空闲存活时间：默认1
+	 */
+	int THREAD_ALIVETIME_DEFAULT = 1;
+
+	/**
+	 * 任务队列长度：默认256
+	 */
+	int QUEUE_SIZE_DEFAULT = 256;
+
+	/**
+	 * 任务队列长度：min
+	 */
+	int QUEUE_SIZE_MIN = 1;
+
+	/**
+	 * 任务超时时间：default
+	 */
+	int TASK_OVERTIME_DEFAULT = 0;
+
+	/**
+	 * 定时计划：fixedRate 默认值：0
+	 */
+	int FIXED_RATE_DEFAULT = 0;
+
+	/**
+	 * 定时计划：fixedDelay 默认值：0
+	 */
+	int FIXED_DELAY_DEFAULT = 0;
+
+	/**
+	 * 启动时默认不执行
+	 */
+	boolean EXEC_ONLOAN_DEFAULT = false;
+	
+	/**
+	 * 默认不检测任务冲突
+	 */
+	boolean ENABLE_TASK_CONFLICT_DEFAULT = false;
+
+	/**
+	 * 默认对每个任务单独检测超时
+	 */
+	boolean DETECT_TIMEOUT_ONEACHTASK_DEFAULT = true;
+	
+	/**
+	 * 默认Running状态时忽略执行请求
+	 */
+	boolean IGNORE_EXECREQUEST_WHEN_RUNNING_DEFAULT = true;
 
 }

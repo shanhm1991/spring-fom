@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,7 +23,6 @@ import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.fom.annotation.Fom;
-import org.springframework.fom.annotation.Schedule;
 import org.springframework.fom.proxy.ScheduleProxy;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
@@ -58,7 +56,9 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		}
 		
 		ScheduleContext<?> scheduleContext = (ScheduleContext<?>)bean;
-		if(scheduleContext.isExternal()) { // 插一段external专门处理
+		
+		// 插一段external专门处理
+		if(scheduleContext.isExternal()) { 
 			return processExternal(scheduleContext, beanName);
 		}
 		
@@ -77,7 +77,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 			scheduleBean = beanFactory.getBean(scheduleBeanName);
 		}
 
-		// 设置Logger
+		// Logger
 		fom = clazz.getAnnotation(Fom.class);
 		if(fom == null){
 			fom = scheduleBean.getClass().getAnnotation(Fom.class);
@@ -89,8 +89,8 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		// 加载配置
 		ScheduleConfig scheduleConfig = scheduleContext.getScheduleConfig();
 		if(fom != null){ // 注解
-			setCronConf(scheduleConfig, fom, scheduleContext, scheduleBean);
-			setOtherConf(scheduleConfig, fom);
+			setCron(scheduleConfig, fom, scheduleContext, scheduleBean);
+			setConf(scheduleConfig, fom);
 			setValue(scheduleConfig, scheduleContext, scheduleBean);
 		}else{ // xml配置
 
@@ -166,39 +166,12 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		// TODO
 	}
 
-	// 只要获取到一个就结束
-	private void setCronConf(ScheduleConfig scheduleConfig, Fom fom, ScheduleContext<?> scheduleContext, Object scheduleBean){
+	private void setCron(ScheduleConfig scheduleConfig, Fom fom, ScheduleContext<?> scheduleContext, Object scheduleBean){
 		if(fom != null){
 			if(setCron(scheduleConfig, fom.cron())
 					|| setFixedRate(scheduleConfig, fom.fixedRate(), fom.fixedRateString())
 					|| setFixedDelay(scheduleConfig, fom.fixedDelay(), fom.fixedDelayString())){
 				return;
-			}
-		}
-		// 尝试从方法上获取定时计划
-		if(scheduleBean != null){ // 从scheduleBean中获取
-			Class<?> clazz = scheduleBean.getClass();
-			for(Method method : clazz.getMethods()){
-				Schedule scheduled = method.getAnnotation(Schedule.class);
-				if(scheduled != null){
-					if(setCron(scheduleConfig, scheduled.cron())
-							|| setFixedRate(scheduleConfig, scheduled.fixedRate(), scheduled.fixedRateString())
-							|| setFixedDelay(scheduleConfig, scheduled.fixedDelay(), scheduled.fixedDelayString())){ 
-						return;
-					}
-				}
-			}
-		}else{ // 从自身获取
-			Class<?> clazz = scheduleContext.getClass();
-			for(Method method : clazz.getMethods()){
-				Schedule scheduled = method.getAnnotation(Schedule.class);
-				if(scheduled != null){
-					if(setCron(scheduleConfig, scheduled.cron())
-							|| setFixedRate(scheduleConfig, scheduled.fixedRate(), scheduled.fixedRateString())
-							|| setFixedDelay(scheduleConfig, scheduled.fixedDelay(), scheduled.fixedDelayString())){ 
-						return;
-					}
-				}
 			}
 		}
 	}
@@ -238,7 +211,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		return false;
 	}
 
-	private void setOtherConf(ScheduleConfig scheduleConfig, Fom fom){
+	private void setConf(ScheduleConfig scheduleConfig, Fom fom){
 		
 		scheduleConfig.setInitialDelay(fom.initialDelay()); 
 		
@@ -347,6 +320,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 					fieldList.add(field);
 					scheduleConfig.set(key, confValue);
 				}
+				
 				// 配置集合中的值尽量按照对应属性的类型来（如果可以的话）
 				if(list.size() == 1) {
 					switch(field.getGenericType().toString()){
@@ -384,5 +358,4 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		}
 		return list;
 	}
-
 }

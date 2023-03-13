@@ -12,13 +12,4 @@ import java.lang.annotation.*;
 @Documented
 public @interface Schedule {
 
-    String cron() default "";
-
-    long fixedDelay() default -1;
-
-    String fixedDelayString() default "";
-
-    long fixedRate() default -1;
-
-    String fixedRateString() default "";
 }
