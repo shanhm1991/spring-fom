@@ -146,7 +146,7 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 				ObjectInputStream ois = new ObjectInputStream(input);){
 			HashMap<String, Object> map = (HashMap<String, Object>)ois.readObject();
 
-			String cron = (String)map.remove(Fom.CRON);
+			String cron = (String)map.remove(ScheduleConfig.KEY_cron);
 			ScheduleConfig scheduleConfig = scheduleContext.getScheduleConfig();
 			scheduleConfig.setCron(cron);
 
@@ -219,10 +219,10 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		if(StringUtils.hasText(threadCoreString)){
 			threadCoreString = valueResolver.resolveStringValue(threadCoreString);
 			int threadCore = Integer.parseInt(threadCoreString);
-			if(Fom.THREAD_CORE_DEFAULT != threadCore){
+			if(ScheduleConfig.DEFAULT_threadCore != threadCore){
 				scheduleConfig.setThreadCore(threadCore);
 			}
-		}else if(Fom.THREAD_CORE_DEFAULT != fom.threadCore()){
+		}else if(ScheduleConfig.DEFAULT_threadCore != fom.threadCore()){
 			scheduleConfig.setThreadCore(fom.threadCore());
 		}
 
@@ -230,10 +230,10 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		if(StringUtils.hasText(threadMaxString)){
 			threadMaxString = valueResolver.resolveStringValue(threadMaxString);
 			int threadMax = Integer.parseInt(threadMaxString);
-			if(Fom.THREAD_CORE_DEFAULT != threadMax){
+			if(ScheduleConfig.DEFAULT_threadCore != threadMax){
 				scheduleConfig.setThreadMax(threadMax);
 			}
-		}else if(Fom.THREAD_CORE_DEFAULT != fom.threadMax()){
+		}else if(ScheduleConfig.DEFAULT_threadCore != fom.threadMax()){
 			scheduleConfig.setThreadMax(fom.threadMax());
 		}
 

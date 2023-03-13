@@ -8,10 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.springframework.fom.annotation.Fom;
-
-import java.util.Set;
-
 /**
  * 
  * @author shanhm1991@163.com
@@ -90,27 +86,18 @@ public class ScheduleInfo {
 		configMap.putAll(scheduleConfig.getConfMap());
 		
 		Map<String, Object> internalConf = ScheduleConfig.getInternalConf();
-		Set<String> readOnlyKey = ScheduleConfig.getReadOnlyConf();
 		
 		// 内部配置
 		for(String key : internalConf.keySet()){
 			Object defaultVal = internalConf.get(key);
 			Object val = configMap.remove(key);
 			if(val == null){
-				if(readOnlyKey.contains(key)){
-					config.add(new Conf(key, defaultVal, true, true, true, false));
-				}else{
-					config.add(new Conf(key, defaultVal, true, false, true, false));
-				}
+				config.add(new Conf(key, defaultVal, true, false, true, false));
 			}else{
-				if(Fom.CRON.equals(key)){
+				if(ScheduleConfig.KEY_cron.equals(key)){
 					config.add(new Conf(key, scheduleConfig.getCronExpression(), true, false, false, false));
 				}else{
-					if(readOnlyKey.contains(key)){
-						config.add(new Conf(key, val, true, true, false, false));
-					}else{
-						config.add(new Conf(key, val, true, false, false, false));
-					}
+					config.add(new Conf(key, val, true, false, false, false));
 				}
 			}
 		}

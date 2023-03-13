@@ -16,7 +16,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.fom.annotation.Fom;
 import org.springframework.fom.collections.MapUtils;
 import org.springframework.fom.quartz.CronExpression;
 import org.springframework.util.Assert;
@@ -32,34 +31,159 @@ public class ScheduleConfig {
 	/**
 	 * 加载时是否启动
 	 */
-	public static final String ENABLE = "enable";
+	public static final String KEY_enable = "enable";
+	
+	/**
+	 * 启动时是否执行
+	 */
+	public static final String KEY_execOnLoad = "execOnLoad";
+	
+	/**
+	 * 定时计划：cron
+	 */
+	public static final String KEY_cron = "cron";
+	
+	/**
+	 * 定时计划：fixedRate
+	 */
+	public static final String KEY_fixedRate = "fixedRate";
 
-	// 内定配置，不允许直接put
+	/**
+	 * 定时计划：fixedDelay
+	 */
+	public static final String KEY_fixedDelay = "fixedDelay";
+	
+	/**
+	 * 线程池任务队列长度
+	 */
+	public static final String KEY_queueSize = "queueSize";
+
+	/**
+	 * 线程池核心线程数
+	 */
+	public static final String KEY_threadCore = "threadCore";
+
+	/**
+	 * 线程池最大线程数
+	 */
+	public static final String KEY_threadMax = "threadMax";
+
+	/**
+	 * 线程池任务线程最长空闲时间
+	 */
+	public static final String KEY_threadAliveTime = "threadAliveTime";
+	
+	/**
+	 * 任务超时时间
+	 */
+	public static final String KEY_taskOverTime = "taskOverTime";
+	
+	/**
+	 * 是否对每个任务单独检测超时
+	 */
+	public static final String KEY_detectTimeoutOnEachTask = "detectTimeoutOnEachTask";
+	
+	/**
+	 * 是否检测任务冲突
+	 */
+	public static final String KEY_enableTaskConflict = "enableTaskConflict";
+	
+	/**
+	 * Running时是否忽略执行请求
+	 */
+	public static final String KEY_ignoreExecRequestWhenRunning = "ignoreExecRequestWhenRunning";
+	
+	/**
+	 * 备注
+	 */
+	public static final String KEY_remark = "remark";
+	
+	/**
+	 * 首次执行延迟时间
+	 */
+	public static final String KEY_initialDelay = "initialDelay";
+	
+	/**
+	 * 默认加载启动
+	 */
+	public static final boolean DEFAULT_enable = true;
+	
+	/**
+	 * 启动时默认不执行
+	 */
+	public static final boolean DEFAULT_execOnLoad = false;
+	
+	/**
+	 * fixedRate 默认0
+	 */
+	public static final int DEFAULT_fixedRate = 0;
+	
+	/**
+	 * fixedDelay 默认0
+	 */
+	public static final int DEFAULT_fixedDelay = 0;
+	
+	/**
+	 * 线程数 默认1
+	 */
+	public static final int DEFAULT_threadCore = 1;
+	
+	/**
+	 * 线程空闲时间：默认1
+	 */
+	public static final int DEFAULT_threadAliveTime = 10;
+	
+	/**
+	 * 任务队列长度：默认256
+	 */
+	public static final int DEFAULT_queueSize = 256;
+	
+	/**
+	 * 任务超时时间：默认不超时
+	 */
+	public static final int DEFAULT_taskOverTime = 0;
+	
+	/**
+	 * 默认不检测任务冲突
+	 */
+	public static final boolean DEFAULT_enableTaskConflict = false;
+	
+	/**
+	 * 默认对每个任务单独检测超时
+	 */
+	public static final boolean DEFAULT_detectTimeoutOnEachTask = true;
+	
+	/**
+	 * Running状态时默认忽略执行请求
+	 */
+	public static final boolean DEFAULT_ignoreExecRequestWhenRunning = true;
+	
+	/**
+	 * 首次执行延迟时间 默认0
+	 */
+	public static final long DEFAULT_initialDelay = 0;
+	
+	// 内部配置，不允许直接put
 	private static Map<String, Object> internalConf = new TreeMap<>();
-
-	// 暂时不用，所有配置都可以修改，只是生效时机不同
-	private static Set<String> readOnlyConf = new HashSet<>();
 
 	private final Map<String, List<Field>> envirmentConf = new HashMap<>();
 
 	static{
-		internalConf.put(Fom.CRON, "");
-		internalConf.put(Fom.FIXED_RATE, Fom.FIXED_RATE_DEFAULT);
-		internalConf.put(Fom.FIXED_DELAY, Fom.FIXED_DELAY_DEFAULT);
-		internalConf.put(Fom.REMARK, "");
-		internalConf.put(Fom.QUEUE_SIZE, Fom.QUEUE_SIZE_DEFAULT);
-		internalConf.put(Fom.THREAD_CORE, Fom.THREAD_CORE_DEFAULT);
-		internalConf.put(Fom.THREAD_MAX, Fom.THREAD_CORE_DEFAULT);
-		internalConf.put(Fom.THREAD_ALIVETIME, Fom.THREAD_ALIVETIME_DEFAULT);
-		internalConf.put(Fom.TASK_OVERTIME, Fom.TASK_OVERTIME_DEFAULT);
-		internalConf.put(Fom.EXEC_ONLOAN, Fom.EXEC_ONLOAN_DEFAULT);
-		internalConf.put(Fom.ENABLE_TASK_CONFLICT, Fom.ENABLE_TASK_CONFLICT_DEFAULT);
-		internalConf.put(Fom.DETECT_TIMEOUT_ONEACHTASK, Fom.DETECT_TIMEOUT_ONEACHTASK_DEFAULT);
-		internalConf.put(Fom.IGNORE_EXECREQUEST_WHEN_RUNNING, Fom.IGNORE_EXECREQUEST_WHEN_RUNNING_DEFAULT);
-		internalConf.put(ENABLE, Fom.ENABLE_DEFAULT);
-		internalConf.put(Fom.initial_Delay, Fom.initial_Delay_default);
-		//readOnlyConf.add(FomSchedule.QUEUE_SIZE);
-		//readOnlyConf.add(FomSchedule.EXEC_ONLOAN);
+		internalConf.put(KEY_cron, "");
+		internalConf.put(KEY_fixedRate,  DEFAULT_fixedRate);
+		internalConf.put(KEY_fixedDelay, DEFAULT_fixedDelay);
+		internalConf.put(KEY_remark, "");
+		internalConf.put(KEY_queueSize,  DEFAULT_queueSize);
+		internalConf.put(KEY_threadCore, DEFAULT_threadCore);
+		internalConf.put(KEY_threadMax,       DEFAULT_threadCore);
+		internalConf.put(KEY_threadAliveTime, DEFAULT_threadAliveTime);
+		internalConf.put(KEY_taskOverTime,    DEFAULT_taskOverTime);
+		internalConf.put(KEY_execOnLoad,      DEFAULT_execOnLoad);
+		internalConf.put(KEY_enableTaskConflict,           DEFAULT_enableTaskConflict);
+		internalConf.put(KEY_detectTimeoutOnEachTask,      DEFAULT_detectTimeoutOnEachTask);
+		internalConf.put(KEY_ignoreExecRequestWhenRunning, DEFAULT_ignoreExecRequestWhenRunning);
+		internalConf.put(KEY_enable,       DEFAULT_enable);
+		internalConf.put(KEY_initialDelay, DEFAULT_initialDelay);
 	}
 
 	private final ConcurrentHashMap<String, Object> confMap = new ConcurrentHashMap<>();
@@ -79,10 +203,6 @@ public class ScheduleConfig {
 		return internalConf;
 	}
 
-	static Set<String> getReadOnlyConf() {
-		return readOnlyConf;
-	}
-
 	Map<String, List<Field>> getEnvirment() {
 		return envirmentConf;
 	}
@@ -94,7 +214,7 @@ public class ScheduleConfig {
 	public Map<String, Object> getConfMap() {
 		Map<String, Object> map = new HashMap<>();
 		map.putAll(confMap);
-		map.put(Fom.CRON, getCronExpression());
+		map.put(KEY_cron, getCronExpression());
 		return map;
 	} 
 
@@ -198,7 +318,7 @@ public class ScheduleConfig {
 
 	// get/set of internal config 
 	public CronExpression getCron(){
-		return (CronExpression)confMap.get(Fom.CRON);
+		return (CronExpression)confMap.get(KEY_cron);
 	}
 
 	public String getCronExpression(){
@@ -222,64 +342,64 @@ public class ScheduleConfig {
 		}
 
 		if(!cron.equals(getCron())){
-			confMap.put(Fom.CRON, cronExpression);
+			confMap.put(KEY_cron, cronExpression);
 			return true;
 		}
 		return false;
 	}
 
 	public long getFixedRate(){
-		return MapUtils.getLongValue(confMap, Fom.FIXED_RATE, Fom.FIXED_RATE_DEFAULT);
+		return MapUtils.getLongValue(confMap, KEY_fixedRate, DEFAULT_fixedRate);
 	}
 
 	public boolean setFixedRate(long fixedRate){
-		if(fixedRate > Fom.FIXED_RATE_DEFAULT && fixedRate != getFixedRate()){
-			confMap.put(Fom.FIXED_RATE, fixedRate);
+		if(fixedRate > DEFAULT_fixedRate && fixedRate != getFixedRate()){
+			confMap.put(KEY_fixedRate, fixedRate);
 			return true;
 		}
 		return false;
 	}
 
 	public long getFixedDelay(){
-		return MapUtils.getLongValue(confMap, Fom.FIXED_DELAY, Fom.FIXED_DELAY_DEFAULT);
+		return MapUtils.getLongValue(confMap, KEY_fixedDelay, DEFAULT_fixedDelay);
 	}
 
 	public boolean setFixedDelay(long fixedDelay){
-		if(fixedDelay > Fom.FIXED_DELAY_DEFAULT && fixedDelay != getFixedDelay()){
-			confMap.put(Fom.FIXED_DELAY, fixedDelay);
+		if(fixedDelay > DEFAULT_fixedDelay && fixedDelay != getFixedDelay()){
+			confMap.put(KEY_fixedDelay, fixedDelay);
 			return true;
 		}
 		return false;
 	}
 
 	public String getRemark(){
-		return MapUtils.getString(confMap, Fom.REMARK, "");
+		return MapUtils.getString(confMap, KEY_remark, "");
 	}
 
 	public boolean setRemark(String remark){
 		if(remark.equals(getRemark())){
 			return false;
 		}
-		confMap.put(Fom.REMARK, remark);
+		confMap.put(KEY_remark, remark);
 		return true;
 	}
 
 	public int getThreadCore(){
-		return MapUtils.getIntValue(confMap, Fom.THREAD_CORE, Fom.THREAD_CORE_DEFAULT);
+		return MapUtils.getIntValue(confMap, KEY_threadCore, DEFAULT_threadCore);
 	}
 
 	public boolean setThreadCore(int threadCore){
-		Assert.isTrue(threadCore >= Fom.THREAD_CORE_DEFAULT,
-				buildMsg(Fom.THREAD_CORE, " cannot be less than ", Fom.THREAD_CORE_DEFAULT));
+		Assert.isTrue(threadCore >= DEFAULT_threadCore,
+				buildMsg(KEY_threadCore, " cannot be less than ", DEFAULT_threadCore));
 		if(threadCore == getThreadCore()){
 			return false;
 		}
 
-		confMap.put(Fom.THREAD_CORE, threadCore);
+		confMap.put(KEY_threadCore, threadCore);
 		int threadMax = getThreadMax();
 		if(threadMax < threadCore){ 
 			threadMax = threadCore;
-			confMap.put(Fom.THREAD_MAX, threadMax);
+			confMap.put(KEY_threadMax, threadMax);
 		}
 
 		if(pool != null && pool.getCorePoolSize() != threadCore){
@@ -290,21 +410,21 @@ public class ScheduleConfig {
 	}
 
 	public int getThreadMax(){
-		return MapUtils.getIntValue(confMap, Fom.THREAD_MAX, Fom.THREAD_CORE_DEFAULT);
+		return MapUtils.getIntValue(confMap, KEY_threadMax, DEFAULT_threadCore);
 	}
 
 	public boolean setThreadMax(int threadMax){
-		Assert.isTrue(threadMax >= Fom.THREAD_CORE_DEFAULT,
-				buildMsg(Fom.THREAD_MAX, " cannot be less than ", Fom. THREAD_CORE_DEFAULT));
+		Assert.isTrue(threadMax >= DEFAULT_threadCore,
+				buildMsg(KEY_threadMax, " cannot be less than ", DEFAULT_threadCore));
 		if(threadMax == getThreadMax()){
 			return false;
 		}
 
-		confMap.put(Fom.THREAD_MAX, threadMax);
+		confMap.put(KEY_threadMax, threadMax);
 		int threadCore = getThreadCore();
 		if(threadCore > threadMax){
 			threadCore = threadMax;
-			confMap.put(Fom.THREAD_CORE, threadCore);
+			confMap.put(KEY_threadCore, threadCore);
 		}
 
 		if(pool != null && pool.getMaximumPoolSize() != threadMax){
@@ -315,16 +435,16 @@ public class ScheduleConfig {
 	}
 
 	public int getThreadAliveTime(){
-		return MapUtils.getIntValue(confMap, Fom.THREAD_ALIVETIME, Fom.THREAD_ALIVETIME_DEFAULT);
+		return MapUtils.getIntValue(confMap, KEY_threadAliveTime, DEFAULT_threadAliveTime);
 	}
 
 	public boolean setThreadAliveTime(int aliveTime){
-		Assert.isTrue(aliveTime >= Fom.THREAD_ALIVETIME_DEFAULT,
-				buildMsg(Fom.THREAD_ALIVETIME, " cannot be less than ", Fom.THREAD_ALIVETIME_DEFAULT));
+		Assert.isTrue(aliveTime >= DEFAULT_threadAliveTime,
+				buildMsg(KEY_threadAliveTime, " cannot be less than ", DEFAULT_threadAliveTime));
 		if(aliveTime == getThreadAliveTime()){
 			return false;
 		}
-		confMap.put(Fom.THREAD_ALIVETIME, aliveTime);
+		confMap.put(KEY_threadAliveTime, aliveTime);
 		if(pool != null && pool.getKeepAliveTime(TimeUnit.MILLISECONDS) != aliveTime){ 
 			pool.setKeepAliveTime(aliveTime, TimeUnit.MILLISECONDS);
 		}
@@ -332,98 +452,96 @@ public class ScheduleConfig {
 	}
 
 	public int getTaskOverTime(){
-		return MapUtils.getIntValue(confMap, Fom.TASK_OVERTIME, Fom.TASK_OVERTIME_DEFAULT);
+		return MapUtils.getIntValue(confMap, KEY_taskOverTime, DEFAULT_taskOverTime);
 	}
 
 	public boolean setTaskOverTime(int overTime){
-		Assert.isTrue(overTime >= Fom.TASK_OVERTIME_DEFAULT,
-				buildMsg(Fom.TASK_OVERTIME, " cannot be less than ", Fom.TASK_OVERTIME_DEFAULT));
+		Assert.isTrue(overTime >= 1000, buildMsg(KEY_taskOverTime, " cannot be less than 1000"));
 		if(overTime == getTaskOverTime()){
 			return false;
 		}
-		confMap.put(Fom.TASK_OVERTIME, overTime);
+		confMap.put(KEY_taskOverTime, overTime);
 		return true;
 	}
 
 	public boolean getExecOnLoad(){
-		return MapUtils.getBoolean(confMap, Fom.EXEC_ONLOAN, Fom.EXEC_ONLOAN_DEFAULT);
+		return MapUtils.getBoolean(confMap, KEY_execOnLoad, DEFAULT_execOnLoad);
 	}
 
 	public boolean setExecOnLoad(boolean execOnLoad) {
 		if(execOnLoad == getExecOnLoad()){
 			return false;
 		}
-		confMap.put(Fom.EXEC_ONLOAN, execOnLoad);
+		confMap.put(KEY_execOnLoad, execOnLoad);
 		return true;
 	}
 
 	public boolean getDetectTimeoutOnEachTask(){
-		return MapUtils.getBoolean(confMap, Fom.DETECT_TIMEOUT_ONEACHTASK, Fom.DETECT_TIMEOUT_ONEACHTASK_DEFAULT);
+		return MapUtils.getBoolean(confMap, KEY_detectTimeoutOnEachTask, DEFAULT_detectTimeoutOnEachTask);
 	}
 
 	public boolean setDetectTimeoutOnEachTask(boolean detectTimeoutOnEachTask){
 		if(detectTimeoutOnEachTask == getDetectTimeoutOnEachTask()){
 			return false;
 		}
-		confMap.put(Fom.DETECT_TIMEOUT_ONEACHTASK, detectTimeoutOnEachTask);
+		confMap.put(KEY_detectTimeoutOnEachTask, detectTimeoutOnEachTask);
 		return true;
 	}
 
 	public boolean getEnableTaskConflict(){
-		return MapUtils.getBoolean(confMap, Fom.ENABLE_TASK_CONFLICT, Fom.ENABLE_TASK_CONFLICT_DEFAULT);
+		return MapUtils.getBoolean(confMap, KEY_enableTaskConflict, DEFAULT_enableTaskConflict);
 	}
 
 	public boolean setEnableTaskConflict(boolean enableTaskConflict){
 		if(enableTaskConflict == getEnableTaskConflict()){
 			return false;
 		}
-		confMap.put(Fom.ENABLE_TASK_CONFLICT, enableTaskConflict);
+		confMap.put(KEY_enableTaskConflict, enableTaskConflict);
 		return true;
 	}
 	
 	public boolean getEnable(){
-		return MapUtils.getBoolean(confMap, ENABLE, Fom.ENABLE_DEFAULT);
+		return MapUtils.getBoolean(confMap, KEY_enable, DEFAULT_enable);
 	}
 	
 	public boolean setEnable(boolean enable){
 		if(enable == getEnable()){
 			return false;
 		}
-		confMap.put(ENABLE, enable);
+		confMap.put(KEY_enable, enable);
 		return true;
 	}
 	
 	public long getInitialDelay() {
-		return MapUtils.getLong(confMap, Fom.initial_Delay, Fom.initial_Delay_default);
+		return MapUtils.getLong(confMap, KEY_initialDelay, DEFAULT_initialDelay);
 	}
 	
 	public void setInitialDelay(long initialDelay) {
-		confMap.put(Fom.initial_Delay, initialDelay);
+		confMap.put(KEY_initialDelay, initialDelay);
 	}
 
 	public boolean getIgnoreExecRequestWhenRunning(){
-		return MapUtils.getBoolean(confMap, Fom.IGNORE_EXECREQUEST_WHEN_RUNNING, Fom.IGNORE_EXECREQUEST_WHEN_RUNNING_DEFAULT);
+		return MapUtils.getBoolean(confMap, KEY_ignoreExecRequestWhenRunning, DEFAULT_ignoreExecRequestWhenRunning);
 	}
 
 	public boolean setIgnoreExecRequestWhenRunning(boolean ignoreExecRequestWhenRunning){
 		if(ignoreExecRequestWhenRunning == getIgnoreExecRequestWhenRunning()){
 			return false;
 		}
-		confMap.put(Fom.IGNORE_EXECREQUEST_WHEN_RUNNING, ignoreExecRequestWhenRunning);
+		confMap.put(KEY_ignoreExecRequestWhenRunning, ignoreExecRequestWhenRunning);
 		return true;
 	}
 
 	public int getQueueSize(){
-		return MapUtils.getIntValue(confMap, Fom.QUEUE_SIZE, Fom.QUEUE_SIZE_DEFAULT);
+		return MapUtils.getIntValue(confMap, KEY_queueSize, DEFAULT_queueSize);
 	}
 
 	boolean setQueueSize(int queueSize){
-		Assert.isTrue(queueSize >= Fom.QUEUE_SIZE_MIN,
-				buildMsg(Fom.QUEUE_SIZE, " cannot be less than ", Fom.QUEUE_SIZE_MIN));
+		Assert.isTrue(queueSize >= 1, buildMsg(KEY_queueSize, " cannot be less than 1"));
 		if(queueSize == getQueueSize()){
 			return false;
 		}
-		confMap.put(Fom.QUEUE_SIZE, queueSize);
+		confMap.put(KEY_queueSize, queueSize);
 		return true;
 	}
 
@@ -521,33 +639,33 @@ public class ScheduleConfig {
 	// 配置有限，这里简单处理下，这样做主要是为了自我保护，防止配置被恶意修改
 	private void saveInternalConfig(String key, Object value){
 		switch(key){
-		case Fom.CRON:
+		case KEY_cron:
 			setCron(value.toString()); return;
-		case Fom.FIXED_RATE:
+		case KEY_fixedRate:
 			setFixedRate(Long.valueOf(value.toString())); return;
-		case Fom.FIXED_DELAY:
+		case KEY_fixedDelay:
 			setFixedDelay(Long.valueOf(value.toString())); return;
-		case Fom.REMARK:
+		case KEY_remark:
 			setRemark(value.toString()); return;
-		case Fom.THREAD_CORE:
+		case KEY_threadCore:
 			setThreadCore(Integer.valueOf(value.toString())); return;
-		case Fom.THREAD_MAX:
+		case KEY_threadMax:
 			setThreadMax(Integer.valueOf(value.toString())); return;
-		case Fom.THREAD_ALIVETIME:
+		case KEY_threadAliveTime:
 			setThreadAliveTime(Integer.valueOf(value.toString())); return;
-		case Fom.TASK_OVERTIME:
+		case KEY_taskOverTime:
 			setTaskOverTime(Integer.valueOf(value.toString())); return;
-		case Fom.DETECT_TIMEOUT_ONEACHTASK:
+		case KEY_detectTimeoutOnEachTask:
 			setDetectTimeoutOnEachTask(Boolean.valueOf(value.toString())); return; 
-		case Fom.IGNORE_EXECREQUEST_WHEN_RUNNING:
+		case KEY_ignoreExecRequestWhenRunning:
 			setIgnoreExecRequestWhenRunning(Boolean.valueOf(value.toString())); return; 
-		case Fom.ENABLE_TASK_CONFLICT:
+		case KEY_enableTaskConflict:
 			setEnableTaskConflict(Boolean.valueOf(value.toString())); return; 
-		case Fom.QUEUE_SIZE:
+		case KEY_queueSize:
 			setQueueSize(Integer.valueOf(value.toString())); return;  
-		case Fom.EXEC_ONLOAN:
+		case KEY_execOnLoad:
 			setExecOnLoad(Boolean.valueOf(value.toString())); return;  
-		case ENABLE:
+		case KEY_enable:
 			setEnable(Boolean.valueOf(value.toString())); return;  
 		default:
 			throw new UnsupportedOperationException("config[" + key + "] cannot be change");

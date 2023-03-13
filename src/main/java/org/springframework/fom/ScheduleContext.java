@@ -32,12 +32,11 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.fom.annotation.Fom;
-import org.springframework.fom.proxy.ResultHandler;
 import org.springframework.fom.proxy.CompleteHandler;
+import org.springframework.fom.proxy.ResultHandler;
 import org.springframework.fom.proxy.ScheduleFactory;
-import org.springframework.fom.proxy.TerminateHandler;
 import org.springframework.fom.proxy.TaskCancelHandler;
+import org.springframework.fom.proxy.TerminateHandler;
 import org.springframework.fom.support.FomResponse;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
@@ -346,7 +345,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 						isFirstRun = false;
 						if(scheduleConfig.getExecOnLoad()) {
 							runSchedul();
-						}else if(scheduleConfig.getInitialDelay() != Fom.initial_Delay_default) {
+						}else if(scheduleConfig.getInitialDelay() != ScheduleConfig.DEFAULT_initialDelay) {
 							sleep(scheduleConfig.getInitialDelay());
 							runSchedul();
 						}else {
@@ -420,7 +419,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 			int overTime = scheduleConfig.getTaskOverTime();
 			boolean detectTimeoutOnEachTask = scheduleConfig.getDetectTimeoutOnEachTask();
 			try {
-				if(Fom.TASK_OVERTIME_DEFAULT == overTime){ // 默认不检测超时
+				if(ScheduleConfig.DEFAULT_taskOverTime == overTime){ // 默认不检测超时
 					completeLatch.waitTaskCompleted();
 					cleanCompletedFutures();
 				}else if(!detectTimeoutOnEachTask){ // 对整体任务算超时
@@ -677,7 +676,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 			}
 
 			long overTime = scheduleConfig.getTaskOverTime();
-			if(Fom.TASK_OVERTIME_DEFAULT != overTime){
+			if(ScheduleConfig.DEFAULT_taskOverTime != overTime){
 				DelayedThread.detectTimeout(futureList, scheduleConfig.getDetectTimeoutOnEachTask()); 
 			}
 		}finally{ 
