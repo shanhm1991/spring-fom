@@ -7,24 +7,40 @@ import java.util.Collection;
  * @author shanhm1991@163.com
  *
  */
-public class FomResponse<T> {
+public class FomEntity<T> {
 
-	public static final int SUCCESS = 200;
+//	public static final int SUCCESS = 200;
+//
+//	public static final int FAILED = 501;
 
-	public static final int FAILED = 501;
+	private int code;
 
-	private final int code;
-
-	private final String msg;
+	private String msg;
 
 	private T data;
-
-	public FomResponse(int code, String msg){
+	
+	public static <V> FomEntity<V> success(){
+        return new FomEntity<>(200);
+    }
+	
+	public static <V> FomEntity<V> success(V data){
+        return new FomEntity<>(200, data);
+    }
+	
+	public static <V> FomEntity<V> instance(int code, String msg){
+		return new FomEntity<>(code, msg, null);
+	}
+	
+	public FomEntity(int code){
 		this.code = code;
-		this.msg = msg;
 	}
 
-	public FomResponse(int code, String msg, T data){
+	public FomEntity(int code, T data){
+		this.code = code;
+		this.data = data;
+	}
+	
+	public FomEntity(int code, String msg, T data){
 		this.code = code;
 		this.msg = msg;
 		this.data = data;

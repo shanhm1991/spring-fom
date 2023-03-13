@@ -10,7 +10,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.fom.ScheduleInfo;
-import org.springframework.fom.support.FomResponse;
+import org.springframework.fom.support.FomEntity;
 
 /**
  * 
@@ -49,17 +49,17 @@ public interface FomService extends ScheduleService {
 	/**
 	 * schedule启动
 	 */
-	FomResponse<Void> start(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName);
+	FomEntity<Void> start(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName);
 	
 	/**
 	 * schedule停止
 	 */
-	FomResponse<Void> shutdown(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName);
+	FomEntity<Void> shutdown(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName);
 	
 	/**
 	 * schedule立即执行
 	 */
-	FomResponse<Void> exec(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName);
+	FomEntity<Void> exec(@NotBlank(message = "scheduleName cannot be empty.") String scheduleName);
 	
 	/**
 	 * 获取正在等待的任务

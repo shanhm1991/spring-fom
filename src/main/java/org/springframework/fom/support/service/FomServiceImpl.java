@@ -26,7 +26,7 @@ import org.springframework.fom.logging.LogLevel;
 import org.springframework.fom.logging.LoggerConfiguration;
 import org.springframework.fom.logging.LoggingSystem;
 import org.springframework.fom.logging.log4j.Log4jLoggingSystem;
-import org.springframework.fom.support.FomResponse;
+import org.springframework.fom.support.FomEntity;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 
@@ -175,17 +175,17 @@ public class FomServiceImpl implements FomService {
 	}
 
 	@Override
-	public FomResponse<Void> start(String scheduleName) {
+	public FomEntity<Void> start(String scheduleName) {
 		return getScheduleByValidName(scheduleName).scheduleStart();
 	}
 
 	@Override
-	public FomResponse<Void> shutdown(String scheduleName){
+	public FomEntity<Void> shutdown(String scheduleName){
 		return getScheduleByValidName(scheduleName).scheduleShutdown();
 	}
 
 	@Override
-	public FomResponse<Void> exec(String scheduleName) {
+	public FomEntity<Void> exec(String scheduleName) {
 		return getScheduleByValidName(scheduleName).scheduleExecNow();
 	}
 
