@@ -339,6 +339,13 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 					terminate();
 					return;
 				}
+				
+				if(scheduleConfig.getDeadTime() != ScheduleConfig.DEFAULT_deadTime
+						&& scheduleConfig.getDeadTime() < System.currentTimeMillis()) {
+					logger.info("schedule[{}] is going to shutdown due to deadTime", scheduleName); 
+					terminate();
+					return;
+				}
 
 				try{
 					if(isFirstRun){
@@ -572,7 +579,7 @@ public class ScheduleContext<E> implements ScheduleFactory<E>, CompleteHandler<E
 			}
 		}
 
-		private void terminate(){ 
+		private void terminate() {
 			scheduleConfig.getPool().shutdown();
 			if(waitShutDown()){
 				try{

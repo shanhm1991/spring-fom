@@ -215,6 +215,8 @@ public class FomBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware
 		
 		scheduleConfig.setInitialDelay(fom.initialDelay()); 
 		
+		scheduleConfig.setDeadTime(fom.deadTime());
+		
 		String threadCoreString = fom.threadCoreString();
 		if(StringUtils.hasText(threadCoreString)){
 			threadCoreString = valueResolver.resolveStringValue(threadCoreString);

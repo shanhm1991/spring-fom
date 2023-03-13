@@ -163,4 +163,9 @@ public @interface Fom {
 	 * 首次执行延迟时间[ms]
 	 */
 	long initialDelay() default ScheduleConfig.DEFAULT_initialDelay;
+	
+	/**
+	 * 任务截止时间[ms] 
+	 */
+	long deadTime() default ScheduleConfig.DEFAULT_deadTime;
 }

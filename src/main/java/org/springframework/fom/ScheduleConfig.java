@@ -103,6 +103,11 @@ public class ScheduleConfig {
 	public static final String KEY_initialDelay = "initialDelay";
 	
 	/**
+	 * 任务截止时间
+	 */
+	public static final String KEY_deadTime = "deadTime";
+	
+	/**
 	 * 默认加载启动
 	 */
 	public static final boolean DEFAULT_enable = true;
@@ -162,6 +167,11 @@ public class ScheduleConfig {
 	 */
 	public static final long DEFAULT_initialDelay = 0;
 	
+	/**
+	 * 任务截止时间 默认0
+	 */
+	public static final long DEFAULT_deadTime = 0;
+	
 	// 内部配置，不允许直接put
 	private static Map<String, Object> internalConf = new TreeMap<>();
 
@@ -183,6 +193,7 @@ public class ScheduleConfig {
 		internalConf.put(KEY_ignoreExecRequestWhenRunning, DEFAULT_ignoreExecRequestWhenRunning);
 		internalConf.put(KEY_enable,       DEFAULT_enable);
 		internalConf.put(KEY_initialDelay, DEFAULT_initialDelay);
+		internalConf.put(KEY_deadTime, DEFAULT_deadTime);
 	}
 
 	private final ConcurrentHashMap<String, Object> confMap = new ConcurrentHashMap<>();
@@ -451,11 +462,12 @@ public class ScheduleConfig {
 	}
 
 	public int getTaskOverTime(){
-		return MapUtils.getIntValue(confMap, KEY_taskOverTime, DEFAULT_taskOverTime);
+		return MapUtils.getIntValue(confMap, DEFAULT_taskOverTime);
 	}
 
 	public boolean setTaskOverTime(int overTime){
-		Assert.isTrue(overTime >= 1000, buildMsg(KEY_taskOverTime, " cannot be less than 1000"));
+		Assert.isTrue(overTime == DEFAULT_taskOverTime|| 
+				overTime > 1000, buildMsg(KEY_taskOverTime, " cannot be less than 1000"));
 		if(overTime == getTaskOverTime()){
 			return false;
 		}
@@ -515,8 +527,24 @@ public class ScheduleConfig {
 		return MapUtils.getLong(confMap, KEY_initialDelay, DEFAULT_initialDelay);
 	}
 	
-	public void setInitialDelay(long initialDelay) {
+	public boolean setInitialDelay(long initialDelay) {
+		if(initialDelay == getInitialDelay()) {
+			return false;
+		}
 		confMap.put(KEY_initialDelay, initialDelay);
+		return true;
+	}
+	
+	public long getDeadTime() {
+		return MapUtils.getLong(confMap, KEY_deadTime, DEFAULT_deadTime); // TODO
+	}
+	
+	public boolean setDeadTime(long deadTime) {
+		if(deadTime == getDeadTime()) {
+			return false;
+		}
+		confMap.put(KEY_deadTime, deadTime);
+		return true;
 	}
 
 	public boolean getIgnoreExecRequestWhenRunning(){
