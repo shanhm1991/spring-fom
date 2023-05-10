@@ -67,7 +67,7 @@ import java.util.SortedMap;
  * @author <a href="mailto:jcarman@apache.org">James Carman</a>
  * @author Neil O'Toole
  */
-public class MapUtils {
+class MapUtils {
     
     /**
      * <code>MapUtils</code> should not normally be instantiated.
