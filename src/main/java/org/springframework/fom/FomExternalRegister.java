@@ -8,7 +8,6 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
-import org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.fom.annotation.Fom;
@@ -24,7 +23,7 @@ public class FomExternalRegister implements BeanFactoryAware, ApplicationContext
 
 	private static DefaultListableBeanFactory defaultListableBeanFactory;
 
-	private static AnnotationConfigServletWebServerApplicationContext applicationContext;
+	private static ApplicationContext applicationContext;
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -33,7 +32,7 @@ public class FomExternalRegister implements BeanFactoryAware, ApplicationContext
 
 	@Override
 	public void setApplicationContext(ApplicationContext context) throws BeansException {
-		applicationContext = (AnnotationConfigServletWebServerApplicationContext)context;
+		applicationContext = context;
 	}
 
 	/**

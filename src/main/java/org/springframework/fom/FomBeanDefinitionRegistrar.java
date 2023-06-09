@@ -50,7 +50,7 @@ public class FomBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar
 
 		// FomExternalRegister
 		RootBeanDefinition fomExternalRegister = new RootBeanDefinition(FomExternalRegister.class);
-		registry.registerBeanDefinition("fomExternalRegister", fomExternalRegister); 
+		registry.registerBeanDefinition("fomExternalRegister", fomExternalRegister);
 
 		// FomBeanDefinition
 		String[] beanNames = registry.getBeanDefinitionNames();
