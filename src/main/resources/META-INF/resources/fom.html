@@ -223,8 +223,8 @@ table = $("#fom").DataTable({
 				{
 					"data" : null,
 					"render": function (data, type, row, meta){
-						return "<i class='layui-icon layui-icon-refresh boxbtn' title='execute immediately' schedule='" + row.scheduleName + "' onclick='scheduleExec(this)'/></i>"
-								+ "<i class='layui-icon layui-icon-play boxbtn' title='startup' schedule='" + row.scheduleName + "' onclick='scheduleStart(this)'/></i>"
+						return "<i class='layui-icon layui-icon-play boxbtn' title='startup' schedule='" + row.scheduleName + "' onclick='scheduleStart(this)'/></i>"
+								+ "<i class='layui-icon layui-icon-refresh boxbtn' title='execute immediately' schedule='" + row.scheduleName + "' onclick='scheduleExec(this)'/></i>"
 								+ "<i class='layui-icon layui-icon-logout boxbtn' title='shutdown' schedule='" + row.scheduleName + "' onclick='scheduleStop(this)'/></i>";
 					},
 					"orderable" : false
@@ -469,7 +469,6 @@ table = $("#fom").DataTable({
 						skin : 'layui-layer-demo',
 						area : [ '1200px', '600px' ],
 						maxmin : true,
-						closeBtn : 2,
 						anim : 2,
 						content : html
 					});
@@ -510,7 +509,6 @@ table = $("#fom").DataTable({
 					skin : 'layui-layer-demo',
 					area : [ '1200px', '600px' ],
 					maxmin : true,
-					closeBtn : 2,
 					anim : 2,
 					content : html
 				});
@@ -560,7 +558,6 @@ table = $("#fom").DataTable({
 					skin : 'layui-layer-demo',
 					area : [ '1500px', '600px' ],
 					maxmin : true,
-					closeBtn : 2,
 					anim : 2,
 					content : html
 				});
@@ -605,7 +602,6 @@ table = $("#fom").DataTable({
 						},
 						area : [ '1600px', '650px' ],
 						maxmin : true,
-						closeBtn : 2,
 						anim : 2,
 						content : html
 					});

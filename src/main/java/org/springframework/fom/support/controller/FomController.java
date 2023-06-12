@@ -14,6 +14,7 @@ import org.springframework.fom.ScheduleInfo;
 import org.springframework.fom.support.FomEntity;
 import org.springframework.fom.support.FomEntity.Page;
 import org.springframework.fom.support.service.FomService;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -29,6 +30,11 @@ public class FomController {
 	
 	@Autowired
 	private FomService fomService;
+
+	@GetMapping
+	public String index() {
+		return "fom.html";
+	}
 
 	@RequestMapping("/schedule/list")
 	@ResponseBody
