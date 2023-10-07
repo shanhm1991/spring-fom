@@ -33,7 +33,7 @@ import org.springframework.validation.annotation.Validated;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * 
+ *
  * @author shanhm1991@163.com
  *
  */
@@ -53,13 +53,13 @@ public class FomServiceImpl implements FomService {
 	@Autowired
 	private ApplicationContext applicationContext;
 
-	private static LoggingSystem loggingSystem; 
+	private static LoggingSystem loggingSystem;
 
 	static{
 		try{
 			loggingSystem = LoggingSystem.get(FomServiceImpl.class.getClassLoader());
 		}catch(IllegalStateException e){
-			System.err.println(e.getMessage()); 
+			System.err.println(e.getMessage());
 		}
 	}
 
@@ -72,10 +72,10 @@ public class FomServiceImpl implements FomService {
 				if(name.startsWith("$EXTERNAL$")) {
 					continue;
 				}
-				
+
 				ScheduleContext<?> schedule = applicationContext.getBean(name, ScheduleContext.class);
 				ScheduleInfo scheduleInfo = schedule.getScheduleInfo();
-				scheduleInfo.setLoggerLevel(getLoggerLevel(schedule.getScheduleName())); 
+				scheduleInfo.setLoggerLevel(getLoggerLevel(schedule.getScheduleName()));
 				list.add(scheduleInfo);
 			}
 		}
@@ -96,7 +96,7 @@ public class FomServiceImpl implements FomService {
 
 	@Override
 	public ScheduleInfo info(Class<?> clazz) {
-		if(ScheduleContext.class.isAssignableFrom(clazz)){ 
+		if(ScheduleContext.class.isAssignableFrom(clazz)){
 			ScheduleContext<?> scheduleContext = (ScheduleContext<?>)applicationContext.getBean(clazz);
 			Assert.notNull(scheduleContext, "schedule of " + clazz + " not exist.");
 			return scheduleContext.getScheduleInfo();
@@ -181,16 +181,16 @@ public class FomServiceImpl implements FomService {
 
 	@Override
 	public FomEntity<Void> shutdown(String scheduleName){
-		return getScheduleByValidName(scheduleName).scheduleShutdown();
+		return getScheduleByValidName(scheduleName).scheduleStop();
 	}
 
 	@Override
 	public FomEntity<Void> exec(String scheduleName) {
-		return getScheduleByValidName(scheduleName).scheduleExecNow();
+		return getScheduleByValidName(scheduleName).scheduleRun();
 	}
 
 	@Override
-	public Map<String, String> getWaitingTasks(String scheduleName) { 
+	public Map<String, String> getWaitingTasks(String scheduleName) {
 		return getScheduleByValidName(scheduleName).getWaitingTasks();
 	}
 
@@ -200,7 +200,7 @@ public class FomServiceImpl implements FomService {
 	}
 
 	@Override
-	public Map<String, Object> getSuccessStat(String scheduleName, String statDay) throws ParseException { 
+	public Map<String, Object> getSuccessStat(String scheduleName, String statDay) throws ParseException {
 		return getScheduleByValidName(scheduleName).getSuccessStat(statDay);
 	}
 
@@ -214,7 +214,7 @@ public class FomServiceImpl implements FomService {
 			successStat = schedule.getSuccessStat(statDay);
 		}
 
-		scheduleStatistics.setSaveDay(saveDay); 
+		scheduleStatistics.setSaveDay(saveDay);
 		return successStat;
 	}
 
@@ -230,7 +230,7 @@ public class FomServiceImpl implements FomService {
 		serializeConfig(schedule);
 	}
 
-	private void serializeConfig(ScheduleContext<?> schedule){  
+	private void serializeConfig(ScheduleContext<?> schedule){
 		if("file".equalsIgnoreCase(cacheType)){
 			serializeFile(schedule);
 		}else if("redis".equalsIgnoreCase(cacheType)){
@@ -241,10 +241,10 @@ public class FomServiceImpl implements FomService {
 	private void serializeFile(ScheduleContext<?> schedule){
 		File dir = new File(cacheFilePath);
 		if(!dir.exists() && !dir.mkdirs()){
-			throw new IllegalArgumentException("cann't touch cache dir " + cacheFilePath); 
+			throw new IllegalArgumentException("cann't touch cache dir " + cacheFilePath);
 		}
 
-		File cacheFile = new File(dir.getPath() + File.separator + schedule.getScheduleName() + ".cache"); 
+		File cacheFile = new File(dir.getPath() + File.separator + schedule.getScheduleName() + ".cache");
 		if(cacheFile.exists()){
 			if(cacheHistory){
 				cacheFile.renameTo(new File(dir.getPath() + File.separator + schedule.getScheduleName() + ".cache." + System.currentTimeMillis()));
@@ -313,10 +313,10 @@ public class FomServiceImpl implements FomService {
 						Throwable cause = throwable;
 						while((cause = throwable.getCause()) != null){
 							throwable = cause;
-						} 
+						}
 
 						builder.append("cause=").append(throwable.toString()).append("\n");
-						for(StackTraceElement stack : throwable.getStackTrace()){ 
+						for(StackTraceElement stack : throwable.getStackTrace()){
 							builder.append(stack).append("\n");
 						}
 					}
