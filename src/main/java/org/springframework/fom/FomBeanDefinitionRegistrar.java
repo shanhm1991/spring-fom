@@ -15,7 +15,7 @@ import org.springframework.fom.support.controller.FomController;
 import org.springframework.fom.support.service.FomServiceImpl;
 
 /**
- * 
+ *
  * @author shanhm1991@163.com
  *
  */
@@ -33,20 +33,20 @@ public class FomBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar
 		if((boolean)attrs.get("enableFomView")){
 			// FomController
 			RootBeanDefinition fomController = new RootBeanDefinition(FomController.class);
-			registry.registerBeanDefinition("fomController", fomController); 
+			registry.registerBeanDefinition("fomController", fomController);
 
-			// FomServiceImpl
-			RootBeanDefinition fomServiceImpl = new RootBeanDefinition(FomServiceImpl.class);
-			registry.registerBeanDefinition("fomService", fomServiceImpl); 
+			// FomService
+			RootBeanDefinition fomService = new RootBeanDefinition(FomServiceImpl.class);
+			registry.registerBeanDefinition("fomService", fomService);
 		}
 
-		// SchedulePostProcessor
+		// FomBeanPostProcessor
 		RootBeanDefinition fomBeanPostProcessor = new RootBeanDefinition(FomBeanPostProcessor.class);
-		registry.registerBeanDefinition("schedulePostProcessor", fomBeanPostProcessor); 
+		registry.registerBeanDefinition("fomBeanPostProcessor", fomBeanPostProcessor);
 
-		// FomScheduleStarter
-		RootBeanDefinition fomScheduleStarter = new RootBeanDefinition(FomStarter.class);
-		registry.registerBeanDefinition("fomScheduleStarter", fomScheduleStarter); 
+		// FomStarter
+		RootBeanDefinition fomStarter = new RootBeanDefinition(FomStarter.class);
+		registry.registerBeanDefinition("fomStarter", fomStarter);
 
 		// FomExternalRegister
 		RootBeanDefinition fomExternalRegister = new RootBeanDefinition(FomExternalRegister.class);
@@ -76,12 +76,12 @@ public class FomBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar
 	public void parseFomSchedule(String beanName, Class<?> clazz, BeanDefinition beanDefinition, Fom fom, BeanDefinitionRegistry registry){
 		if(ScheduleContext.class.isAssignableFrom(clazz)){
 			beanDefinition.getPropertyValues().add("scheduleName", beanName);
-			registry.registerAlias(beanName,  "$" + beanName); 
+			registry.registerAlias(beanName,  "$" + beanName);
 		}else{
 			RootBeanDefinition fomBeanDefinition = new RootBeanDefinition(ScheduleContext.class);
 			fomBeanDefinition.getPropertyValues().add("scheduleBeanName", beanName);
 			fomBeanDefinition.getPropertyValues().add("scheduleName", "$" + beanName);
-			registry.registerBeanDefinition("$" + beanName, fomBeanDefinition); 
+			registry.registerBeanDefinition("$" + beanName, fomBeanDefinition);
 		}
 	}
 }
