@@ -14,7 +14,7 @@ import org.springframework.fom.annotation.Schedule;
 import org.springframework.util.CollectionUtils;
 
 /**
- * 
+ *
  * @author shanhm1991@163.com
  *
  */
@@ -40,7 +40,7 @@ public class ScheduleProxy implements MethodInterceptor {
 	@Override
 	public Object intercept(Object object, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 		String methodName = method.getName();
-		if("onComplete".equals(methodName)){ 
+		if("onComplete".equals(methodName)){
 			return onComplete(object, method, args, methodProxy);
 		}else if("onTerminate".equals(methodName)){
 			return onTerminate(object, method, args, methodProxy);
@@ -54,7 +54,7 @@ public class ScheduleProxy implements MethodInterceptor {
 			return method.invoke(scheduleContext, args);
 		}
 	}
-	
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Object onComplete(Object object, Method method, Object[] args, MethodProxy methodProxy) throws Throwable{
 		Class<?>[] parameterTypes = method.getParameterTypes();
@@ -72,7 +72,7 @@ public class ScheduleProxy implements MethodInterceptor {
 		}
 
 		// 调用scheduleBean的行为
-		((CompleteHandler)scheduleBean).onComplete((long)args[0], (long)args[1], (List)args[2]); 
+		((CompleteHandler)scheduleBean).onComplete((long)args[0], (long)args[1], (List)args[2]);
 		return null;
 	}
 
@@ -104,7 +104,7 @@ public class ScheduleProxy implements MethodInterceptor {
 			return null;
 		}
 
-		((TaskCancelHandler)scheduleBean).handleCancel((String)args[0], (long)args[1]); 
+		((TaskCancelHandler)scheduleBean).handleCancel((String)args[0], (long)args[1]);
 		return null;
 	}
 
@@ -117,8 +117,8 @@ public class ScheduleProxy implements MethodInterceptor {
 		}
 
 		Collection<Task<?>> tasks = new ArrayList<>();
-		if(scheduleBean == null){ 
-			tasks.addAll((Collection<Task<?>>)methodProxy.invokeSuper(object, args)); 
+		if(scheduleBean == null){
+			tasks.addAll((Collection<Task<?>>)methodProxy.invokeSuper(object, args));
 			List<Method> methods = new ArrayList<>();
 			for(Method m : scheduleContext.getClass().getMethods()){
 				Schedule scheduled = m.getAnnotation(Schedule.class);
@@ -127,16 +127,20 @@ public class ScheduleProxy implements MethodInterceptor {
 				}
 			}
 
+			String scheduleName = beanName;
+			if(scheduleName.startsWith("$")){
+				scheduleName = scheduleName.substring(1, scheduleName.length() - 1);
+			}
 			for(final Method m : methods){
-				Task<Object> task = new Task<Object>(beanName + "-" + m.getName()){
+				Task<Object> task = new Task<Object>(scheduleName + "-" + m.getName()){
 					@Override
 					public Object exec() throws Exception {
 						return m.invoke(scheduleContext);
 					}
-				}; 
+				};
 				tasks.add(task);
 			}
-		}else{ 
+		}else{
 			if((ScheduleFactory.class.isAssignableFrom(scheduleBeanClass))){
 				ScheduleFactory scheduleFactory = (ScheduleFactory)scheduleBean;
 				Collection<Task<?>> collection =  (Collection<Task<?>>)scheduleFactory.newSchedulTasks();
@@ -153,13 +157,17 @@ public class ScheduleProxy implements MethodInterceptor {
 				}
 			}
 
+			String scheduleName = beanName;
+			if(scheduleName.startsWith("$")){
+				scheduleName = scheduleName.substring(1, scheduleName.length() - 1);
+			}
 			for(final Method m : methods){
-				Task<Object> task = new Task<Object>(beanName + "-" + m.getName()){
+				Task<Object> task = new Task<Object>(scheduleName + "-" + m.getName()){
 					@Override
 					public Object exec() throws Exception {
 						return m.invoke(scheduleBean);
 					}
-				}; 
+				};
 				tasks.add(task);
 			}
 		}
@@ -169,15 +177,15 @@ public class ScheduleProxy implements MethodInterceptor {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Object handleResult(Object object, Method method, Object[] args, MethodProxy methodProxy) throws Throwable{
 		Class<?>[] parameterTypes = method.getParameterTypes();
-		if(scheduleBean == null || parameterTypes.length != 1 
+		if(scheduleBean == null || parameterTypes.length != 1
 				|| !Result.class.isAssignableFrom(parameterTypes[0])){
 			return method.invoke(scheduleContext, args);
 		}
-		
+
 		if(!(ResultHandler.class.isAssignableFrom(scheduleBeanClass))){
 			return null;
 		}
-		
+
 		((ResultHandler)scheduleBean).handleResult((Result)args[0]);
 		return null;
 	}

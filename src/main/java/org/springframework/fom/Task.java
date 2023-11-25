@@ -8,16 +8,16 @@ import org.springframework.fom.ScheduleContext.CompleteLatch;
 import org.springframework.util.StringUtils;
 
 /**
- * 
+ *
  * @param <E> 任务执行结果类型
- * 
+ *
  * @author shanhm1991@163.com
  *
  */
 public abstract class Task<E> implements Callable<Result<E>> {
-	
+
 	protected volatile Logger logger = LoggerFactory.getLogger(Task.class);
-	
+
 	private static ThreadLocal<ScheduleContext<?>> localSchedule = new ThreadLocal<>();
 
 	protected final String id;
@@ -33,40 +33,36 @@ public abstract class Task<E> implements Callable<Result<E>> {
 
 	// 定时线程设置，任务线程读取
 	private volatile CompleteLatch<E> completeLatch;
-	
+
 	public Task(){
-		String name = this.getClass().getSimpleName();
-		if(!StringUtils.hasText(name)){
-			name = "Task";
-		}
-		this.id = name;
+		this.id = this.getClass().getSimpleName();
 	}
 
-	public Task(String id) { 
+	public Task(String id) {
 		this.id = id;
 	}
-	
+
 	public static ScheduleContext<?> getCurrentSchedule(){
 		return localSchedule.get();
 	}
 
 	@Override
-	public final Result<E> call() throws InterruptedException {   
-		Thread.currentThread().setName("task[" + id + "]");
-		localSchedule.set(scheduleContext); 
-		logger.debug("task started."); 
+	public final Result<E> call() throws InterruptedException {
+		Thread.currentThread().setName("schedule[" + id + "]");
+		localSchedule.set(scheduleContext);
+		logger.debug("task started.");
 
 		this.startTime = System.currentTimeMillis();
-		final Result<E> result = new Result<>(id, submitTime, startTime); 
+		final Result<E> result = new Result<>(id, submitTime, startTime);
 		doCall(result);
-		result.setCostTime(System.currentTimeMillis() - startTime); 
+		result.setCostTime(System.currentTimeMillis() - startTime);
 
 		if(scheduleContext != null){
 			if(completeLatch != null){
-				completeLatch.addResult(result); 
+				completeLatch.addResult(result);
 				scheduleContext.checkComplete(completeLatch);
 			}
-			scheduleContext.record(result); 
+			scheduleContext.record(result);
 		}
 
 		if(result.isSuccess()){
@@ -89,7 +85,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	private void doCall(Result<E> result){
 		try {
 			if(!beforeExec()){
-				result.setSuccess(false); 
+				result.setSuccess(false);
 				return;
 			}
 			result.setContent(exec());
@@ -100,7 +96,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 			try {
 				afterExec(result.isSuccess(), result.getContent(), result.getThrowable());
 			}catch(Throwable e) {
-				logger.error("", e); 
+				logger.error("", e);
 			}
 		}
 	}
@@ -114,11 +110,11 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	public void afterExec(boolean isExecSuccess,  E content, Throwable e) throws Exception {
 
 	}
-	
+
 	public final String getTaskId() {
 		return id;
 	}
-	
+
 	void setSubmitTime(long submitTime) {
 		this.submitTime = submitTime;
 	}
@@ -177,7 +173,7 @@ public abstract class Task<E> implements Callable<Result<E>> {
 	public final int hashCode() {
 		return this.id.hashCode();
 	}
-	
+
 	@Override
 	public String toString() {
 		return id;
