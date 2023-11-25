@@ -54,7 +54,6 @@
 				</includes>
 			</resource>
 		</resources>
-
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -65,7 +64,6 @@
 					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
@@ -75,7 +73,6 @@
 					<arguments>-spring-fom-release</arguments>
 				</configuration>
 			</plugin>
-
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>cobertura-maven-plugin</artifactId>
@@ -88,7 +85,6 @@
 					<check />
 				</configuration>
 			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
@@ -97,7 +93,6 @@
 					<attach>true</attach>
 				</configuration>
 			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -117,7 +112,6 @@
 					<encoding>UTF-8</encoding>
 					<show>protected</show>
 					<notree>true</notree>
-					<!-- Avoid running into Java 8's very restrictive doclint issues -->
 					<failOnError>false</failOnError>
 					<doclint>none</doclint>
 				</configuration>
@@ -167,7 +161,6 @@
 			<version>2.1.1.RELEASE</version>
 			<scope>provided</scope>
 		</dependency>
-
 		<!-- log4j -->
 		<dependency>
 			<groupId>log4j</groupId>
@@ -187,7 +180,6 @@
 			<version>1.18</version>
 			<scope>provided</scope>
 		</dependency>
-
 		<!-- log4j2 -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
@@ -207,7 +199,6 @@
 			<version>2.11.1</version>
 			<scope>provided</scope>
 		</dependency>
-
 		<!-- logback -->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
